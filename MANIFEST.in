@@ -1,0 +1,5 @@
+include requirements*.txt
+include README.md
+include LICENSE
+recursive-include bt_python/assets *
+recursive-include bt_python/www *
