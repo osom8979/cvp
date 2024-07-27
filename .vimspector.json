@@ -1,12 +1,9 @@
 {
     "configurations": {
-        "main.py": {
+        "player": {
             "adapter": "debugpy",
             "filetypes": ["python"],
             "default": true,
-            "variables": {
-                "VERBOSE_FLAG": "--verbose"
-            },
             "configuration": {
                 "request": "launch",
                 "type": "python",
@@ -18,9 +15,7 @@
                 "env": {
                     "PYTHONPATH": "${workspaceRoot}"
                 },
-                "args": [
-                    "${VERBOSE_FLAG}"
-                ]
+                "args": ["-D", "player"]
             },
             "breakpoints": {
                 "exception": {

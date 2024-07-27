@@ -67,7 +67,7 @@ SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
 SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
 
 COLORED_FORMATTER_CLASS_PATH = (
-    f"{DEFAULT_LOGGER_NAME}.logging.colored_formatter.ColoredFormatter"
+    f"{DEFAULT_LOGGER_NAME}.logging.formatters.colored.ColoredFormatter"
 )
 
 DEFAULT_LOGGING_CONFIG = {
@@ -224,7 +224,7 @@ def add_default_rotate_file_logging(
 
 
 def add_default_colored_logging(level=DEBUG) -> None:
-    from cvp.logging.colored_formatter import ColoredFormatter
+    from cvp.logging.formatters.colored import ColoredFormatter
 
     formatter = ColoredFormatter(
         fmt=DEFAULT_FORMAT,

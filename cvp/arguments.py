@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from argparse import REMAINDER, ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from functools import lru_cache
 from os import R_OK, access, getcwd
 from os.path import isfile, join
@@ -21,21 +21,18 @@ Apply general debugging options:
   {PROG} -D ...
 """
 
-CMD_MASTER: Final[str] = "master"
-CMD_MASTER_HELP: Final[str] = "Endpoint server for HTTP API"
-CMD_MASTER_EPILOG = f"""
+CMD_PLAYER: Final[str] = "player"
+CMD_PLAYER_HELP: Final[str] = "Desktop GUI"
+CMD_PLAYER_EPILOG = f"""
 Simply usage:
-  {PROG} {CMD_MASTER}
+  {PROG} {CMD_PLAYER}
 """
 
-CMDS: Final[Sequence[str]] = (CMD_MASTER,)
+CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
+DEFAULT_CMD: Final[str] = CMD_PLAYER
 
 LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
 TEST_DOTENV_FILENAME: Final[str] = ".env.test"
-
-DEFAULT_API_HTTP_HOST: Final[str] = "0.0.0.0"
-DEFAULT_API_HTTP_PORT: Final[int] = 8080
-DEFAULT_API_HTTP_TIMEOUT: Final[float] = 8.0
 
 PRINTER_ATTR_KEY: Final[str] = "_printer"
 
@@ -67,40 +64,15 @@ def add_dotenv_arguments(parser: ArgumentParser) -> None:
     )
 
 
-def add_master_parser(subparsers) -> None:
+def add_player_parser(subparsers) -> None:
     # noinspection SpellCheckingInspection
     parser = subparsers.add_parser(
-        name=CMD_MASTER,
-        help=CMD_MASTER_HELP,
+        name=CMD_PLAYER,
+        help=CMD_PLAYER_HELP,
         formatter_class=RawDescriptionHelpFormatter,
-        epilog=CMD_MASTER_EPILOG,
+        epilog=CMD_PLAYER_EPILOG,
     )
     assert isinstance(parser, ArgumentParser)
-    parser.add_argument(
-        "--api-http-bind",
-        default=get_eval("API_HTTP_HOST", DEFAULT_API_HTTP_HOST),
-        metavar="host",
-        help=f"Host address (default: '{DEFAULT_API_HTTP_HOST}')",
-    )
-    parser.add_argument(
-        "--api-http-port",
-        default=get_eval("API_HTTP_PORT", DEFAULT_API_HTTP_PORT),
-        metavar="port",
-        type=int,
-        help=f"Port number (default: {DEFAULT_API_HTTP_PORT})",
-    )
-    parser.add_argument(
-        "--api-http-timeout",
-        default=get_eval("API_HTTP_TIMEOUT", DEFAULT_API_HTTP_TIMEOUT),
-        metavar="sec",
-        type=float,
-        help=f"Common timeout in seconds (default: {DEFAULT_API_HTTP_TIMEOUT})",
-    )
-    parser.add_argument(
-        "opts",
-        nargs=REMAINDER,
-        help="Arguments of module",
-    )
 
 
 def default_argument_parser() -> ArgumentParser:
@@ -149,12 +121,6 @@ def default_argument_parser() -> ArgumentParser:
     )
 
     parser.add_argument(
-        "--use-uvloop",
-        action="store_true",
-        default=get_eval("USE_UVLOOP", False),
-        help="Replace the event loop with uvloop",
-    )
-    parser.add_argument(
         "--severity",
         choices=SEVERITIES,
         default=get_eval("SEVERITY", SEVERITY_NAME_INFO),
@@ -190,7 +156,13 @@ def default_argument_parser() -> ArgumentParser:
     )
 
     subparsers = parser.add_subparsers(dest="cmd")
-    add_master_parser(subparsers)
+    subparsers.add_parser(
+        name=CMD_PLAYER,
+        help=CMD_PLAYER_HELP,
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog=CMD_PLAYER_EPILOG,
+    )
+
     return parser
 
 

@@ -167,7 +167,6 @@ function run_test
         exit_code=${exit_codes[$i]}
 
         if [[ $exit_code -eq 0 ]]; then
-            print_message "$(print_line)"
             print_message "Script '$script_name' completed successfully."
         else
             print_error "$(print_line)"

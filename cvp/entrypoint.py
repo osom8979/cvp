@@ -4,7 +4,13 @@ from sys import exit as sys_exit
 from typing import Callable, List, Optional
 
 from cvp.apps import run_app
-from cvp.arguments import CMDS, PRINTER_ATTR_KEY, VERBOSE_LEVEL_2, get_default_arguments
+from cvp.arguments import (
+    CMDS,
+    DEFAULT_CMD,
+    PRINTER_ATTR_KEY,
+    VERBOSE_LEVEL_2,
+    get_default_arguments,
+)
 from cvp.logging.logging import (
     SEVERITY_NAME_DEBUG,
     add_default_colored_logging,
@@ -26,8 +32,7 @@ def main(
         setattr(args, PRINTER_ATTR_KEY, printer)
 
     if not args.cmd:
-        printer("The command does not exist")
-        return 1
+        args.cmd = DEFAULT_CMD
 
     assert args.cmd in CMDS
     assert isinstance(args.colored_logging, bool)
@@ -35,7 +40,6 @@ def main(
     assert isinstance(args.simple_logging, bool)
     assert isinstance(args.rotate_logging_prefix, str)
     assert isinstance(args.rotate_logging_when, str)
-    assert isinstance(args.use_uvloop, bool)
     assert isinstance(args.severity, str)
     assert isinstance(args.debug, bool)
     assert isinstance(args.verbose, int)

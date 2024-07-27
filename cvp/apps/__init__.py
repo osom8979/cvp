@@ -5,16 +5,14 @@ from asyncio.exceptions import CancelledError
 from functools import lru_cache
 from typing import Callable, Dict
 
-from cvp.apps.master import master_main
-from cvp.arguments import CMD_MASTER
+from cvp.apps.player import player_main
+from cvp.arguments import CMD_PLAYER
 from cvp.logging.logging import logger
 
 
 @lru_cache
 def cmd_apps() -> Dict[str, Callable[[Namespace], None]]:
-    return {
-        CMD_MASTER: master_main,
-    }
+    return {CMD_PLAYER: player_main}
 
 
 def run_app(cmd: str, args: Namespace) -> int:
