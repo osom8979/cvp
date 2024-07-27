@@ -2,4 +2,4 @@
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" || exit; pwd)
 
-"$ROOT_DIR/python" -m pip uninstall cvp
+"$ROOT_DIR/python" -c 'import cvp; print(cvp.__version__)'

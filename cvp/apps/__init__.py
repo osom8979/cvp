@@ -3,18 +3,17 @@
 from argparse import Namespace
 from asyncio.exceptions import CancelledError
 from functools import lru_cache
+from typing import Callable, Dict
 
-from bt_python.apps.client.main import client_main
-from bt_python.apps.server.main import server_main
-from bt_python.arguments import CMD_CLIENT, CMD_SERVER
-from bt_python.logging.logging import logger
+from cvp.apps.master import master_main
+from cvp.arguments import CMD_MASTER
+from cvp.logging.logging import logger
 
 
 @lru_cache
-def cmd_apps():
+def cmd_apps() -> Dict[str, Callable[[Namespace], None]]:
     return {
-        CMD_CLIENT: client_main,
-        CMD_SERVER: server_main,
+        CMD_MASTER: master_main,
     }
 
 
@@ -29,15 +28,15 @@ def run_app(cmd: str, args: Namespace) -> int:
         app(args)
     except CancelledError:
         logger.debug("An cancelled signal was detected")
-        return 0
     except KeyboardInterrupt:
         logger.warning("An interrupt signal was detected")
-        return 0
-    except Exception as e:
-        logger.exception(e)
-        return 1
+    except SystemExit as e:
+        assert isinstance(e.code, int)
+        if e.code != 0:
+            logger.warning(f"A system shutdown has been detected ({e.code})")
+        return e.code
     except BaseException as e:
         logger.exception(e)
         return 1
-    else:
-        return 0
+
+    return 0

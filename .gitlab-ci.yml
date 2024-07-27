@@ -1,14 +1,8 @@
 image: python:3.9
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   USE_SYSTEM_PYTHON: 3
-  POSTGRES_USER: pguser
-  POSTGRES_PASSWORD: pgpass
-  POSTGRES_HOST_AUTH_METHOD: trust
-
-services:
-  - timescale/timescaledb:2.1.0-pg13
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 cache:
   paths:

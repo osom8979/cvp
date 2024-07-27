@@ -14,19 +14,19 @@ function print_message
     echo -e "\033[32m$@\033[0m"
 }
 
-trap 'cancel_black' INT
-
-function cancel_black
+function on_interrupt_trap
 {
     print_error "An interrupt signal was detected."
     exit 1
 }
+
+trap on_interrupt_trap INT
 
 ARGS=("--config-file=${ROOT_DIR}/mypy.ini")
 
 print_message "mypy ${ARGS[*]}"
 
 "$ROOT_DIR/python" -m mypy "${ARGS[@]}" \
-    "$ROOT_DIR/bt_python/" \
+    "$ROOT_DIR/cvp/" \
     "$ROOT_DIR/tester/" \
     "$ROOT_DIR/setup.py"

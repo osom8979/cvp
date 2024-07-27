@@ -1,0 +1,3 @@
+jedi>=0.19.1
+# pydevd-pycharm~=241.14494.241
+# pygdb

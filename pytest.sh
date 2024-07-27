@@ -14,13 +14,13 @@ function print_message
     echo -e "\033[32m$@\033[0m"
 }
 
-trap 'cancel_black' INT
-
-function cancel_black
+function on_interrupt_trap
 {
     print_error "An interrupt signal was detected."
     exit 1
 }
+
+trap on_interrupt_trap INT
 
 ARGS=(
     "-v"

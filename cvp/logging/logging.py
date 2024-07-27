@@ -16,7 +16,11 @@ from logging import config as logging_config
 from logging import getLogger
 from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
-from typing import Final, Literal, Optional, Union
+from typing import Final, Literal, Optional, Sequence, Union, get_args
+
+DEFAULT_LOGGER_NAME: Final[str] = "cvp"
+
+logger = getLogger(DEFAULT_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"
 SEVERITY_NAME_FATAL = "fatal"
@@ -45,6 +49,9 @@ TimedRotatingWhenLiteral = Literal[
     "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"
 ]  # W0=Monday
 
+TIMED_ROTATING_WHEN: Final[Sequence[str]] = get_args(TimedRotatingWhenLiteral)
+DEFAULT_TIMED_ROTATING_WHEN: Final[str] = "D"
+
 DEFAULT_SIMPLE_LOGGING_FORMAT: Final[str] = "{levelname[0]} [{name}] {message}"
 DEFAULT_SIMPLE_LOGGING_STYLE: Final[LoggingStyleLiteral] = "{"
 
@@ -58,6 +65,10 @@ DEFAULT_STYLE: Final[LoggingStyleLiteral] = "%"
 SIMPLE_FORMAT: Final[str] = "{levelname[0]} {asctime} {name} {message}"
 SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
 SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
+
+COLORED_FORMATTER_CLASS_PATH = (
+    f"{DEFAULT_LOGGER_NAME}.logging.colored_formatter.ColoredFormatter"
+)
 
 DEFAULT_LOGGING_CONFIG = {
     "version": 1,
@@ -74,7 +85,7 @@ DEFAULT_LOGGING_CONFIG = {
             "style": SIMPLE_STYLE,
         },
         "color": {
-            "class": "bt_python.logging.colored_formatter.ColoredFormatter",
+            "class": COLORED_FORMATTER_CLASS_PATH,
             "format": DEFAULT_FORMAT,
             "datefmt": DEFAULT_DATEFMT,
             "style": DEFAULT_STYLE,
@@ -110,16 +121,13 @@ DEFAULT_LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "": {  # root logger
+        # root logger
+        "": {
             "handlers": ["console_color"],
             "level": "DEBUG",
         },
     },
 }
-
-DEFAULT_LOGGER_NAME = "bt_python"
-
-logger = getLogger(DEFAULT_LOGGER_NAME)
 
 
 def convert_level_number(level: Optional[Union[str, int]] = None) -> int:
@@ -196,25 +204,9 @@ def set_default_logging_config() -> None:
     logging_config.dictConfig(DEFAULT_LOGGING_CONFIG)
 
 
-def add_colored_formatter_logging_config(level=DEBUG) -> None:
-    from bt_python.logging.colored_formatter import ColoredFormatter
-
-    formatter = ColoredFormatter(
-        fmt=DEFAULT_FORMAT,
-        datefmt=DEFAULT_DATEFMT,
-        style=DEFAULT_STYLE,
-    )
-
-    handler = StreamHandler(stdout)
-    handler.setFormatter(formatter)
-    handler.setLevel(level)
-
-    getLogger().addHandler(handler)
-
-
-def add_rotate_file_logging_config(
+def add_default_rotate_file_logging(
     prefix: str,
-    when: Union[str, TimedRotatingWhenLiteral] = "D",
+    when: Union[str, TimedRotatingWhenLiteral] = DEFAULT_TIMED_ROTATING_WHEN,
     level=DEBUG,
 ) -> None:
     formatter = Formatter(
@@ -231,7 +223,37 @@ def add_rotate_file_logging_config(
     getLogger().addHandler(handler)
 
 
-def add_simple_logging_config(level=DEBUG) -> None:
+def add_default_colored_logging(level=DEBUG) -> None:
+    from cvp.logging.colored_formatter import ColoredFormatter
+
+    formatter = ColoredFormatter(
+        fmt=DEFAULT_FORMAT,
+        datefmt=DEFAULT_DATEFMT,
+        style=DEFAULT_STYLE,
+    )
+
+    handler = StreamHandler(stdout)
+    handler.setFormatter(formatter)
+    handler.setLevel(level)
+
+    getLogger().addHandler(handler)
+
+
+def add_default_logging(level=DEBUG) -> None:
+    formatter = Formatter(
+        fmt=DEFAULT_FORMAT,
+        datefmt=DEFAULT_DATEFMT,
+        style=DEFAULT_STYLE,
+    )
+
+    handler = StreamHandler(stdout)
+    handler.setFormatter(formatter)
+    handler.setLevel(level)
+
+    getLogger().addHandler(handler)
+
+
+def add_simple_logging(level=DEBUG) -> None:
     formatter = Formatter(
         fmt=DEFAULT_SIMPLE_LOGGING_FORMAT,
         style=DEFAULT_SIMPLE_LOGGING_STYLE,

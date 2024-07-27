@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" || exit; pwd)
-BASE_PYTHON_VERSION=3.9.17
-VIRTUALENV_PREFIX=bt_python
+BASE_PYTHON_VERSION=3.9.19
+VIRTUALENV_PREFIX=cvp
 VIRTUALENV_SUFFIX=${VIRTUALENV_SUFFIX:-none}
 VIRTUALENV_NAME=$VIRTUALENV_PREFIX-$USER-$BASE_PYTHON_VERSION-${VIRTUALENV_SUFFIX}
 VENV_HOME=$ROOT_DIR/.venv
@@ -35,7 +35,12 @@ function on_interrupt_trap
     exit 1
 }
 
-trap 'on_interrupt_trap' INT
+trap on_interrupt_trap INT
+
+if [[ ! $BASE_PYTHON_VERSION =~ ^[0-9.]+$ ]]; then
+    print_error "The python version is incorrect: $BASE_PYTHON_VERSION"
+    exit 1
+fi
 
 if [[ "${VIRTUALENV_PREFIX:0:1}" == "%" ]]; then
     print_error "First, you must enter the virtualenv prefix"

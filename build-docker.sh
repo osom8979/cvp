@@ -2,13 +2,12 @@
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" || exit; pwd)
 
-CODE="import bt_python; print(bt_python.__version__)"
-if ! VERSION=$("$ROOT_DIR/python" -c "$CODE"); then
+if ! VERSION=$("$ROOT_DIR/version"); then
     echo "Python code execution failed ($?)" 1>&2
     exit 1
 fi
 
-NAME="bt-python"
+NAME="cvp"
 TAG="$NAME:$VERSION"
 LATEST="$NAME:latest"
 

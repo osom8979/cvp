@@ -40,13 +40,18 @@ function print_message
     echo -e "\033[32m$@\033[0m"
 }
 
-trap 'cancel_black' INT
+function print_line
+{
+    printf -v line '%*s' "$(tput cols)" '' && echo "${line// /-}"
+}
 
-function cancel_black
+function on_interrupt_trap
 {
     print_error "An interrupt signal was detected."
     exit 1
 }
+
+trap on_interrupt_trap INT
 
 function print_usage
 {
@@ -59,15 +64,6 @@ function exit_on_error
     if [[ $code -ne 0 ]]; then
         exit $code
     fi
-}
-
-function exit_on_result_error
-{
-    for i in "$@"; do
-        if [[ $i -ne 0 ]]; then
-            exit 1
-        fi
-    done
 }
 
 function run_create_cache
@@ -114,21 +110,71 @@ function run_install_packages
     exit_on_error
 }
 
+_TEMP_FILES=()
+
+function _remove_temp_files
+{
+    if [[ ${#_TEMP_FILES[@]} -gt 0 ]]; then
+        rm "${_TEMP_FILES[@]}"
+    fi
+}
+
 function run_test
 {
     print_message "Run python tests"
-    bash "$ROOT_DIR/black.sh"  ; BLACK_RESULT=$?
-    bash "$ROOT_DIR/flake8.sh" ; FLAKE8_RESULT=$?
-    bash "$ROOT_DIR/isort.sh"  ; ISORT_RESULT=$?
-    bash "$ROOT_DIR/mypy.sh"   ; MYPY_RESULT=$?
-    bash "$ROOT_DIR/pytest.sh" ; PYTEST_RESULT=$?
 
-    exit_on_result_error \
-        $BLACK_RESULT \
-        $FLAKE8_RESULT \
-        $ISORT_RESULT \
-        $MYPY_RESULT \
-        $PYTEST_RESULT
+    local script_names=("black" "flake8" "isort" "mypy" "pytest")
+    local script_length=${#script_names[@]}
+    local script_pids=()
+    local temp_files=()
+    local exit_codes=()
+
+    local script_name
+    local temp_file
+    local script_pid
+    local exit_code
+
+    trap _remove_temp_files EXIT
+
+    for script_name in "${script_names[@]}"; do
+        temp_file=$(mktemp || exit)
+        temp_files+=("$temp_file")
+        _TEMP_FILES+=("$temp_file")
+    done
+
+    for (( i = 0; i < script_length; i++ )); do
+        script_name="${script_names[$i]}"
+        temp_file=${temp_files[$i]}
+
+        print_message "Executes script '$script_name'"
+
+        bash "$ROOT_DIR/${script_name}.sh" &> "$temp_file" &
+        script_pids+=($!)
+    done
+
+    for (( i = 0; i < script_length; i++ )); do
+        script_name="${script_names[$i]}"
+        script_pid=${script_pids[$i]}
+
+        print_message "Waiting for completion of script '$script_name' with PID ${script_pid} ..."
+        wait "${script_pid}"
+        exit_codes+=($?)
+    done
+
+    for (( i = 0; i < script_length; i++ )); do
+        script_name="${script_names[$i]}"
+        temp_file=${temp_files[$i]}
+        exit_code=${exit_codes[$i]}
+
+        if [[ $exit_code -eq 0 ]]; then
+            print_message "$(print_line)"
+            print_message "Script '$script_name' completed successfully."
+        else
+            print_error "$(print_line)"
+            print_error "Error ${exit_code} occurred in script '$script_name'."
+            cat "$temp_file"
+        fi
+    done
 }
 
 function run_build
@@ -235,4 +281,3 @@ case "$COMMAND" in
         exit 1
         ;;
 esac
-

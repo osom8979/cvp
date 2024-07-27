@@ -8,4 +8,4 @@ rm -vrf \
     "$ROOT_DIR/.sphinx_cache/" \
     "$ROOT_DIR/build/" \
     "$ROOT_DIR/dist/" \
-    "$ROOT_DIR/bt_python.egg-info/"
+    "$ROOT_DIR/cvp.egg-info/"

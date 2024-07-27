@@ -3,7 +3,10 @@
 
 asctime
 datefmt
+dockerignore
+ghcr
 levelname
 meipass
 nocov
 pythonpath
+vimspector

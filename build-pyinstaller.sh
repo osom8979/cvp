@@ -17,10 +17,9 @@ fi
 source "$ACTIVATE_PATH"
 
 cd "$ROOT_DIR" && pyinstaller \
-    --name "bt-python" \
+    --name "cvp" \
     --onefile \
     --clean \
     --noconsole \
-    --add-data "bt_python/assets:assets" \
-    --add-data "bt_python/www:www" \
+    --add-data "cvp/assets:assets" \
     "$ROOT_DIR/main.py"

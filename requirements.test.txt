@@ -1,8 +1,9 @@
-black>=22.3.0
-flake8>=4.0.1
-mypy>=0.961
-pytest>=7.1.2
-pytest-cov>=3.0.0
-coverage>=6.5.0
-isort[requirements_deprecated_finder,pipfile_deprecated_finder]>=5.10.1
+black>=24.4.2
 colorama>=0.4.6  # To use the `--color` option in isort
+coverage>=7.6.0
+flake8>=7.1.0
+isort>=5.13.2
+mypy>=1.11.0
+overrides==7.7.0
+pytest-cov>=5.0.0
+pytest>=8.3.1
