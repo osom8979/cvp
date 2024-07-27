@@ -27,3 +27,9 @@ Computer Vision Player
 ## Unit testing
 ./pytest.sh
 ```
+
+## License
+
+**cvp** inherits the underlying libmpv's license, which can be either
+[GPLv2 or later](./LICENSE.GPLv2.0) (default) or [LGPLv2.1 or later](./LICENSE.LGPLv2.1).
+For details, see [the mpv copyright page](https://github.com/mpv-player/mpv/blob/master/Copyright).
