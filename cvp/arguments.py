@@ -4,6 +4,7 @@ from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from functools import lru_cache
 from os import R_OK, access, getcwd
 from os.path import isfile, join
+from pathlib import Path
 from typing import Final, List, Optional, Sequence
 
 from cvp.logging.logging import (
@@ -30,6 +31,9 @@ Simply usage:
 
 CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
 DEFAULT_CMD: Final[str] = CMD_PLAYER
+
+IMGUI_INI_PATH: Final[str] = str(Path.home() / ".cvp" / "imgui.ini")
+PLAYER_INI_PATH: Final[str] = str(Path.home() / ".cvp" / "player.ini")
 
 LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
 TEST_DOTENV_FILENAME: Final[str] = ".env.test"
@@ -84,6 +88,19 @@ def default_argument_parser() -> ArgumentParser:
     )
 
     add_dotenv_arguments(parser)
+
+    parser.add_argument(
+        "--imgui-ini",
+        metavar="file",
+        default=get_eval("IMGUI_INI", IMGUI_INI_PATH),
+        help="Filepath imgui.ini",
+    )
+    parser.add_argument(
+        "--player-ini",
+        metavar="file",
+        default=get_eval("PLAYER_INI", PLAYER_INI_PATH),
+        help="Filepath player.ini",
+    )
 
     logging_group = parser.add_mutually_exclusive_group()
     logging_group.add_argument(

@@ -9,4 +9,5 @@ levelname
 meipass
 nocov
 pythonpath
+remapper
 vimspector

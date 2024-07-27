@@ -27,8 +27,3 @@ Computer Vision Player
 ## Unit testing
 ./pytest.sh
 ```
-
-## License
-
-See the [LICENSE](./LICENSE) file for details. In summary,
-**cvp** is licensed under the **MIT license**.

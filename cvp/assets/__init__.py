@@ -17,3 +17,13 @@ def get_assets_dir() -> str:
 
 def get_assets_path() -> Path:
     return Path(get_assets_dir())
+
+
+@lru_cache
+def get_fonts_dir() -> str:
+    return os.path.join(get_assets_dir(), "fonts")
+
+
+@lru_cache
+def get_fonts_path() -> Path:
+    return Path(get_fonts_dir())

@@ -4,6 +4,8 @@ from argparse import Namespace
 
 
 def player_main(args: Namespace) -> None:
+    assert isinstance(args.imgui_ini, str)
+    assert isinstance(args.player_ini, str)
     assert isinstance(args.colored_logging, bool)
     assert isinstance(args.default_logging, bool)
     assert isinstance(args.simple_logging, bool)
@@ -14,4 +16,7 @@ def player_main(args: Namespace) -> None:
     assert isinstance(args.verbose, int)
     assert isinstance(args.D, bool)
 
-    print("Hello, World!")
+    from cvp.apps.player.context import PlayerContext
+
+    context = PlayerContext(args)
+    context.start()
