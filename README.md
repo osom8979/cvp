@@ -2,7 +2,6 @@
 
 [![PyPI](https://img.shields.io/pypi/v/cvp?style=flat-square)](https://pypi.org/project/cvp/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cvp?style=flat-square)
-[![GitHub](https://img.shields.io/github/license/osom8979/cvp?style=flat-square)](https://github.com/osom8979/cvp/)
 
 Computer Vision Player
 
