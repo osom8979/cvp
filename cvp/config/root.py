@@ -4,9 +4,9 @@ from enum import IntEnum, StrEnum, auto, unique
 from os import PathLike
 from typing import Optional, Union
 
-from cvp.assets import get_fonts_path
 from cvp.config._base import BaseConfig
 from cvp.config.sections.display import DisplaySection
+from cvp.config.sections.font import FontSection
 
 
 @unique
@@ -22,11 +22,6 @@ class Section(StrEnum):
 class Key(StrEnum):
     # [DEFAULT]
     open_file_popup_path = auto()
-
-    # [font]
-    family = auto()
-    scale = auto()
-    pixels = auto()
 
     # [overlay]
     anchor = auto()
@@ -57,35 +52,15 @@ class Config(BaseConfig):
     def __init__(self, filename: Optional[Union[str, PathLike]] = None):
         super().__init__(filename)
         self._display = DisplaySection(self)
+        self._font = FontSection(self)
 
     @property
     def display(self):
         return self._display
 
     @property
-    def font_family(self) -> str:
-        default_font = str(get_fonts_path() / "NanumGothicCoding.ttf")
-        return self.get(self.S.font, self.K.family, default_font)
-
-    @font_family.setter
-    def font_family(self, value: str) -> None:
-        self.set(self.S.font, self.K.family, value)
-
-    @property
-    def font_scale(self) -> float:
-        return self.get(self.S.font, self.K.scale, 1.0)
-
-    @font_scale.setter
-    def font_scale(self, value: float) -> None:
-        self.set(self.S.font, self.K.scale, value)
-
-    @property
-    def font_pixels(self) -> int:
-        return self.get(self.S.font, self.K.pixels, 14)
-
-    @font_pixels.setter
-    def font_pixels(self, value: int) -> None:
-        self.set(self.S.font, self.K.pixels, value)
+    def font(self):
+        return self._font
 
     @property
     def overlay_anchor(self) -> Anchor:

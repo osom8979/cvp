@@ -87,15 +87,15 @@ class PlayerContext:
         io.display_size = size
         imgui.load_ini_settings_from_disk(self._imgui_ini)
 
-        if os.path.isfile(self._config.font_family):
+        if os.path.isfile(self._config.font.family):
             io.fonts.clear()
             io.fonts.add_font_from_file_ttf(
-                self._config.font_family,
-                self._config.font_pixels * self._config.font_scale,
+                self._config.font.family,
+                self._config.font.pixels * self._config.font.scale,
                 None,
                 io.fonts.get_glyph_ranges_korean(),
             )
-            io.font_global_scale /= self._config.font_scale
+            io.font_global_scale /= self._config.font.scale
             self._renderer.refresh_font_texture()
 
         GL.glClearColor(1, 1, 1, 1)

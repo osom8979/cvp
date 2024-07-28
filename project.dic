@@ -7,6 +7,7 @@ dockerignore
 ghcr
 levelname
 meipass
+nanum
 nocov
 pythonpath
 remapper
