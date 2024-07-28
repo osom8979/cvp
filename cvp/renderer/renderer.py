@@ -8,7 +8,7 @@ from imgui.integrations.opengl import FixedPipelineRenderer
 from pygame.event import Event
 from pygame.time import get_ticks
 
-from cvp.apps.player.remapper import KeycodeRemapper
+from cvp.renderer.remapper import KeycodeRemapper
 
 
 class PygameRenderer(FixedPipelineRenderer):

@@ -11,10 +11,10 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.apps.player.interface import WindowInterface
-from cvp.apps.player.renderer import PygameRenderer
 from cvp.apps.player.windows.background import BackgroundWindow
 from cvp.apps.player.windows.overlay import OverlayWindow
 from cvp.config.root import Config
+from cvp.renderer.renderer import PygameRenderer
 
 
 class PlayerContext:
