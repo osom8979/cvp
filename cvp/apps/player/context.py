@@ -3,7 +3,7 @@
 import os
 from argparse import Namespace
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import imgui
 import pygame
@@ -11,7 +11,9 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.apps.player.interface import WindowInterface
+from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.root import Config
+from cvp.filesystem.permission import test_rw_directory, test_rw_file
 from cvp.renderer.renderer import PygameRenderer
 from cvp.windows.background import BackgroundWindow
 from cvp.windows.overlay import OverlayWindow
@@ -21,11 +23,21 @@ class PlayerContext:
     _renderer: PygameRenderer
     _windows: List[WindowInterface]
 
-    def __init__(self, args: Namespace):
-        self._imgui_ini = args.imgui_ini
-        self._player_ini = args.player_ini
-        self._debug = args.debug
-        self._verbose = args.verbose
+    def __init__(
+        self,
+        home: Optional[str] = None,
+        debug=False,
+        verbose=0,
+    ):
+        self._home = Path(home) if home else CVP_HOME
+        self._imgui_ini = self._home / IMGUI_INI_FILENAME
+        self._player_ini = self._home / PLAYER_INI_FILENAME
+        self._debug = debug
+        self._verbose = verbose
+
+        test_rw_directory(self._home)
+        test_rw_file(self._imgui_ini)
+        test_rw_file(self._player_ini)
 
         self._config = Config(self._player_ini)
         self._done = False
@@ -33,6 +45,17 @@ class PlayerContext:
             BackgroundWindow(self._config),
             OverlayWindow(self._config.overlay),
         ]
+
+    @classmethod
+    def from_namespace(cls, args: Namespace):
+        assert isinstance(args.home, str)
+        assert isinstance(args.debug, bool)
+        assert isinstance(args.verbose, int)
+        return cls(
+            home=args.home,
+            debug=args.debug,
+            verbose=args.verbose,
+        )
 
     def quit(self):
         self._done = True
@@ -85,7 +108,7 @@ class PlayerContext:
         self._renderer = PygameRenderer()
         io = imgui.get_io()
         io.display_size = size
-        imgui.load_ini_settings_from_disk(self._imgui_ini)
+        imgui.load_ini_settings_from_disk(str(self._imgui_ini))
 
         if os.path.isfile(self._config.font.family):
             io.fonts.clear()
@@ -110,8 +133,8 @@ class PlayerContext:
         self._config.display.size = pygame.display.get_window_size()
         self._config.write(self._player_ini)
 
-        Path(self._imgui_ini).parent.mkdir(parents=True, exist_ok=True)
-        imgui.save_ini_settings_to_disk(self._imgui_ini)
+        self._imgui_ini.parent.mkdir(parents=True, exist_ok=True)
+        imgui.save_ini_settings_to_disk(str(self._imgui_ini))
 
         del self._renderer
         pygame.quit()
