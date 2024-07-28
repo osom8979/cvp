@@ -8,8 +8,8 @@ from typing import Callable, List, Optional, Union
 import imgui
 import pygame
 
-from cvp.apps.player.widgets.button_ex import button_ex
 from cvp.logging.logging import logger
+from cvp.widgets.button_ex import button_ex
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 ALLOW_DOUBLE_CLICK = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK
