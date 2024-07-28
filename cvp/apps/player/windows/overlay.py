@@ -7,7 +7,8 @@ import imgui
 from overrides import override
 
 from cvp.apps.player.interface import WindowInterface
-from cvp.config.root import Anchor, Config
+from cvp.config.root import Config
+from cvp.config.sections.overlay import Anchor
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
@@ -27,24 +28,12 @@ class OverlayWindow(WindowInterface):
         self._error_color = 1.0, 0.0, 0.0
 
     @property
-    def anchor(self):
-        return self._config.overlay_anchor
-
-    @property
     def is_left_side(self):
-        return self.anchor in (Anchor.TopLeft, Anchor.BottomLeft)
-
-    @property
-    def is_right_side(self):
-        return not self.is_left_side
+        return self._config.overlay.is_left_side
 
     @property
     def is_top_side(self):
-        return self.anchor in (Anchor.TopLeft, Anchor.TopRight)
-
-    @property
-    def is_bottom_side(self):
-        return not self.is_top_side
+        return self._config.overlay.is_top_side
 
     @property
     def window_position(self) -> Tuple[float, float]:
@@ -53,7 +42,7 @@ class OverlayWindow(WindowInterface):
         work_size = viewport.work_size
         work_pos_x, work_pos_y = work_pos
         work_size_x, work_size_y = work_size
-        padding = self._config.overlay_padding
+        padding = self._config.overlay.padding
         x = work_pos_x + (padding if self.is_left_side else work_size_x - padding)
         y = work_pos_y + (padding if self.is_top_side else work_size_y - padding)
         return x, y
@@ -65,9 +54,9 @@ class OverlayWindow(WindowInterface):
         return x, y
 
     def get_framerate_color(self, framerate: float) -> Tuple[float, float, float]:
-        if framerate >= self._config.overlay_fps_warning_threshold:
+        if framerate >= self._config.overlay.fps_warning_threshold:
             return self._normal_color
-        elif framerate >= self._config.overlay_fps_error_threshold:
+        elif framerate >= self._config.overlay.fps_error_threshold:
             return self._warning_color
         else:
             return self._error_color
@@ -81,16 +70,16 @@ class OverlayWindow(WindowInterface):
         mouse_pos = imgui.get_mouse_pos()
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
-        anchor = self._config.overlay_anchor
+        anchor = self._config.overlay.anchor
         if imgui.begin_popup_context_window():
             if imgui.menu_item("Top-Left", None, anchor == Anchor.TopLeft)[0]:
-                self._config.overlay_anchor = Anchor.TopLeft
+                self._config.overlay.anchor = Anchor.TopLeft
             if imgui.menu_item("Top-Right", None, anchor == Anchor.TopRight)[0]:
-                self._config.overlay_anchor = Anchor.TopRight
+                self._config.overlay.anchor = Anchor.TopRight
             if imgui.menu_item("Bottom-Left", None, anchor == Anchor.BottomLeft)[0]:
-                self._config.overlay_anchor = Anchor.BottomLeft
+                self._config.overlay.anchor = Anchor.BottomLeft
             if imgui.menu_item("Bottom-Right", None, anchor == Anchor.BottomRight)[0]:
-                self._config.overlay_anchor = Anchor.BottomRight
+                self._config.overlay.anchor = Anchor.BottomRight
             imgui.separator()
             if imgui.menu_item("Close")[0]:
                 self._config.views_overlay = False
@@ -103,7 +92,7 @@ class OverlayWindow(WindowInterface):
         pos_x, pos_y = self.window_position
         pivot_x, pivot_y = self.window_pivot
         imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
-        imgui.set_next_window_bg_alpha(self._config.overlay_alpha)
+        imgui.set_next_window_bg_alpha(self._config.overlay.alpha)
 
         expanded, opened = imgui.begin("Overlay Window", False, self._flags)
         try:

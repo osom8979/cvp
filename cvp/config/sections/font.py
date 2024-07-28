@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
 from enum import StrEnum, auto, unique
-from typing import Final
 
-from cvp.assets import get_fonts_dir
+from cvp.assets import get_nanum_gothic_coding_ttf
 from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
-
-DEFAULT_FONT: Final[str] = os.path.join(get_fonts_dir(), "NanumGothicCoding.ttf")
 
 
 @unique
@@ -26,7 +22,7 @@ class FontSection(BaseSection):
 
     @property
     def family(self) -> str:
-        return self.get(self.K.family, DEFAULT_FONT)
+        return self.get(self.K.family, get_nanum_gothic_coding_ttf())
 
     @family.setter
     def family(self, value: str) -> None:
