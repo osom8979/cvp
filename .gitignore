@@ -135,3 +135,5 @@ MANIFEST
 ### Project ###
 .env*
 .venv/
+imgui.ini
+player.ini

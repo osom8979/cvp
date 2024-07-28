@@ -1,39 +1,28 @@
 # -*- coding: utf-8 -*-
 
-from enum import StrEnum, auto, unique
 from os import PathLike
 from typing import Optional, Union
 
 from cvp.config._base import BaseConfig
+from cvp.config.sections.default import DefaultSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.overlay import OverlaySection
-
-
-@unique
-class Section(StrEnum):
-    DEFAULT = auto()
-    tools = auto()
-
-
-@unique
-class Key(StrEnum):
-    # [DEFAULT]
-    open_file_popup_path = auto()
-
-    # [tools]
-    demo = auto()
+from cvp.config.sections.tools import ToolsSection
 
 
 class Config(BaseConfig):
-    S = Section
-    K = Key
-
     def __init__(self, filename: Optional[Union[str, PathLike]] = None):
         super().__init__(filename)
+        self._default = DefaultSection(self)
         self._display = DisplaySection(self)
         self._font = FontSection(self)
         self._overlay = OverlaySection(self)
+        self._tools = ToolsSection(self)
+
+    @property
+    def default(self):
+        return self._default
 
     @property
     def display(self):
@@ -48,9 +37,5 @@ class Config(BaseConfig):
         return self._overlay
 
     @property
-    def tools_demo(self) -> bool:
-        return self.get(self.S.tools, self.K.demo, False)
-
-    @tools_demo.setter
-    def tools_demo(self, value: bool) -> None:
-        self.set(self.S.tools, self.K.demo, value)
+    def tools(self):
+        return self._tools

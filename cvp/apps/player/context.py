@@ -164,14 +164,14 @@ class PlayerContext:
             if imgui.begin_menu("Tools"):
                 if self._debug:
                     imgui.separator()
-                    if imgui.menu_item("Demo", None, self._config.tools_demo)[0]:
-                        self._config.tools_demo = not self._config.tools_demo
+                    if imgui.menu_item("Demo", None, self._config.tools.demo)[0]:
+                        self._config.tools.demo = not self._config.tools.demo
 
                 imgui.end_menu()
 
     def on_demo_window(self) -> None:
         if not self._debug:
             return
-        if not self._config.tools_demo:
+        if not self._config.tools.demo:
             return
         imgui.show_test_window()
