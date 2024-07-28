@@ -31,7 +31,7 @@ class PlayerContext:
         self._done = False
         self._windows = [
             BackgroundWindow(self._config),
-            OverlayWindow(self._config),
+            OverlayWindow(self._config.overlay),
         ]
 
     def quit(self):
@@ -157,8 +157,8 @@ class PlayerContext:
                 imgui.end_menu()
 
             if imgui.begin_menu("View"):
-                if imgui.menu_item("Overlay", None, self._config.views_overlay)[0]:
-                    self._config.views_overlay = not self._config.views_overlay
+                if imgui.menu_item("Overlay", None, self._config.overlay.visible)[0]:
+                    self._config.overlay.visible = not self._config.overlay.visible
                 imgui.end_menu()
 
             if imgui.begin_menu("Tools"):

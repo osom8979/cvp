@@ -16,6 +16,7 @@ class Anchor(IntEnum):
 
 @unique
 class _Keys(StrEnum):
+    visible = auto()
     anchor = auto()
     padding = auto()
     alpha = auto()
@@ -30,12 +31,48 @@ class OverlaySection(BaseSection):
         super().__init__(config, section="overlay")
 
     @property
+    def visible(self) -> bool:
+        return self.get(self.K.visible, False)
+
+    @visible.setter
+    def visible(self, value: bool) -> None:
+        self.set(self.K.visible, value)
+
+    @property
     def anchor(self) -> Anchor:
         return Anchor(self.get(self.K.anchor, 0))
 
     @anchor.setter
     def anchor(self, value: Anchor) -> None:
         self.set(self.K.anchor, int(value))
+
+    @property
+    def is_top_left(self):
+        return self.anchor == Anchor.TopLeft
+
+    @property
+    def is_top_right(self):
+        return self.anchor == Anchor.TopRight
+
+    @property
+    def is_bottom_left(self):
+        return self.anchor == Anchor.BottomLeft
+
+    @property
+    def is_bottom_right(self):
+        return self.anchor == Anchor.BottomRight
+
+    def set_top_left(self) -> None:
+        self.anchor = Anchor.TopLeft
+
+    def set_top_right(self) -> None:
+        self.anchor = Anchor.TopRight
+
+    def set_bottom_left(self) -> None:
+        self.anchor = Anchor.BottomLeft
+
+    def set_bottom_right(self) -> None:
+        self.anchor = Anchor.BottomRight
 
     @property
     def is_left_side(self):

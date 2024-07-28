@@ -13,9 +13,6 @@ from cvp.config.sections.overlay import OverlaySection
 @unique
 class Section(StrEnum):
     DEFAULT = auto()
-    font = auto()
-    overlay = auto()
-    views = auto()
     tools = auto()
 
 
@@ -23,9 +20,6 @@ class Section(StrEnum):
 class Key(StrEnum):
     # [DEFAULT]
     open_file_popup_path = auto()
-
-    # [views]
-    overlay = auto()
 
     # [tools]
     demo = auto()
@@ -52,14 +46,6 @@ class Config(BaseConfig):
     @property
     def overlay(self):
         return self._overlay
-
-    @property
-    def views_overlay(self) -> bool:
-        return self.get(self.S.views, self.K.overlay, False)
-
-    @views_overlay.setter
-    def views_overlay(self, value: bool) -> None:
-        self.set(self.S.views, self.K.overlay, value)
 
     @property
     def tools_demo(self) -> bool:
