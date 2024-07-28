@@ -6,8 +6,8 @@ from typing import Final, Tuple
 import imgui
 from overrides import override
 
-from cvp.apps.player.config.root import Anchor, RootConfig
 from cvp.apps.player.interface import WindowInterface
+from cvp.config.root import Anchor, Config
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
@@ -19,7 +19,7 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 
 class OverlayWindow(WindowInterface):
-    def __init__(self, config: RootConfig, flags=OVERLAY_WINDOW_FLAGS):
+    def __init__(self, config: Config, flags=OVERLAY_WINDOW_FLAGS):
         self._config = config
         self._flags = flags
         self._normal_color = 0.0, 1.0, 0.0

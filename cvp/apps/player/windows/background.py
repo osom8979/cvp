@@ -5,8 +5,8 @@ from typing import Final, Optional
 import imgui
 from overrides import override
 
-from cvp.apps.player.config.root import RootConfig
 from cvp.apps.player.interface import WindowInterface
+from cvp.config.root import Config
 from cvp.images.load import TextureTuple
 
 BACKGROUND_WINDOW_FLAGS: Final[int] = (
@@ -22,7 +22,7 @@ BACKGROUND_WINDOW_FLAGS: Final[int] = (
 class BackgroundWindow(WindowInterface):
     _logo_texture: Optional[TextureTuple]
 
-    def __init__(self, config: RootConfig, flags=BACKGROUND_WINDOW_FLAGS):
+    def __init__(self, config: Config, flags=BACKGROUND_WINDOW_FLAGS):
         self._config = config
         self._flags = flags
         self._logo_texture = None

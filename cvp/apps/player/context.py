@@ -10,11 +10,11 @@ import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.apps.player.config.root import RootConfig
 from cvp.apps.player.interface import WindowInterface
 from cvp.apps.player.renderer import PygameRenderer
 from cvp.apps.player.windows.background import BackgroundWindow
 from cvp.apps.player.windows.overlay import OverlayWindow
+from cvp.config.root import Config
 
 
 class PlayerContext:
@@ -27,7 +27,7 @@ class PlayerContext:
         self._debug = args.debug
         self._verbose = args.verbose
 
-        self._config = RootConfig(self._player_ini)
+        self._config = Config(self._player_ini)
         self._done = False
         self._windows = [
             BackgroundWindow(self._config),
