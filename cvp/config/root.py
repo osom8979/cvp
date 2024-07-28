@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from enum import IntEnum, StrEnum, auto, unique
-from typing import Tuple
+from os import PathLike
+from typing import Optional, Union
 
 from cvp.assets import get_fonts_path
-from cvp.config.base import BaseConfig
+from cvp.config._base import BaseConfig
+from cvp.config.sections.display import DisplaySection
 
 
 @unique
 class Section(StrEnum):
     DEFAULT = auto()
-    display = auto()
     font = auto()
     overlay = auto()
     views = auto()
@@ -21,12 +22,6 @@ class Section(StrEnum):
 class Key(StrEnum):
     # [DEFAULT]
     open_file_popup_path = auto()
-
-    # [display]
-    width = auto()
-    height = auto()
-    fullscreen = auto()
-    force_egl = auto()
 
     # [font]
     family = auto()
@@ -59,46 +54,13 @@ class Config(BaseConfig):
     S = Section
     K = Key
 
-    @property
-    def display_width(self) -> int:
-        return self.get(self.S.display, self.K.width, -1)
-
-    @display_width.setter
-    def display_width(self, value: int) -> None:
-        self.set(self.S.display, self.K.width, value)
+    def __init__(self, filename: Optional[Union[str, PathLike]] = None):
+        super().__init__(filename)
+        self._display = DisplaySection(self)
 
     @property
-    def display_height(self) -> int:
-        return self.get(self.S.display, self.K.height, -1)
-
-    @display_height.setter
-    def display_height(self, value: int) -> None:
-        self.set(self.S.display, self.K.height, value)
-
-    @property
-    def display_size(self) -> Tuple[int, int]:
-        return self.display_width, self.display_height
-
-    @display_size.setter
-    def display_size(self, value: Tuple[int, int]) -> None:
-        self.display_width = value[0]
-        self.display_height = value[1]
-
-    @property
-    def display_fullscreen(self) -> bool:
-        return self.get(self.S.display, self.K.fullscreen, False)
-
-    @display_fullscreen.setter
-    def display_fullscreen(self, value: bool) -> None:
-        self.set(self.S.display, self.K.fullscreen, value)
-
-    @property
-    def display_force_egl(self) -> bool:
-        return self.get(self.S.display, self.K.force_egl, False)
-
-    @display_force_egl.setter
-    def display_force_egl(self, value: bool) -> None:
-        self.set(self.S.display, self.K.force_egl, value)
+    def display(self):
+        return self._display
 
     @property
     def font_family(self) -> str:

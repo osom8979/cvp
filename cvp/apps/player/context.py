@@ -51,8 +51,8 @@ class PlayerContext:
     def pygame_display_size(self) -> Tuple[int, int]:
         assert pygame.display.get_init(), "pygame must be initialized"
 
-        w = self._config.display_width
-        h = self._config.display_height
+        w = self._config.display.width
+        h = self._config.display.height
         if w >= 1 and h >= 1:
             return w, h
         else:
@@ -62,13 +62,13 @@ class PlayerContext:
     @property
     def pygame_display_flags(self) -> int:
         common_flags = pygame.DOUBLEBUF | pygame.OPENGL
-        if self._config.display_fullscreen:
+        if self._config.display.fullscreen:
             return common_flags | pygame.FULLSCREEN
         else:
             return common_flags | pygame.RESIZABLE
 
     def on_init(self) -> None:
-        if self._config.display_force_egl:
+        if self._config.display.force_egl:
             os.environ["SDL_VIDEO_X11_FORCE_EGL"] = "1"
 
         pygame.init()
@@ -106,8 +106,8 @@ class PlayerContext:
         for win in self._windows:
             win.on_destroy()
 
-        self._config.display_fullscreen = pygame.display.is_fullscreen()
-        self._config.display_size = pygame.display.get_window_size()
+        self._config.display.fullscreen = pygame.display.is_fullscreen()
+        self._config.display.size = pygame.display.get_window_size()
         self._config.write(self._player_ini)
 
         Path(self._imgui_ini).parent.mkdir(parents=True, exist_ok=True)

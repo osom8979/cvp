@@ -11,19 +11,15 @@ _DefaultT = TypeVar("_DefaultT", str, bool, int, float)
 
 
 class BaseConfig:
-    _config: ConfigParser
-
     def __init__(self, filename: Optional[Union[str, PathLike]] = None):
         self._config = ConfigParser()
         if filename:
             self._config.read(filename)
 
     def read(self, filename: Union[str, PathLike]) -> None:
-        assert self._config is not None
         self._config.read(filename)
 
     def write(self, filename: Union[str, PathLike]) -> None:
-        assert self._config is not None
         parent_dir = Path(filename).parent
         if not parent_dir.is_dir():
             parent_dir.mkdir(parents=True, exist_ok=True)
@@ -31,7 +27,6 @@ class BaseConfig:
             self._config.write(fp)
 
     def get_config_value(self, section: str, key: str, default=None) -> Optional[str]:
-        assert self._config is not None
         if section not in self._config:
             return default
         if key not in self._config[section]:
@@ -39,10 +34,15 @@ class BaseConfig:
         return self._config[section][key]
 
     def set_config_value(self, section: str, key: str, value: str) -> None:
-        assert self._config is not None
         if section not in self._config:
             self._config[section] = dict()
         self._config[section][key] = value
+
+    def has(self, section: str, key: str) -> bool:
+        if section in self._config:
+            return key in self._config[section]
+        else:
+            return False
 
     # fmt: off
     @overload
