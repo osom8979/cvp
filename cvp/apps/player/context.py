@@ -10,15 +10,16 @@ import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.apps.player.interface import WindowInterface
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.root import Config
 from cvp.config.sections.display import force_egl_pair
 from cvp.filesystem.permission import test_rw_directory
 from cvp.logging.logging import logger
+from cvp.renderer.interface import WindowInterface
 from cvp.renderer.renderer import PygameRenderer
 from cvp.windows.background import BackgroundWindow
 from cvp.windows.overlay import OverlayWindow
+from cvp.windows.tools.av import AvWindow
 
 
 class PlayerContext:
@@ -47,6 +48,7 @@ class PlayerContext:
         self._windows = [
             BackgroundWindow(self._config),
             OverlayWindow(self._config.overlay),
+            AvWindow(self._config.tools),
         ]
 
     @classmethod
@@ -194,6 +196,8 @@ class PlayerContext:
 
             if imgui.begin_menu("Tools"):
                 if self._debug:
+                    if imgui.menu_item("AV", None, self._config.tools.av)[0]:
+                        self._config.tools.av = not self._config.tools.av
                     imgui.separator()
                     if imgui.menu_item("Demo", None, self._config.tools.demo)[0]:
                         self._config.tools.demo = not self._config.tools.demo

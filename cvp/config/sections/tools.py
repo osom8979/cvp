@@ -9,6 +9,7 @@ from cvp.config.sections._base import BaseSection
 @unique
 class _Keys(StrEnum):
     demo = auto()
+    av = auto()
 
 
 class ToolsSection(BaseSection):
@@ -24,3 +25,11 @@ class ToolsSection(BaseSection):
     @demo.setter
     def demo(self, value: bool) -> None:
         self.set(self.K.demo, value)
+
+    @property
+    def av(self) -> bool:
+        return self.get(self.K.av, False)
+
+    @av.setter
+    def av(self, value: bool) -> None:
+        self.set(self.K.av, value)

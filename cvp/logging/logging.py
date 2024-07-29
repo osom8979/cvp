@@ -19,8 +19,10 @@ from sys import stdout
 from typing import Final, Literal, Optional, Sequence, Union, get_args
 
 DEFAULT_LOGGER_NAME: Final[str] = "cvp"
+MPV_LOGGER_NAME: Final[str] = "cvp.mpv"
 
 logger = getLogger(DEFAULT_LOGGER_NAME)
+mpv_logger = getLogger(MPV_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"
 SEVERITY_NAME_FATAL = "fatal"

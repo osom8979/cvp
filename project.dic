@@ -4,6 +4,7 @@
 asctime
 datefmt
 dockerignore
+framebuffers
 ghcr
 levelname
 materialdesignicons

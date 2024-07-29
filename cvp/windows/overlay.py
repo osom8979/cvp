@@ -6,8 +6,8 @@ from typing import Final, Tuple
 import imgui
 from overrides import override
 
-from cvp.apps.player.interface import WindowInterface
 from cvp.config.sections.overlay import OverlaySection
+from cvp.windows._window import Window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
@@ -18,7 +18,7 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 )
 
 
-class OverlayWindow(WindowInterface):
+class OverlayWindow(Window):
     def __init__(self, config: OverlaySection, flags=OVERLAY_WINDOW_FLAGS):
         self._config = config
         self._flags = flags
