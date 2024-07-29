@@ -13,7 +13,9 @@ from OpenGL.error import Error
 from cvp.apps.player.interface import WindowInterface
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.root import Config
-from cvp.filesystem.permission import test_rw_directory, test_rw_file
+from cvp.config.sections.display import force_egl_pair
+from cvp.filesystem.permission import test_rw_directory
+from cvp.logging.logging import logger
 from cvp.renderer.renderer import PygameRenderer
 from cvp.windows.background import BackgroundWindow
 from cvp.windows.overlay import OverlayWindow
@@ -35,9 +37,10 @@ class PlayerContext:
         self._debug = debug
         self._verbose = verbose
 
+        if not self._home.exists():
+            self._home.mkdir(parents=True, exist_ok=True)
+
         test_rw_directory(self._home)
-        test_rw_file(self._imgui_ini)
-        test_rw_file(self._player_ini)
 
         self._config = Config(self._player_ini)
         self._done = False
@@ -66,6 +69,11 @@ class PlayerContext:
             self.on_process()
         except Error as e:
             if str(e) == "Attempt to retrieve context when no valid context":
+                section, key = force_egl_pair()
+                logger.error(
+                    f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
+                    f" section of the '{str(self._player_ini)}' file and try again."
+                )
                 raise RuntimeError("Consider enabling EGL related options") from e
         finally:
             self.on_exit()

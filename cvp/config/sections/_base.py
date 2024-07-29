@@ -10,6 +10,10 @@ class BaseSection:
         self._config = config
         self._section = section
 
+    @property
+    def section(self) -> str:
+        return self._section
+
     # fmt: off
     @overload
     def get(self, key: str, default: str) -> str: ...

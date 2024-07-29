@@ -61,3 +61,7 @@ class DisplaySection(BaseSection):
     @force_egl.setter
     def force_egl(self, value: bool) -> None:
         self.set(self.K.force_egl, value)
+
+
+def force_egl_pair() -> Tuple[str, str]:
+    return str(DisplaySection(BaseConfig()).section), str(DisplaySection.K.force_egl)
