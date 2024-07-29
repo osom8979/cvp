@@ -177,7 +177,7 @@ class AvWindow(Window):
                     logger.exception(e)
                 else:
                     self._pos = value
-            else:
+            elif self._mpv.percent_pos is not None:
                 self._pos = self._mpv.percent_pos
 
         changed, value = self.slider("Volume Percentage", self._volume)
@@ -189,7 +189,7 @@ class AvWindow(Window):
                     logger.exception(e)
                 else:
                     self._volume = value
-            else:
+            elif self._mpv.volume is not None:
                 self._volume = self._mpv.volume
 
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
