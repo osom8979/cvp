@@ -21,9 +21,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: checkout
-        uses: openrndr/setup-opengl@v1.1
-
       - name: setup python 3.9
         uses: actions/setup-python@v1
         with:
