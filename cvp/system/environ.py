@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from os import environ
 from contextlib import contextmanager
+from os import environ
 from typing import Dict, Optional, TypeVar, Union, overload
 
 from cvp.types.string.to_boolean import string_to_boolean

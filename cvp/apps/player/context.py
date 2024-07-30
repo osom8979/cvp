@@ -115,10 +115,13 @@ class PlayerContext:
         pygame.display.set_mode(size, flags)
 
         imgui.create_context()
-        self._renderer = PygameRenderer()
         io = imgui.get_io()
         io.display_size = size
+        io.ini_file_name = None
+        io.log_file_name = None
         imgui.load_ini_settings_from_disk(str(self._imgui_ini))
+
+        self._renderer = PygameRenderer()
 
         if os.path.isfile(self._config.font.family):
             io.fonts.clear()
@@ -143,7 +146,9 @@ class PlayerContext:
         self._config.display.size = pygame.display.get_window_size()
         self._config.write(self._player_ini)
 
-        self._imgui_ini.parent.mkdir(parents=True, exist_ok=True)
+        if not self._imgui_ini.exists():
+            self._imgui_ini.parent.mkdir(parents=True, exist_ok=True)
+
         imgui.save_ini_settings_to_disk(str(self._imgui_ini))
 
         del self._renderer

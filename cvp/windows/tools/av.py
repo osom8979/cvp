@@ -44,9 +44,6 @@ def _logging_handler(level: str, prefix: str, text: str) -> None:
     mpv_logger.log(log_level, f"[{prefix}] {text.strip()}")
 
 
-OPENGL_INIT_PARAMS = dict(get_proc_address=MpvGlGetProcAddressFn(_get_process_address))
-
-
 class AvWindow(Window):
     _file: Optional[str]
     _fbo: Optional[int]
@@ -111,7 +108,9 @@ class AvWindow(Window):
         self._context = MpvRenderContext(
             mpv=self._mpv,
             api_type="opengl",
-            opengl_init_params=OPENGL_INIT_PARAMS,
+            opengl_init_params={
+                "get_proc_address": MpvGlGetProcAddressFn(_get_process_address),
+            },
         )
 
         self._mpv.play(file)
@@ -243,9 +242,7 @@ class AvWindow(Window):
 
                 p1 = cx, cy
                 p2 = cx + cw, cy + ch
-                img_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
-                draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1), img_color)
-                # imgui.image(self._texture, w, h)
+                draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
         finally:
             imgui.end_child()
 
