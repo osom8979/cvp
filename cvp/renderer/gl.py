@@ -4,12 +4,13 @@ from ctypes import CDLL, c_void_p, cast
 from functools import lru_cache
 from typing import Optional
 
-from OpenGL import GL
+from OpenGL import platform
 
 
 @lru_cache
 def get_opengl_dll() -> CDLL:
-    return GL.glGetString.DLL
+    # noinspection PyUnresolvedReferences
+    return platform.PLATFORM.OpenGL
 
 
 def get_process_address(name: str) -> Optional[int]:

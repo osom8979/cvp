@@ -3,10 +3,16 @@
 from ctypes import CDLL
 from unittest import TestCase, main
 
+from OpenGL import GL, platform
+
 from cvp.renderer.gl import get_opengl_dll, get_process_address
 
 
 class GlTestCase(TestCase):
+    def test_platform_dll(self):
+        # noinspection PyUnresolvedReferences
+        self.assertEqual(GL.glGetString.DLL, platform.PLATFORM.OpenGL)
+
     def test_get_opengl_dll(self):
         self.assertIsInstance(get_opengl_dll(), CDLL)
 
