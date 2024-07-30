@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from os import environ
+from contextlib import contextmanager
 from typing import Dict, Optional, TypeVar, Union, overload
 
 from cvp.types.string.to_boolean import string_to_boolean
@@ -53,3 +54,12 @@ def exchange_env(key: str, exchange: Optional[str]) -> Optional[str]:
     if exchange is not None:
         environ[key] = exchange
     return result
+
+
+@contextmanager
+def exchange_env_context(key: str, exchange: Optional[str]):
+    original = exchange_env(key, exchange)
+    try:
+        yield
+    finally:
+        exchange_env(key, original)
