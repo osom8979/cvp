@@ -2,16 +2,37 @@
 # https://plugins.jetbrains.com/plugin/12089-dictionary
 
 asctime
+autodect
 datefmt
+demuxing
+discardcorrupt
 dockerignore
+dostr
+fastdecode
+fflags
 framebuffers
 ghcr
+lavfi
 levelname
 libgl
 materialdesignicons
 meipass
+muxing
 nanum
+nobuffer
 nocov
+nullsrc
+paletted
+paletted
+psnr
 pythonpath
+rawvideo
+rawvideo
 remapper
+stillimage
+vcodec
+veryfast
+veryslow
 vimspector
+yuyv
+zerolatency
