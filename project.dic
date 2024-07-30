@@ -7,6 +7,7 @@ dockerignore
 framebuffers
 ghcr
 levelname
+libgl
 materialdesignicons
 meipass
 nanum
