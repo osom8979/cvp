@@ -3,7 +3,8 @@ PyOpenGL==3.1.7
 coloredlogs==15.0.1
 imgui==2.0.0
 mpv==1.0.7
+numpy>=1.21
 psutil==6.0.0
 pygame-ce==2.4.1
 python-dotenv==1.0.1
-numpy>=1.21
+static-ffmpeg==2.7
