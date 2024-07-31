@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
+from io import StringIO
+from subprocess import check_output
+from typing import Dict, Final, List, NamedTuple, Sequence
+from urllib.parse import urlparse
+
 # noinspection SpellCheckingInspection
-FFMPEG_FORMATS = """
+_FFMPEG_FORMATS_STDOUT_SAMPLE = """
 File formats:
  D. = Demuxing supported
  .E = Muxing supported
@@ -404,3 +410,85 @@ File formats:
  D  yop             Psygnosis YOP
  DE yuv4mpegpipe    YUV4MPEG pipe
 """
+
+AUTOMATIC_DETECT_FILE_FORMAT: Final[str] = "autodect"
+
+WELL_KNOWN_SCHEME_FORMAT: Final[Dict[str, str]] = {
+    "rtmp": "flv",
+    "rtsp": "rtsp",
+}
+
+FFMPEG_FILE_FORMATS_HEADER_LINES: Final[Sequence[str]] = (
+    "File formats:",
+    " D. = Demuxing supported",
+    " .E = Muxing supported",
+    " --",
+)
+"""Skip unnecessary header lines in `ffmpeg -hide_banner -formats` command."""
+
+
+class FileFormat(NamedTuple):
+    supported_demuxing: bool
+    supported_muxing: bool
+    name: str
+    description: str
+
+    def __repr__(self):
+        buffer = StringIO()
+        buffer.write("D" if self.supported_demuxing else ".")
+        buffer.write("E" if self.supported_muxing else ".")
+        buffer.write(f" {self.name}")
+        return buffer.getvalue()
+
+    @classmethod
+    def from_format_line(cls, line: str):
+        supported_demuxing = line[1] == "D"
+        supported_muxing = line[2] == "E"
+        name_desc = line[4:].split(maxsplit=1)
+        name = name_desc[0]
+        desc = name_desc[1] if len(name_desc) == 2 else str()
+        return cls(
+            supported_demuxing=supported_demuxing,
+            supported_muxing=supported_muxing,
+            name=name,
+            description=desc,
+        )
+
+
+def parse_file_formats_output(text: str) -> List[FileFormat]:
+    lines = text.splitlines()
+    for i, header_line in enumerate(FFMPEG_FILE_FORMATS_HEADER_LINES):
+        if lines[i] != header_line:
+            raise ValueError(f"This is not the expected header line #{i}: '{lines[i]}'")
+
+    begin = len(FFMPEG_FILE_FORMATS_HEADER_LINES)
+    lines = lines[begin:]
+
+    # [IMPORTANT] Do not use strip
+    return [FileFormat.from_format_line(line) for line in lines]
+
+
+def inspect_file_formats(ffmpeg_path="ffmpeg") -> List[FileFormat]:
+    cmds = (ffmpeg_path, "-hide_banner", "-formats")
+    output = check_output(cmds).decode("utf-8")
+    return parse_file_formats_output(output)
+
+
+def detect_file_format(url: str, ffmpeg_path="ffmpeg") -> str:
+    if os.path.exists(url):
+        ext = os.path.splitext(url)[1]
+        return ext[1:] if ext[0] == "." else ext
+    else:
+        file_formats = inspect_file_formats(ffmpeg_path)
+        o = urlparse(url)
+        if o.scheme:
+            if o.scheme in WELL_KNOWN_SCHEME_FORMAT:
+                return WELL_KNOWN_SCHEME_FORMAT[o.scheme]
+            try:
+                file_format = next(filter(lambda f: f.name == o.scheme, file_formats))
+            except StopIteration:
+                raise IndexError(f"Unsupported URL scheme: {o.scheme}")
+            else:
+                return file_format.name
+        else:
+            raise NotImplementedError("URL scheme is required")

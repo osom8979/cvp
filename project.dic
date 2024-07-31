@@ -4,6 +4,7 @@
 asctime
 autodect
 datefmt
+deblocking
 demuxing
 discardcorrupt
 dockerignore

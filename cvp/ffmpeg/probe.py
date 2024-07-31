@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from json import loads as json_loads
 from subprocess import check_output
 from typing import Any, Tuple
+
+from orjson import loads
 
 
 def inspect_source(src: str, ffprobe_path="ffprobe") -> Any:
@@ -16,8 +17,7 @@ def inspect_source(src: str, ffprobe_path="ffprobe") -> Any:
         "-show_streams",
         src,
     ]
-    output = check_output(ffprobe_command).decode("utf-8")
-    return json_loads(output)
+    return loads(check_output(ffprobe_command))
 
 
 def inspect_source_size(
