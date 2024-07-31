@@ -1,9 +1,8 @@
 black>=24.4.2
-colorama>=0.4.6  # To use the `--color` option in isort
 coverage>=7.6.0
 flake8>=7.1.0
 isort>=5.13.2
 mypy>=1.11.0
-overrides==7.7.0
+overrides>=7.7.0
 pytest-cov>=5.0.0
 pytest>=8.3.1

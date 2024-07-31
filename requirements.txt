@@ -1,3 +1,4 @@
+-c constraints.txt
 -r requirements.deploy.txt
 -r requirements.develop.txt
 -r requirements.main.txt
