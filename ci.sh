@@ -174,6 +174,12 @@ function run_test
             cat "$temp_file"
         fi
     done
+
+    for exit_code in "${exit_codes[@]}"; do
+        if [[ $exit_code -ne 0 ]]; then
+            exit 1
+        fi
+    done
 }
 
 function run_build
