@@ -13,7 +13,7 @@ from OpenGL.error import Error
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.root import Config
 from cvp.config.sections.display import force_egl_pair
-from cvp.filesystem.permission import test_rw_directory
+from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
 from cvp.renderer.interface import WindowInterface
 from cvp.renderer.renderer import PygameRenderer
@@ -41,8 +41,10 @@ class PlayerContext:
         if not self._home.exists():
             self._home.mkdir(parents=True, exist_ok=True)
 
-        test_rw_directory(self._home)
+        test_directory(self._home)
+        test_readable(self._home)
 
+        self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._player_ini)
         self._done = False
         self._windows = [

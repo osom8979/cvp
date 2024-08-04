@@ -15,8 +15,9 @@ def get_assets_dir() -> str:
         return os.path.abspath(os.path.dirname(__file__))
 
 
-def get_assets_path() -> Path:
-    return Path(get_assets_dir())
+@lru_cache
+def get_bin_dir() -> str:
+    return os.path.join(get_assets_dir(), "bin")
 
 
 @lru_cache
@@ -25,8 +26,24 @@ def get_fonts_dir() -> str:
 
 
 @lru_cache
+def get_cache_dir() -> str:
+    return os.path.join(get_assets_dir(), "cache")
+
+
+def get_assets_path() -> Path:
+    return Path(get_assets_dir())
+
+
+def get_bin_path() -> Path:
+    return Path(get_bin_dir())
+
+
 def get_fonts_path() -> Path:
     return Path(get_fonts_dir())
+
+
+def get_cache_path() -> Path:
+    return Path(get_cache_dir())
 
 
 @lru_cache

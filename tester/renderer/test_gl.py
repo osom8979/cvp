@@ -17,7 +17,7 @@ class GlTestCase(TestCase):
         self.assertIsInstance(get_opengl_dll(), CDLL)
 
     def test_get_process_address(self):
-        self.assertNotEquals(0, get_process_address("glGetString"))
+        self.assertNotEqual(0, get_process_address("glGetString"))
 
 
 if __name__ == "__main__":
