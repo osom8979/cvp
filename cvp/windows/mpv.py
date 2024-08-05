@@ -61,7 +61,6 @@ class MpvWindow(Window):
         self._min_width = 400
         self._min_height = 300
 
-        self._open = None
         self._file = None
         self._fbo = None
         self._texture = None
@@ -126,25 +125,27 @@ class MpvWindow(Window):
         # GL.glDeleteTextures(1, self._texture)
         # GL.glDeleteFramebuffers(1, self._fbo)
 
-        self._open = None
         self._file = None
         self._fbo = None
         self._texture = None
         self._mpv = None
         self._context = None
 
-    def _on_file_open(self, file: Optional[str]) -> None:
+    def on_open_file(self, file: Optional[str]) -> None:
         if not file:
             return
         self.open(file)
 
     def open_file_popup(self) -> None:
-        self._popup.show(title="Open video file", callback=self._on_file_open)
+        self._popup.show(
+            title="Open video file",
+            callback=self.on_open_file,
+        )
 
     @staticmethod
     def slider(label: str, value: float) -> Tuple[bool, float]:
         changed, value = imgui.slider_float(
-            f"##{label}", value, 0.0, 100.0, f"{label} %.0f", 1.0
+            f"#{label}", value, 0.0, 100.0, f"{label} %.0f", 1.0
         )
         assert isinstance(changed, bool)
         assert isinstance(value, float)

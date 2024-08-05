@@ -12,11 +12,13 @@ from OpenGL.error import Error
 
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.root import Config
-from cvp.config.sections.display import force_egl_pair
+from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
 from cvp.renderer.interface import WindowInterface
 from cvp.renderer.renderer import PygameRenderer
+from cvp.widgets.popups.open_file import OpenFilePopup
+from cvp.widgets.popups.open_url import OpenUrlPopup
 from cvp.windows.background import BackgroundWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
@@ -53,6 +55,9 @@ class PlayerContext:
             "__mpv__": MpvWindow(self._config.tools),
         }
 
+        self._open_file_popup = OpenFilePopup()
+        self._open_url_popup = OpenUrlPopup()
+
     @classmethod
     def from_namespace(cls, args: Namespace):
         assert isinstance(args.home, str)
@@ -67,13 +72,35 @@ class PlayerContext:
     def quit(self):
         self._done = True
 
+    def on_open_file(self, file: Optional[str]) -> None:
+        if not file:
+            return
+        # TODO: open video file
+
+    def open_file(self):
+        self._open_file_popup.show(
+            title="Open file",
+            callback=self.on_open_file,
+        )
+
+    def on_open_url(self, file: Optional[str]) -> None:
+        if not file:
+            return
+        # TODO: open network stream
+
+    def open_url(self):
+        self._open_url_popup.show(
+            title="Open network stream",
+            callback=self.on_open_url,
+        )
+
     def start(self) -> None:
         self.on_init()
         try:
             self.on_process()
         except Error as e:
             if str(e) == "Attempt to retrieve context when no valid context":
-                section, key = force_egl_pair()
+                section, key = force_egl_section_key()
                 logger.error(
                     f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
                     f" section of the '{str(self._player_ini)}' file and try again."
@@ -170,6 +197,10 @@ class PlayerContext:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
             self.quit()
+        if keys[pygame.K_LCTRL] and keys[pygame.K_o]:
+            self.open_file()
+        if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
+            self.open_url()
 
         self._renderer.do_tick()
 
@@ -178,6 +209,7 @@ class PlayerContext:
         try:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             self.on_main_menu()
+            self.on_popups()
             for win in self._windows.values():
                 win.on_process()
             self.on_demo_window()
@@ -191,6 +223,10 @@ class PlayerContext:
     def on_main_menu(self) -> None:
         with imgui.begin_main_menu_bar():
             if imgui.begin_menu("File"):
+                if imgui.menu_item("Open file", "Ctrl+O")[0]:
+                    self.open_file()
+                if imgui.menu_item("Open network", "Ctrl+N")[0]:
+                    self.open_url()
                 imgui.separator()
                 if imgui.menu_item("Quit", "Ctrl+Q")[0]:
                     self.quit()
@@ -210,6 +246,10 @@ class PlayerContext:
                         self._config.tools.demo = not self._config.tools.demo
 
                 imgui.end_menu()
+
+    def on_popups(self) -> None:
+        self._open_file_popup.process()
+        self._open_url_popup.process()
 
     def on_demo_window(self) -> None:
         if not self._debug:
