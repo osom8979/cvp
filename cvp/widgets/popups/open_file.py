@@ -20,10 +20,9 @@ class OpenFilePopup:
     _result: Optional[str]
     _callback: Optional[Callable[[str], None]]
 
-    def __init__(self, title="Open file"):
-        self._default_title = title
+    def __init__(self):
         self._enabled = False
-        self._title = title
+        self._title = str()
         self._location_text = str()
         self._current_dir = str()
         self._items = list()
@@ -32,6 +31,8 @@ class OpenFilePopup:
         self._callback = None
         self._centered = True
         self._show_hidden = False
+        self._min_width = 400
+        self._min_height = 240
 
     @staticmethod
     def list_items(location: Union[str, PathLike], show_hidden=False) -> List[str]:
@@ -68,7 +69,7 @@ class OpenFilePopup:
             dir_path = Path.home()
 
         self._enabled = True
-        self._title = title if title else self._default_title
+        self._title = title if title else type(self).__name__
         self._location_text = str(dir_path)
         self._current_dir = str()
         self._items = list()
@@ -85,6 +86,9 @@ class OpenFilePopup:
         imgui.close_current_popup()
 
     def _main(self) -> None:
+        if imgui.is_window_appearing():
+            imgui.set_window_size(self._min_width, self._min_height)
+
         if imgui.button("Parent"):
             self._location_text = str(Path(self._location_text).parent)
 
