@@ -3,7 +3,7 @@
 import os
 from argparse import Namespace
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import imgui
 import pygame
@@ -18,13 +18,13 @@ from cvp.logging.logging import logger
 from cvp.renderer.interface import WindowInterface
 from cvp.renderer.renderer import PygameRenderer
 from cvp.windows.background import BackgroundWindow
+from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
-from cvp.windows.tools.av import AvWindow
 
 
 class PlayerContext:
     _renderer: PygameRenderer
-    _windows: List[WindowInterface]
+    _windows: Dict[str, WindowInterface]
 
     def __init__(
         self,
@@ -47,11 +47,11 @@ class PlayerContext:
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._player_ini)
         self._done = False
-        self._windows = [
-            BackgroundWindow(self._config),
-            OverlayWindow(self._config.overlay),
-            AvWindow(self._config.tools),
-        ]
+        self._windows = {
+            "__background__": BackgroundWindow(self._config),
+            "__overlay__": OverlayWindow(self._config.overlay),
+            "__mpv__": MpvWindow(self._config.tools),
+        }
 
     @classmethod
     def from_namespace(cls, args: Namespace):
@@ -137,11 +137,11 @@ class PlayerContext:
             self._renderer.refresh_font_texture()
 
         GL.glClearColor(1, 1, 1, 1)
-        for win in self._windows:
+        for win in self._windows.values():
             win.on_create()
 
     def on_exit(self) -> None:
-        for win in self._windows:
+        for win in self._windows.values():
             win.on_destroy()
 
         self._config.display.fullscreen = pygame.display.is_fullscreen()
@@ -178,7 +178,7 @@ class PlayerContext:
         try:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             self.on_main_menu()
-            for win in self._windows:
+            for win in self._windows.values():
                 win.on_process()
             self.on_demo_window()
         finally:

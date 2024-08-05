@@ -44,7 +44,7 @@ def _logging_handler(level: str, prefix: str, text: str) -> None:
     mpv_logger.log(log_level, f"[{prefix}] {text.strip()}")
 
 
-class AvWindow(Window):
+class MpvWindow(Window):
     _file: Optional[str]
     _fbo: Optional[int]
     _texture: Optional[int]
