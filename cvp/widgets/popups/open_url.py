@@ -51,9 +51,8 @@ class OpenUrlPopup:
         if imgui.is_window_appearing():
             imgui.set_keyboard_focus_here()
 
-        window_width = imgui.get_content_region_available_width()
-        imgui.push_item_width(window_width)
-        self._url = imgui.input_text("#URL", self._url, -1, ENTER_RETURN)[1]
+        imgui.push_item_width(-1)
+        self._url = imgui.input_text("## URL", self._url, -1, ENTER_RETURN)[1]
         imgui.pop_item_width()
 
         if button_ex("Open", disabled=not self._url):

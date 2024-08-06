@@ -31,8 +31,8 @@ class OpenFilePopup:
         self._callback = None
         self._centered = True
         self._show_hidden = False
-        self._min_width = 400
-        self._min_height = 240
+        self._min_width = 480
+        self._min_height = 320
 
     @staticmethod
     def list_items(location: Union[str, PathLike], show_hidden=False) -> List[str]:
