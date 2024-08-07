@@ -3,11 +3,28 @@
 from configparser import ConfigParser
 from os import PathLike
 from pathlib import Path
-from typing import Optional, TypeVar, Union, overload
+from typing import Dict, List, Optional, Tuple, TypeVar, Union, overload
 
 from cvp.types.string.to_boolean import string_to_boolean
 
 _DefaultT = TypeVar("_DefaultT", str, bool, int, float)
+
+SerializedConfig = Dict[str, List[Tuple[str, str]]]
+
+
+def config_dumps(config: ConfigParser) -> SerializedConfig:
+    result = dict()
+    for section in config.sections():
+        result[section] = [item for item in config.items(section)]
+    return result
+
+
+def config_loads(config: ConfigParser, o: SerializedConfig) -> None:
+    for section, items in o.items():
+        if not config.has_section(section):
+            config.add_section(section)
+        for option, value in items:
+            config.set(section, option, value)
 
 
 class BaseConfig:
@@ -15,6 +32,24 @@ class BaseConfig:
         self._config = ConfigParser()
         if filename:
             self._config.read(filename)
+
+    def sections(self):
+        return self._config.sections()
+
+    def clear(self) -> None:
+        for section in self._config.sections():
+            self._config.remove_section(section)
+
+    def dumps(self) -> SerializedConfig:
+        return config_dumps(self._config)
+
+    def extends(self, o: Union["BaseConfig", ConfigParser, SerializedConfig]) -> None:
+        if isinstance(o, BaseConfig):
+            config_loads(self._config, o.dumps())
+        elif isinstance(o, ConfigParser):
+            config_loads(self._config, config_dumps(o))
+        else:
+            config_loads(self._config, o)
 
     def read(self, filename: Union[str, PathLike]) -> None:
         self._config.read(filename)
