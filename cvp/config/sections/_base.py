@@ -54,6 +54,12 @@ class BaseSection:
     def __len__(self):
         return len(self.keys())
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
     # fmt: off
     @overload
     def get(self, key: str, default: str, *, raw=False) -> str: ...

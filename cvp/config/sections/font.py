@@ -17,8 +17,8 @@ class _Keys(StrEnum):
 class FontSection(BaseSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig):
-        super().__init__(config, section="font")
+    def __init__(self, config: BaseConfig, section="font"):
+        super().__init__(config=config, section=section)
 
     @property
     def family(self) -> str:

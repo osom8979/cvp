@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from os import PathLike
-from typing import List, Optional, Union
+from typing import Optional, Union
+from uuid import uuid4
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.av import AvSection, filter_av_sections
-from cvp.config.sections.default import DefaultSection
+from cvp.config.prefix import SectionPrefix
+from cvp.config.sections.av import AvSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.overlay import OverlaySection
@@ -19,15 +20,11 @@ class Config(BaseConfig):
         cvp_home: Optional[str] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
-        self._default = DefaultSection(self)
-        self._display = DisplaySection(self)
-        self._font = FontSection(self)
-        self._overlay = OverlaySection(self)
-        self._tools = ToolsSection(self)
-
-    @property
-    def default(self):
-        return self._default
+        self._display = DisplaySection(config=self)
+        self._font = FontSection(config=self)
+        self._overlay = OverlaySection(config=self)
+        self._tools = ToolsSection(config=self)
+        self._avs = SectionPrefix(config=self, prefix="av.")
 
     @property
     def display(self):
@@ -45,12 +42,6 @@ class Config(BaseConfig):
     def tools(self):
         return self._tools
 
-    def av_sections(self) -> List[str]:
-        return filter_av_sections(self.sections())
-
-    @property
-    def avs(self) -> List[AvSection]:
-        return [AvSection(section, self) for section in self.av_sections()]
-
-    def create_av(self, name: str) -> AvSection:
-        return AvSection.from_name(name, self)
+    def av(self, name: Optional[str] = None):
+        section_name = self._avs.join_section_name(name) if name else str(uuid4())
+        return AvSection(config=self, section=section_name)

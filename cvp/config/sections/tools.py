@@ -15,8 +15,8 @@ class _Keys(StrEnum):
 class ToolsSection(BaseSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig):
-        super().__init__(config, section="tools")
+    def __init__(self, config: BaseConfig, section="tools"):
+        super().__init__(config=config, section=section)
 
     @property
     def demo(self) -> bool:

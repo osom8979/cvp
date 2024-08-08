@@ -27,8 +27,8 @@ class _Keys(StrEnum):
 class OverlaySection(BaseSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig):
-        super().__init__(config, section="overlay")
+    def __init__(self, config: BaseConfig, section="overlay"):
+        super().__init__(config=config, section=section)
 
     @property
     def visible(self) -> bool:

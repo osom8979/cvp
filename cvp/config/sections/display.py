@@ -18,8 +18,8 @@ class _Keys(StrEnum):
 class DisplaySection(BaseSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig):
-        super().__init__(config, section="display")
+    def __init__(self, config: BaseConfig, section="display"):
+        super().__init__(config=config, section=section)
 
     @property
     def width(self) -> int:

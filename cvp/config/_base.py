@@ -116,10 +116,18 @@ class BaseConfig:
             return default
         return self._config[section][key]
 
-    def set_config_value(self, section: str, key: str, value: str) -> None:
+    def add_section(self, section: str) -> None:
+        self._config.add_section(section)
+
+    def set_config_value(
+        self,
+        section: str,
+        key: str,
+        value: Optional[str] = None,
+    ) -> None:
         if section not in self._config:
-            self._config[section] = dict()
-        self._config[section][key] = value
+            self._config.add_section(section)
+        self._config.set(section, key, value)
 
     def has(self, section: str, key: str) -> bool:
         if section in self._config:
