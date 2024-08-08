@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from configparser import InterpolationMissingOptionError
 from tempfile import TemporaryDirectory
 from unittest import TestCase, main
 
@@ -13,7 +14,6 @@ Size=400,400
 # Comment
 [Window][Open Network Stream]
 Collapsed=0
-Latest=${HOME}
 
 [display]
 fullscreen = False  # Not comment
@@ -24,6 +24,7 @@ opened = "False"  ; Not comment
 
 [av.2]
 opened = 1
+home=${CVP_HOME}
 """
 
 _EXPECTED_SECTIONS = {
@@ -36,10 +37,10 @@ _EXPECTED_SECTIONS = {
 
 _EXPECTED_SERIALIZED_OBJECT = {
     "Window][Debug##Default": {"size": "400,400"},
-    "Window][Open Network Stream": {"collapsed": "0", "latest": "${HOME}"},
+    "Window][Open Network Stream": {"collapsed": "0"},
     "display": {"fullscreen": "False  # Not comment", "color": "0.5, 0.5, 0.5"},
     "av.1": {"opened": '"False"  ; Not comment'},
-    "av.2": {"opened": "1"},
+    "av.2": {"opened": "1", "home": "${CVP_HOME}"},
 }
 
 
@@ -82,6 +83,13 @@ class BaseTestCase(TestCase):
         self.assertNotIn(("A", "C"), config)
         self.assertNotIn(("a", "B"), config)
 
+        config.clear()
+        self.assertFalse(config)
+
+    def test_get_set(self):
+        config = BaseConfig()
+        config.set_config_value("A", "B", "1")
+
         self.assertSetEqual({"A"}, set(config.sections()))
         self.assertSetEqual({"b"}, set(config.options("A")))
 
@@ -95,8 +103,25 @@ class BaseTestCase(TestCase):
         self.assertEqual(1.0, config.get("A", "B", 0.0))
         self.assertEqual(True, config.get("A", "B", False))
 
-        config.clear()
-        self.assertFalse(config)
+    def test_interpolation(self):
+        config = BaseConfig(cvp_home=self.temp_dir.name)
+        config.set_config_value("A", "z", "${CVP_HOME}")
+        config.set_config_value("B", "y", "KKK")
+        config.set_config_value("C", "x", "${B:y}")
+
+        self.assertEqual("${CVP_HOME}", config.get("A", "z", raw=True))
+        self.assertEqual(self.temp_dir.name, config.get("A", "z", raw=False))
+
+        self.assertEqual("KKK", config.get("B", "y", raw=True))
+        self.assertEqual("KKK", config.get("B", "y", raw=False))
+
+        self.assertEqual("${B:y}", config.get("C", "x", raw=True))
+        self.assertEqual("KKK", config.get("C", "x", raw=False))
+
+        config.set_config_value("D", "u", "${A:z}")
+        self.assertEqual("${A:z}", config.get("D", "u", raw=True))
+        with self.assertRaises(InterpolationMissingOptionError):
+            config.get("D", "u", raw=False)  # "${A:z}" -> "${CVP_HOME}" -> ...
 
     def test_read_write(self):
         config1 = BaseConfig()

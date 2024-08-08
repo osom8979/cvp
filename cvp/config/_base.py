@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import DEFAULTSECT, ConfigParser, ExtendedInterpolation
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, overload
@@ -44,7 +44,7 @@ class BaseConfig:
             inline_comment_prefixes=None,
             strict=True,
             empty_lines_in_values=False,
-            default_section="__DEFAULT__",
+            default_section=DEFAULTSECT,
             interpolation=ExtendedInterpolation(),
         )
         self._vars = {"CVP_HOME": cvp_home if cvp_home else str()}
@@ -146,15 +146,15 @@ class BaseConfig:
 
     # fmt: off
     @overload
-    def get(self, section: str, key: str) -> Optional[str]: ...
+    def get(self, section: str, key: str, *, raw=False) -> Optional[str]: ...
     @overload
-    def get(self, section: str, key: str, default: str) -> str: ...
+    def get(self, section: str, key: str, default: str, *, raw=False) -> str: ...
     @overload
-    def get(self, section: str, key: str, default: bool) -> bool: ...
+    def get(self, section: str, key: str, default: bool, *, raw=False) -> bool: ...
     @overload
-    def get(self, section: str, key: str, default: int) -> int: ...
+    def get(self, section: str, key: str, default: int, *, raw=False) -> int: ...
     @overload
-    def get(self, section: str, key: str, default: float) -> float: ...
+    def get(self, section: str, key: str, default: float, *, raw=False) -> float: ...
     # fmt: on
 
     def get(
@@ -162,6 +162,8 @@ class BaseConfig:
         section: str,
         key: str,
         default: Optional[_DefaultT] = None,
+        *,
+        raw=False,
     ) -> Optional[Union[str, bool, int, float]]:
         if not self._config.has_section(section):
             return default
@@ -170,21 +172,22 @@ class BaseConfig:
             return default
 
         if default is None:
-            return self._config.get(section, key, vars=self._vars)
+            return self._config.get(section, key, raw=raw, vars=self._vars)
 
         assert default is not None
 
         if isinstance(default, str):
-            return self._config.get(section, key, vars=self._vars)
+            return self._config.get(section, key, raw=raw, vars=self._vars)
 
         if isinstance(default, bool):
-            return string_to_boolean(self._config.get(section, key, vars=self._vars))
+            _boolean_value = self._config.get(section, key, raw=raw, vars=self._vars)
+            return string_to_boolean(_boolean_value)
 
         if isinstance(default, int):
-            return self._config.getint(section, key, vars=self._vars)
+            return self._config.getint(section, key, raw=raw, vars=self._vars)
 
         if isinstance(default, float):
-            return self._config.getfloat(section, key, vars=self._vars)
+            return self._config.getfloat(section, key, raw=raw, vars=self._vars)
 
         raise TypeError(f"Unsupported default type: {type(default).__name__}")
 

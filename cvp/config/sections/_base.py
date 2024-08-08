@@ -56,21 +56,23 @@ class BaseSection:
 
     # fmt: off
     @overload
-    def get(self, key: str, default: str) -> str: ...
+    def get(self, key: str, default: str, *, raw=False) -> str: ...
     @overload
-    def get(self, key: str, default: bool) -> bool: ...
+    def get(self, key: str, default: bool, *, raw=False) -> bool: ...
     @overload
-    def get(self, key: str, default: int) -> int: ...
+    def get(self, key: str, default: int, *, raw=False) -> int: ...
     @overload
-    def get(self, key: str, default: float) -> float: ...
+    def get(self, key: str, default: float, *, raw=False) -> float: ...
     # fmt: on
 
     def get(
         self,
         key: str,
         default: _DefaultT,
+        *,
+        raw=False,
     ) -> Optional[Union[str, bool, int, float]]:
-        return self._config.get(self._section, key, default)
+        return self._config.get(self._section, key, default, raw=raw)
 
     def set(self, key: str, value: _DefaultT) -> None:
         self._config.set(self._section, key, value)
