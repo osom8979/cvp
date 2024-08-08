@@ -3,11 +3,9 @@
 from typing import Final, Optional
 
 import imgui
-from overrides import override
 
 from cvp.config.config import Config
 from cvp.images.load import TextureTuple
-from cvp.windows._window import Window
 
 BACKGROUND_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
@@ -19,29 +17,18 @@ BACKGROUND_WINDOW_FLAGS: Final[int] = (
 )
 
 
-class BackgroundWindow(Window):
+class BackgroundWindow:
     _logo_texture: Optional[TextureTuple]
 
     def __init__(self, config: Config, flags=BACKGROUND_WINDOW_FLAGS):
-        super().__init__()
-
         self._config = config
         self._flags = flags
         self._logo_texture = None
 
-    @override
     def on_create(self) -> None:
         # logo_path = get_logos_path() / "logo.svg"
         # self._logo_texture = load_svg(logo_path, (256, 256))
         pass
-
-    @override
-    def on_destroy(self) -> None:
-        pass
-
-    @override
-    def on_process(self) -> None:
-        self.on_begin()
 
     def on_begin(self) -> None:
         viewport = imgui.get_main_viewport()

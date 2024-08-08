@@ -48,15 +48,14 @@ def _logging_handler(level: str, prefix: str, text: str) -> None:
     mpv_logger.log(log_level, f"[{prefix}] {text.strip()}")
 
 
-class MpvWindow(Window):
+class MpvWindow(Window[MpvSection]):
     _file: Optional[str]
     _mpv: Optional[MPV]
     _context: Optional[MpvRenderContext]
 
     def __init__(self, config: MpvSection, flags=imgui.WINDOW_MENU_BAR):
-        super().__init__()
+        super().__init__(config)
 
-        self._config = config
         self._flags = flags
         self._popup = OpenFilePopup()
         self._clear_color = 0.5, 0.5, 0.5, 1.0
@@ -122,13 +121,13 @@ class MpvWindow(Window):
         self._popup.process()
 
     def _process_window(self) -> None:
-        if not self._config.opened:
+        if not self.opened:
             return
 
         expanded, opened = imgui.begin(type(self).__name__, True, self._flags)
         try:
             if not opened:
-                self._config.opened = False
+                self.opened = False
                 return
 
             if not expanded:
@@ -191,7 +190,7 @@ class MpvWindow(Window):
         self._context = None
 
     @property
-    def opened(self) -> bool:
+    def context_opened(self) -> bool:
         if self._context is not None:
             assert self._file is not None
             assert self._mpv is not None
@@ -318,7 +317,7 @@ class MpvWindow(Window):
             self.update_texture_size(size)
             self.render(size)
 
-            if self.opened:
+            if self.context_opened:
                 p1 = cx, cy
                 p2 = cx + cw, cy + ch
                 draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))

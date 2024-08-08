@@ -9,17 +9,17 @@ from cvp.types.string.to_boolean import string_to_boolean
 
 _DefaultT = TypeVar("_DefaultT", str, bool, int, float)
 
-SerializedConfig = Dict[str, Dict[str, str]]
+SerializedObject = Dict[str, Dict[str, str]]
 
 
-def config_dumps(config: ConfigParser) -> SerializedConfig:
+def config_dumps(config: ConfigParser) -> SerializedObject:
     result = dict()
     for section in config.sections():
         result[section] = {key: value for key, value in config.items(section, raw=True)}
     return result
 
 
-def config_loads(config: ConfigParser, o: SerializedConfig) -> None:
+def config_loads(config: ConfigParser, o: SerializedObject) -> None:
     for section, items in o.items():
         if not config.has_section(section):
             config.add_section(section)
@@ -88,10 +88,10 @@ class BaseConfig:
     def remove_option(self, section: str, option: str) -> bool:
         return self._config.remove_option(section, option)
 
-    def dumps(self) -> SerializedConfig:
+    def dumps(self) -> SerializedObject:
         return config_dumps(self._config)
 
-    def extends(self, o: Union["BaseConfig", ConfigParser, SerializedConfig]) -> None:
+    def extends(self, o: Union["BaseConfig", ConfigParser, SerializedObject]) -> None:
         if isinstance(o, BaseConfig):
             config_loads(self._config, o.dumps())
         elif isinstance(o, ConfigParser):

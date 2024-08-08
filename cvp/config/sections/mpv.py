@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from enum import StrEnum, auto, unique
+from enum import StrEnum, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections._base import BaseSection
+from cvp.config.sections._window import CommonWindowSection
 
 
 @unique
 class _Keys(StrEnum):
-    opened = auto()
+    pass
 
 
-class MpvSection(BaseSection):
+class MpvSection(CommonWindowSection):
     K = _Keys
 
     def __init__(self, config: BaseConfig, section="mpv"):
         super().__init__(config=config, section=section)
-
-    @property
-    def opened(self) -> bool:
-        return self.get(self.K.opened, False)
-
-    @opened.setter
-    def opened(self, value: bool) -> None:
-        self.set(self.K.opened, value)

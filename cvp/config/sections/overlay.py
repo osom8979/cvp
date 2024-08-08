@@ -3,7 +3,7 @@
 from enum import IntEnum, StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections._base import BaseSection
+from cvp.config.sections._window import CommonWindowSection
 
 
 @unique
@@ -16,7 +16,6 @@ class Anchor(IntEnum):
 
 @unique
 class _Keys(StrEnum):
-    visible = auto()
     anchor = auto()
     padding = auto()
     alpha = auto()
@@ -24,19 +23,11 @@ class _Keys(StrEnum):
     fps_error_threshold = auto()
 
 
-class OverlaySection(BaseSection):
+class OverlaySection(CommonWindowSection):
     K = _Keys
 
     def __init__(self, config: BaseConfig, section="overlay"):
         super().__init__(config=config, section=section)
-
-    @property
-    def visible(self) -> bool:
-        return self.get(self.K.visible, False)
-
-    @visible.setter
-    def visible(self, value: bool) -> None:
-        self.set(self.K.visible, value)
 
     @property
     def anchor(self) -> Anchor:

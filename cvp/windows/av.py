@@ -15,11 +15,10 @@ _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class AvWindow(Window):
+class AvWindow(Window[AvSection]):
     def __init__(self, config: AvSection):
-        super().__init__()
+        super().__init__(config)
 
-        self._config = config
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._min_width = 400
@@ -58,17 +57,17 @@ class AvWindow(Window):
 
     @property
     def window_title(self) -> str:
-        name = self._config.name
+        name = self.config.name
         return name if name else type(self).__name__
 
     def _process_window(self) -> None:
-        if not self._config.opened:
+        if not self.opened:
             return
 
         expanded, opened = imgui.begin(self.window_title, True, self._flags)
         try:
             if not opened:
-                self._config.opened = False
+                self.opened = False
                 return
 
             if not expanded:

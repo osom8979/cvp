@@ -1,12 +1,24 @@
 # -*- coding: utf-8 -*-
 
+from typing import Generic, TypeVar
+
+# noinspection PyProtectedMember
+from cvp.config.sections._window import CommonWindowSection
 from cvp.renderer.interface import WindowInterface
 from cvp.types.override import override
 
+SectionT = TypeVar("SectionT", bound=CommonWindowSection)
 
-class Window(WindowInterface):
-    def __init__(self):
+
+class Window(Generic[SectionT], WindowInterface):
+    def __init__(self, config: SectionT):
+        assert isinstance(config, CommonWindowSection)
+        self._config = config
         self._initialized = False
+
+    @property
+    def config(self) -> SectionT:
+        return self._config
 
     @property
     def initialized(self) -> bool:
@@ -23,6 +35,14 @@ class Window(WindowInterface):
     @override
     def on_destroy(self) -> None:
         pass
+
+    @property
+    def opened(self) -> bool:
+        return self._config.opened
+
+    @opened.setter
+    def opened(self, value: bool) -> None:
+        self._config.opened = value
 
     def do_process(self) -> None:
         if not self._initialized:
