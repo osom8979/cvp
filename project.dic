@@ -12,9 +12,12 @@ dockerignore
 dostr
 fastdecode
 fflags
+fmpeg
+fprobe
 framebuffers
 ghcr
 hexdigest
+infiles
 lavfi
 levelname
 libgl
@@ -25,6 +28,7 @@ nanum
 nobuffer
 nocov
 nullsrc
+outfiles
 paletted
 paletted
 psnr
