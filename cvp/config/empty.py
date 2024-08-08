@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from cvp.config.root import Config
+from cvp.config.config import Config
 
 
 class EmptyConfig(Config):

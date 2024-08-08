@@ -5,7 +5,7 @@ from typing import Final, Optional
 import imgui
 from overrides import override
 
-from cvp.config.root import Config
+from cvp.config.config import Config
 from cvp.images.load import TextureTuple
 from cvp.windows._window import Window
 

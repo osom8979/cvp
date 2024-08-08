@@ -11,7 +11,7 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
-from cvp.config.root import Config
+from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
