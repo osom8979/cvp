@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from configparser import ConfigParser
+from configparser import ConfigParser, ExtendedInterpolation
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypeVar, Union, overload
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, overload
 
 from cvp.types.string.to_boolean import string_to_boolean
 
 _DefaultT = TypeVar("_DefaultT", str, bool, int, float)
 
-SerializedConfig = Dict[str, List[Tuple[str, str]]]
+SerializedConfig = Dict[str, Dict[str, str]]
 
 
 def config_dumps(config: ConfigParser) -> SerializedConfig:
     result = dict()
     for section in config.sections():
-        result[section] = [item for item in config.items(section)]
+        result[section] = {key: value for key, value in config.items(section, raw=True)}
     return result
 
 
@@ -23,22 +23,70 @@ def config_loads(config: ConfigParser, o: SerializedConfig) -> None:
     for section, items in o.items():
         if not config.has_section(section):
             config.add_section(section)
-        for option, value in items:
+        for option, value in items.items():
             config.set(section, option, value)
 
 
 class BaseConfig:
-    def __init__(self, filename: Optional[Union[str, PathLike]] = None):
-        self._config = ConfigParser()
+    _vars: Dict[str, str]
+
+    def __init__(
+        self,
+        filename: Optional[Union[str, PathLike]] = None,
+        cvp_home: Optional[str] = None,
+    ):
+        self._config = ConfigParser(
+            defaults=None,
+            dict_type=dict,
+            allow_no_value=False,
+            delimiters=("=",),
+            comment_prefixes=("#",),
+            inline_comment_prefixes=None,
+            strict=True,
+            empty_lines_in_values=False,
+            default_section="__DEFAULT__",
+            interpolation=ExtendedInterpolation(),
+        )
+        self._vars = {"CVP_HOME": cvp_home if cvp_home else str()}
         if filename:
             self._config.read(filename)
 
-    def sections(self):
+    def sections(self) -> List[str]:
         return self._config.sections()
+
+    def options(self, section: str) -> List[str]:
+        return self._config.options(section)
+
+    def keys(self) -> List[Tuple[str, str]]:
+        result = list()
+        for section in self._config.sections():
+            for option in self._config.options(section):
+                result.append((section, option))
+        return result
+
+    def items(self, *, raw=False) -> List[Tuple[str, str, str]]:
+        result = list()
+        for section, option in self.keys():
+            value = self._config.get(section, option, raw=raw, vars=self._vars)
+            result.append((section, option, value))
+        return result
+
+    def section_items(self, section: str, *, raw=False) -> List[Tuple[str, str]]:
+        result = list()
+        for option in self.options(section):
+            value = self._config.get(section, option, raw=raw, vars=self._vars)
+            result.append((option, value))
+        return result
 
     def clear(self) -> None:
         for section in self._config.sections():
             self._config.remove_section(section)
+
+    def remove_section(self, section: str) -> bool:
+        return self._config.remove_section(section)
+
+    def remove_option(self, section: str, option: str) -> bool:
+        return self._config.remove_option(section, option)
 
     def dumps(self) -> SerializedConfig:
         return config_dumps(self._config)
@@ -79,6 +127,23 @@ class BaseConfig:
         else:
             return False
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, BaseConfig):
+            return False
+        return self.dumps() == other.dumps()
+
+    def __bool__(self) -> bool:
+        return bool(self._config.sections())
+
+    def __contains__(self, item: Sequence[str]) -> bool:
+        return self.has(item[0], item[1])
+
+    def __iter__(self):
+        return iter(self.items())
+
+    def __len__(self):
+        return len(self.keys())
+
     # fmt: off
     @overload
     def get(self, section: str, key: str) -> Optional[str]: ...
@@ -98,21 +163,30 @@ class BaseConfig:
         key: str,
         default: Optional[_DefaultT] = None,
     ) -> Optional[Union[str, bool, int, float]]:
-        if default is None:
-            return self.get_config_value(section, key)
-        value = self.get_config_value(section, key)
-        if value is None:
+        if not self._config.has_section(section):
             return default
-        elif isinstance(default, str):
-            return value
-        elif isinstance(default, bool):
-            return string_to_boolean(value)
-        elif isinstance(default, int):
-            return int(value)
-        elif isinstance(default, float):
-            return float(value)
-        else:
-            raise TypeError(f"Unsupported default type: {type(default).__name__}")
+
+        if not self._config.has_option(section, key):
+            return default
+
+        if default is None:
+            return self._config.get(section, key, vars=self._vars)
+
+        assert default is not None
+
+        if isinstance(default, str):
+            return self._config.get(section, key, vars=self._vars)
+
+        if isinstance(default, bool):
+            return string_to_boolean(self._config.get(section, key, vars=self._vars))
+
+        if isinstance(default, int):
+            return self._config.getint(section, key, vars=self._vars)
+
+        if isinstance(default, float):
+            return self._config.getfloat(section, key, vars=self._vars)
+
+        raise TypeError(f"Unsupported default type: {type(default).__name__}")
 
     def set(self, section: str, key: str, value: _DefaultT) -> None:
         config_data = value if isinstance(value, str) else str(value)

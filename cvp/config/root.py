@@ -13,8 +13,12 @@ from cvp.config.sections.tools import ToolsSection
 
 
 class Config(BaseConfig):
-    def __init__(self, filename: Optional[Union[str, PathLike]] = None):
-        super().__init__(filename)
+    def __init__(
+        self,
+        filename: Optional[Union[str, PathLike]] = None,
+        cvp_home: Optional[str] = None,
+    ):
+        super().__init__(filename=filename, cvp_home=cvp_home)
         self._default = DefaultSection(self)
         self._display = DisplaySection(self)
         self._font = FontSection(self)
