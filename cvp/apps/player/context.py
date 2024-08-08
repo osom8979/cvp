@@ -11,6 +11,7 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
+from cvp.assets import get_default_font_path
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
@@ -152,14 +153,15 @@ class PlayerContext:
 
         self._renderer = PygameRenderer()
 
-        if os.path.isfile(self._config.font.family):
+        family = self._config.font.family
+        family = family if family else get_default_font_path()
+
+        if os.path.isfile(family):
+            pixels = self._config.font.pixels
+            scale = self._config.font.scale
+            ranges = io.fonts.get_glyph_ranges_korean()
             io.fonts.clear()
-            io.fonts.add_font_from_file_ttf(
-                self._config.font.family,
-                self._config.font.pixels * self._config.font.scale,
-                None,
-                io.fonts.get_glyph_ranges_korean(),
-            )
+            io.fonts.add_font_from_file_ttf(family, pixels * scale, None, ranges)
             io.font_global_scale /= self._config.font.scale
             self._renderer.refresh_font_texture()
 

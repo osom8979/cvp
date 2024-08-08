@@ -148,7 +148,11 @@ class DownloadArchive:
                 dest = os.path.join(get_assets_dir(), path.extract_path)
                 move(src, dest)
 
-    def prepare(self, timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT) -> None:
+    def prepare(
+        self,
+        timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT,
+        verify_checksum=True,
+    ) -> None:
         assert self.paths
 
         if self.has_extract_files:
@@ -160,7 +164,7 @@ class DownloadArchive:
         if not os.path.isfile(self.cache_path):
             raise FileNotFoundError("Not found cache file")
 
-        if not self.verify_checksum():
+        if verify_checksum and not self.verify_checksum():
             raise ValueError("Invalid checksum")
 
         self.extract()

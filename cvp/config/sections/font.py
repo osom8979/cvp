@@ -2,7 +2,6 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.assets import get_nanum_gothic_coding_ttf
 from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 
@@ -22,7 +21,7 @@ class FontSection(BaseSection):
 
     @property
     def family(self) -> str:
-        return self.get(self.K.family, get_nanum_gothic_coding_ttf())
+        return self.get(self.K.family, str())
 
     @family.setter
     def family(self, value: str) -> None:

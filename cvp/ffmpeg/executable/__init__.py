@@ -23,13 +23,16 @@ def has_ffprobe():
         return get_ffprobe_link().has_extract_files
 
 
-def prepare_ffmpeg(timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT) -> str:
+def prepare_ffmpeg(
+    timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT,
+    verify_checksum=True,
+) -> str:
     path = which_ffmpeg()
     if path:
         return path
 
     link = get_ffmpeg_link()
-    link.prepare(timeout=timeout)
+    link.prepare(timeout=timeout, verify_checksum=verify_checksum)
 
     files = link.extract_files
     assert 1 == len(link.paths)
@@ -41,13 +44,16 @@ def prepare_ffmpeg(timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT) -> str:
     return path
 
 
-def prepare_ffprobe(timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT) -> str:
+def prepare_ffprobe(
+    timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT,
+    verify_checksum=True,
+) -> str:
     path = which_ffprobe()
     if path:
         return path
 
     link = get_ffprobe_link()
-    link.prepare(timeout=timeout)
+    link.prepare(timeout=timeout, verify_checksum=verify_checksum)
 
     files = link.extract_files
     assert 1 == len(link.paths)
