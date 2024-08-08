@@ -24,6 +24,14 @@ class Window(Generic[SectionT], WindowInterface):
     def initialized(self) -> bool:
         return self._initialized
 
+    @property
+    def opened(self) -> bool:
+        return self._config.opened
+
+    @opened.setter
+    def opened(self, value: bool) -> None:
+        self._config.opened = value
+
     @override
     def on_process(self) -> None:
         pass
@@ -35,14 +43,6 @@ class Window(Generic[SectionT], WindowInterface):
     @override
     def on_destroy(self) -> None:
         pass
-
-    @property
-    def opened(self) -> bool:
-        return self._config.opened
-
-    @opened.setter
-    def opened(self, value: bool) -> None:
-        self._config.opened = value
 
     def do_process(self) -> None:
         if not self._initialized:

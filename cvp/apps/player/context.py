@@ -25,6 +25,7 @@ from cvp.windows._window import Window
 from cvp.windows.av import AvWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
+from cvp.windows.preference import PreferenceWindow
 
 
 class PlayerContext:
@@ -56,6 +57,7 @@ class PlayerContext:
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
+        self._preference = PreferenceWindow(self._config)
         for av_config in self._config.avs:
             self._windows[av_config.section] = AvWindow(av_config)
 
@@ -217,6 +219,8 @@ class PlayerContext:
             self.open_file()
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
             self.open_url()
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
+            self._preference.opened = not self._preference.opened
 
         self._renderer.do_tick()
 
@@ -228,6 +232,7 @@ class PlayerContext:
             self.on_popups()
             for win in self._windows.values():
                 win.do_process()
+            self._preference.process()
             self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not
@@ -243,6 +248,12 @@ class PlayerContext:
                     self.open_file()
                 if imgui.menu_item("Open network", "Ctrl+N")[0]:
                     self.open_url()
+
+                imgui.separator()
+                _preference_opened = self._preference.opened
+                if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
+                    self._preference.opened = not self._preference.opened
+
                 imgui.separator()
                 if imgui.menu_item("Quit", "Ctrl+Q")[0]:
                     self.quit()

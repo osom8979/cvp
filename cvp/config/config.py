@@ -12,6 +12,7 @@ from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
+from cvp.config.sections.preference import PreferenceSection
 
 
 class Config(BaseConfig):
@@ -27,6 +28,7 @@ class Config(BaseConfig):
         self._font = FontSection(config=self)
         self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
+        self._preference = PreferenceSection(config=self)
 
     def add_av_section(self, name: Optional[str] = None):
         section = self._avs.join_section_name(name if name else str(uuid4()))
@@ -58,3 +60,7 @@ class Config(BaseConfig):
     @property
     def overlay(self):
         return self._overlay
+
+    @property
+    def preference(self):
+        return self._preference
