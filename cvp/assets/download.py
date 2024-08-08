@@ -80,6 +80,9 @@ class DownloadArchive:
         else:
             self._checksum = None
 
+    def __repr__(self):
+        return f"<DownloadArchive {self._url}>"
+
     @property
     def has_path(self) -> bool:
         return bool(self._paths)

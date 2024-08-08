@@ -68,3 +68,17 @@ def get_ffmpeg_link(sm: Optional[SysMach] = None) -> DownloadArchive:
 
 def get_ffprobe_link(sm: Optional[SysMach] = None) -> DownloadArchive:
     return get_link(sm).ffprobe
+
+
+def _prepare() -> None:
+    link = get_ffmpeg_link()
+    print(f"Download ffmpeg '{link.url}' ...", flush=True)
+    link.prepare()
+
+    link = get_ffprobe_link()
+    print(f"Download ffprobe '{link.url}' ...", flush=True)
+    link.prepare()
+
+
+if __name__ == "__main__":
+    _prepare()
