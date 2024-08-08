@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, List, Optional
-
-from cvp.ffmpeg.executable.which import which_ffmpeg
+from typing import Final, List
 
 DEFAULT_FFMPEG_RECV_FORMAT: Final[str] = (
     # global options
@@ -61,8 +59,8 @@ class FFmpegBuilder:
     _globals: List[str]
     _files: List[FileBuilder]
 
-    def __init__(self, ffmpeg: Optional[str] = None) -> None:
-        self._ffmpeg = ffmpeg if ffmpeg else which_ffmpeg()
+    def __init__(self, ffmpeg="ffmpeg") -> None:
+        self._ffmpeg = ffmpeg
         self._globals = list()
         self._files = list()
 
