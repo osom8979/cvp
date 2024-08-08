@@ -24,6 +24,7 @@ class AvWindow(Window[AvSection]):
         self._min_width = 400
         self._min_height = 300
         self._texture = 0
+        self._popup_name = "ContextMenu"
 
     @override
     def on_create(self) -> None:
@@ -119,23 +120,47 @@ class AvWindow(Window[AvSection]):
 
         self.begin_child_canvas()
         try:
-            cx, cy = imgui.get_cursor_screen_pos()
-            cw, ch = imgui.get_content_region_available()
-
-            draw_list = imgui.get_window_draw_list()
-            assert isinstance(draw_list, _DrawList)
-
-            filled_color = imgui.get_color_u32_rgba(*self._clear_color)
-            draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
-
-            w = int(cw)
-            h = int(ch)
-            size = w, h
-
-            self.update_texture_size(size)
-
-            p1 = cx, cy
-            p2 = cx + cw, cy + ch
-            draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
+            self._child()
+            self._popup()
         finally:
             imgui.end_child()
+
+    def _child(self):
+        cx, cy = imgui.get_cursor_screen_pos()
+        cw, ch = imgui.get_content_region_available()
+
+        draw_list = imgui.get_window_draw_list()
+        assert isinstance(draw_list, _DrawList)
+
+        filled_color = imgui.get_color_u32_rgba(*self._clear_color)
+        draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
+
+        w = int(cw)
+        h = int(ch)
+        size = w, h
+
+        self.update_texture_size(size)
+
+        p1 = cx, cy
+        p2 = cx + cw, cy + ch
+        draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
+
+    @staticmethod
+    def is_hovered_right_click():
+        return (
+            imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_RIGHT)
+            and imgui.is_window_hovered()
+        )
+
+    def _popup(self):
+        if self.is_hovered_right_click():
+            imgui.open_popup(self._popup_name)
+
+        if imgui.begin_popup(self._popup_name):
+            if imgui.menu_item("Option 1")[0]:
+                print("Option 1 selected")
+            if imgui.menu_item("Option 2")[0]:
+                print("Option 2 selected")
+            if imgui.menu_item("Option 3")[0]:
+                print("Option 3 selected")
+            imgui.end_popup()

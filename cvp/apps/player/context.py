@@ -181,7 +181,7 @@ class PlayerContext:
             io.font_global_scale /= self._config.font.scale
             self._renderer.refresh_font_texture()
 
-        GL.glClearColor(1, 1, 1, 1)
+        GL.glClearColor(0, 0, 0, 1)
         for win in self._windows.values():
             win.do_create()
 
@@ -220,7 +220,7 @@ class PlayerContext:
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
             self.open_url()
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
-            self._preference.opened = not self._preference.opened
+            self._preference.opened = True
 
         self._renderer.do_tick()
 
