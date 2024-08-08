@@ -52,7 +52,7 @@ class PlayerContext:
         self._windows = {
             "__background__": BackgroundWindow(self._config),
             "__overlay__": OverlayWindow(self._config.overlay),
-            "__mpv__": MpvWindow(self._config.tools),
+            "__mpv__": MpvWindow(self._config.mpv),
         }
 
         self._open_file_popup = OpenFilePopup()
@@ -238,12 +238,13 @@ class PlayerContext:
                 imgui.end_menu()
 
             if imgui.begin_menu("Tools"):
+                if imgui.menu_item("MPV", None, self._config.mpv.opened)[0]:
+                    self._config.mpv.opened = not self._config.mpv.opened
+
                 if self._debug:
-                    if imgui.menu_item("AV", None, self._config.tools.av)[0]:
-                        self._config.tools.av = not self._config.tools.av
                     imgui.separator()
-                    if imgui.menu_item("Demo", None, self._config.tools.demo)[0]:
-                        self._config.tools.demo = not self._config.tools.demo
+                    if imgui.menu_item("Demo", None, self._config.demo.opened)[0]:
+                        self._config.demo.opened = not self._config.demo.opened
 
                 imgui.end_menu()
 
@@ -254,6 +255,6 @@ class PlayerContext:
     def on_demo_window(self) -> None:
         if not self._debug:
             return
-        if not self._config.tools.demo:
+        if not self._config.demo.opened:
             return
         imgui.show_test_window()

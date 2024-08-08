@@ -8,7 +8,7 @@ from imgui.core import _DrawList  # noqa
 from mpv import MPV, MpvGlGetProcAddressFn, MpvRenderContext
 from OpenGL import GL
 
-from cvp.config.sections.tools import ToolsSection
+from cvp.config.sections.mpv import MpvSection
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.renderer.gl import get_process_address
 from cvp.types.override import override
@@ -53,7 +53,7 @@ class MpvWindow(Window):
     _mpv: Optional[MPV]
     _context: Optional[MpvRenderContext]
 
-    def __init__(self, config: ToolsSection, flags=imgui.WINDOW_MENU_BAR):
+    def __init__(self, config: MpvSection, flags=imgui.WINDOW_MENU_BAR):
         self._config = config
         self._flags = flags
         self._popup = OpenFilePopup()
@@ -120,13 +120,13 @@ class MpvWindow(Window):
         self._popup.process()
 
     def _process_window(self) -> None:
-        if not self._config.av:
+        if not self._config.opened:
             return
 
         expanded, opened = imgui.begin(type(self).__name__, True, self._flags)
         try:
             if not opened:
-                self._config.av = False
+                self._config.opened = False
                 return
 
             if not expanded:

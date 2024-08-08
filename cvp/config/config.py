@@ -7,10 +7,11 @@ from uuid import uuid4
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
 from cvp.config.sections.av import AvSection
+from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
+from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
-from cvp.config.sections.tools import ToolsSection
 
 
 class Config(BaseConfig):
@@ -20,11 +21,20 @@ class Config(BaseConfig):
         cvp_home: Optional[str] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
+        self._avs = SectionPrefix(config=self, prefix="av.")
+        self._demo = DemoSection(config=self)
         self._display = DisplaySection(config=self)
         self._font = FontSection(config=self)
+        self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
-        self._tools = ToolsSection(config=self)
-        self._avs = SectionPrefix(config=self, prefix="av.")
+
+    def av(self, name: Optional[str] = None):
+        section_name = self._avs.join_section_name(name) if name else str(uuid4())
+        return AvSection(config=self, section=section_name)
+
+    @property
+    def demo(self):
+        return self._demo
 
     @property
     def display(self):
@@ -35,13 +45,9 @@ class Config(BaseConfig):
         return self._font
 
     @property
-    def overlay(self):
-        return self._overlay
+    def mpv(self):
+        return self._mpv
 
     @property
-    def tools(self):
-        return self._tools
-
-    def av(self, name: Optional[str] = None):
-        section_name = self._avs.join_section_name(name) if name else str(uuid4())
-        return AvSection(config=self, section=section_name)
+    def overlay(self):
+        return self._overlay
