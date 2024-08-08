@@ -20,6 +20,8 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 class OverlayWindow(Window):
     def __init__(self, config: OverlaySection, flags=OVERLAY_WINDOW_FLAGS):
+        super().__init__()
+
         self._config = config
         self._flags = flags
 

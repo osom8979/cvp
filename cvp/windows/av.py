@@ -17,6 +17,8 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 class AvWindow(Window):
     def __init__(self, config: AvSection):
+        super().__init__()
+
         self._config = config
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
@@ -54,11 +56,16 @@ class AvWindow(Window):
     def on_process(self) -> None:
         self._process_window()
 
+    @property
+    def window_title(self) -> str:
+        name = self._config.name
+        return name if name else type(self).__name__
+
     def _process_window(self) -> None:
         if not self._config.opened:
             return
 
-        expanded, opened = imgui.begin(type(self).__name__, True, self._flags)
+        expanded, opened = imgui.begin(self.window_title, True, self._flags)
         try:
             if not opened:
                 self._config.opened = False

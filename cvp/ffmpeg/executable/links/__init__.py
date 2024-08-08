@@ -81,4 +81,5 @@ def _prepare() -> None:
 
 
 if __name__ == "__main__":
-    _prepare()
+    # _prepare()
+    pass

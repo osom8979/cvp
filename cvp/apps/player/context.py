@@ -16,10 +16,13 @@ from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
-from cvp.renderer.interface import WindowInterface
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.popups.open_file import OpenFilePopup
 from cvp.widgets.popups.open_url import OpenUrlPopup
+
+# noinspection PyProtectedMember
+from cvp.windows._window import Window
+from cvp.windows.av import AvWindow
 from cvp.windows.background import BackgroundWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
@@ -27,7 +30,7 @@ from cvp.windows.overlay import OverlayWindow
 
 class PlayerContext:
     _renderer: PygameRenderer
-    _windows: Dict[str, WindowInterface]
+    _windows: Dict[str, Window]
 
     def __init__(
         self,
@@ -55,6 +58,8 @@ class PlayerContext:
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
+        for av_config in self._config.avs:
+            self._windows[av_config.section] = AvWindow(av_config)
 
         self._open_file_popup = OpenFilePopup()
         self._open_url_popup = OpenUrlPopup()
@@ -73,10 +78,21 @@ class PlayerContext:
     def quit(self):
         self._done = True
 
+    def add_av_window(self, file: str) -> None:
+        section = self._config.add_av_section()
+        section.opened = True
+        section.file = file
+        section.name = file
+
+        window = AvWindow(section)
+        window.do_create()
+
+        self._windows[section.section] = window
+
     def on_open_file(self, file: Optional[str]) -> None:
         if not file:
             return
-        # TODO: open video file
+        self.add_av_window(file)
 
     def open_file(self):
         self._open_file_popup.show(
@@ -87,7 +103,7 @@ class PlayerContext:
     def on_open_url(self, file: Optional[str]) -> None:
         if not file:
             return
-        # TODO: open network stream
+        self.add_av_window(file)
 
     def open_url(self):
         self._open_url_popup.show(
@@ -167,11 +183,11 @@ class PlayerContext:
 
         GL.glClearColor(1, 1, 1, 1)
         for win in self._windows.values():
-            win.on_create()
+            win.do_create()
 
     def on_exit(self) -> None:
         for win in self._windows.values():
-            win.on_destroy()
+            win.do_destroy()
 
         self._config.display.fullscreen = pygame.display.is_fullscreen()
         self._config.display.size = pygame.display.get_window_size()
@@ -213,7 +229,7 @@ class PlayerContext:
             self.on_main_menu()
             self.on_popups()
             for win in self._windows.values():
-                win.on_process()
+                win.do_process()
             self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not

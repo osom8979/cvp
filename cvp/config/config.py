@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from os import PathLike
-from typing import Optional, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 
 from cvp.config._base import BaseConfig
@@ -28,9 +28,16 @@ class Config(BaseConfig):
         self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
 
-    def av(self, name: Optional[str] = None):
-        section_name = self._avs.join_section_name(name) if name else str(uuid4())
-        return AvSection(config=self, section=section_name)
+    def add_av_section(self, name: Optional[str] = None):
+        section = self._avs.join_section_name(name if name else str(uuid4()))
+        if self.has_section(section):
+            raise KeyError(f"Section '{section}' already exists")
+        return AvSection(config=self, section=section)
+
+    @property
+    def avs(self) -> List[AvSection]:
+        sections = self._avs.sections()
+        return [AvSection(config=self, section=section) for section in sections]
 
     @property
     def demo(self):

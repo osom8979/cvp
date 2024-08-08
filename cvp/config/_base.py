@@ -129,11 +129,20 @@ class BaseConfig:
             self._config.add_section(section)
         self._config.set(section, key, value)
 
-    def has(self, section: str, key: str) -> bool:
-        if section in self._config:
-            return key in self._config[section]
-        else:
+    def has_section(self, section: str) -> bool:
+        return self._config.has_section(section)
+
+    def has_option(self, section: str, key: str) -> bool:
+        return self._config.has_option(section, key)
+
+    def has(self, section: str, key: Optional[str] = None) -> bool:
+        if not self._config.has_section(section):
             return False
+        assert section in self._config
+        if not key:
+            return True
+        assert isinstance(key, str)
+        return self.has_option(section, key)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, BaseConfig):

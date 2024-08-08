@@ -23,6 +23,8 @@ class BackgroundWindow(Window):
     _logo_texture: Optional[TextureTuple]
 
     def __init__(self, config: Config, flags=BACKGROUND_WINDOW_FLAGS):
+        super().__init__()
+
         self._config = config
         self._flags = flags
         self._logo_texture = None
