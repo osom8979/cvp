@@ -6,38 +6,38 @@ from cvp.config.config import Config
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 
 
-class PreferenceWindow:
+class ManagerWindow:
     def __init__(self, config: Config):
         self._config = config
         self._flags = 0
         self._min_width = MIN_WINDOW_WIDTH
         self._min_height = MIN_WINDOW_HEIGHT
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._menus = ("Appearance", "FFmpeg")
+        self._items = ("Video1", "Video2")
 
     @property
     def opened(self) -> bool:
-        return self._config.preference.opened
+        return self._config.manager.opened
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self._config.preference.opened = value
+        self._config.manager.opened = value
 
     @property
     def sidebar_width(self) -> int:
-        return self._config.preference.sidebar_width
+        return self._config.manager.sidebar_width
 
     @sidebar_width.setter
     def sidebar_width(self, value: int) -> None:
-        self._config.preference.sidebar_width = value
+        self._config.manager.sidebar_width = value
 
     @property
-    def menu_index(self) -> int:
-        return self._config.preference.menu_index
+    def item_index(self) -> int:
+        return self._config.manager.item_index
 
-    @menu_index.setter
-    def menu_index(self, value: int) -> None:
-        self._config.preference.menu_index = value
+    @item_index.setter
+    def item_index(self, value: int) -> None:
+        self._config.manager.item_index = value
 
     def process(self) -> None:
         self._process_window()
@@ -46,7 +46,7 @@ class PreferenceWindow:
         if not self.opened:
             return
 
-        expanded, opened = imgui.begin("Preference", True, self._flags)
+        expanded, opened = imgui.begin("Manager", True, self._flags)
         try:
             if not opened:
                 self.opened = False
@@ -79,7 +79,7 @@ class PreferenceWindow:
         # noinspection PyArgumentList
         imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
         try:
-            imgui.text("Sidebar Menu")
+            imgui.text("Videos")
 
             content_width = imgui.get_content_region_available_width()
             imgui.set_next_item_width(content_width)
@@ -87,9 +87,9 @@ class PreferenceWindow:
 
             menus = imgui.begin_list_box("## SideList", width=-1, height=-1)
             if menus.opened:
-                for i, menu in enumerate(self._menus):
-                    if imgui.selectable(menu, i == self.menu_index)[1]:
-                        self.menu_index = i
+                for i, item in enumerate(self._items):
+                    if imgui.selectable(item, i == self.item_index)[1]:
+                        self.item_index = i
                 imgui.end_list_box()
         finally:
             imgui.end_child()

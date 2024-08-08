@@ -9,6 +9,7 @@ import imgui
 import pygame
 
 from cvp.logging.logging import logger
+from cvp.variables import MIN_OPEN_FILE_POPUP_HEIGHT, MIN_OPEN_FILE_POPUP_WIDTH
 from cvp.widgets.button_ex import button_ex
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
@@ -31,8 +32,8 @@ class OpenFilePopup:
         self._callback = None
         self._centered = True
         self._show_hidden = False
-        self._min_width = 480
-        self._min_height = 320
+        self._min_width = MIN_OPEN_FILE_POPUP_WIDTH
+        self._min_height = MIN_OPEN_FILE_POPUP_HEIGHT
 
     @staticmethod
     def list_items(location: Union[str, PathLike], show_hidden=False) -> List[str]:

@@ -10,6 +10,7 @@ from cvp.config.sections.av import AvSection
 from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
+from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
 from cvp.config.sections.preference import PreferenceSection
@@ -26,6 +27,7 @@ class Config(BaseConfig):
         self._demo = DemoSection(config=self)
         self._display = DisplaySection(config=self)
         self._font = FontSection(config=self)
+        self._manager = ManagerSection(self)
         self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
         self._preference = PreferenceSection(config=self)
@@ -52,6 +54,10 @@ class Config(BaseConfig):
     @property
     def font(self):
         return self._font
+
+    @property
+    def manager(self):
+        return self._manager
 
     @property
     def mpv(self):

@@ -8,6 +8,7 @@ from OpenGL import GL
 
 from cvp.config.sections.av import AvSection
 from cvp.types.override import override
+from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.windows._window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -21,8 +22,8 @@ class AvWindow(Window[AvSection]):
 
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
-        self._min_width = 400
-        self._min_height = 300
+        self._min_width = MIN_WINDOW_WIDTH
+        self._min_height = MIN_WINDOW_HEIGHT
         self._texture = 0
         self._popup_name = "ContextMenu"
 

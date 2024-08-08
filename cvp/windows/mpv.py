@@ -12,6 +12,7 @@ from cvp.config.sections.mpv import MpvSection
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.renderer.gl import get_process_address
 from cvp.types.override import override
+from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.popups.open_file import OpenFilePopup
 from cvp.windows._window import Window
 
@@ -61,8 +62,8 @@ class MpvWindow(Window[MpvSection]):
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._playback = 0.0
         self._volume = 0.0
-        self._min_width = 400
-        self._min_height = 300
+        self._min_width = MIN_WINDOW_WIDTH
+        self._min_height = MIN_WINDOW_HEIGHT
 
         self._fbo = 0
         self._texture = 0

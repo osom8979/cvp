@@ -10,13 +10,13 @@ from cvp.variables import MIN_SIDEBAR_WIDTH
 @unique
 class _Keys(StrEnum):
     sidebar_width = auto()
-    menu_index = auto()
+    item_index = auto()
 
 
-class PreferenceSection(CommonWindowSection):
+class ManagerSection(CommonWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="preference"):
+    def __init__(self, config: BaseConfig, section="manager"):
         super().__init__(config=config, section=section)
 
     @property
@@ -28,9 +28,9 @@ class PreferenceSection(CommonWindowSection):
         self.set(self.K.sidebar_width, value)
 
     @property
-    def menu_index(self) -> int:
-        return self.get(self.K.menu_index, 0)
+    def item_index(self) -> int:
+        return self.get(self.K.item_index, 0)
 
-    @menu_index.setter
-    def menu_index(self, value: int) -> None:
-        self.set(self.K.menu_index, value)
+    @item_index.setter
+    def item_index(self, value: int) -> None:
+        self.set(self.K.item_index, value)

@@ -5,6 +5,7 @@ from typing import Callable, Optional
 import imgui
 import pygame
 
+from cvp.variables import MIN_OPEN_URL_POPUP_HEIGHT, MIN_OPEN_URL_POPUP_WIDTH
 from cvp.widgets.button_ex import button_ex
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
@@ -21,8 +22,8 @@ class OpenUrlPopup:
         self._result = None
         self._callback = None
         self._centered = True
-        self._min_width = 400
-        self._min_height = 140
+        self._min_width = MIN_OPEN_URL_POPUP_WIDTH
+        self._min_height = MIN_OPEN_URL_POPUP_HEIGHT
 
     def show(
         self,

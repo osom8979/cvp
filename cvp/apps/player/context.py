@@ -23,6 +23,7 @@ from cvp.widgets.popups.open_url import OpenUrlPopup
 # noinspection PyProtectedMember
 from cvp.windows._window import Window
 from cvp.windows.av import AvWindow
+from cvp.windows.manager import ManagerWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
@@ -57,6 +58,7 @@ class PlayerContext:
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
+        self._manager = ManagerWindow(self._config)
         self._preference = PreferenceWindow(self._config)
         for av_config in self._config.avs:
             self._windows[av_config.section] = AvWindow(av_config)
@@ -219,6 +221,9 @@ class PlayerContext:
             self.open_file()
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
             self.open_url()
+
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
+            self._manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
             self._preference.opened = True
 
@@ -232,6 +237,7 @@ class PlayerContext:
             self.on_popups()
             for win in self._windows.values():
                 win.do_process()
+            self._manager.process()
             self._preference.process()
             self.on_demo_window()
         finally:
@@ -250,6 +256,8 @@ class PlayerContext:
                     self.open_url()
 
                 imgui.separator()
+                if imgui.menu_item("Manager", "Ctrl+Alt+M", self._manager.opened)[0]:
+                    self._manager.opened = not self._manager.opened
                 _preference_opened = self._preference.opened
                 if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
                     self._preference.opened = not self._preference.opened
