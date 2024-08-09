@@ -60,7 +60,7 @@ class PlayerContext:
         }
         self._manager = ManagerWindow(self._config)
         self._preference = PreferenceWindow(self._config)
-        for config in self._config.medias:
+        for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config)
 
         self._open_file_popup = OpenFilePopup()
@@ -256,9 +256,11 @@ class PlayerContext:
                     self.open_url()
 
                 imgui.separator()
-                if imgui.menu_item("Manager", "Ctrl+Alt+M", self._manager.opened)[0]:
-                    self._manager.opened = not self._manager.opened
+                _manager_opened = self._manager.opened
                 _preference_opened = self._preference.opened
+
+                if imgui.menu_item("Media Manager", "Ctrl+Alt+M", _manager_opened)[0]:
+                    self._manager.opened = not self._manager.opened
                 if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
                     self._preference.opened = not self._preference.opened
 

@@ -61,7 +61,7 @@ class MediaWindow(Window[MediaSection]):
     @property
     def window_title(self) -> str:
         name = self.config.name
-        return name if name else type(self).__name__
+        return (name if name else type(self).__name__) + "###" + self.config.section
 
     def _process_window(self) -> None:
         if not self.opened:

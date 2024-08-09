@@ -10,7 +10,7 @@ from cvp.variables import MIN_SIDEBAR_WIDTH
 @unique
 class _Keys(StrEnum):
     sidebar_width = auto()
-    item_index = auto()
+    selected = auto()
 
 
 class ManagerSection(CommonWindowSection):
@@ -28,9 +28,9 @@ class ManagerSection(CommonWindowSection):
         self.set(self.K.sidebar_width, value)
 
     @property
-    def item_index(self) -> int:
-        return self.get(self.K.item_index, 0)
+    def selected(self) -> str:
+        return self.get(self.K.selected, str())
 
-    @item_index.setter
-    def item_index(self, value: int) -> None:
-        self.set(self.K.item_index, value)
+    @selected.setter
+    def selected(self, value: str) -> None:
+        self.set(self.K.selected, value)

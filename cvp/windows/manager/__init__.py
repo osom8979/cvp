@@ -5,15 +5,18 @@ import imgui
 from cvp.config.config import Config
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 
+ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
+READ_ONLY = imgui.INPUT_TEXT_READ_ONLY
+
 
 class ManagerWindow:
     def __init__(self, config: Config):
         self._config = config
+        self._title = "Media Manger"
         self._flags = 0
         self._min_width = MIN_WINDOW_WIDTH
         self._min_height = MIN_WINDOW_HEIGHT
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._items = ("Video1", "Video2")
 
     @property
     def opened(self) -> bool:
@@ -32,12 +35,16 @@ class ManagerWindow:
         self._config.manager.sidebar_width = value
 
     @property
-    def item_index(self) -> int:
-        return self._config.manager.item_index
+    def selected(self) -> str:
+        return self._config.manager.selected
 
-    @item_index.setter
-    def item_index(self, value: int) -> None:
-        self._config.manager.item_index = value
+    @selected.setter
+    def selected(self, value: str) -> None:
+        self._config.manager.selected = value
+
+    @property
+    def medias(self):
+        return self._config.medias
 
     def process(self) -> None:
         self._process_window()
@@ -46,7 +53,7 @@ class ManagerWindow:
         if not self.opened:
             return
 
-        expanded, opened = imgui.begin("Manager", True, self._flags)
+        expanded, opened = imgui.begin(self._title, True, self._flags)
         try:
             if not opened:
                 self.opened = False
@@ -74,22 +81,84 @@ class ManagerWindow:
 
     def _main(self) -> None:
         if imgui.is_window_appearing():
-            imgui.set_window_size(self._min_width, self._min_height)
+            cw, ch = imgui.get_window_size()
+            w = cw if cw >= self._min_width else self._min_width
+            h = ch if ch >= self._min_height else self._min_height
+            imgui.set_window_size(w, h)
+
+        medias = self._config.medias
+        media = medias.get(self.selected, None)
 
         # noinspection PyArgumentList
         imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
         try:
-            imgui.text("Videos")
+            imgui.text("Medias")
 
             content_width = imgui.get_content_region_available_width()
             imgui.set_next_item_width(content_width)
             self.drag_sidebar_width()
 
+            imgui.separator()
+
             menus = imgui.begin_list_box("## SideList", width=-1, height=-1)
             if menus.opened:
-                for i, item in enumerate(self._items):
-                    if imgui.selectable(item, i == self.item_index)[1]:
-                        self.item_index = i
+                for key, section in medias.items():
+                    if imgui.selectable(section.name, key == self.selected)[1]:
+                        self.selected = key
                 imgui.end_list_box()
+        finally:
+            imgui.end_child()
+
+        imgui.same_line()
+
+        # Reserve enough left-over height for 1 separator + 1 input text
+        footer_height_to_reserve = (
+            imgui.get_frame_height_with_spacing() + imgui.get_style().item_spacing.y
+        )
+
+        # noinspection PyArgumentList
+        imgui.begin_child("## Main", -1, -footer_height_to_reserve)
+        try:
+            if media is not None:
+                if imgui.begin_tab_bar("Media Tabs"):
+                    if imgui.begin_tab_item("Info").selected:
+                        imgui.text("Section:")
+                        imgui.push_item_width(-1)
+                        imgui.push_style_color(
+                            imgui.COLOR_FRAME_BACKGROUND, 0.2, 0.2, 0.2
+                        )
+                        imgui.push_style_color(imgui.COLOR_TEXT, 0.8, 0.8, 0.8)
+                        imgui.input_text("## Section", media.section, -1, READ_ONLY)
+                        imgui.pop_style_color(2)
+                        imgui.pop_item_width()
+
+                        imgui.separator()
+
+                        imgui.text("Name:")
+                        imgui.push_item_width(-1)
+                        media.name = imgui.input_text(
+                            "## Name", media.name, -1, ENTER_RETURN
+                        )[1]
+                        imgui.pop_item_width()
+
+                        imgui.separator()
+
+                        imgui.text("File:")
+                        imgui.push_item_width(-1)
+                        media.file = imgui.input_text(
+                            "## File", media.file, -1, ENTER_RETURN
+                        )[1]
+                        imgui.pop_item_width()
+
+                        imgui.end_tab_item()
+                    imgui.end_tab_bar()
+            else:
+                message = "Please select a media item"
+                window_size = imgui.get_window_size()
+                text_size = imgui.calc_text_size(message)
+                text_x = (window_size.x - text_size.x) * 0.5
+                text_y = (window_size.y - text_size.y) * 0.5
+                imgui.set_cursor_pos((text_x, text_y))
+                imgui.text(message)
         finally:
             imgui.end_child()

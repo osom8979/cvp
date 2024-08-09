@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from os import PathLike
-from typing import List, Optional, Union
+from typing import Dict, Optional, Union
 from uuid import uuid4
 
 from cvp.config._base import BaseConfig
@@ -40,9 +40,12 @@ class Config(BaseConfig):
         return MediaSection(config=self, section=section)
 
     @property
-    def medias(self) -> List[MediaSection]:
-        sections = self._medias.sections()
-        return [MediaSection(config=self, section=section) for section in sections]
+    def medias(self) -> Dict[str, MediaSection]:
+        result = dict()
+        for section in self._medias.sections():
+            key = self._medias.split_section_name(section)
+            result[key] = MediaSection(config=self, section=section)
+        return result
 
     @property
     def demo(self):
