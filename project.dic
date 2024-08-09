@@ -31,11 +31,13 @@ nullsrc
 outfiles
 paletted
 paletted
+popens
 psnr
 pythonpath
 rawvideo
 rawvideo
 remapper
+returncode
 stillimage
 subpath
 vcodec
