@@ -7,6 +7,7 @@ import imgui
 from overrides import override
 
 from cvp.config.sections.overlay import OverlaySection
+from cvp.widgets.menu_item_ex import menu_item_ex
 from cvp.windows._window import Window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
@@ -71,16 +72,16 @@ class OverlayWindow(Window[OverlaySection]):
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
         if imgui.begin_popup_context_window():
-            if imgui.menu_item("Top-Left", None, self.config.is_top_left)[0]:
+            if menu_item_ex("Top-Left", self.config.is_top_left):
                 self.config.set_top_left()
-            if imgui.menu_item("Top-Right", None, self.config.is_top_right)[0]:
+            if menu_item_ex("Top-Right", self.config.is_top_right):
                 self.config.set_top_right()
-            if imgui.menu_item("Bottom-Left", None, self.config.is_bottom_left)[0]:
+            if menu_item_ex("Bottom-Left", self.config.is_bottom_left):
                 self.config.set_bottom_left()
-            if imgui.menu_item("Bottom-Right", None, self.config.is_bottom_right)[0]:
+            if menu_item_ex("Bottom-Right", self.config.is_bottom_right):
                 self.config.set_bottom_right()
             imgui.separator()
-            if imgui.menu_item("Close")[0]:
+            if menu_item_ex("Close"):
                 self.opened = False
             imgui.end_popup()
 

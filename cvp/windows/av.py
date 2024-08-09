@@ -9,6 +9,7 @@ from OpenGL import GL
 from cvp.config.sections.av import AvSection
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.widgets.menu_item_ex import menu_item_ex
 from cvp.windows._window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -146,22 +147,12 @@ class AvWindow(Window[AvSection]):
         p2 = cx + cw, cy + ch
         draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
 
-    @staticmethod
-    def is_hovered_right_click():
-        return (
-            imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_RIGHT)
-            and imgui.is_window_hovered()
-        )
-
     def _popup(self):
-        if self.is_hovered_right_click():
-            imgui.open_popup(self._popup_name)
-
-        if imgui.begin_popup(self._popup_name):
-            if imgui.menu_item("Option 1")[0]:
+        if imgui.begin_popup_context_window():
+            if menu_item_ex("Option 1"):
                 print("Option 1 selected")
-            if imgui.menu_item("Option 2")[0]:
+            if menu_item_ex("Option 2"):
                 print("Option 2 selected")
-            if imgui.menu_item("Option 3")[0]:
+            if menu_item_ex("Option 3"):
                 print("Option 3 selected")
             imgui.end_popup()
