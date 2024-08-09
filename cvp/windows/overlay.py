@@ -7,6 +7,7 @@ import imgui
 from overrides import override
 
 from cvp.config.sections.overlay import OverlaySection
+from cvp.system.usage import SystemUsage
 from cvp.widgets.menu_item_ex import menu_item_ex
 from cvp.windows._window import Window
 
@@ -27,6 +28,8 @@ class OverlayWindow(Window[OverlaySection]):
         self._normal_color = 0.0, 1.0, 0.0
         self._warning_color = 1.0, 1.0, 0.0
         self._error_color = 1.0, 0.0, 0.0
+
+        self._usage = SystemUsage(interval=1.0)
 
     @property
     def is_left_side(self):
@@ -65,9 +68,16 @@ class OverlayWindow(Window[OverlaySection]):
     def _main(self) -> None:
         framerate = imgui.get_io().framerate
         framerate_color = self.get_framerate_color(framerate)
-
         imgui.text_colored(f"FPS: {floor(framerate)}", *framerate_color)
+
         imgui.separator()
+
+        usage = self._usage.update_interval()
+        imgui.text(f"CPU: {usage.cpu:3.1f}%")
+        imgui.text(f"VMEM: {usage.vmem:3.1f}%")
+
+        imgui.separator()
+
         mouse_pos = imgui.get_mouse_pos()
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
