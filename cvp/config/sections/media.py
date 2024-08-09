@@ -12,10 +12,10 @@ class _Keys(StrEnum):
     name_ = "name"
 
 
-class AvSection(CommonWindowSection):
+class MediaSection(CommonWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="av"):
+    def __init__(self, config: BaseConfig, section="media"):
         super().__init__(config=config, section=section)
 
     @property

@@ -2,6 +2,8 @@
 
 from typing import Final
 
+MEDIA_SECTION_PREFIX: Final[str] = "media."
+
 MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 MIN_SIDEBAR_WIDTH: Final[int] = 160

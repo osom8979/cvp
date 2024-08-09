@@ -6,14 +6,15 @@ from uuid import uuid4
 
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
-from cvp.config.sections.av import AvSection
 from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.manager import ManagerSection
+from cvp.config.sections.media import MediaSection
 from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
 from cvp.config.sections.preference import PreferenceSection
+from cvp.variables import MEDIA_SECTION_PREFIX
 
 
 class Config(BaseConfig):
@@ -23,7 +24,7 @@ class Config(BaseConfig):
         cvp_home: Optional[str] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
-        self._avs = SectionPrefix(config=self, prefix="av.")
+        self._medias = SectionPrefix(config=self, prefix=MEDIA_SECTION_PREFIX)
         self._demo = DemoSection(config=self)
         self._display = DisplaySection(config=self)
         self._font = FontSection(config=self)
@@ -32,16 +33,16 @@ class Config(BaseConfig):
         self._overlay = OverlaySection(config=self)
         self._preference = PreferenceSection(config=self)
 
-    def add_av_section(self, name: Optional[str] = None):
-        section = self._avs.join_section_name(name if name else str(uuid4()))
+    def add_media_section(self, name: Optional[str] = None):
+        section = self._medias.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
-        return AvSection(config=self, section=section)
+        return MediaSection(config=self, section=section)
 
     @property
-    def avs(self) -> List[AvSection]:
-        sections = self._avs.sections()
-        return [AvSection(config=self, section=section) for section in sections]
+    def medias(self) -> List[MediaSection]:
+        sections = self._medias.sections()
+        return [MediaSection(config=self, section=section) for section in sections]
 
     @property
     def demo(self):

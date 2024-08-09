@@ -22,8 +22,8 @@ from cvp.widgets.popups.open_url import OpenUrlPopup
 
 # noinspection PyProtectedMember
 from cvp.windows._window import Window
-from cvp.windows.av import AvWindow
 from cvp.windows.manager import ManagerWindow
+from cvp.windows.media import MediaWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
@@ -60,8 +60,8 @@ class PlayerContext:
         }
         self._manager = ManagerWindow(self._config)
         self._preference = PreferenceWindow(self._config)
-        for av_config in self._config.avs:
-            self._windows[av_config.section] = AvWindow(av_config)
+        for config in self._config.medias:
+            self._windows[config.section] = MediaWindow(config)
 
         self._open_file_popup = OpenFilePopup()
         self._open_url_popup = OpenUrlPopup()
@@ -80,13 +80,13 @@ class PlayerContext:
     def quit(self):
         self._done = True
 
-    def add_av_window(self, file: str) -> None:
-        section = self._config.add_av_section()
+    def add_media_window(self, file: str) -> None:
+        section = self._config.add_media_section()
         section.opened = True
         section.file = file
         section.name = file
 
-        window = AvWindow(section)
+        window = MediaWindow(section)
         window.do_create()
 
         self._windows[section.section] = window
@@ -94,7 +94,7 @@ class PlayerContext:
     def on_open_file(self, file: Optional[str]) -> None:
         if not file:
             return
-        self.add_av_window(file)
+        self.add_media_window(file)
 
     def open_file(self):
         self._open_file_popup.show(
@@ -105,7 +105,7 @@ class PlayerContext:
     def on_open_url(self, file: Optional[str]) -> None:
         if not file:
             return
-        self.add_av_window(file)
+        self.add_media_window(file)
 
     def open_url(self):
         self._open_url_popup.show(

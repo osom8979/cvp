@@ -6,7 +6,7 @@ import imgui
 from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
-from cvp.config.sections.av import AvSection
+from cvp.config.sections.media import MediaSection
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.menu_item_ex import menu_item_ex
@@ -17,8 +17,8 @@ _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class AvWindow(Window[AvSection]):
-    def __init__(self, config: AvSection):
+class MediaWindow(Window[MediaSection]):
+    def __init__(self, config: MediaSection):
         super().__init__(config)
 
         self._flags = 0
