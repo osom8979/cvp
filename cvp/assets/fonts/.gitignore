@@ -1,3 +1,10 @@
 *
 !.gitignore
-!JetBrainsMonoNLNerdFontMono-Regular.*
+!JetBrainsMonoNLNerdFontMono-Regular.OFL.txt
+!JetBrainsMonoNLNerdFontMono-Regular.README.md
+!JetBrainsMonoNLNerdFontMono-Regular.ttf
+!NanumGothicCoding-Bold.ttf
+!NanumGothicCoding.OFL.md
+!NanumGothicCoding.ttf
+!materialdesignicons-webfont.license
+!materialdesignicons-webfont.ttf
