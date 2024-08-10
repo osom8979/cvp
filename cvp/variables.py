@@ -2,6 +2,7 @@
 
 from typing import Final
 
+FONT_RANGES_EXTENSION: Final[str] = ".ranges"
 MEDIA_SECTION_PREFIX: Final[str] = "media."
 
 MIN_WINDOW_WIDTH: Final[int] = 400

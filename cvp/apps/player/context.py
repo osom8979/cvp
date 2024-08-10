@@ -11,11 +11,11 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
-from cvp.assets import get_default_font_path
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
+from cvp.renderer.imgui import add_jbm_font, add_ngc_font
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.popups.open_file import OpenFilePopup
 from cvp.widgets.popups.open_url import OpenUrlPopup
@@ -171,17 +171,20 @@ class PlayerContext:
 
         self._renderer = PygameRenderer()
 
-        family = self._config.font.family
-        family = family if family else get_default_font_path()
+        io.fonts.clear()
+        pixels = self._config.font.pixels
+        scale = self._config.font.scale
+        font_size_pixels = pixels * scale
+        add_jbm_font(font_size_pixels)
+        add_ngc_font(font_size_pixels)
 
-        if os.path.isfile(family):
-            pixels = self._config.font.pixels
-            scale = self._config.font.scale
-            ranges = io.fonts.get_glyph_ranges_korean()
-            io.fonts.clear()
-            io.fonts.add_font_from_file_ttf(family, pixels * scale, None, ranges)
-            io.font_global_scale /= self._config.font.scale
-            self._renderer.refresh_font_texture()
+        user_font = self._config.font.family
+        if user_font and os.path.isfile(user_font):
+            korean_ranges = io.fonts.get_glyph_ranges_korean()
+            io.fonts.add_font_from_file_ttf(user_font, font_size_pixels, korean_ranges)
+
+        io.font_global_scale /= self._config.font.scale
+        self._renderer.refresh_font_texture()
 
         GL.glClearColor(0, 0, 0, 1)
         for win in self._windows.values():

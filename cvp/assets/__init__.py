@@ -47,5 +47,20 @@ def get_cache_path() -> Path:
 
 
 @lru_cache
-def get_default_font_path() -> str:
+def get_jbm_nl_nfm_r_font_path() -> str:
     return os.path.join(get_fonts_dir(), "JetBrainsMonoNLNerdFontMono-Regular.ttf")
+
+
+@lru_cache
+def get_mdi_font_path() -> str:
+    return os.path.join(get_fonts_dir(), "materialdesignicons-webfont.ttf")
+
+
+@lru_cache
+def get_ngc_font_path() -> str:
+    return os.path.join(get_fonts_dir(), "NanumGothicCoding.ttf")
+
+
+@lru_cache
+def get_ngc_b_font_path() -> str:
+    return os.path.join(get_fonts_dir(), "NanumGothicCoding-Bold.ttf")
