@@ -4,13 +4,16 @@ import io
 import os
 from signal import SIGINT
 from subprocess import PIPE, Popen
+from threading import Thread
 from typing import IO, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from psutil import Process
 
+from cvp.types.override import override
 
-class ProcessMapper(Dict[str, Popen]):
-    def spawn(
+
+class PopenThread(Thread):
+    def __init__(
         self,
         key: str,
         args: Sequence[Union[str, os.PathLike[str]]],
@@ -20,10 +23,16 @@ class ProcessMapper(Dict[str, Popen]):
         stderr: Optional[Union[int, IO]] = PIPE,
         cwd: Optional[Union[str, os.PathLike[str]]] = None,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
-    ) -> Popen:
-        if self.__contains__(key):
-            raise KeyError(f"Key '{key}' already exists")
-        proc = Popen(
+    ):
+        super().__init__(
+            group=None,
+            target=None,
+            name=key,
+            args=(),
+            kwargs=None,
+            daemon=None,
+        )
+        self._popen = Popen(
             args,
             bufsize=buffer_size,
             executable=None,
@@ -50,6 +59,92 @@ class ProcessMapper(Dict[str, Popen]):
             umask=-1,
             pipesize=-1,
             process_group=None,
+        )
+        self._process = Process(self._popen.pid)
+
+    @override
+    def run(self) -> None:
+        pass
+
+    @property
+    def pid(self) -> int:
+        return self._popen.pid
+
+    @property
+    def returncode(self) -> int:
+        return self._popen.returncode
+
+    @property
+    def stdin(self):
+        return self._popen.stdin
+
+    @property
+    def stdout(self):
+        return self._popen.stdout
+
+    @property
+    def stderr(self):
+        return self._popen.stderr
+
+    @property
+    def args(self):
+        return self._popen.args
+
+    def poll(self) -> Optional[int]:
+        return self._popen.poll()
+
+    def wait(self, timeout: Optional[float] = None) -> int:
+        return self._popen.wait(timeout)
+
+    def communicate(
+        self,
+        data: Optional[bytes] = None,
+        timeout: Optional[float] = None,
+    ) -> Tuple[Optional[bytes], Optional[bytes]]:
+        # [WARNING]
+        # The data read is buffered in memory,
+        # so do not use this method if the data size is large or unlimited.
+        stdout, stderr = self._popen.communicate(data, timeout)
+        assert isinstance(stdout, (type(None), bytes))
+        assert isinstance(stderr, (type(None), bytes))
+        return stdout, stderr
+
+    def send_signal(self, signum: int) -> None:
+        self._popen.send_signal(signum)
+
+    def interrupt(self) -> None:
+        self._popen.send_signal(SIGINT)
+
+    def terminate(self) -> None:
+        self._popen.terminate()
+
+    def kill(self) -> None:
+        self._popen.kill()
+
+
+class ProcessMapper(Dict[str, PopenThread]):
+    def spawn(
+        self,
+        key: str,
+        args: Sequence[Union[str, os.PathLike[str]]],
+        buffer_size=io.DEFAULT_BUFFER_SIZE,
+        stdin: Optional[Union[int, IO]] = PIPE,
+        stdout: Optional[Union[int, IO]] = PIPE,
+        stderr: Optional[Union[int, IO]] = PIPE,
+        cwd: Optional[Union[str, os.PathLike[str]]] = None,
+        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
+    ) -> PopenThread:
+        if self.__contains__(key):
+            raise KeyError(f"Key '{key}' already exists")
+        proc = PopenThread(
+            key=key,
+            args=args,
+            buffer_size=buffer_size,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
         )
         self.__setitem__(key, proc)
         return proc
@@ -81,7 +176,7 @@ class ProcessMapper(Dict[str, Popen]):
     def poll(self, key: str) -> Optional[int]:
         return self.__getitem__(key).poll()
 
-    def pools(self):
+    def polls(self):
         return {key: proc.poll() for key, proc in self.items()}
 
     def wait(self, key: str, timeout: Optional[float] = None) -> int:

@@ -15,6 +15,7 @@ from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
+from cvp.process.manager import ProcessManager
 from cvp.renderer.imgui import add_jbm_font, add_ngc_font
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.popups.open_file import OpenFilePopup
@@ -54,11 +55,12 @@ class PlayerContext:
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._player_ini)
         self._done = False
+        self._processes = ProcessManager()
         self._windows = {
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
-        self._manager = ManagerWindow(self._config)
+        self._manager = ManagerWindow(self._processes, self._config)
         self._preference = PreferenceWindow(self._config)
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config)

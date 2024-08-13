@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from cvp.process.mapper import ProcessMapper
 
-class ProcessManager:
+
+class ProcessManager(ProcessMapper):
     pass
