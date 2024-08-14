@@ -1,5 +1,6 @@
 # PyOpenGL_accelerate==3.1.7
 PyOpenGL==3.1.7
+WSDiscovery==2.0.0
 coloredlogs==15.0.1
 imgui==2.0.0
 mpv==1.0.7
@@ -8,3 +9,4 @@ orjson==3.10.6
 psutil==6.0.0
 pygame-ce==2.4.1
 python-dotenv==1.0.1
+zeep==4.2.1

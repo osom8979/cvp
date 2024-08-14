@@ -2,15 +2,36 @@
 
 import io
 import os
+import sys
+from abc import ABC, abstractmethod
+from functools import lru_cache
 from signal import SIGINT
 from subprocess import PIPE, Popen
 from threading import Thread
-from typing import IO, Mapping, Optional, Sequence, Tuple, Union
+from typing import IO, Any, Callable, Mapping, Optional, Sequence, Tuple, Union
 
 from psutil import Process
 
+from cvp.types.override import override
 
-class PopenThread:
+
+@lru_cache
+def default_creation_flags() -> int:
+    if sys.platform == "win32":
+        from subprocess import CREATE_NO_WINDOW
+
+        return CREATE_NO_WINDOW
+    else:
+        return 0
+
+
+class PopenThreadInterface(ABC):
+    @abstractmethod
+    def run(self) -> None:
+        raise NotImplementedError
+
+
+class PopenThread(PopenThreadInterface):
     def __init__(
         self,
         name: str,
@@ -21,7 +42,14 @@ class PopenThread:
         stderr: Optional[Union[int, IO]] = PIPE,
         cwd: Optional[Union[str, os.PathLike[str]]] = None,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
+        creation_flags: Optional[int] = None,
+        target: Optional[Callable[..., Any]] = None,
     ):
+        if creation_flags is None:
+            creation_flags = default_creation_flags()
+
+        assert isinstance(creation_flags, int)
+
         self._process = Popen(
             args,
             bufsize=buffer_size,
@@ -36,7 +64,7 @@ class PopenThread:
             env=env,
             universal_newlines=None,
             startupinfo=None,
-            creationflags=0,
+            creationflags=creation_flags,
             restore_signals=True,
             start_new_session=False,
             pass_fds=(),
@@ -53,16 +81,18 @@ class PopenThread:
         self._query = Process(self._process.pid)
         self._thread = Thread(
             group=None,
-            target=self._runner,
+            target=self.run,
             name=name,
             args=(),
             kwargs=None,
             daemon=None,
         )
-        self._thread.start()
+        self._target = target
 
-    def _runner(self) -> None:
-        pass
+    @override
+    def run(self) -> None:
+        if self._target is not None:
+            self._target()
 
     @property
     def process(self):
@@ -130,3 +160,20 @@ class PopenThread:
 
     def kill(self) -> None:
         self._process.kill()
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def is_alive_thread(self) -> bool:
+        return self._thread.is_alive()
+
+    def join_thread(self, timeout: Optional[float] = None) -> None:
+        self._thread.join(timeout)
+
+    @property
+    def identifier(self):
+        return self._thread.ident
+
+    @property
+    def native_id(self):
+        return self._thread.native_id
