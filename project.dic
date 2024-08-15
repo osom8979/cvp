@@ -15,6 +15,7 @@ fflags
 fmpeg
 fprobe
 framebuffers
+getbuffer
 ghcr
 hexdigest
 infiles

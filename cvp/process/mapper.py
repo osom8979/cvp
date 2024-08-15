@@ -6,32 +6,33 @@ from signal import SIGINT
 from subprocess import PIPE
 from typing import IO, Dict, Mapping, Optional, Sequence, Tuple, Union
 
-from cvp.process.thread import PopenThread
+from cvp.process.ffmpeg import FFmpegProcess
 
 
-class ProcessMapper(Dict[str, PopenThread]):
+class ProcessMapper(Dict[str, FFmpegProcess]):
     def spawn(
         self,
         key: str,
         args: Sequence[Union[str, os.PathLike[str]]],
+        frame_size: int,
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = PIPE,
-        stdout: Optional[Union[int, IO]] = PIPE,
         stderr: Optional[Union[int, IO]] = PIPE,
         cwd: Optional[Union[str, os.PathLike[str]]] = None,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
-    ) -> PopenThread:
+    ) -> FFmpegProcess:
         if self.__contains__(key):
             raise KeyError(f"Key '{key}' already exists")
-        proc = PopenThread(
+        proc = FFmpegProcess(
             name=key,
             args=args,
+            frame_size=frame_size,
             buffer_size=buffer_size,
             stdin=stdin,
-            stdout=stdout,
             stderr=stderr,
             cwd=cwd,
             env=env,
+            creation_flags=None,
         )
         self.__setitem__(key, proc)
         return proc
@@ -42,8 +43,8 @@ class ProcessMapper(Dict[str, PopenThread]):
     def pids(self):
         return {key: proc.pid for key, proc in self.items()}
 
-    def query(self, key: str):
-        return self.__getitem__(key).query
+    def psutil(self, key: str):
+        return self.__getitem__(key).psutil
 
     def returncode(self, key: str) -> int:
         return self.__getitem__(key).returncode

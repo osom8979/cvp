@@ -156,30 +156,31 @@ class ManagerWindow:
                         imgui.separator()
 
                         if button_ex("Start"):
-                            self._processes.spawn(
-                                media.section,
-                                (
-                                    "ffmpeg",
-                                    "-hide_banner",
-                                    "-fflags",
-                                    "nobuffer",
-                                    "-fflags",
-                                    "discardcorrupt",
-                                    "-flags",
-                                    "low_delay",
-                                    "-rtsp_transport",
-                                    "tcp",
-                                    "-i",
-                                    media.file,
-                                    "-f",
-                                    "image2pipe",
-                                    "-pix_fmt",
-                                    "rgb24",
-                                    "-vcodec",
-                                    "rawvideo",
-                                    "pipe:1",
-                                ),
-                            )
+                            # self._processes.spawn(
+                            #     media.section,
+                            #     (
+                            #         "ffmpeg",
+                            #         "-hide_banner",
+                            #         "-fflags",
+                            #         "nobuffer",
+                            #         "-fflags",
+                            #         "discardcorrupt",
+                            #         "-flags",
+                            #         "low_delay",
+                            #         "-rtsp_transport",
+                            #         "tcp",
+                            #         "-i",
+                            #         media.file,
+                            #         "-f",
+                            #         "image2pipe",
+                            #         "-pix_fmt",
+                            #         "rgb24",
+                            #         "-vcodec",
+                            #         "rawvideo",
+                            #         "pipe:1",
+                            #     ),
+                            # )
+                            pass
                         if button_ex("Stop"):
                             pass
 

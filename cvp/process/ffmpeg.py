@@ -3,16 +3,13 @@
 import io
 import os
 import sys
-from abc import ABC, abstractmethod
 from functools import lru_cache
 from signal import SIGINT
-from subprocess import PIPE, Popen
+from subprocess import DEVNULL, PIPE, Popen
 from threading import Thread
-from typing import IO, Any, Callable, Mapping, Optional, Sequence, Tuple, Union
+from typing import IO, Callable, Mapping, Optional, Sequence, Tuple, Union
 
 from psutil import Process
-
-from cvp.types.override import override
 
 
 @lru_cache
@@ -25,25 +22,19 @@ def default_creation_flags() -> int:
         return 0
 
 
-class PopenThreadInterface(ABC):
-    @abstractmethod
-    def run(self) -> None:
-        raise NotImplementedError
-
-
-class PopenThread(PopenThreadInterface):
+class FFmpegProcess:
     def __init__(
         self,
         name: str,
         args: Sequence[Union[str, os.PathLike[str]]],
+        frame_size: int,
         buffer_size=io.DEFAULT_BUFFER_SIZE,
-        stdin: Optional[Union[int, IO]] = PIPE,
-        stdout: Optional[Union[int, IO]] = PIPE,
-        stderr: Optional[Union[int, IO]] = PIPE,
+        stdin: Optional[Union[int, IO]] = None,
+        stderr: Optional[Union[int, IO]] = DEVNULL,
         cwd: Optional[Union[str, os.PathLike[str]]] = None,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
         creation_flags: Optional[int] = None,
-        target: Optional[Callable[..., Any]] = None,
+        target: Optional[Callable[[bytes], None]] = None,
     ):
         if creation_flags is None:
             creation_flags = default_creation_flags()
@@ -55,7 +46,7 @@ class PopenThread(PopenThreadInterface):
             bufsize=buffer_size,
             executable=None,
             stdin=stdin,
-            stdout=stdout,
+            stdout=PIPE,
             stderr=stderr,
             preexec_fn=None,
             close_fds=True,
@@ -78,33 +69,56 @@ class PopenThread(PopenThreadInterface):
             pipesize=-1,
             process_group=None,
         )
-        self._query = Process(self._process.pid)
         self._thread = Thread(
             group=None,
-            target=self.run,
+            target=self._read_stdout_stream,
             name=name,
             args=(),
             kwargs=None,
             daemon=None,
         )
+        self._frame_size = frame_size
         self._target = target
 
-    @override
-    def run(self) -> None:
+    def _read_stdout_stream(self) -> None:
+        stdout_pipe = self._process.stdout
+        assert stdout_pipe is not None
+        self.read_pipe_stream(stdout_pipe)
+
+    def read_pipe_stream(self, pipe: IO[bytes]) -> None:
+        remain: Optional[bytes] = None
+
+        while self._process.poll() is None:
+            if remain:
+                next_read_size = self._frame_size - len(remain)
+                remain = self.on_recv(remain + pipe.read(next_read_size))
+            else:
+                remain = self.on_recv(pipe.read(self._frame_size))
+
+        pipe.flush()
+        if remain:
+            self.on_recv(remain + pipe.read())
+        else:
+            self.on_recv(pipe.read())
+
+    def on_recv(self, data: bytes) -> Optional[bytes]:
+        if len(data) == 0:
+            return None
+
+        if len(data) == self._frame_size:
+            self.on_frame(data)
+            return None
+
+        assert 0 < len(data) < self._frame_size
+        return data
+
+    def on_frame(self, data: bytes) -> None:
         if self._target is not None:
-            self._target()
+            self._target(data)
 
     @property
-    def process(self):
-        return self._process
-
-    @property
-    def query(self):
-        return self._query
-
-    @property
-    def thread(self):
-        return self._thread
+    def psutil(self):
+        return Process(self._process.pid)
 
     @property
     def pid(self) -> int:
@@ -161,7 +175,7 @@ class PopenThread(PopenThreadInterface):
     def kill(self) -> None:
         self._process.kill()
 
-    def start(self) -> None:
+    def start_thread(self) -> None:
         self._thread.start()
 
     def is_alive_thread(self) -> bool:
@@ -171,9 +185,9 @@ class PopenThread(PopenThreadInterface):
         self._thread.join(timeout)
 
     @property
-    def identifier(self):
+    def thread_identifier(self):
         return self._thread.ident
 
     @property
-    def native_id(self):
+    def thread_native_id(self):
         return self._thread.native_id
