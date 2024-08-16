@@ -1,119 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, FrozenSet, List, Literal, Optional, Sequence
-
-_PRINT_INFOS: Final[Sequence[str]] = (
-    "-L",
-    "-h",
-    "-?",
-    "-help",
-    "--help",
-    "-version",
-    "-buildconf",
-    "-formats",
-    "-muxers",
-    "-demuxers",
-    "-devices",
-    "-codecs",
-    "-decoders",
-    "-encoders",
-    "-bsfs",
-    "-protocols",
-    "-filters",
-    "-pix_fmts",
-    "-layouts",
-    "-sample_fmts",
-    "-colors",
-    "-sources",
-    "-sinks",
-    "-hwaccels",
-)
-
-_GLOBAL_OPTIONS: Final[Sequence[str]] = (
-    "-loglevel",
-    "-v",
-    "-report",
-    "-max_alloc",
-    "-y",
-    "-n",
-    "-ignore_unknown",
-    "-filter_threads",
-    "-filter_complex_threads",
-    "-stats",
-    "-max_error_rate",
-    "-bits_per_raw_sample",
-    "-vol",
-)
-
-_ADVANCED_GLOBAL_OPTIONS: Final[Sequence[str]] = (
-    "-cpuflags",
-    "-hide_banner",
-    "-copy_unknown",
-    "-benchmark",
-    "-benchmark_all",
-    "-progress",
-    "-stdin",
-    "-timelimit",
-    "-dump",
-    "-hex",
-    "-vsync",
-    "-frame_drop_threshold",
-    "-async",
-    "-adrift_threshold",
-    "-copyts",
-    "-start_at_zero",
-    "-copytb",
-    "-dts_delta_threshold",
-    "-dts_error_threshold",
-    "-xerror",
-    "-abort_on",
-    "-filter_complex",
-    "-lavfi",
-    "-filter_complex_script",
-    "-auto_conversion_filters",
-    "-stats_period",
-    "-debug_ts",
-    "-intra",
-    "-sameq",
-    "-same_quant",
-    "-deinterlace",
-    "-psnr",
-    "-vstats",
-    "-vstats_file",
-    "-vstats_version",
-    "-qphist",
-    "-vc",
-    "-tvstd",
-    "-isync",
-    "-sdp_file",
-    "-vaapi_device",
-    "-qsv_device",
-    "-init_hw_device",
-    "-filter_hw_device",
-)
-
-PRINT_INFO_OPTIONS: FrozenSet[str] = frozenset(_PRINT_INFOS)
-COMMON_GLOBAL_OPTIONS: FrozenSet[str] = frozenset(_GLOBAL_OPTIONS)
-ADVANCED_GLOBAL_OPTIONS: FrozenSet[str] = frozenset(_ADVANCED_GLOBAL_OPTIONS)
-TOTAL_GLOBAL_OPTIONS: FrozenSet[str] = frozenset(
-    list(_PRINT_INFOS) + list(_GLOBAL_OPTIONS) + list(_ADVANCED_GLOBAL_OPTIONS)
-)
-
-
-def is_print_option(option: str) -> bool:
-    return option in PRINT_INFO_OPTIONS
-
-
-def is_common_global_option(option: str) -> bool:
-    return option in COMMON_GLOBAL_OPTIONS
-
-
-def is_advanced_global_option(option: str) -> bool:
-    return option in ADVANCED_GLOBAL_OPTIONS
-
-
-def is_global_option(option: str) -> bool:
-    return option in TOTAL_GLOBAL_OPTIONS
+from shlex import split
+from typing import List, Literal, Optional
 
 
 class FFmpegGlobalOptions:
@@ -128,6 +16,9 @@ class FFmpegGlobalOptions:
     def append_global_options(self, *args):
         self._globals += tuple(str(a) for a in args if a is not None)
         return self
+
+    def append_global_options_with_text(self, text: str, *, comments=False, posix=True):
+        return self.append_global_options(*split(text, comments=comments, posix=posix))
 
     # ==================================================================================
     # Print help / information / capabilities:
