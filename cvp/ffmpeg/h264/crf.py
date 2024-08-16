@@ -37,3 +37,4 @@ class Crf(IntEnum):
 
 CRF_MIN: Final[Crf] = Crf.lossless
 CRF_MAX: Final[Crf] = Crf.worst_quality_possible
+CRF_DEFAULT: Final[Crf] = Crf.default
