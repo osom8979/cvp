@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.config.config import Config
-from cvp.process.manager import ProcessManager
+from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.button_ex import button_ex
 
@@ -12,8 +12,8 @@ READ_ONLY = imgui.INPUT_TEXT_READ_ONLY
 
 
 class ManagerWindow:
-    def __init__(self, processes: ProcessManager, config: Config):
-        self._processes = processes
+    def __init__(self, ffmpegs: FFmpegManager, config: Config):
+        self._ffmpegs = ffmpegs
         self._config = config
         self._title = "Media Manger"
         self._flags = 0
@@ -156,30 +156,6 @@ class ManagerWindow:
                         imgui.separator()
 
                         if button_ex("Start"):
-                            # self._processes.spawn(
-                            #     media.section,
-                            #     (
-                            #         "ffmpeg",
-                            #         "-hide_banner",
-                            #         "-fflags",
-                            #         "nobuffer",
-                            #         "-fflags",
-                            #         "discardcorrupt",
-                            #         "-flags",
-                            #         "low_delay",
-                            #         "-rtsp_transport",
-                            #         "tcp",
-                            #         "-i",
-                            #         media.file,
-                            #         "-f",
-                            #         "image2pipe",
-                            #         "-pix_fmt",
-                            #         "rgb24",
-                            #         "-vcodec",
-                            #         "rawvideo",
-                            #         "pipe:1",
-                            #     ),
-                            # )
                             pass
                         if button_ex("Stop"):
                             pass
