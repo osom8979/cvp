@@ -6,9 +6,9 @@ from typing import Any, Tuple
 from orjson import loads
 
 
-def inspect_source(src: str, ffprobe_path="ffprobe") -> Any:
+def inspect_source(src: str, *, ffprobe="ffprobe") -> Any:
     ffprobe_command = [
-        ffprobe_path,
+        ffprobe,
         "-v",
         "quiet",
         "-print_format",
@@ -22,10 +22,11 @@ def inspect_source(src: str, ffprobe_path="ffprobe") -> Any:
 
 def inspect_source_size(
     src: str,
-    ffprobe_path="ffprobe",
     video_stream_index=0,
+    *,
+    ffprobe="ffprobe",
 ) -> Tuple[int, int]:
-    inspect_result = inspect_source(src, ffprobe_path)
+    inspect_result = inspect_source(src, ffprobe=ffprobe)
     assert isinstance(inspect_result, dict)
 
     streams = inspect_result["streams"]

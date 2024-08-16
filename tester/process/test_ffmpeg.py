@@ -54,8 +54,9 @@ class ThreadTestCase(TestCase):
 
         popen = FFmpegProcess(type(self).__name__, args, frame_size, target=on_frame)
         popen.start_thread()
-        popen.wait()
+        popen.join_thread()
 
+        self.assertIsNone(popen.thread_error)
         self.assertEqual(total_frames, len(frames))
         for frame in frames:
             self.assertTrue(np.all(frame[:, :] == color))

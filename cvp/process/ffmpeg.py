@@ -76,6 +76,8 @@ class FFmpegFrameReader(FFmpegFrameInterface):
 
 
 class FFmpegProcess:
+    _thread_error: Optional[BaseException]
+
     def __init__(
         self,
         name: str,
@@ -132,11 +134,23 @@ class FFmpegProcess:
         )
         self._frame_size = frame_size
         self._target = target
+        self._thread_error = None
+
+    @property
+    def thread_error(self):
+        return self._thread_error
+
+    def raise_if_thread_error(self):
+        if self._thread_error is not None:
+            raise self._thread_error
 
     def _read_stdout_stream(self) -> None:
-        stdout_pipe = self._process.stdout
-        assert stdout_pipe is not None
-        self.read_pipe_stream(stdout_pipe)
+        try:
+            stdout_pipe = self._process.stdout
+            assert stdout_pipe is not None
+            self.read_pipe_stream(stdout_pipe)
+        except BaseException as e:
+            self._thread_error = e
 
     def read_pipe_stream(self, pipe: IO[bytes]) -> None:
         remain: Optional[bytes] = None
@@ -153,6 +167,17 @@ class FFmpegProcess:
             self.on_recv(remain + pipe.read())
         else:
             self.on_recv(pipe.read())
+
+    def on_recv(self, data: bytes) -> Optional[bytes]:
+        if len(data) == 0:
+            return None
+
+        if len(data) == self._frame_size:
+            self.on_frame(data)
+            return None
+
+        assert 0 < len(data) < self._frame_size
+        return data
 
     def on_frame(self, data: bytes) -> None:
         if self._target is not None:
