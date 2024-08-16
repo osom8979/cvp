@@ -12,7 +12,6 @@ from typing import IO, Callable, Mapping, Optional, Sequence, Tuple, Union
 from psutil import Process
 
 from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
-from cvp.types.override import override
 
 
 @lru_cache
@@ -41,7 +40,6 @@ class FFmpegProcess(FFmpegFrameReader):
         creation_flags: Optional[int] = None,
         target: Optional[Callable[[bytes], None]] = None,
     ):
-        self._target = target
         self._thread_error = None
 
         if creation_flags is None:
@@ -93,7 +91,7 @@ class FFmpegProcess(FFmpegFrameReader):
             daemon=None,
         )
 
-        super().__init__(pipe=stdout_pipe, frame_size=frame_size)
+        super().__init__(pipe=stdout_pipe, frame_size=frame_size, target=target)
 
     @property
     def thread_error(self):
@@ -112,11 +110,6 @@ class FFmpegProcess(FFmpegFrameReader):
             self.read_eof()
         except BaseException as e:
             self._thread_error = e
-
-    @override
-    def on_frame(self, data: bytes) -> None:
-        if self._target is not None:
-            self._target(data)
 
     @property
     def psutil(self):
