@@ -3,6 +3,7 @@
 import io
 import os
 import sys
+from abc import ABC, abstractmethod
 from functools import lru_cache
 from signal import SIGINT
 from subprocess import DEVNULL, PIPE, Popen
@@ -10,6 +11,8 @@ from threading import Thread
 from typing import IO, Callable, Mapping, Optional, Sequence, Tuple, Union
 
 from psutil import Process
+
+from cvp.types.override import override
 
 
 @lru_cache
@@ -20,6 +23,56 @@ def default_creation_flags() -> int:
         return CREATE_NO_WINDOW
     else:
         return 0
+
+
+class FFmpegFrameInterface(ABC):
+    @abstractmethod
+    def on_frame(self, data: bytes) -> None:
+        raise NotImplementedError
+
+
+class FFmpegFrameReader(FFmpegFrameInterface):
+    _remain: Optional[bytes]
+
+    def __init__(self, pipe: IO[bytes], frame_size: int):
+        self._pipe = pipe
+        self._frame_size = frame_size
+        self._remain = None
+
+    @property
+    def frame_size(self):
+        return self._frame_size
+
+    def flush(self) -> None:
+        self._pipe.flush()
+
+    def read(self) -> None:
+        if self._remain:
+            next_read_size = self._frame_size - len(self._remain)
+            self._remain = self.on_recv(self._remain + self._pipe.read(next_read_size))
+        else:
+            self._remain = self.on_recv(self._pipe.read(self._frame_size))
+
+    def read_eof(self) -> None:
+        if self._remain:
+            self.on_recv(self._remain + self._pipe.read())
+        else:
+            self.on_recv(self._pipe.read())
+
+    def on_recv(self, data: bytes) -> Optional[bytes]:
+        if len(data) == 0:
+            return None
+
+        if len(data) == self._frame_size:
+            self.on_frame(data)
+            return None
+
+        assert 0 < len(data) < self._frame_size
+        return data
+
+    @override
+    def on_frame(self, data: bytes) -> None:
+        raise NotImplementedError
 
 
 class FFmpegProcess:
@@ -100,17 +153,6 @@ class FFmpegProcess:
             self.on_recv(remain + pipe.read())
         else:
             self.on_recv(pipe.read())
-
-    def on_recv(self, data: bytes) -> Optional[bytes]:
-        if len(data) == 0:
-            return None
-
-        if len(data) == self._frame_size:
-            self.on_frame(data)
-            return None
-
-        assert 0 < len(data) < self._frame_size
-        return data
 
     def on_frame(self, data: bytes) -> None:
         if self._target is not None:
