@@ -6,11 +6,11 @@ from unittest import TestCase, main, skipIf
 import numpy as np
 
 from cvp.ffmpeg.executable.which import which_ffmpeg
-from cvp.process.ffmpeg import FFmpegProcess
+from cvp.ffmpeg.ffmpeg.process import FFmpegProcess
 
 
-class ThreadTestCase(TestCase):
-    @skipIf(which_ffmpeg() is None, "Not found ffmpeg executable")
+class ProcessTestCase(TestCase):
+    @skipIf(not which_ffmpeg(), "Not found ffmpeg executable")
     def test_default(self):
         ffmpeg = which_ffmpeg()
         self.assertIsInstance(ffmpeg, str)

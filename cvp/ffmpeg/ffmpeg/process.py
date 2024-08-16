@@ -3,7 +3,6 @@
 import io
 import os
 import sys
-from abc import ABC, abstractmethod
 from functools import lru_cache
 from signal import SIGINT
 from subprocess import DEVNULL, PIPE, Popen
@@ -12,6 +11,7 @@ from typing import IO, Callable, Mapping, Optional, Sequence, Tuple, Union
 
 from psutil import Process
 
+from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
 from cvp.types.override import override
 
 
@@ -25,63 +25,13 @@ def default_creation_flags() -> int:
         return 0
 
 
-class FFmpegFrameInterface(ABC):
-    @abstractmethod
-    def on_frame(self, data: bytes) -> None:
-        raise NotImplementedError
-
-
-class FFmpegFrameReader(FFmpegFrameInterface):
-    _remain: Optional[bytes]
-
-    def __init__(self, pipe: IO[bytes], frame_size: int):
-        self._pipe = pipe
-        self._frame_size = frame_size
-        self._remain = None
-
-    @property
-    def frame_size(self):
-        return self._frame_size
-
-    def flush(self) -> None:
-        self._pipe.flush()
-
-    def read(self) -> None:
-        if self._remain:
-            next_read_size = self._frame_size - len(self._remain)
-            self._remain = self.on_recv(self._remain + self._pipe.read(next_read_size))
-        else:
-            self._remain = self.on_recv(self._pipe.read(self._frame_size))
-
-    def read_eof(self) -> None:
-        if self._remain:
-            self.on_recv(self._remain + self._pipe.read())
-        else:
-            self.on_recv(self._pipe.read())
-
-    def on_recv(self, data: bytes) -> Optional[bytes]:
-        if len(data) == 0:
-            return None
-
-        if len(data) == self._frame_size:
-            self.on_frame(data)
-            return None
-
-        assert 0 < len(data) < self._frame_size
-        return data
-
-    @override
-    def on_frame(self, data: bytes) -> None:
-        raise NotImplementedError
-
-
-class FFmpegProcess:
+class FFmpegProcess(FFmpegFrameReader):
     _thread_error: Optional[BaseException]
 
     def __init__(
         self,
         name: str,
-        args: Sequence[Union[str, os.PathLike[str]]],
+        args: Sequence[str],
         frame_size: int,
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = None,
@@ -91,6 +41,9 @@ class FFmpegProcess:
         creation_flags: Optional[int] = None,
         target: Optional[Callable[[bytes], None]] = None,
     ):
+        self._target = target
+        self._thread_error = None
+
         if creation_flags is None:
             creation_flags = default_creation_flags()
 
@@ -124,17 +77,23 @@ class FFmpegProcess:
             pipesize=-1,
             process_group=None,
         )
+
+        assert self._process.pid != 0
+        self._psutil = Process(self._process.pid)
+
+        stdout_pipe = self._process.stdout
+        assert stdout_pipe is not None
+
         self._thread = Thread(
             group=None,
-            target=self._read_stdout_stream,
+            target=self._read_pipe_stream_main,
             name=name,
             args=(),
             kwargs=None,
             daemon=None,
         )
-        self._frame_size = frame_size
-        self._target = target
-        self._thread_error = None
+
+        super().__init__(pipe=stdout_pipe, frame_size=frame_size)
 
     @property
     def thread_error(self):
@@ -144,48 +103,24 @@ class FFmpegProcess:
         if self._thread_error is not None:
             raise self._thread_error
 
-    def _read_stdout_stream(self) -> None:
+    def _read_pipe_stream_main(self) -> None:
         try:
-            stdout_pipe = self._process.stdout
-            assert stdout_pipe is not None
-            self.read_pipe_stream(stdout_pipe)
+            while self._process.poll() is None:
+                self.read()
+
+            self.flush()
+            self.read_eof()
         except BaseException as e:
             self._thread_error = e
 
-    def read_pipe_stream(self, pipe: IO[bytes]) -> None:
-        remain: Optional[bytes] = None
-
-        while self._process.poll() is None:
-            if remain:
-                next_read_size = self._frame_size - len(remain)
-                remain = self.on_recv(remain + pipe.read(next_read_size))
-            else:
-                remain = self.on_recv(pipe.read(self._frame_size))
-
-        pipe.flush()
-        if remain:
-            self.on_recv(remain + pipe.read())
-        else:
-            self.on_recv(pipe.read())
-
-    def on_recv(self, data: bytes) -> Optional[bytes]:
-        if len(data) == 0:
-            return None
-
-        if len(data) == self._frame_size:
-            self.on_frame(data)
-            return None
-
-        assert 0 < len(data) < self._frame_size
-        return data
-
+    @override
     def on_frame(self, data: bytes) -> None:
         if self._target is not None:
             self._target(data)
 
     @property
     def psutil(self):
-        return Process(self._process.pid)
+        return self._psutil
 
     @property
     def pid(self) -> int:

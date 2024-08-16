@@ -468,18 +468,18 @@ def parse_file_formats_output(text: str) -> List[FileFormat]:
     return [FileFormat.from_format_line(line) for line in lines]
 
 
-def inspect_file_formats(ffmpeg_path="ffmpeg") -> List[FileFormat]:
-    cmds = (ffmpeg_path, "-hide_banner", "-formats")
+def inspect_file_formats(ffmpeg="ffmpeg") -> List[FileFormat]:
+    cmds = (ffmpeg, "-hide_banner", "-formats")
     output = check_output(cmds).decode("utf-8")
     return parse_file_formats_output(output)
 
 
-def detect_file_format(url: str, ffmpeg_path="ffmpeg") -> str:
+def detect_file_format(url: str, ffmpeg="ffmpeg") -> str:
     if os.path.exists(url):
         ext = os.path.splitext(url)[1]
         return ext[1:] if ext[0] == "." else ext
     else:
-        file_formats = inspect_file_formats(ffmpeg_path)
+        file_formats = inspect_file_formats(ffmpeg)
         o = urlparse(url)
         if o.scheme:
             if o.scheme in WELL_KNOWN_SCHEME_FORMAT:

@@ -278,14 +278,14 @@ def parse_fix_fmts_output(text: str) -> List[PixFmt]:
     return [PixFmt.from_format_line(line) for line in lines]
 
 
-def inspect_pix_fmts(ffmpeg_path="ffmpeg") -> List[PixFmt]:
-    cmds = (ffmpeg_path, "-hide_banner", "-pix_fmts")
+def inspect_pix_fmts(ffmpeg="ffmpeg") -> List[PixFmt]:
+    cmds = (ffmpeg, "-hide_banner", "-pix_fmts")
     output = check_output(cmds).decode("utf-8")
     return parse_fix_fmts_output(output)
 
 
-def find_pix_fmt(pixel_format: str, ffmpeg_path="ffmpeg") -> PixFmt:
-    pix_fmts = inspect_pix_fmts(ffmpeg_path)
+def find_pix_fmt(pixel_format: str, ffmpeg="ffmpeg") -> PixFmt:
+    pix_fmts = inspect_pix_fmts(ffmpeg)
     filtered_pix_fmts = list(filter(lambda x: x.name == pixel_format, pix_fmts))
     if not filtered_pix_fmts:
         raise IndexError(f"Not found pixel format: {pixel_format}")
@@ -293,5 +293,5 @@ def find_pix_fmt(pixel_format: str, ffmpeg_path="ffmpeg") -> PixFmt:
     return filtered_pix_fmts[0]
 
 
-def find_bits_per_pixel(pixel_format: str, ffmpeg_path="ffmpeg") -> int:
-    return find_pix_fmt(pixel_format, ffmpeg_path).bits_per_pixel
+def find_bits_per_pixel(pixel_format: str, ffmpeg="ffmpeg") -> int:
+    return find_pix_fmt(pixel_format, ffmpeg).bits_per_pixel

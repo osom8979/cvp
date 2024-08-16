@@ -6,14 +6,14 @@ from signal import SIGINT
 from subprocess import PIPE
 from typing import IO, Dict, Mapping, Optional, Sequence, Tuple, Union
 
-from cvp.process.ffmpeg import FFmpegProcess
+from cvp.ffmpeg.ffmpeg.process import FFmpegProcess
 
 
 class ProcessMapper(Dict[str, FFmpegProcess]):
     def spawn(
         self,
         key: str,
-        args: Sequence[Union[str, os.PathLike[str]]],
+        args: Sequence[str],
         frame_size: int,
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = PIPE,
