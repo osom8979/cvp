@@ -1,9 +1,76 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict
+import io
+import os
+from pathlib import Path
+from subprocess import DEVNULL
+from typing import IO, Callable, Dict, Mapping, Optional, Sequence, Union
 
+from cvp.arguments import CVP_HOME
+from cvp.ffmpeg.ffmpeg.builder import FFmpegBuilder
 from cvp.ffmpeg.ffmpeg.process import FFmpegProcess
 
 
 class FFmpegManager(Dict[str, FFmpegProcess]):
-    pass
+    def __init__(
+        self,
+        home: Optional[str] = None,
+        *,
+        ffmpeg="ffmpeg",
+        ffprobe="ffprobe",
+    ):
+        super().__init__()
+        self._home = Path(home) if home else CVP_HOME
+        self._ffmpeg = ffmpeg
+        self._ffprobe = ffprobe
+
+    def spawn(
+        self,
+        key: str,
+        args: Sequence[str],
+        frame_size: int,
+        buffer_size=io.DEFAULT_BUFFER_SIZE,
+        stdin: Optional[Union[int, IO]] = None,
+        stderr: Optional[Union[int, IO]] = DEVNULL,
+        cwd: Optional[Union[str, os.PathLike[str]]] = None,
+        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
+        creation_flags: Optional[int] = None,
+        target: Optional[Callable[[bytes], None]] = None,
+    ):
+        process = FFmpegProcess(
+            name=key,
+            args=args,
+            frame_size=frame_size,
+            buffer_size=buffer_size,
+            stdin=stdin,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            creation_flags=creation_flags,
+            target=target,
+        )
+        self.__setitem__(key, process)
+        return process
+
+    def spawn_builder(self, key: str, frame_size: int, builder: FFmpegBuilder):
+        return self.spawn(key, args=(), frame_size=frame_size)
+
+    def spawnable(self, key: str) -> bool:
+        return not self.__contains__(key)
+
+    def stoppable(self, key: str) -> bool:
+        if not self.__contains__(key):
+            return False
+
+        process = self.__getitem__(key)
+        return process.poll() is None
+
+    def removable(self, key: str) -> bool:
+        if not self.__contains__(key):
+            return False
+
+        process = self.__getitem__(key)
+        if process.is_alive_thread():
+            return False
+
+        return process.poll() is not None

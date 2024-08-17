@@ -147,36 +147,23 @@ class ManagerWindow:
             with item_width(-1):
                 media.file = input_text_value("## File", media.file)
 
+            key = media.section
+            process = self._ffmpegs.get(key)
+            spawnable = self._ffmpegs.spawnable(key)
+            stoppable = self._ffmpegs.stoppable(key)
+            removable = self._ffmpegs.removable(key)
+
             imgui.separator()
-            imgui.text("Process:")
-
-            process = self._ffmpegs.get(media.section)
             status = process.psutil.status() if process else "not-exists"
+            imgui.text(f"Process ({status})")
 
-            imgui.text("Status: ")
-            imgui.same_line()
-            imgui.text(status)
-
-            if button_ex("Spawn"):
+            if button_ex("Spawn", disabled=not spawnable):
                 pass
             imgui.same_line()
-            if button_ex("Stop"):
+            if button_ex("Stop", disabled=not stoppable):
                 pass
-
-            # STATUS_RUNNING = "running"
-            # STATUS_SLEEPING = "sleeping"
-            # STATUS_DISK_SLEEP = "disk-sleep"
-            # STATUS_STOPPED = "stopped"
-            # STATUS_TRACING_STOP = "tracing-stop"
-            # STATUS_ZOMBIE = "zombie"
-            # STATUS_DEAD = "dead"
-            # STATUS_WAKE_KILL = "wake-kill"
-            # STATUS_WAKING = "waking"
-            # STATUS_IDLE = "idle"  # Linux, macOS, FreeBSD
-            # STATUS_LOCKED = "locked"  # FreeBSD
-            # STATUS_WAITING = "waiting"  # FreeBSD
-            # STATUS_SUSPENDED = "suspended"  # NetBSD
-            # STATUS_PARKED = "parked"  # Linux
-
+            imgui.same_line()
+            if button_ex("Remove", disabled=not removable):
+                pass
         finally:
             imgui.end_tab_item()

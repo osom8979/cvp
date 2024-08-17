@@ -19,6 +19,18 @@ class FFmpegBuilder(FFmpegGlobalOptions):
         self._ffmpeg = ffmpeg
         self._files = list()
 
+    @property
+    def ffmpeg(self):
+        return self._ffmpeg
+
+    @ffmpeg.setter
+    def ffmpeg(self, value: str) -> None:
+        self._ffmpeg = value
+
+    @property
+    def files(self):
+        return self._files
+
     def clear(self):
         self._globals.clear()
         self._files.clear()
