@@ -3,12 +3,16 @@
 import imgui
 
 from cvp.config.config import Config
+from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.button_ex import button_ex
-
-ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
-READ_ONLY = imgui.INPUT_TEXT_READ_ONLY
+from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
+from cvp.widgets.input_text_disabled import input_text_disabled
+from cvp.widgets.input_text_value import input_text_value
+from cvp.widgets.item_width import item_width
+from cvp.widgets.set_window_min_size import set_window_min_size
+from cvp.widgets.text_centered import text_centered
 
 
 class ManagerWindow:
@@ -49,10 +53,20 @@ class ManagerWindow:
     def medias(self):
         return self._config.medias
 
-    def process(self) -> None:
-        self._process_window()
+    def drag_sidebar_width(self):
+        sidebar_width = imgui.drag_int(
+            "## SideWidth",
+            self.sidebar_width,
+            1.0,
+            self._min_sidebar_width,
+            0,
+            "Sidebar Width %d",
+        )[1]
+        if sidebar_width < self._min_sidebar_width:
+            sidebar_width = self._min_sidebar_width
+        self.sidebar_width = sidebar_width
 
-    def _process_window(self) -> None:
+    def process(self) -> None:
         if not self.opened:
             return
 
@@ -69,25 +83,9 @@ class ManagerWindow:
         finally:
             imgui.end()
 
-    def drag_sidebar_width(self):
-        sidebar_width = imgui.drag_int(
-            "## SideWidth",
-            self.sidebar_width,
-            1.0,
-            self._min_sidebar_width,
-            0,
-            "Sidebar Width %d",
-        )[1]
-        if sidebar_width < self._min_sidebar_width:
-            sidebar_width = self._min_sidebar_width
-        self.sidebar_width = sidebar_width
-
     def _main(self) -> None:
         if imgui.is_window_appearing():
-            cw, ch = imgui.get_window_size()
-            w = cw if cw >= self._min_width else self._min_width
-            h = ch if ch >= self._min_height else self._min_height
-            imgui.set_window_size(w, h)
+            set_window_min_size(self._min_width, self._min_height)
 
         medias = self._config.medias
         media = medias.get(self.selected, None)
@@ -114,61 +112,71 @@ class ManagerWindow:
 
         imgui.same_line()
 
-        # Reserve enough left-over height for 1 separator + 1 input text
-        footer_height_to_reserve = (
-            imgui.get_frame_height_with_spacing() + imgui.get_style().item_spacing.y
-        )
-
         # noinspection PyArgumentList
-        imgui.begin_child("## Main", -1, -footer_height_to_reserve)
+        imgui.begin_child("## Main", -1, -footer_height_to_reserve())
         try:
             if media is not None:
-                if imgui.begin_tab_bar("Media Tabs"):
-                    if imgui.begin_tab_item("Info").selected:
-                        imgui.text("Section:")
-                        imgui.push_item_width(-1)
-                        imgui.push_style_color(
-                            imgui.COLOR_FRAME_BACKGROUND, 0.2, 0.2, 0.2
-                        )
-                        imgui.push_style_color(imgui.COLOR_TEXT, 0.8, 0.8, 0.8)
-                        imgui.input_text("## Section", media.section, -1, READ_ONLY)
-                        imgui.pop_style_color(2)
-                        imgui.pop_item_width()
-
-                        imgui.separator()
-
-                        imgui.text("Name:")
-                        imgui.push_item_width(-1)
-                        media.name = imgui.input_text(
-                            "## Name", media.name, -1, ENTER_RETURN
-                        )[1]
-                        imgui.pop_item_width()
-
-                        imgui.separator()
-
-                        imgui.text("File:")
-                        imgui.push_item_width(-1)
-                        media.file = imgui.input_text(
-                            "## File", media.file, -1, ENTER_RETURN
-                        )[1]
-                        imgui.pop_item_width()
-
-                        imgui.separator()
-
-                        if button_ex("Start"):
-                            pass
-                        if button_ex("Stop"):
-                            pass
-
-                        imgui.end_tab_item()
-                    imgui.end_tab_bar()
+                self._media_tab_bar(media)
             else:
-                message = "Please select a media item"
-                window_size = imgui.get_window_size()
-                text_size = imgui.calc_text_size(message)
-                text_x = (window_size.x - text_size.x) * 0.5
-                text_y = (window_size.y - text_size.y) * 0.5
-                imgui.set_cursor_pos((text_x, text_y))
-                imgui.text(message)
+                text_centered("Please select a media item")
         finally:
             imgui.end_child()
+
+    def _media_tab_bar(self, media: MediaSection) -> None:
+        if not imgui.begin_tab_bar("Media Tabs"):
+            return
+
+        try:
+            self._basic_tab(media)
+        finally:
+            imgui.end_tab_bar()
+
+    def _basic_tab(self, media: MediaSection) -> None:
+        if not imgui.begin_tab_item("Basic").selected:
+            return
+
+        try:
+            imgui.text("Section:")
+            input_text_disabled("## Section", media.section)
+
+            imgui.text("Name:")
+            with item_width(-1):
+                media.name = input_text_value("## Name", media.name)
+
+            imgui.text("File:")
+            with item_width(-1):
+                media.file = input_text_value("## File", media.file)
+
+            imgui.separator()
+            imgui.text("Process:")
+
+            process = self._ffmpegs.get(media.section)
+            status = process.psutil.status() if process else "not-exists"
+
+            imgui.text("Status: ")
+            imgui.same_line()
+            imgui.text(status)
+
+            if button_ex("Spawn"):
+                pass
+            imgui.same_line()
+            if button_ex("Stop"):
+                pass
+
+            # STATUS_RUNNING = "running"
+            # STATUS_SLEEPING = "sleeping"
+            # STATUS_DISK_SLEEP = "disk-sleep"
+            # STATUS_STOPPED = "stopped"
+            # STATUS_TRACING_STOP = "tracing-stop"
+            # STATUS_ZOMBIE = "zombie"
+            # STATUS_DEAD = "dead"
+            # STATUS_WAKE_KILL = "wake-kill"
+            # STATUS_WAKING = "waking"
+            # STATUS_IDLE = "idle"  # Linux, macOS, FreeBSD
+            # STATUS_LOCKED = "locked"  # FreeBSD
+            # STATUS_WAITING = "waiting"  # FreeBSD
+            # STATUS_SUSPENDED = "suspended"  # NetBSD
+            # STATUS_PARKED = "parked"  # Linux
+
+        finally:
+            imgui.end_tab_item()

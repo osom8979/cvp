@@ -31,7 +31,7 @@ class OverlaySection(CommonWindowSection):
 
     @property
     def anchor(self) -> Anchor:
-        return Anchor(self.get(self.K.anchor, 0))
+        return Anchor(self.get(self.K.anchor, int(Anchor.TopLeft)))
 
     @anchor.setter
     def anchor(self, value: Anchor) -> None:
