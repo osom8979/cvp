@@ -63,7 +63,7 @@ class PlayerContext:
         self._manager = ManagerWindow(self._ffmpegs, self._config)
         self._preference = PreferenceWindow(self._config)
         for config in self._config.medias.values():
-            self._windows[config.section] = MediaWindow(config)
+            self._windows[config.section] = MediaWindow(config, self._ffmpegs)
 
         self._open_file_popup = OpenFilePopup()
         self._open_url_popup = OpenUrlPopup()
@@ -88,7 +88,7 @@ class PlayerContext:
         section.file = file
         section.name = file
 
-        window = MediaWindow(section)
+        window = MediaWindow(section, self._ffmpegs)
         window.do_create()
 
         self._windows[section.section] = window
@@ -193,6 +193,18 @@ class PlayerContext:
             win.do_create()
 
     def on_exit(self) -> None:
+        for process in self._ffmpegs.values():
+            if process.poll() is not None:
+                continue
+            process.interrupt()
+
+        process_timeout = 2.0
+        for process in self._ffmpegs.values():
+            try:
+                process.wait(process_timeout)
+            except TimeoutError:
+                process.kill()
+
         for win in self._windows.values():
             win.do_destroy()
 

@@ -19,10 +19,11 @@ class ProcessTestCase(TestCase):
         rate = 10
         width = 1920
         height = 1080
-        channels = 3
         pix_fmt = "rgb24"
-        frame_size = width * height * channels
-        shape = height, width, channels
+        channels = 3
+        frame_shape = width, height, channels
+        array_shape = height, width, channels
+
         total_frames = duration * rate
         color = 253, 0, 0  # red
 
@@ -50,9 +51,9 @@ class ProcessTestCase(TestCase):
         frames = list()
 
         def on_frame(data: bytes) -> None:
-            frames.append(np.ndarray(shape, dtype=np.uint8, buffer=data))
+            frames.append(np.ndarray(array_shape, dtype=np.uint8, buffer=data))
 
-        popen = FFmpegProcess(type(self).__name__, args, frame_size, target=on_frame)
+        popen = FFmpegProcess(type(self).__name__, args, frame_shape, target=on_frame)
         popen.start_thread()
         popen.join_thread()
 

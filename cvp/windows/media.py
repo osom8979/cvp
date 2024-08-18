@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Tuple
+from ctypes import addressof, c_void_p, create_string_buffer, memmove
+from typing import Final
 
 import imgui
 from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
 from cvp.config.sections.media import MediaSection
+from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.menu_item_ex import menu_item_ex
@@ -18,19 +20,24 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaSection]):
-    def __init__(self, config: MediaSection):
+    def __init__(self, config: MediaSection, ffmpegs: FFmpegManager):
         super().__init__(config)
 
+        self._ffmpegs = ffmpegs
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._min_width = MIN_WINDOW_WIDTH
         self._min_height = MIN_WINDOW_HEIGHT
         self._texture = 0
+        self._pbo = 0
         self._popup_name = "ContextMenu"
+        self._prev_frame_index = 0
 
     @override
     def on_create(self) -> None:
         assert self._texture == 0
+        assert self._pbo == 0
+
         self._texture = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._texture)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
@@ -48,11 +55,25 @@ class MediaWindow(Window[MediaSection]):
         )
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
 
+        self._pbo = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, self._pbo)
+        size = self._min_width * self._min_height * 3
+        GL.glBufferData(GL.GL_PIXEL_UNPACK_BUFFER, size, None, GL.GL_STREAM_DRAW)
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
+
+        assert self._texture != 0
+        assert self._pbo != 0
+
     @override
     def on_destroy(self) -> None:
         assert self._texture != 0
+        assert self._pbo != 0
+
         GL.glDeleteTextures(1, self._texture)
         self._texture = 0
+
+        GL.glDeleteBuffers(1, self._pbo)
+        self._pbo = 0
 
     @override
     def on_process(self) -> None:
@@ -80,18 +101,41 @@ class MediaWindow(Window[MediaSection]):
         finally:
             imgui.end()
 
-    def update_texture_size(self, size: Tuple[int, int]) -> None:
+    def update_texture(self) -> None:
         if not self._texture:
             return
 
-        width = size[0]
-        height = size[1]
+        process = self._ffmpegs.get(self.config.section)
+        if process is None:
+            return
+
+        if process.poll() is not None:
+            return
+
+        pixels = process.dequeue_latest()
+        if not pixels:
+            return
+
+        if self._prev_frame_index == process.latest_count:
+            return
+
+        self._prev_frame_index = process.latest_count
+        width = process.frame_shape.width
+        height = process.frame_shape.height
+        channels = process.frame_shape.channels
+
         if width <= 0 or height <= 0:
             return
 
         assert isinstance(width, int)
         assert isinstance(height, int)
+        assert isinstance(channels, int)
+        assert channels == 3
 
+        self.update_texture_image_2d(width, height, pixels)
+        # self.update_texture_with_pbo(width, height, channels, pixels)
+
+    def update_texture_image_2d(self, width: int, height: int, pixels: bytes) -> None:
         GL.glBindTexture(GL.GL_TEXTURE_2D, self._texture)
         GL.glTexImage2D(
             GL.GL_TEXTURE_2D,
@@ -102,9 +146,43 @@ class MediaWindow(Window[MediaSection]):
             0,
             GL.GL_RGB,
             GL.GL_UNSIGNED_BYTE,
-            None,
+            pixels,
         )
         GL.glBindTexture(GL.GL_TEXTURE_2D, 0)
+
+    def update_texture_with_pbo(
+        self,
+        width: int,
+        height: int,
+        channels: int,
+        pixels: bytes,
+    ) -> None:
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, self._pbo)
+        GL.glBindTexture(GL.GL_TEXTURE_2D, self._texture)
+        GL.glTexSubImage2D(
+            GL.GL_TEXTURE_2D,
+            0,
+            0,
+            0,
+            width,
+            height,
+            GL.GL_RGB,
+            GL.GL_UNSIGNED_BYTE,
+            c_void_p(0),
+        )
+
+        size = width * height * channels
+
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, self._pbo)
+        GL.glBufferData(GL.GL_PIXEL_UNPACK_BUFFER, size, None, GL.GL_STREAM_DRAW)
+
+        buffer_ptr = GL.glMapBuffer(GL.GL_PIXEL_UNPACK_BUFFER, GL.GL_WRITE_ONLY)
+        if buffer_ptr:
+            pixels_ptr = addressof(create_string_buffer(pixels, size))
+            memmove(buffer_ptr, pixels_ptr, size)
+            GL.glUnmapBuffer(GL.GL_PIXEL_UNPACK_BUFFER)
+
+        GL.glBindBuffer(GL.GL_PIXEL_UNPACK_BUFFER, 0)
 
     @staticmethod
     def begin_child_canvas() -> None:
@@ -137,11 +215,7 @@ class MediaWindow(Window[MediaSection]):
         filled_color = imgui.get_color_u32_rgba(*self._clear_color)
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
-        w = int(cw)
-        h = int(ch)
-        size = w, h
-
-        self.update_texture_size(size)
+        self.update_texture()
 
         p1 = cx, cy
         p2 = cx + cw, cy + ch

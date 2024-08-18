@@ -5,11 +5,10 @@ import os
 import sys
 from pathlib import Path
 from subprocess import DEVNULL
-from typing import IO, Callable, Dict, Mapping, Optional, Sequence, Union
+from typing import IO, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from cvp.arguments import CVP_HOME
-from cvp.ffmpeg.ffmpeg.builder import FFmpegBuilder
-from cvp.ffmpeg.ffmpeg.process import FFmpegProcess
+from cvp.ffmpeg.ffmpeg.process import FFmpegProcess, FrameShape
 
 
 class FFmpegManager(Dict[str, FFmpegProcess]):
@@ -29,7 +28,7 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
         self,
         key: str,
         args: Sequence[str],
-        frame_size: int,
+        frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = None,
         stderr: Optional[Union[int, IO]] = DEVNULL,
@@ -41,7 +40,7 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
         process = FFmpegProcess(
             name=key,
             args=args,
-            frame_size=frame_size,
+            frame_shape=frame_shape,
             buffer_size=buffer_size,
             stdin=stdin,
             stderr=stderr,
@@ -76,20 +75,12 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
             f"{width}x{height}",
             "pipe:1",
         )
-        frame_size = width * height * 3
+        frame_shape = width, height, 3
         return self.spawn(
             key,
             args=args,
             stderr=sys.stderr.fileno(),
-            frame_size=frame_size,
-        )
-
-    def spawn_builder(self, key: str, frame_size: int, builder: FFmpegBuilder):
-        return self.spawn(
-            key,
-            args=(),
-            frame_size=frame_size,
-            stderr=sys.stderr.fileno(),
+            frame_shape=frame_shape,
         )
 
     def spawnable(self, key: str) -> bool:
