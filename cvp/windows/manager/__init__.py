@@ -5,6 +5,7 @@ import imgui
 from cvp.config.config import Config
 from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
+from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
@@ -148,22 +149,42 @@ class ManagerWindow:
                 media.file = input_text_value("## File", media.file)
 
             key = media.section
-            process = self._ffmpegs.get(key)
             spawnable = self._ffmpegs.spawnable(key)
             stoppable = self._ffmpegs.stoppable(key)
             removable = self._ffmpegs.removable(key)
 
             imgui.separator()
-            status = process.psutil.status() if process else "not-exists"
+            imgui.text("Frame:")
+            media.frame_size = imgui.input_int2("Size", *media.frame_size)[1]
+            if imgui.button("Reset"):
+                media.frame_size = 0, 0
+            imgui.same_line()
+            if imgui.button("Inspect"):
+                try:
+                    media.frame_size = inspect_video_frame_size(media.file)
+                except BaseException as e:
+                    print(e)
+
+            imgui.separator()
+            try:
+                status = self._ffmpegs.status(key)
+            except BaseException as e:
+                status = str(e)
             imgui.text(f"Process ({status})")
 
             if button_ex("Spawn", disabled=not spawnable):
+                self._ffmpegs.spawn_with_file(
+                    key,
+                    media.frame_width,
+                    media.frame_height,
+                    media.file,
+                )
                 pass
             imgui.same_line()
             if button_ex("Stop", disabled=not stoppable):
-                pass
+                self._ffmpegs.interrupt(key)
             imgui.same_line()
             if button_ex("Remove", disabled=not removable):
-                pass
+                self._ffmpegs.pop(key)
         finally:
             imgui.end_tab_item()

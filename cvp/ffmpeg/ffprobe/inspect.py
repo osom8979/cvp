@@ -20,7 +20,7 @@ def inspect_source(src: str, *, ffprobe="ffprobe") -> Any:
     return loads(check_output(ffprobe_command))
 
 
-def inspect_source_size(
+def inspect_video_frame_size(
     src: str,
     video_stream_index=0,
     *,
@@ -31,7 +31,8 @@ def inspect_source_size(
 
     streams = inspect_result["streams"]
     video_streams = list(filter(lambda x: x["codec_type"] == "video", streams))
-    video_stream = video_streams[video_stream_index]
+    video_stream_map = {int(stream["index"]): stream for stream in video_streams}
+    video_stream = video_stream_map[video_stream_index]
 
     width = video_stream["width"]
     height = video_stream["height"]

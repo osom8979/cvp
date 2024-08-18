@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from shlex import split
-from typing import List
+from typing import List, Optional, Tuple, Union
 
+from cvp.ffmpeg.utils.video_size import VIDEO_SIZES
 from cvp.types.override import override
 
 
@@ -14,6 +15,9 @@ class FileBuilder:
         self._options = list()
         self._file = file
         self._done = False
+
+    def as_args(self) -> List[str]:
+        raise NotImplementedError
 
     def clear(self) -> None:
         self._options.clear()
@@ -38,8 +42,25 @@ class FileBuilder:
         assert isinstance(self._base, FFmpegBuilder)
         return self._base
 
-    def as_args(self) -> List[str]:
-        raise NotImplementedError
+    def find_s(
+        self,
+        stream_specifier: Optional[Union[str, int]] = None,
+    ) -> str:
+        """
+        -s[:stream_specifier] size (input/output,per-stream)
+
+        Set frame size.
+        """
+        value = f"-s:{stream_specifier}" if stream_specifier is not None else "-s"
+        return self._options[self._options.index(value) + 1]
+
+    @staticmethod
+    def parse_s(text: str) -> Tuple[int, int]:
+        if text in VIDEO_SIZES:
+            return VIDEO_SIZES[text]
+        else:
+            width, height = text.split("x")
+            return int(width), int(height)
 
 
 class InputFileBuilder(FileBuilder):

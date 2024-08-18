@@ -58,3 +58,11 @@ class FFmpegBuilder(FFmpegGlobalOptions):
         builder = OutputFileBuilder(self, file)
         self._files.append(builder)
         return builder
+
+    @property
+    def infiles(self) -> List[InputFileBuilder]:
+        return [file for file in self._files if isinstance(file, InputFileBuilder)]
+
+    @property
+    def outfiles(self) -> List[OutputFileBuilder]:
+        return [file for file in self._files if isinstance(file, OutputFileBuilder)]
