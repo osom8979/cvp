@@ -2,10 +2,14 @@
 # https://plugins.jetbrains.com/plugin/12089-dictionary
 
 aarch
+armv
 asctime
+athlon
+athlonxp
 autodect
 bsfs
 buildconf
+cmov
 copytb
 copyts
 cpuflags
@@ -16,6 +20,8 @@ demuxer
 demuxers
 demuxing
 discardcorrupt
+dnow
+dnowext
 dockerignore
 dostr
 fastdecode
@@ -42,6 +48,7 @@ levelname
 libgl
 materialdesignicons
 meipass
+mmxext
 muxing
 nanum
 nobuffer
@@ -67,10 +74,12 @@ rawvideo
 remapper
 returncode
 sameq
+setend
 sntsc
 spal
 spawnable
 sqcif
+ssse
 stillimage
 subpath
 svga
@@ -80,6 +89,7 @@ uxga
 vcodec
 veryfast
 veryslow
+vfpv
 vimspector
 whsxga
 whuxga

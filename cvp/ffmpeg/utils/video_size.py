@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+Specify the size of the sourced video, it may be a string of the form {width}x{height},
+or the name of a size abbreviation.
+
+https://ffmpeg.org/ffmpeg-utils.html#Video-size
+"""
 
 from typing import Dict, Final, Tuple
 
@@ -57,9 +63,3 @@ VIDEO_SIZES: Final[Dict[str, Tuple[int, int]]] = {
     "uhd2160": (3840, 2160),
     "uhd4320": (7680, 4320),
 }
-"""
-Specify the size of the sourced video, it may be a string of the form {width}x{height},
-or the name of a size abbreviation.
-
-https://ffmpeg.org/ffmpeg-utils.html#Video-size
-"""
