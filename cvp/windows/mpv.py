@@ -9,8 +9,8 @@ from mpv import MPV, MpvGlGetProcAddressFn, MpvRenderContext
 from OpenGL import GL
 
 from cvp.config.sections.mpv import MpvSection
+from cvp.gl.runtime import get_process_address
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
-from cvp.renderer.gl import get_process_address
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.popups.open_file import OpenFilePopup

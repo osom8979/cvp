@@ -44,6 +44,9 @@ class DownloadArchive:
         url: Union[str, ParseResult],
         paths: Sequence[Union[Tuple[str, str], ExtractPath]],
         checksum: Optional[Union[str, Tuple[str, str], Checksum]] = None,
+        extract_root: Optional[str] = None,
+        cache_dir: Optional[str] = None,
+        temp_dir: Optional[str] = None,
     ):
         if not paths:
             raise ValueError("No paths given")
@@ -80,6 +83,10 @@ class DownloadArchive:
         else:
             self._checksum = None
 
+        self._extract_root = extract_root if extract_root else get_assets_dir()
+        self._cache_dir = cache_dir if cache_dir else get_cache_dir()
+        self._temp_dir = temp_dir
+
     def __repr__(self):
         return f"<DownloadArchive {self._url}>"
 
@@ -101,7 +108,7 @@ class DownloadArchive:
 
     @property
     def extract_files(self) -> List[str]:
-        return [os.path.join(get_assets_dir(), p.extract_path) for p in self._paths]
+        return [os.path.join(self._extract_root, p.extract_path) for p in self._paths]
 
     @property
     def has_extract_files(self):
@@ -117,7 +124,7 @@ class DownloadArchive:
 
     @property
     def cache_path(self) -> str:
-        return os.path.join(get_cache_dir(), self.filename)
+        return os.path.join(self._cache_dir, self.filename)
 
     def healthcheck(
         self,
@@ -143,12 +150,12 @@ class DownloadArchive:
             return calc_checksum(method, f.read()) == value
 
     def extract(self) -> None:
-        with TemporaryDirectory() as tmpdir:
+        with TemporaryDirectory(dir=self._temp_dir) as tmpdir:
             unpack_archive(self.cache_path, tmpdir)
 
             for path in self._paths:
                 src = os.path.join(tmpdir, path.archive_path)
-                dest = os.path.join(get_assets_dir(), path.extract_path)
+                dest = os.path.join(self._extract_root, path.extract_path)
                 move(src, dest)
 
     def prepare(

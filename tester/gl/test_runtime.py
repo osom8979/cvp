@@ -5,10 +5,10 @@ from unittest import TestCase, main
 
 from OpenGL import GL, platform
 
-from cvp.renderer.gl import get_opengl_dll, get_process_address
+from cvp.gl.runtime import get_opengl_dll, get_process_address
 
 
-class GlTestCase(TestCase):
+class RuntimeTestCase(TestCase):
     def test_platform_dll(self):
         # noinspection PyUnresolvedReferences
         self.assertEqual(GL.glGetString.DLL, platform.PLATFORM.OpenGL)
