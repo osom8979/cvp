@@ -5,14 +5,14 @@ from typing import Optional
 import imgui
 import pygame
 
-from cvp.variables import MIN_OPEN_URL_POPUP_HEIGHT, MIN_OPEN_URL_POPUP_WIDTH
+from cvp.types.override import override
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.input_text_value import input_text_value
 from cvp.widgets.item_width import item_width
-from cvp.widgets.set_window_min_size import set_window_min_size
+from cvp.widgets.popups._popup import Popup
 
 
-class InputTextPopup:
+class InputTextPopup(Popup[str]):
     def __init__(
         self,
         title: Optional[str] = None,
@@ -21,49 +21,21 @@ class InputTextPopup:
         ok: Optional[str] = None,
         cancel: Optional[str] = None,
         centered=True,
+        flags=0,
     ):
-        self._title = title if title else type(self).__name__
+        super().__init__(title, centered, flags)
         self._label = label if label else str()
         self._text = text if text else str()
         self._ok_button_label = ok if ok else "Ok"
         self._cancel_button_label = cancel if cancel else "Cancel"
         self._text_label = "## Text"
-        self._centered = centered
-
-        self._enabled = False
-        self._min_width = MIN_OPEN_URL_POPUP_WIDTH
-        self._min_height = MIN_OPEN_URL_POPUP_HEIGHT
 
     @property
     def text(self):
         return self._text
 
-    def show(self) -> None:
-        self._enabled = True
-
-    def process(self) -> Optional[str]:
-        if self._enabled:
-            imgui.open_popup(self._title)
-            self._enabled = False
-
-        if self._centered:
-            x, y = imgui.get_main_viewport().get_center()
-            px, py = 0.5, 0.5
-            imgui.set_next_window_position(x, y, imgui.APPEARING, px, py)
-
-        modal = imgui.begin_popup_modal(self._title)
-        if not modal.opened:
-            return None
-
-        try:
-            return self._main()
-        finally:
-            imgui.end_popup()
-
+    @override
     def _main(self) -> Optional[str]:
-        if imgui.is_window_appearing():
-            set_window_min_size(self._min_width, self._min_height)
-
         if self._label:
             imgui.text(self._label)
 

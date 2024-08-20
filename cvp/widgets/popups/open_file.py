@@ -9,26 +9,30 @@ import imgui
 import pygame
 
 from cvp.logging.logging import logger
-from cvp.variables import MIN_OPEN_FILE_POPUP_HEIGHT, MIN_OPEN_FILE_POPUP_WIDTH
+from cvp.types.override import override
 from cvp.widgets.begin_child import begin_child, end_child
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
+from cvp.widgets.popups._popup import Popup
 from cvp.widgets.set_window_min_size import set_window_min_size
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 DOUBLE_CLICK = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK
 
 
-class OpenFilePopup:
+class OpenFilePopup(Popup[str]):
     _items: List[str]
 
     def __init__(
         self,
         title: Optional[str] = None,
         directory: Optional[Union[str, PathLike]] = None,
-        centered=True,
         show_hidden=False,
+        centered=True,
+        flags=0,
     ):
+        super().__init__(title, centered, flags)
+
         if isinstance(directory, Path) and directory.is_dir():
             dir_path = directory
         elif isinstance(directory, str) and os.path.isdir(directory):
@@ -36,7 +40,6 @@ class OpenFilePopup:
         else:
             dir_path = Path.home()
 
-        self._title = title if title else type(self).__name__
         self._location_text = str(dir_path)
         self._current_dir = str()
         self._items = list()
@@ -47,12 +50,7 @@ class OpenFilePopup:
         self._hidden_checkbox_label = "Show Hidden"
         self._open_button_label = "Open"
         self._close_button_label = "Close"
-
-        self._enabled = False
-        self._centered = centered
         self._show_hidden = show_hidden
-        self._min_width = MIN_OPEN_FILE_POPUP_WIDTH
-        self._min_height = MIN_OPEN_FILE_POPUP_HEIGHT
 
     @staticmethod
     def list_items(location: Union[str, PathLike], show_hidden=False) -> List[str]:
@@ -73,28 +71,7 @@ class OpenFilePopup:
 
         return dirs + files
 
-    def show(self) -> None:
-        self._enabled = True
-
-    def process(self) -> Optional[str]:
-        if self._enabled:
-            imgui.open_popup(self._title)
-            self._enabled = False
-
-        if self._centered:
-            x, y = imgui.get_main_viewport().get_center()
-            px, py = 0.5, 0.5
-            imgui.set_next_window_position(x, y, imgui.APPEARING, px, py)
-
-        modal = imgui.begin_popup_modal(self._title)
-        if not modal.opened:
-            return None
-
-        try:
-            return self._main()
-        finally:
-            imgui.end_popup()
-
+    @override
     def _main(self) -> Optional[str]:
         if imgui.is_window_appearing():
             set_window_min_size(self._min_width, self._min_height)
