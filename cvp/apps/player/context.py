@@ -18,8 +18,8 @@ from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
 from cvp.renderer.imgui import add_jbm_font, add_ngc_font
 from cvp.renderer.renderer import PygameRenderer
+from cvp.widgets.popups.input_text import InputTextPopup
 from cvp.widgets.popups.open_file import OpenFilePopup
-from cvp.widgets.popups.open_url import OpenUrlPopup
 
 # noinspection PyProtectedMember
 from cvp.windows._window import Window
@@ -66,7 +66,12 @@ class PlayerContext:
             self._windows[config.section] = MediaWindow(config, self._ffmpegs)
 
         self._open_file_popup = OpenFilePopup()
-        self._open_url_popup = OpenUrlPopup()
+        self._open_url_popup = InputTextPopup(
+            title="Open network stream",
+            label="Please enter a network URL:",
+            ok="Open",
+            cancel="Close",
+        )
 
     @classmethod
     def from_namespace(cls, args: Namespace):
@@ -102,17 +107,6 @@ class PlayerContext:
         self._open_file_popup.show(
             title="Open file",
             callback=self.on_open_file,
-        )
-
-    def on_open_url(self, file: Optional[str]) -> None:
-        if not file:
-            return
-        self.add_media_window(file)
-
-    def open_url(self):
-        self._open_url_popup.show(
-            title="Open network stream",
-            callback=self.on_open_url,
         )
 
     def start(self) -> None:
@@ -237,7 +231,7 @@ class PlayerContext:
         if keys[pygame.K_LCTRL] and keys[pygame.K_o]:
             self.open_file()
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
-            self.open_url()
+            self._open_url_popup.show()
 
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
             self._manager.opened = True
@@ -270,7 +264,7 @@ class PlayerContext:
                 if imgui.menu_item("Open file", "Ctrl+O")[0]:
                     self.open_file()
                 if imgui.menu_item("Open network", "Ctrl+N")[0]:
-                    self.open_url()
+                    self._open_url_popup.show()
 
                 imgui.separator()
                 _manager_opened = self._manager.opened
@@ -298,7 +292,10 @@ class PlayerContext:
 
     def on_popups(self) -> None:
         self._open_file_popup.process()
-        self._open_url_popup.process()
+
+        url = self._open_url_popup.process()
+        if url:
+            self.add_media_window(url)
 
     def on_demo_window(self) -> None:
         if not self._debug:
