@@ -58,7 +58,7 @@ class MpvWindow(Window[MpvSection]):
         super().__init__(config)
 
         self._flags = flags
-        self._popup = OpenFilePopup()
+        self._popup = OpenFilePopup("Open video file")
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._playback = 0.0
         self._volume = 0.0
@@ -119,7 +119,9 @@ class MpvWindow(Window[MpvSection]):
     @override
     def on_process(self) -> None:
         self._process_window()
-        self._popup.process()
+        file = self._popup.process()
+        if file:
+            self.open(file)
 
     def _process_window(self) -> None:
         if not self.opened:
@@ -224,17 +226,6 @@ class MpvWindow(Window[MpvSection]):
             opengl_fbo=dict(w=width, h=height, fbo=self._fbo),
         )
 
-    def on_open_file(self, file: Optional[str]) -> None:
-        if not file:
-            return
-        self.open(file)
-
-    def open_file_popup(self) -> None:
-        self._popup.show(
-            title="Open video file",
-            callback=self.on_open_file,
-        )
-
     @staticmethod
     def slider_float(label: str, value: float) -> Tuple[bool, float]:
         changed, value = imgui.slider_float(
@@ -287,7 +278,7 @@ class MpvWindow(Window[MpvSection]):
         if imgui.begin_menu_bar().opened:
             if imgui.begin_menu("File").opened:
                 if imgui.menu_item("Open")[0]:
-                    self.open_file_popup()
+                    self._popup.show()
 
                 imgui.separator()
                 if imgui.menu_item("Close")[0]:

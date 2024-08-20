@@ -65,7 +65,9 @@ class PlayerContext:
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config, self._ffmpegs)
 
-        self._open_file_popup = OpenFilePopup()
+        self._open_file_popup = OpenFilePopup(
+            title="Open file",
+        )
         self._open_url_popup = InputTextPopup(
             title="Open network stream",
             label="Please enter a network URL:",
@@ -97,17 +99,6 @@ class PlayerContext:
         window.do_create()
 
         self._windows[section.section] = window
-
-    def on_open_file(self, file: Optional[str]) -> None:
-        if not file:
-            return
-        self.add_media_window(file)
-
-    def open_file(self):
-        self._open_file_popup.show(
-            title="Open file",
-            callback=self.on_open_file,
-        )
 
     def start(self) -> None:
         self.on_init()
@@ -229,7 +220,7 @@ class PlayerContext:
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
             self.quit()
         if keys[pygame.K_LCTRL] and keys[pygame.K_o]:
-            self.open_file()
+            self._open_file_popup.show()
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
             self._open_url_popup.show()
 
@@ -262,7 +253,7 @@ class PlayerContext:
         with imgui.begin_main_menu_bar():
             if imgui.begin_menu("File"):
                 if imgui.menu_item("Open file", "Ctrl+O")[0]:
-                    self.open_file()
+                    self._open_file_popup.show()
                 if imgui.menu_item("Open network", "Ctrl+N")[0]:
                     self._open_url_popup.show()
 
@@ -291,7 +282,9 @@ class PlayerContext:
                 imgui.end_menu()
 
     def on_popups(self) -> None:
-        self._open_file_popup.process()
+        file = self._open_file_popup.process()
+        if file:
+            self.add_media_window(file)
 
         url = self._open_url_popup.process()
         if url:

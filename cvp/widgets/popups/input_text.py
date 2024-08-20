@@ -25,8 +25,8 @@ class InputTextPopup:
         self._title = title if title else type(self).__name__
         self._label = label if label else str()
         self._text = text if text else str()
-        self._ok = ok if ok else "Ok"
-        self._cancel = cancel if cancel else "Cancel"
+        self._ok_button_label = ok if ok else "Ok"
+        self._cancel_button_label = cancel if cancel else "Cancel"
         self._text_label = "## Text"
         self._centered = centered
 
@@ -34,32 +34,12 @@ class InputTextPopup:
         self._min_width = MIN_OPEN_URL_POPUP_WIDTH
         self._min_height = MIN_OPEN_URL_POPUP_HEIGHT
 
-    def show(
-        self,
-        title: Optional[str] = None,
-        label: Optional[str] = None,
-        text: Optional[str] = None,
-        ok: Optional[str] = None,
-        cancel: Optional[str] = None,
-        centered: Optional[bool] = None,
-    ) -> None:
-        if title is not None:
-            self._title = title
-        if label is not None:
-            self._label = label
-        if text is not None:
-            self._text = text
-        if ok is not None:
-            self._ok = ok
-        if cancel is not None:
-            self._cancel = cancel
-        if centered is not None:
-            self._centered = centered
-        self._enabled = True
-
     @property
     def text(self):
         return self._text
+
+    def show(self) -> None:
+        self._enabled = True
 
     def process(self) -> Optional[str]:
         if self._enabled:
@@ -100,11 +80,11 @@ class InputTextPopup:
             imgui.close_current_popup()
             return None
 
-        if button_ex(self._cancel):
+        if button_ex(self._cancel_button_label):
             imgui.close_current_popup()
             return None
         imgui.same_line()
-        if button_ex(self._ok, disabled=not self._text):
+        if button_ex(self._ok_button_label, disabled=not self._text):
             imgui.close_current_popup()
             return self._text
 
