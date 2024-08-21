@@ -21,8 +21,8 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 
 class OverlayWindow(Window[OverlaySection]):
-    def __init__(self, config: OverlaySection, flags=OVERLAY_WINDOW_FLAGS):
-        super().__init__(config)
+    def __init__(self, section: OverlaySection, flags=OVERLAY_WINDOW_FLAGS):
+        super().__init__(section)
 
         self._flags = flags
         self._normal_color = 0.0, 1.0, 0.0
@@ -33,11 +33,11 @@ class OverlayWindow(Window[OverlaySection]):
 
     @property
     def is_left_side(self):
-        return self.config.is_left_side
+        return self.section.is_left_side
 
     @property
     def is_top_side(self):
-        return self.config.is_top_side
+        return self.section.is_top_side
 
     @property
     def window_position(self) -> Tuple[float, float]:
@@ -46,7 +46,7 @@ class OverlayWindow(Window[OverlaySection]):
         work_size = viewport.work_size
         work_pos_x, work_pos_y = work_pos
         work_size_x, work_size_y = work_size
-        padding = self.config.padding
+        padding = self.section.padding
         x = work_pos_x + (padding if self.is_left_side else work_size_x - padding)
         y = work_pos_y + (padding if self.is_top_side else work_size_y - padding)
         return x, y
@@ -58,9 +58,9 @@ class OverlayWindow(Window[OverlaySection]):
         return x, y
 
     def get_framerate_color(self, framerate: float) -> Tuple[float, float, float]:
-        if framerate >= self.config.fps_warning_threshold:
+        if framerate >= self.section.fps_warning_threshold:
             return self._normal_color
-        elif framerate >= self.config.fps_error_threshold:
+        elif framerate >= self.section.fps_error_threshold:
             return self._warning_color
         else:
             return self._error_color
@@ -82,14 +82,14 @@ class OverlayWindow(Window[OverlaySection]):
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
         if imgui.begin_popup_context_window():
-            if menu_item_ex("Top-Left", self.config.is_top_left):
-                self.config.set_top_left()
-            if menu_item_ex("Top-Right", self.config.is_top_right):
-                self.config.set_top_right()
-            if menu_item_ex("Bottom-Left", self.config.is_bottom_left):
-                self.config.set_bottom_left()
-            if menu_item_ex("Bottom-Right", self.config.is_bottom_right):
-                self.config.set_bottom_right()
+            if menu_item_ex("Top-Left", self.section.is_top_left):
+                self.section.set_top_left()
+            if menu_item_ex("Top-Right", self.section.is_top_right):
+                self.section.set_top_right()
+            if menu_item_ex("Bottom-Left", self.section.is_bottom_left):
+                self.section.set_bottom_left()
+            if menu_item_ex("Bottom-Right", self.section.is_bottom_right):
+                self.section.set_bottom_right()
             imgui.separator()
             if menu_item_ex("Close"):
                 self.opened = False
@@ -102,7 +102,7 @@ class OverlayWindow(Window[OverlaySection]):
         pos_x, pos_y = self.window_position
         pivot_x, pivot_y = self.window_pivot
         imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
-        imgui.set_next_window_bg_alpha(self.config.alpha)
+        imgui.set_next_window_bg_alpha(self.section.alpha)
 
         expanded, opened = imgui.begin("Overlay Window", False, self._flags)
         try:

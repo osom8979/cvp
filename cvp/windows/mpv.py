@@ -54,8 +54,8 @@ class MpvWindow(Window[MpvSection]):
     _mpv: Optional[MPV]
     _context: Optional[MpvRenderContext]
 
-    def __init__(self, config: MpvSection, flags=imgui.WINDOW_MENU_BAR):
-        super().__init__(config)
+    def __init__(self, section: MpvSection, flags=imgui.WINDOW_MENU_BAR):
+        super().__init__(section)
 
         self._flags = flags
         self._popup = OpenFilePopup("Open video file")

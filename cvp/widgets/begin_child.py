@@ -15,5 +15,5 @@ def begin_child(
     return imgui.begin_child(label, width, height, border, flags)  # noqa
 
 
-def end_child():
-    return imgui.end_child()
+def end_child() -> None:
+    imgui.end_child()

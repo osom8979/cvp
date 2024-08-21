@@ -11,14 +11,14 @@ SectionT = TypeVar("SectionT", bound=CommonWindowSection)
 
 
 class Window(Generic[SectionT], WindowInterface):
-    def __init__(self, config: SectionT):
-        assert isinstance(config, CommonWindowSection)
-        self._config = config
+    def __init__(self, section: SectionT):
+        assert isinstance(section, CommonWindowSection)
+        self._section = section
         self._initialized = False
 
     @property
-    def config(self) -> SectionT:
-        return self._config
+    def section(self) -> SectionT:
+        return self._section
 
     @property
     def initialized(self) -> bool:
@@ -26,11 +26,11 @@ class Window(Generic[SectionT], WindowInterface):
 
     @property
     def opened(self) -> bool:
-        return self._config.opened
+        return self._section.opened
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self._config.opened = value
+        self._section.opened = value
 
     @override
     def on_process(self) -> None:

@@ -20,8 +20,8 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaSection]):
-    def __init__(self, config: MediaSection, ffmpegs: FFmpegManager):
-        super().__init__(config)
+    def __init__(self, section: MediaSection, ffmpegs: FFmpegManager):
+        super().__init__(section)
 
         self._ffmpegs = ffmpegs
         self._flags = 0
@@ -81,8 +81,8 @@ class MediaWindow(Window[MediaSection]):
 
     @property
     def window_title(self) -> str:
-        name = self.config.name
-        return (name if name else type(self).__name__) + "###" + self.config.section
+        name = self.section.name
+        return (name if name else type(self).__name__) + "###" + self.section.section
 
     def _process_window(self) -> None:
         if not self.opened:
@@ -105,7 +105,7 @@ class MediaWindow(Window[MediaSection]):
         if not self._texture:
             return
 
-        process = self._ffmpegs.get(self.config.section)
+        process = self._ffmpegs.get(self.section.section)
         if process is None:
             return
 

@@ -5,7 +5,7 @@ from typing import Generic, Optional, TypeVar
 
 import imgui
 
-from cvp.variables import MIN_DEFAULT_POPUP_HEIGHT, MIN_DEFAULT_POPUP_WIDTH
+from cvp.variables import MIN_POPUP_HEIGHT, MIN_POPUP_WIDTH
 from cvp.widgets.set_window_min_size import set_window_min_size
 
 ResultT = TypeVar("ResultT")
@@ -20,8 +20,8 @@ class Popup(Generic[ResultT], ABC):
         centered=True,
         flags=0,
         *,
-        min_width=MIN_DEFAULT_POPUP_WIDTH,
-        min_height=MIN_DEFAULT_POPUP_HEIGHT,
+        min_width=MIN_POPUP_WIDTH,
+        min_height=MIN_POPUP_HEIGHT,
     ):
         self._title = title if title else type(self).__name__
 
