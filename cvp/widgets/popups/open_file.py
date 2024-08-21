@@ -72,7 +72,7 @@ class OpenFilePopup(Popup[str]):
         return dirs + files
 
     @override
-    def _main(self) -> Optional[str]:
+    def on_process(self) -> Optional[str]:
         if imgui.is_window_appearing():
             set_window_min_size(self._min_width, self._min_height)
 

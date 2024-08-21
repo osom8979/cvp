@@ -119,7 +119,7 @@ class MpvWindow(Window[MpvSection]):
     @override
     def on_process(self) -> None:
         self._process_window()
-        file = self._popup.process()
+        file = self._popup.do_process()
         if file:
             self.open(file)
 

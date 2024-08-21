@@ -35,7 +35,7 @@ class InputTextPopup(Popup[str]):
         return self._text
 
     @override
-    def _main(self) -> Optional[str]:
+    def on_process(self) -> Optional[str]:
         if self._label:
             imgui.text(self._label)
 

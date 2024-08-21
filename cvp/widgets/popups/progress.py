@@ -61,7 +61,7 @@ class ProgressPopup(Popup[None]):
         return self._thread.native_id
 
     @override
-    def _main(self) -> Optional[None]:
+    def on_process(self) -> Optional[None]:
         if self.label:
             imgui.text(self.label)
 

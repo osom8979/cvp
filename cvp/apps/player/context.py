@@ -282,11 +282,11 @@ class PlayerContext:
                 imgui.end_menu()
 
     def on_popups(self) -> None:
-        file = self._open_file_popup.process()
+        file = self._open_file_popup.do_process()
         if file:
             self.add_media_window(file)
 
-        url = self._open_url_popup.process()
+        url = self._open_url_popup.do_process()
         if url:
             self.add_media_window(url)
 

@@ -26,7 +26,7 @@ class ConfirmPopup(Popup[bool]):
         self._cancel_button_label = cancel if cancel else "Cancel"
 
     @override
-    def _main(self) -> Optional[bool]:
+    def on_process(self) -> Optional[bool]:
         if self._label:
             imgui.text(self._label)
 

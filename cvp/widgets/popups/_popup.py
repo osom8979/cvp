@@ -5,7 +5,7 @@ from typing import Generic, Optional, TypeVar
 
 import imgui
 
-from cvp.variables import MIN_OPEN_FILE_POPUP_HEIGHT, MIN_OPEN_FILE_POPUP_WIDTH
+from cvp.variables import MIN_DEFAULT_POPUP_HEIGHT, MIN_DEFAULT_POPUP_WIDTH
 from cvp.widgets.set_window_min_size import set_window_min_size
 
 ResultT = TypeVar("ResultT")
@@ -19,8 +19,9 @@ class Popup(Generic[ResultT], ABC):
         title: Optional[str] = None,
         centered=True,
         flags=0,
-        min_width=MIN_OPEN_FILE_POPUP_WIDTH,
-        min_height=MIN_OPEN_FILE_POPUP_HEIGHT,
+        *,
+        min_width=MIN_DEFAULT_POPUP_WIDTH,
+        min_height=MIN_DEFAULT_POPUP_HEIGHT,
     ):
         self._title = title if title else type(self).__name__
 
@@ -44,7 +45,7 @@ class Popup(Generic[ResultT], ABC):
     def show(self) -> None:
         self._visible = True
 
-    def process(self) -> Optional[ResultT]:
+    def do_process(self) -> Optional[ResultT]:
         if self._visible:
             imgui.open_popup(self._title)
             self._visible = False
@@ -63,11 +64,11 @@ class Popup(Generic[ResultT], ABC):
             set_window_min_size(self._min_width, self._min_height)
 
         try:
-            self._result = self._main()
+            self._result = self.on_process()
             return self._result
         finally:
             imgui.end_popup()
 
     @abstractmethod
-    def _main(self) -> Optional[ResultT]:
+    def on_process(self) -> Optional[ResultT]:
         raise NotImplementedError
