@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from cvp.widgets.begin import begin, end
+from cvp.widgets.begin_background import begin_background, end_background
 from cvp.widgets.begin_child import begin_child, end_child
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
@@ -14,6 +15,8 @@ from cvp.widgets.text_centered import text_centered
 __all__ = (
     "begin",
     "end",
+    "begin_background",
+    "end_background",
     "begin_child",
     "end_child",
     "button_ex",
