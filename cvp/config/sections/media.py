@@ -4,7 +4,7 @@ from enum import StrEnum, auto, unique
 from typing import Tuple
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections._window import CommonWindowSection
+from cvp.config.sections.commons.window import CommonWindowSection
 
 
 @unique

@@ -3,7 +3,7 @@
 from enum import StrEnum, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections._window import CommonWindowSection
+from cvp.config.sections.commons.window import CommonWindowSection
 
 
 @unique

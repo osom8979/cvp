@@ -3,8 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-# noinspection PyProtectedMember
-from cvp.config.sections._window import CommonWindowSection
+from cvp.config.sections.commons.window import CommonWindowSection
 from cvp.types.override import override
 
 SectionT = TypeVar("SectionT", bound=CommonWindowSection)
