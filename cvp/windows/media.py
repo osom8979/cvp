@@ -11,8 +11,8 @@ from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets.menu_item_ex import menu_item_ex
-from cvp.windows._window import Window
+from cvp.widgets import menu_item_ex
+from cvp.widgets.hoc.window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR

@@ -8,8 +8,8 @@ from overrides import override
 
 from cvp.config.sections.overlay import OverlaySection
 from cvp.system.usage import SystemUsage
-from cvp.widgets.menu_item_ex import menu_item_ex
-from cvp.windows._window import Window
+from cvp.widgets import menu_item_ex
+from cvp.widgets.hoc.window import Window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION

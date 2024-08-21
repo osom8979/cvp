@@ -16,13 +16,13 @@ from cvp.config.sections.display import force_egl_section_key
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
-from cvp.renderer.imgui import add_jbm_font, add_ngc_font
+from cvp.popups.input_text import InputTextPopup
+from cvp.popups.open_file import OpenFilePopup
 from cvp.renderer.renderer import PygameRenderer
-from cvp.widgets.popups.input_text import InputTextPopup
-from cvp.widgets.popups.open_file import OpenFilePopup
+from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 
 # noinspection PyProtectedMember
-from cvp.windows._window import Window
+from cvp.widgets.hoc.window import Window
 from cvp.windows.manager import ManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.mpv import MpvWindow

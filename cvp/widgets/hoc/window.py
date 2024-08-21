@@ -1,13 +1,27 @@
 # -*- coding: utf-8 -*-
 
+from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 # noinspection PyProtectedMember
 from cvp.config.sections._window import CommonWindowSection
-from cvp.renderer.interface import WindowInterface
 from cvp.types.override import override
 
 SectionT = TypeVar("SectionT", bound=CommonWindowSection)
+
+
+class WindowInterface(ABC):
+    @abstractmethod
+    def on_create(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_destroy(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_process(self) -> None:
+        raise NotImplementedError
 
 
 class Window(Generic[SectionT], WindowInterface):

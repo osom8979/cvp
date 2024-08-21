@@ -7,7 +7,7 @@ import pygame
 
 from cvp.types.override import override
 from cvp.widgets.button_ex import button_ex
-from cvp.widgets.popups._popup import Popup
+from cvp.widgets.hoc.popup import Popup
 
 
 class ConfirmPopup(Popup[bool]):

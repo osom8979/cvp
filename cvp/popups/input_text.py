@@ -6,10 +6,8 @@ import imgui
 import pygame
 
 from cvp.types.override import override
-from cvp.widgets.button_ex import button_ex
-from cvp.widgets.input_text_value import input_text_value
-from cvp.widgets.item_width import item_width
-from cvp.widgets.popups._popup import Popup
+from cvp.widgets import button_ex, input_text_value, item_width
+from cvp.widgets.hoc.popup import Popup
 
 
 class InputTextPopup(Popup[str]):

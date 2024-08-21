@@ -6,7 +6,7 @@ from typing import Generic, Optional, TypeVar
 import imgui
 
 from cvp.variables import MIN_POPUP_HEIGHT, MIN_POPUP_WIDTH
-from cvp.widgets.set_window_min_size import set_window_min_size
+from cvp.widgets import set_window_min_size
 
 ResultT = TypeVar("ResultT")
 

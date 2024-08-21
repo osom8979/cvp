@@ -10,11 +10,14 @@ import pygame
 
 from cvp.logging.logging import logger
 from cvp.types.override import override
-from cvp.widgets.begin_child import begin_child, end_child
-from cvp.widgets.button_ex import button_ex
-from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
-from cvp.widgets.popups._popup import Popup
-from cvp.widgets.set_window_min_size import set_window_min_size
+from cvp.widgets import (
+    begin_child,
+    button_ex,
+    end_child,
+    footer_height_to_reserve,
+    set_window_min_size,
+)
+from cvp.widgets.hoc.popup import Popup
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 DOUBLE_CLICK = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK
