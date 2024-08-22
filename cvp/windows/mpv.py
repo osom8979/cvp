@@ -13,7 +13,6 @@ from cvp.gl.runtime import get_process_address
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.popups.open_file import OpenFilePopup
 from cvp.types.override import override
-from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.hoc.window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -54,16 +53,12 @@ class MpvWindow(Window[MpvSection]):
     _mpv: Optional[MPV]
     _context: Optional[MpvRenderContext]
 
-    def __init__(self, section: MpvSection, flags=imgui.WINDOW_MENU_BAR):
-        super().__init__(section)
+    def __init__(self, section: MpvSection):
+        super().__init__(section, closable=True, flags=imgui.WINDOW_MENU_BAR)
 
-        self._flags = flags
-        self._popup = OpenFilePopup("Open video file")
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._playback = 0.0
         self._volume = 0.0
-        self._min_width = MIN_WINDOW_WIDTH
-        self._min_height = MIN_WINDOW_HEIGHT
 
         self._fbo = 0
         self._texture = 0
@@ -71,6 +66,13 @@ class MpvWindow(Window[MpvSection]):
         self._file = None
         self._mpv = None
         self._context = None
+
+        self._popup = OpenFilePopup("Open video file")
+        self._popup.target = self.on_open_file
+        self.register_popup(self._popup)
+
+    def on_open_file(self, file: str) -> None:
+        self.open(file)
 
     @override
     def on_create(self) -> None:
@@ -118,27 +120,46 @@ class MpvWindow(Window[MpvSection]):
 
     @override
     def on_process(self) -> None:
-        self._process_window()
-        file = self._popup.do_process()
-        if file:
-            self.open(file)
+        if imgui.begin_menu_bar().opened:
+            if imgui.begin_menu("File").opened:
+                if imgui.menu_item("Open")[0]:
+                    self._popup.show()
 
-    def _process_window(self) -> None:
-        if not self.opened:
-            return
+                imgui.separator()
+                if imgui.menu_item("Close")[0]:
+                    self.close()
+                imgui.end_menu()
+            imgui.end_menu_bar()
 
-        expanded, opened = imgui.begin(type(self).__name__, True, self._flags)
+        imgui.push_item_width(-1)
+        self.slider_playback()
+        self.slider_volume()
+        imgui.pop_item_width()
+
+        self.begin_child_canvas()
         try:
-            if not opened:
-                self.opened = False
-                return
+            cx, cy = imgui.get_cursor_screen_pos()
+            cw, ch = imgui.get_content_region_available()
 
-            if not expanded:
-                return
+            draw_list = imgui.get_window_draw_list()
+            assert isinstance(draw_list, _DrawList)
 
-            self._main()
+            filled_color = imgui.get_color_u32_rgba(*self._clear_color)
+            draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
+
+            w = int(cw)
+            h = int(ch)
+            size = w, h
+
+            self.update_texture_size(size)
+            self.render(size)
+
+            if self.context_opened:
+                p1 = cx, cy
+                p2 = cx + cw, cy + ch
+                draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
         finally:
-            imgui.end()
+            imgui.end_child()
 
     def update_texture_size(self, size: Tuple[int, int]) -> None:
         if not self._texture:
@@ -270,48 +291,3 @@ class MpvWindow(Window[MpvSection]):
                     self._volume = value
             elif self._mpv.volume is not None:
                 self._volume = self._mpv.volume
-
-    def _main(self) -> None:
-        if imgui.is_window_appearing():
-            imgui.set_window_size(self._min_width, self._min_height)
-
-        if imgui.begin_menu_bar().opened:
-            if imgui.begin_menu("File").opened:
-                if imgui.menu_item("Open")[0]:
-                    self._popup.show()
-
-                imgui.separator()
-                if imgui.menu_item("Close")[0]:
-                    self.close()
-                imgui.end_menu()
-            imgui.end_menu_bar()
-
-        imgui.push_item_width(-1)
-        self.slider_playback()
-        self.slider_volume()
-        imgui.pop_item_width()
-
-        self.begin_child_canvas()
-        try:
-            cx, cy = imgui.get_cursor_screen_pos()
-            cw, ch = imgui.get_content_region_available()
-
-            draw_list = imgui.get_window_draw_list()
-            assert isinstance(draw_list, _DrawList)
-
-            filled_color = imgui.get_color_u32_rgba(*self._clear_color)
-            draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
-
-            w = int(cw)
-            h = int(ch)
-            size = w, h
-
-            self.update_texture_size(size)
-            self.render(size)
-
-            if self.context_opened:
-                p1 = cx, cy
-                p2 = cx + cw, cy + ch
-                draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
-        finally:
-            imgui.end_child()

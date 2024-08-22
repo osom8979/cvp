@@ -21,10 +21,9 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 
 class OverlayWindow(Window[OverlaySection]):
-    def __init__(self, section: OverlaySection, flags=OVERLAY_WINDOW_FLAGS):
-        super().__init__(section)
+    def __init__(self, section: OverlaySection):
+        super().__init__(section, title="Overlay Window", flags=OVERLAY_WINDOW_FLAGS)
 
-        self._flags = flags
         self._normal_color = 0.0, 1.0, 0.0
         self._warning_color = 1.0, 1.0, 0.0
         self._error_color = 1.0, 0.0, 0.0
@@ -65,7 +64,8 @@ class OverlayWindow(Window[OverlaySection]):
         else:
             return self._error_color
 
-    def _main(self) -> None:
+    @override
+    def on_process(self) -> None:
         framerate = imgui.get_io().framerate
         framerate_color = self.get_framerate_color(framerate)
         imgui.text_colored(f"FPS: {floor(framerate)}", *framerate_color)
@@ -95,36 +95,10 @@ class OverlayWindow(Window[OverlaySection]):
                 self.opened = False
             imgui.end_popup()
 
-    def _process_window(self) -> None:
-        if not self.opened:
-            return
-
+    @override
+    def begin(self) -> Tuple[bool, bool]:
         pos_x, pos_y = self.window_position
         pivot_x, pivot_y = self.window_pivot
         imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
         imgui.set_next_window_bg_alpha(self.section.alpha)
-
-        expanded, opened = imgui.begin("Overlay Window", False, self._flags)
-        try:
-            if not opened:
-                self.opened = False
-                return
-
-            if not expanded:
-                return
-
-            self._main()
-        finally:
-            imgui.end()
-
-    @override
-    def on_create(self) -> None:
-        pass
-
-    @override
-    def on_destroy(self) -> None:
-        pass
-
-    @override
-    def on_process(self) -> None:
-        self._process_window()
+        return super().begin()

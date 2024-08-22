@@ -10,7 +10,6 @@ from OpenGL import GL
 from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.types.override import override
-from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
 
@@ -21,16 +20,12 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 class MediaWindow(Window[MediaSection]):
     def __init__(self, section: MediaSection, ffmpegs: FFmpegManager):
-        super().__init__(section)
-
+        super().__init__(section, closable=True)
         self._ffmpegs = ffmpegs
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
-        self._min_width = MIN_WINDOW_WIDTH
-        self._min_height = MIN_WINDOW_HEIGHT
         self._texture = 0
         self._pbo = 0
-        self._popup_name = "ContextMenu"
         self._prev_frame_index = 0
 
     @override
@@ -76,30 +71,18 @@ class MediaWindow(Window[MediaSection]):
         self._pbo = 0
 
     @override
-    def on_process(self) -> None:
-        self._process_window()
-
-    @property
-    def window_title(self) -> str:
+    def get_title(self) -> str:
         name = self.section.name
         return (name if name else type(self).__name__) + "###" + self.section.section
 
-    def _process_window(self) -> None:
-        if not self.opened:
-            return
-
-        expanded, opened = imgui.begin(self.window_title, True, self._flags)
+    @override
+    def on_process(self) -> None:
+        self.begin_child_canvas()
         try:
-            if not opened:
-                self.opened = False
-                return
-
-            if not expanded:
-                return
-
-            self._main()
+            self._child()
+            self._popup()
         finally:
-            imgui.end()
+            imgui.end_child()
 
     def update_texture(self) -> None:
         if not self._texture:
@@ -193,17 +176,6 @@ class MediaWindow(Window[MediaSection]):
         imgui.begin_child("Canvas", 0, -space, border=True, flags=child_flags)  # noqa
         imgui.pop_style_color()
         imgui.pop_style_var()
-
-    def _main(self) -> None:
-        if imgui.is_window_appearing():
-            imgui.set_window_size(self._min_width, self._min_height)
-
-        self.begin_child_canvas()
-        try:
-            self._child()
-            self._popup()
-        finally:
-            imgui.end_child()
 
     def _child(self):
         cx, cy = imgui.get_cursor_screen_pos()

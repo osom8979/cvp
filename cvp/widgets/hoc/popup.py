@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, TypeVar
+from typing import Callable, Generic, Optional, TypeVar
 
 import imgui
 
@@ -12,6 +12,7 @@ ResultT = TypeVar("ResultT")
 
 
 class Popup(Generic[ResultT], ABC):
+    _target: Optional[Callable[[ResultT], None]]
     _result: Optional[ResultT]
 
     def __init__(
@@ -32,7 +33,20 @@ class Popup(Generic[ResultT], ABC):
         self._min_width = min_width
         self._min_height = min_height
 
+        self._target = None
         self._result = None
+
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, value: Callable[[ResultT], None]) -> None:
+        self._target = value
 
     @property
     def result(self):
@@ -65,6 +79,8 @@ class Popup(Generic[ResultT], ABC):
 
         try:
             self._result = self.on_process()
+            if self._target is not None and self._result is not None:
+                self._target(self._result)
             return self._result
         finally:
             imgui.end_popup()
