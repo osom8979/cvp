@@ -3,6 +3,10 @@
 from cvp.widgets.begin import begin, end
 from cvp.widgets.begin_background import begin_background, end_background
 from cvp.widgets.begin_child import begin_child, end_child
+from cvp.widgets.begin_popup_context_window import (
+    begin_popup_context_window,
+    end_popup_context_window,
+)
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.footer_height_to_reserve import footer_height_to_reserve
 from cvp.widgets.input_text_disabled import input_text_disabled
@@ -19,6 +23,8 @@ __all__ = (
     "end_background",
     "begin_child",
     "end_child",
+    "begin_popup_context_window",
+    "end_popup_context_window",
     "button_ex",
     "footer_height_to_reserve",
     "input_text_disabled",

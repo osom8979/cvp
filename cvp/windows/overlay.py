@@ -10,6 +10,7 @@ from cvp.config.sections.overlay import OverlaySection
 from cvp.system.usage import SystemUsage
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
+from cvp.widgets import begin_popup_context_window, end_popup_context_window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
@@ -65,6 +66,29 @@ class OverlayWindow(Window[OverlaySection]):
             return self._error_color
 
     @override
+    def begin(self) -> Tuple[bool, bool]:
+        pos_x, pos_y = self.window_position
+        pivot_x, pivot_y = self.window_pivot
+        imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
+        imgui.set_next_window_bg_alpha(self.section.alpha)
+        return super().begin()
+
+    def on_popup_context_window(self) -> None:
+        if menu_item_ex("Top-Left", self.section.is_top_left):
+            self.section.set_top_left()
+        if menu_item_ex("Top-Right", self.section.is_top_right):
+            self.section.set_top_right()
+        if menu_item_ex("Bottom-Left", self.section.is_bottom_left):
+            self.section.set_bottom_left()
+        if menu_item_ex("Bottom-Right", self.section.is_bottom_right):
+            self.section.set_bottom_right()
+
+        imgui.separator()
+
+        if menu_item_ex("Close"):
+            self.opened = False
+
+    @override
     def on_process(self) -> None:
         framerate = imgui.get_io().framerate
         framerate_color = self.get_framerate_color(framerate)
@@ -77,28 +101,11 @@ class OverlayWindow(Window[OverlaySection]):
         imgui.text(f"VMEM: {usage.vmem:3.1f}%")
 
         imgui.separator()
-
         mouse_pos = imgui.get_mouse_pos()
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
-        if imgui.begin_popup_context_window():
-            if menu_item_ex("Top-Left", self.section.is_top_left):
-                self.section.set_top_left()
-            if menu_item_ex("Top-Right", self.section.is_top_right):
-                self.section.set_top_right()
-            if menu_item_ex("Bottom-Left", self.section.is_bottom_left):
-                self.section.set_bottom_left()
-            if menu_item_ex("Bottom-Right", self.section.is_bottom_right):
-                self.section.set_bottom_right()
-            imgui.separator()
-            if menu_item_ex("Close"):
-                self.opened = False
-            imgui.end_popup()
-
-    @override
-    def begin(self) -> Tuple[bool, bool]:
-        pos_x, pos_y = self.window_position
-        pivot_x, pivot_y = self.window_pivot
-        imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
-        imgui.set_next_window_bg_alpha(self.section.alpha)
-        return super().begin()
+        if begin_popup_context_window():
+            try:
+                self.on_popup_context_window()
+            finally:
+                end_popup_context_window()
