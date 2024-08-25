@@ -26,7 +26,7 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 class OverlayWindow(Window[OverlaySection]):
     def __init__(self, section: OverlaySection):
-        super().__init__(section, title="Overlay Window", flags=OVERLAY_WINDOW_FLAGS)
+        super().__init__(section, title="Overlay", flags=OVERLAY_WINDOW_FLAGS)
 
         self._normal_color = 0.0, 1.0, 0.0
         self._warning_color = 1.0, 1.0, 0.0
@@ -76,21 +76,6 @@ class OverlayWindow(Window[OverlaySection]):
         imgui.set_next_window_bg_alpha(self.section.alpha)
         return super().begin()
 
-    def on_popup_context_window(self) -> None:
-        if menu_item_ex("Top-Left", self.section.is_top_left):
-            self.section.set_top_left()
-        if menu_item_ex("Top-Right", self.section.is_top_right):
-            self.section.set_top_right()
-        if menu_item_ex("Bottom-Left", self.section.is_bottom_left):
-            self.section.set_bottom_left()
-        if menu_item_ex("Bottom-Right", self.section.is_bottom_right):
-            self.section.set_bottom_right()
-
-        imgui.separator()
-
-        if menu_item_ex("Close"):
-            self.opened = False
-
     @override
     def on_process(self) -> None:
         framerate = imgui.get_io().framerate
@@ -107,8 +92,23 @@ class OverlayWindow(Window[OverlaySection]):
         mouse_pos = imgui.get_mouse_pos()
         imgui.text(f"Mouse: {floor(mouse_pos.x)}, {floor(mouse_pos.y)}")
 
-        if begin_popup_context_window():
+        if begin_popup_context_window().opened:
             try:
                 self.on_popup_context_window()
             finally:
                 end_popup_context_window()
+
+    def on_popup_context_window(self) -> None:
+        if menu_item_ex("Top-Left", self.section.is_top_left):
+            self.section.set_top_left()
+        if menu_item_ex("Top-Right", self.section.is_top_right):
+            self.section.set_top_right()
+        if menu_item_ex("Bottom-Left", self.section.is_bottom_left):
+            self.section.set_bottom_left()
+        if menu_item_ex("Bottom-Right", self.section.is_bottom_right):
+            self.section.set_bottom_right()
+
+        imgui.separator()
+
+        if menu_item_ex("Close"):
+            self.opened = False

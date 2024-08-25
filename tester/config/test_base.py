@@ -21,6 +21,7 @@ color = 0.5, 0.5, 0.5
 
 [av.1]
 opened = "False"  ; Not comment
+rate = 0.9
 
 [av.2]
 opened = 1
@@ -39,7 +40,7 @@ _EXPECTED_SERIALIZED_OBJECT = {
     "Window][Debug##Default": {"size": "400,400"},
     "Window][Open Network Stream": {"collapsed": "0"},
     "display": {"fullscreen": "False  # Not comment", "color": "0.5, 0.5, 0.5"},
-    "av.1": {"opened": '"False"  ; Not comment'},
+    "av.1": {"opened": '"False"  ; Not comment', "rate": "0.9"},
     "av.2": {"opened": "1", "home": "${CVP_HOME}"},
 }
 
@@ -93,15 +94,33 @@ class BaseTestCase(TestCase):
         self.assertSetEqual({"A"}, set(config.sections()))
         self.assertSetEqual({"b"}, set(config.options("A")))
 
-        self.assertIsInstance(config.get("A", "B"), str)
-        self.assertIsInstance(config.get("A", "B", 0), int)
-        self.assertIsInstance(config.get("A", "B", 0.0), float)
-        self.assertIsInstance(config.get("A", "B", False), bool)
+        val0 = config.get("A", "-")
+        val1 = config.get("A", "B")
+        val2 = config.get("A", "B", 0)
+        val3 = config.get("A", "B", 0.0)
+        val4 = config.get("A", "B", False)
 
-        self.assertEqual("1", config.get("A", "B"))
-        self.assertEqual(1, config.get("A", "B", 0))
-        self.assertEqual(1.0, config.get("A", "B", 0.0))
-        self.assertEqual(True, config.get("A", "B", False))
+        self.assertIsNone(val0)
+        self.assertEqual("1", val1)
+        self.assertEqual(1, val2)
+        self.assertEqual(1.0, val3)
+        self.assertEqual(True, val4)
+
+    def test_get_items(self):
+        config = BaseConfig()
+        config.set_config_value("x", "y", "1 , 0")
+
+        val5 = config.get("x", "y", ())
+        val6 = config.get("x", "y", ("?",))
+        val7 = config.get("x", "y", (False,))
+        val8 = config.get("x", "y", (100,))
+        val9 = config.get("x", "y", (0.1,))
+
+        self.assertSequenceEqual(("1 ", " 0"), val5)
+        self.assertSequenceEqual(("1", "0"), val6)
+        self.assertSequenceEqual((True, False), val7)
+        self.assertSequenceEqual((1, 0), val8)
+        self.assertSequenceEqual((1.0, 0.0), val9)
 
     def test_interpolation(self):
         config = BaseConfig(cvp_home=self.temp_dir.name)

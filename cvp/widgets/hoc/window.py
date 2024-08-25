@@ -71,14 +71,21 @@ class Window(Generic[SectionT], WindowInterface):
         flags: Optional[int] = None,
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
+        debug=False,
+        verbose=0,
     ) -> None:
         assert isinstance(section, CommonWindowSection)
         self._section = section
-        self._title = title
-        self._closable = closable
-        self._flags = flags
+
+        self._static_title = title
+        self._static_closable = closable
+        self._static_flags = flags
+
         self._min_width = min_width
         self._min_height = min_height
+        self._debug = debug
+        self._verbose = verbose
+
         self._initialized = False
         self._popups = dict()
 
@@ -100,15 +107,15 @@ class Window(Generic[SectionT], WindowInterface):
 
     @override
     def get_title(self) -> str:
-        return self._title if self._title else type(self).__name__
+        return self._static_title if self._static_title else type(self).__name__
 
     @override
     def get_closable(self) -> bool:
-        return self._closable if self._closable else False
+        return self._static_closable if self._static_closable else False
 
     @override
     def get_flags(self) -> int:
-        return self._flags if self._flags else 0
+        return self._static_flags if self._static_flags else 0
 
     @override
     def begin(self) -> Tuple[bool, bool]:

@@ -2,6 +2,8 @@
 
 from typing import Final
 
+CONFIG_VALUE_SEPARATOR: Final[str] = ","
+
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
 MEDIA_SECTION_PREFIX: Final[str] = "media."
 

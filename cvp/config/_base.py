@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
 
 from configparser import DEFAULTSECT, ConfigParser, ExtendedInterpolation
+from functools import reduce
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, overload
+from typing import Dict, List, Optional, Sequence, Tuple, Union, overload
 
 from cvp.types.string.to_boolean import string_to_boolean
+from cvp.variables import CONFIG_VALUE_SEPARATOR
 
-_DefaultT = TypeVar("_DefaultT", str, bool, int, float)
-
+ValueUnion = Union[
+    str,
+    bool,
+    int,
+    float,
+    Sequence[str],
+    Sequence[bool],
+    Sequence[int],
+    Sequence[float],
+]
 SerializedObject = Dict[str, Dict[str, str]]
 
 
@@ -34,6 +44,8 @@ class BaseConfig:
         self,
         filename: Optional[Union[str, PathLike]] = None,
         cvp_home: Optional[str] = None,
+        *,
+        separator=CONFIG_VALUE_SEPARATOR,
     ):
         self._config = ConfigParser(
             defaults=None,
@@ -48,6 +60,7 @@ class BaseConfig:
             interpolation=ExtendedInterpolation(),
         )
         self._vars = {"CVP_HOME": cvp_home if cvp_home else str()}
+        self._separator = separator
         if filename:
             self._config.read(filename)
 
@@ -172,16 +185,25 @@ class BaseConfig:
     def get(self, section: str, key: str, default: int, *, raw=False) -> int: ...
     @overload
     def get(self, section: str, key: str, default: float, *, raw=False) -> float: ...
+
+    @overload
+    def get(self, section: str, key: str, default: Sequence[str], *, raw=False) -> Sequence[str]: ...  # noqa: E501
+    @overload
+    def get(self, section: str, key: str, default: Sequence[bool], *, raw=False) -> Sequence[bool]: ...  # noqa: E501
+    @overload
+    def get(self, section: str, key: str, default: Sequence[int], *, raw=False) -> Sequence[int]: ...  # noqa: E501
+    @overload
+    def get(self, section: str, key: str, default: Sequence[float], *, raw=False) -> Sequence[float]: ...  # noqa: E501
     # fmt: on
 
     def get(
         self,
         section: str,
         key: str,
-        default: Optional[_DefaultT] = None,
+        default: Optional[ValueUnion] = None,
         *,
         raw=False,
-    ) -> Optional[Union[str, bool, int, float]]:
+    ) -> Optional[ValueUnion]:
         if not self._config.has_section(section):
             return default
 
@@ -196,18 +218,41 @@ class BaseConfig:
         if isinstance(default, str):
             return self._config.get(section, key, raw=raw, vars=self._vars)
 
-        if isinstance(default, bool):
+        elif isinstance(default, bool):
             _boolean_value = self._config.get(section, key, raw=raw, vars=self._vars)
             return string_to_boolean(_boolean_value)
 
-        if isinstance(default, int):
+        elif isinstance(default, int):
             return self._config.getint(section, key, raw=raw, vars=self._vars)
 
-        if isinstance(default, float):
+        elif isinstance(default, float):
             return self._config.getfloat(section, key, raw=raw, vars=self._vars)
+
+        elif isinstance(default, Sequence):
+            value = self._config.get(section, key, raw=raw, vars=self._vars)
+            items = value.split(self._separator)
+            if len(default) == 0:
+                return tuple(items)
+            elif isinstance(default[0], str):
+                return tuple(item.strip() for item in items)
+            elif isinstance(default[0], bool):
+                return tuple(string_to_boolean(item.strip()) for item in items)
+            elif isinstance(default[0], int):
+                return tuple(int(item.strip()) for item in items)
+            elif isinstance(default[0], float):
+                return tuple(float(item.strip()) for item in items)
 
         raise TypeError(f"Unsupported default type: {type(default).__name__}")
 
-    def set(self, section: str, key: str, value: _DefaultT) -> None:
-        config_data = value if isinstance(value, str) else str(value)
+    def set(self, section: str, key: str, value: ValueUnion) -> None:
+        if isinstance(value, str):
+            config_data = value
+        elif isinstance(value, Sequence):
+            config_data = reduce(
+                lambda x, y: f"{x}{self._separator}{y}",
+                value[1:],
+                str(value[0]),
+            )
+        else:
+            config_data = str(value)
         self.set_config_value(section, key, config_data)

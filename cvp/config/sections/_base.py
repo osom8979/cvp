@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, List, Optional, Tuple, Union, overload
+from typing import Dict, List, Optional, Sequence, Tuple, overload
 
-from cvp.config._base import BaseConfig, _DefaultT
+from cvp.config._base import BaseConfig, ValueUnion
 
 
 class BaseSection:
@@ -69,16 +69,25 @@ class BaseSection:
     def get(self, key: str, default: int, *, raw=False) -> int: ...
     @overload
     def get(self, key: str, default: float, *, raw=False) -> float: ...
+
+    @overload
+    def get(self, key: str, default: Sequence[str], *, raw=False) -> Sequence[str]: ...
+    @overload
+    def get(self, key: str, default: Sequence[bool], *, raw=False) -> Sequence[bool]: ...  # noqa: E501
+    @overload
+    def get(self, key: str, default: Sequence[int], *, raw=False) -> Sequence[int]: ...
+    @overload
+    def get(self, key: str, default: Sequence[float], *, raw=False) -> Sequence[float]: ...  # noqa: E501
     # fmt: on
 
     def get(
         self,
         key: str,
-        default: _DefaultT,
+        default: ValueUnion,
         *,
         raw=False,
-    ) -> Optional[Union[str, bool, int, float]]:
+    ) -> Optional[ValueUnion]:
         return self._config.get(self._section, key, default, raw=raw)
 
-    def set(self, key: str, value: _DefaultT) -> None:
+    def set(self, key: str, value: ValueUnion) -> None:
         self._config.set(self._section, key, value)
