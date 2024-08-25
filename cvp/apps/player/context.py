@@ -239,8 +239,8 @@ class PlayerContext:
             self.on_popups()
             for win in self._windows.values():
                 win.do_process()
-            self._manager.process()
-            self._preference.process()
+            self._manager.do_process()
+            self._preference.do_process()
             self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not

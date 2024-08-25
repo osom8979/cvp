@@ -3,58 +3,49 @@
 import imgui
 
 from cvp.config.config import Config
+from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
-from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.types.override import override
+from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import (
     button_ex,
     footer_height_to_reserve,
     input_text_disabled,
     input_text_value,
     item_width,
-    set_window_min_size,
     text_centered,
 )
+from cvp.widgets.hoc.window import Window
 
 
-class ManagerWindow:
+class ManagerWindow(Window[ManagerSection]):
     def __init__(self, ffmpegs: FFmpegManager, config: Config):
+        super().__init__(
+            config.manager,
+            title="Media Manager",
+            closable=True,
+        )
         self._ffmpegs = ffmpegs
-        self._config = config
-        self._title = "Media Manger"
-        self._flags = 0
-        self._min_width = MIN_WINDOW_WIDTH
-        self._min_height = MIN_WINDOW_HEIGHT
+        self._medias = config.medias
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
 
     @property
-    def opened(self) -> bool:
-        return self._config.manager.opened
-
-    @opened.setter
-    def opened(self, value: bool) -> None:
-        self._config.manager.opened = value
-
-    @property
     def sidebar_width(self) -> int:
-        return self._config.manager.sidebar_width
+        return self.section.sidebar_width
 
     @sidebar_width.setter
     def sidebar_width(self, value: int) -> None:
-        self._config.manager.sidebar_width = value
+        self.section.sidebar_width = value
 
     @property
     def selected(self) -> str:
-        return self._config.manager.selected
+        return self.section.selected
 
     @selected.setter
     def selected(self, value: str) -> None:
-        self._config.manager.selected = value
-
-    @property
-    def medias(self):
-        return self._config.medias
+        self.section.selected = value
 
     def drag_sidebar_width(self):
         sidebar_width = imgui.drag_int(
@@ -69,29 +60,9 @@ class ManagerWindow:
             sidebar_width = self._min_sidebar_width
         self.sidebar_width = sidebar_width
 
-    def process(self) -> None:
-        if not self.opened:
-            return
-
-        expanded, opened = imgui.begin(self._title, True, self._flags)
-        try:
-            if not opened:
-                self.opened = False
-                return
-
-            if not expanded:
-                return
-
-            self._main()
-        finally:
-            imgui.end()
-
-    def _main(self) -> None:
-        if imgui.is_window_appearing():
-            set_window_min_size(self._min_width, self._min_height)
-
-        medias = self._config.medias
-        media = medias.get(self.selected, None)
+    @override
+    def on_process(self) -> None:
+        media = self._medias.get(self.selected, None)
 
         # noinspection PyArgumentList
         imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
@@ -106,7 +77,7 @@ class ManagerWindow:
 
             menus = imgui.begin_list_box("## SideList", width=-1, height=-1)
             if menus.opened:
-                for key, section in medias.items():
+                for key, section in self._medias.items():
                     if imgui.selectable(section.name, key == self.selected)[1]:
                         self.selected = key
                 imgui.end_list_box()
@@ -150,10 +121,9 @@ class ManagerWindow:
             with item_width(-1):
                 media.file = input_text_value("## File", media.file)
 
-            key = media.section
-            spawnable = self._ffmpegs.spawnable(key)
-            stoppable = self._ffmpegs.stoppable(key)
-            removable = self._ffmpegs.removable(key)
+            spawnable = self._ffmpegs.spawnable(media.section)
+            stoppable = self._ffmpegs.stoppable(media.section)
+            removable = self._ffmpegs.removable(media.section)
 
             imgui.separator()
             imgui.text("Frame:")
@@ -169,14 +139,14 @@ class ManagerWindow:
 
             imgui.separator()
             try:
-                status = self._ffmpegs.status(key)
+                status = self._ffmpegs.status(media.section)
             except BaseException as e:
                 status = str(e)
             imgui.text(f"Process ({status})")
 
             if button_ex("Spawn", disabled=not spawnable):
                 self._ffmpegs.spawn_with_file(
-                    key,
+                    media.section,
                     media.frame_width,
                     media.frame_height,
                     media.file,
@@ -184,9 +154,9 @@ class ManagerWindow:
                 pass
             imgui.same_line()
             if button_ex("Stop", disabled=not stoppable):
-                self._ffmpegs.interrupt(key)
+                self._ffmpegs.interrupt(media.section)
             imgui.same_line()
             if button_ex("Remove", disabled=not removable):
-                self._ffmpegs.pop(key)
+                self._ffmpegs.pop(media.section)
         finally:
             imgui.end_tab_item()

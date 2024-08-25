@@ -3,61 +3,34 @@
 import imgui
 
 from cvp.config.config import Config
-from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.config.sections.preference import PreferenceSection
+from cvp.types.override import override
+from cvp.variables import MIN_SIDEBAR_WIDTH
+from cvp.widgets.hoc.window import Window
 
 
-class PreferenceWindow:
+class PreferenceWindow(Window[PreferenceSection]):
     def __init__(self, config: Config):
+        super().__init__(config.preference, title="Preference", closable=True)
         self._config = config
-        self._flags = 0
-        self._min_width = MIN_WINDOW_WIDTH
-        self._min_height = MIN_WINDOW_HEIGHT
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._menus = ("Appearance", "FFmpeg")
 
     @property
-    def opened(self) -> bool:
-        return self._config.preference.opened
-
-    @opened.setter
-    def opened(self, value: bool) -> None:
-        self._config.preference.opened = value
-
-    @property
     def sidebar_width(self) -> int:
-        return self._config.preference.sidebar_width
+        return self.section.sidebar_width
 
     @sidebar_width.setter
     def sidebar_width(self, value: int) -> None:
-        self._config.preference.sidebar_width = value
+        self.section.sidebar_width = value
 
     @property
     def menu_index(self) -> int:
-        return self._config.preference.menu_index
+        return self.section.menu_index
 
     @menu_index.setter
     def menu_index(self, value: int) -> None:
-        self._config.preference.menu_index = value
-
-    def process(self) -> None:
-        self._process_window()
-
-    def _process_window(self) -> None:
-        if not self.opened:
-            return
-
-        expanded, opened = imgui.begin("Preference", True, self._flags)
-        try:
-            if not opened:
-                self.opened = False
-                return
-
-            if not expanded:
-                return
-
-            self._main()
-        finally:
-            imgui.end()
+        self.section.menu_index = value
 
     def drag_sidebar_width(self):
         sidebar_width = imgui.drag_int(
@@ -72,10 +45,8 @@ class PreferenceWindow:
             sidebar_width = self._min_sidebar_width
         self.sidebar_width = sidebar_width
 
-    def _main(self) -> None:
-        if imgui.is_window_appearing():
-            imgui.set_window_size(self._min_width, self._min_height)
-
+    @override
+    def on_process(self) -> None:
         # noinspection PyArgumentList
         imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
         try:

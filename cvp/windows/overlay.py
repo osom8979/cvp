@@ -8,9 +8,12 @@ from overrides import override
 
 from cvp.config.sections.overlay import OverlaySection
 from cvp.system.usage import SystemUsage
-from cvp.widgets import menu_item_ex
+from cvp.widgets import (
+    begin_popup_context_window,
+    end_popup_context_window,
+    menu_item_ex,
+)
 from cvp.widgets.hoc.window import Window
-from cvp.widgets import begin_popup_context_window, end_popup_context_window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
