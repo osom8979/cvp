@@ -6,6 +6,7 @@ from cvp.config.config import Config
 from cvp.config.sections.preference import PreferenceSection
 from cvp.types.override import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
+from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
 from cvp.widgets.hoc.window import Window
 
 
@@ -14,7 +15,7 @@ class PreferenceWindow(Window[PreferenceSection]):
         super().__init__(config.preference, title="Preference", closable=True)
         self._config = config
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._menus = ("Appearance", "FFmpeg")
+        self._menus = ["appearance", "ffmpeg"]
 
     @property
     def sidebar_width(self) -> int:
@@ -47,20 +48,28 @@ class PreferenceWindow(Window[PreferenceSection]):
 
     @override
     def on_process(self) -> None:
-        # noinspection PyArgumentList
-        imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
-        try:
-            imgui.text("Sidebar Menu")
+        if begin_child("## Sidebar", self.sidebar_width, border=True).visible:
+            try:
+                content_width = imgui.get_content_region_available_width()
+                imgui.set_next_item_width(content_width)
+                self.drag_sidebar_width()
 
-            content_width = imgui.get_content_region_available_width()
-            imgui.set_next_item_width(content_width)
-            self.drag_sidebar_width()
+                imgui.separator()
 
-            menus = imgui.begin_list_box("## SideList", width=-1, height=-1)
-            if menus.opened:
-                for i, menu in enumerate(self._menus):
-                    if imgui.selectable(menu, i == self.menu_index)[1]:
-                        self.menu_index = i
-                imgui.end_list_box()
-        finally:
-            imgui.end_child()
+                if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
+                    for i, menu in enumerate(self._menus):
+                        if imgui.selectable(menu, i == self.menu_index)[1]:
+                            self.menu_index = i
+                    imgui.end_list_box()
+            finally:
+                end_child()
+
+        if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
+            try:
+                if 0 <= self.menu_index < len(self._menus):
+                    # self._menus[self.menu_index].on_process()
+                    pass
+                else:
+                    text_centered("Please select a menu item")
+            finally:
+                end_child()

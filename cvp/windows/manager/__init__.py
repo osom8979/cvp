@@ -10,7 +10,9 @@ from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.types.override import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import (
+    begin_child,
     button_ex,
+    end_child,
     footer_height_to_reserve,
     input_text_disabled,
     input_text_value,
@@ -62,39 +64,33 @@ class ManagerWindow(Window[ManagerSection]):
 
     @override
     def on_process(self) -> None:
-        media = self._medias.get(self.selected, None)
+        if begin_child("## Sidebar", self.sidebar_width, border=True).visible:
+            try:
+                content_width = imgui.get_content_region_available_width()
+                imgui.set_next_item_width(content_width)
+                self.drag_sidebar_width()
 
-        # noinspection PyArgumentList
-        imgui.begin_child("## Sidebar", self.sidebar_width, 0, border=True)
-        try:
-            imgui.text("Medias")
+                imgui.separator()
 
-            content_width = imgui.get_content_region_available_width()
-            imgui.set_next_item_width(content_width)
-            self.drag_sidebar_width()
-
-            imgui.separator()
-
-            menus = imgui.begin_list_box("## SideList", width=-1, height=-1)
-            if menus.opened:
-                for key, section in self._medias.items():
-                    if imgui.selectable(section.name, key == self.selected)[1]:
-                        self.selected = key
-                imgui.end_list_box()
-        finally:
-            imgui.end_child()
+                if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
+                    for key, section in self._medias.items():
+                        if imgui.selectable(section.name, key == self.selected)[1]:
+                            self.selected = key
+                    imgui.end_list_box()
+            finally:
+                end_child()
 
         imgui.same_line()
 
-        # noinspection PyArgumentList
-        imgui.begin_child("## Main", -1, -footer_height_to_reserve())
-        try:
-            if media is not None:
-                self._media_tab_bar(media)
-            else:
-                text_centered("Please select a media item")
-        finally:
-            imgui.end_child()
+        if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
+            try:
+                media = self._medias.get(self.selected, None)
+                if media is not None:
+                    self._media_tab_bar(media)
+                else:
+                    text_centered("Please select a media item")
+            finally:
+                end_child()
 
     def _media_tab_bar(self, media: MediaSection) -> None:
         if not imgui.begin_tab_bar("Media Tabs"):

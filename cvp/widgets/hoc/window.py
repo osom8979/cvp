@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
@@ -10,11 +10,12 @@ from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
 from cvp.widgets.hoc.popup import Popup
+from cvp.widgets.hoc.widget import WidgetInterface
 
 SectionT = TypeVar("SectionT", bound=CommonWindowSection)
 
 
-class WindowInterface(ABC):
+class WindowInterface(WidgetInterface):
     @abstractmethod
     def get_title(self) -> str:
         raise NotImplementedError
@@ -48,16 +49,20 @@ class WindowInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def on_process(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     def on_after(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def on_popup(self, popup: Popup, result: Any) -> None:
-        pass
+        raise NotImplementedError
+
+    @abstractmethod
+    def do_create(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def do_destroy(self) -> None:
+        raise NotImplementedError
 
 
 class Window(Generic[SectionT], WindowInterface):
@@ -162,6 +167,7 @@ class Window(Generic[SectionT], WindowInterface):
     def unregister_popup(self, popup: Popup) -> None:
         self._popups.pop(popup.title)
 
+    @override
     def do_create(self) -> None:
         if self._initialized:
             return
@@ -169,6 +175,7 @@ class Window(Generic[SectionT], WindowInterface):
         self.on_create()
         self._initialized = True
 
+    @override
     def do_destroy(self) -> None:
         if not self._initialized:
             return
@@ -176,6 +183,7 @@ class Window(Generic[SectionT], WindowInterface):
         self.on_destroy()
         self._initialized = False
 
+    @override
     def do_process(self) -> None:
         if not self._initialized:
             self.on_create()
