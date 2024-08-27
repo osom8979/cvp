@@ -2,11 +2,9 @@
 
 import io
 import os
-import sys
 from collections import deque
-from functools import lru_cache
 from signal import SIGINT
-from subprocess import DEVNULL, PIPE, Popen
+from subprocess import DEVNULL, PIPE
 from threading import Lock, Thread
 from typing import (
     IO,
@@ -20,9 +18,8 @@ from typing import (
     Union,
 )
 
-from psutil import Process
-
 from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
+from cvp.process.process import Process
 from cvp.types.override import override
 
 
@@ -34,16 +31,6 @@ class FrameShape(NamedTuple):
     @property
     def size(self):
         return self.width * self.height * self.channels
-
-
-@lru_cache
-def default_creation_flags() -> int:
-    if sys.platform == "win32":
-        from subprocess import CREATE_NO_WINDOW
-
-        return CREATE_NO_WINDOW
-    else:
-        return 0
 
 
 class FFmpegProcess(FFmpegFrameReader):
@@ -73,42 +60,16 @@ class FFmpegProcess(FFmpegFrameReader):
         self._latest = bytes()
         self._latest_count = 0
 
-        if creation_flags is None:
-            creation_flags = default_creation_flags()
-
-        assert isinstance(creation_flags, int)
-
-        self._process = Popen(
-            args,
-            bufsize=buffer_size,
-            executable=None,
+        self._process = Process(
+            args=args,
+            buffer_size=buffer_size,
             stdin=stdin,
             stdout=PIPE,
             stderr=stderr,
-            preexec_fn=None,
-            close_fds=True,
-            shell=False,
             cwd=cwd,
             env=env,
-            universal_newlines=None,
-            startupinfo=None,
-            creationflags=creation_flags,
-            restore_signals=True,
-            start_new_session=False,
-            pass_fds=(),
-            user=None,
-            group=None,
-            extra_groups=None,
-            encoding=None,
-            errors=None,
-            text=None,
-            umask=-1,
-            pipesize=-1,
-            process_group=None,
+            creation_flags=creation_flags,
         )
-
-        assert self._process.pid != 0
-        self._psutil = Process(self._process.pid)
 
         stdout_pipe = self._process.stdout
         assert stdout_pipe is not None
@@ -135,6 +96,14 @@ class FFmpegProcess(FFmpegFrameReader):
     @property
     def frame_shape(self):
         return self._frame_shape
+
+    @property
+    def latest(self):
+        return self._latest
+
+    @property
+    def latest_count(self):
+        return self._latest_count
 
     def raise_if_thread_error(self):
         if self._thread_error is not None:
@@ -177,16 +146,8 @@ class FFmpegProcess(FFmpegFrameReader):
         return self._latest
 
     @property
-    def latest(self):
-        return self._latest
-
-    @property
-    def latest_count(self):
-        return self._latest_count
-
-    @property
     def psutil(self):
-        return self._psutil
+        return self._process.psutil
 
     @property
     def pid(self) -> int:
