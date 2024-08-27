@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
+
 import imgui
 
 from cvp.config.config import Config
@@ -7,15 +9,23 @@ from cvp.config.sections.preference import PreferenceSection
 from cvp.types.override import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
+from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
+from cvp.windows.preference.appearance import AppearancePreference
+from cvp.windows.preference.ffmpeg import FFmpegPreference
 
 
 class PreferenceWindow(Window[PreferenceSection]):
+    _menus: List[WidgetInterface]
+
     def __init__(self, config: Config):
         super().__init__(config.preference, title="Preference", closable=True)
         self._config = config
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._menus = ["appearance", "ffmpeg"]
+        self._menus = [
+            AppearancePreference(),
+            FFmpegPreference(),
+        ]
 
     @property
     def sidebar_width(self) -> int:
@@ -58,17 +68,21 @@ class PreferenceWindow(Window[PreferenceSection]):
 
                 if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
                     for i, menu in enumerate(self._menus):
-                        if imgui.selectable(menu, i == self.menu_index)[1]:
+                        if imgui.selectable(str(menu), i == self.menu_index)[1]:
                             self.menu_index = i
                     imgui.end_list_box()
             finally:
                 end_child()
 
+        imgui.same_line()
+
         if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
             try:
                 if 0 <= self.menu_index < len(self._menus):
-                    # self._menus[self.menu_index].on_process()
-                    pass
+                    menu = self._menus[self.menu_index]
+                    imgui.text(str(menu))
+                    imgui.separator()
+                    menu.on_process()
                 else:
                     text_centered("Please select a menu item")
             finally:

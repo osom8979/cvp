@@ -7,7 +7,3 @@ class WidgetInterface(ABC):
     @abstractmethod
     def on_process(self) -> None:
         raise NotImplementedError
-
-    @abstractmethod
-    def do_process(self) -> None:
-        raise NotImplementedError

@@ -22,7 +22,6 @@ class TabItem(WidgetInterface):
         assert self
         imgui.end_tab_item()
 
-    @override
     def do_process(self) -> None:
         if self.begin().selected:
             try:
@@ -53,7 +52,6 @@ class TabBar(WidgetInterface):
         assert self
         imgui.end_tab_bar()
 
-    @override
     def do_process(self) -> None:
         if self.begin().opened:
             try:

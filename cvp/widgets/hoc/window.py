@@ -56,14 +56,6 @@ class WindowInterface(WidgetInterface):
     def on_popup(self, popup: Popup, result: Any) -> None:
         raise NotImplementedError
 
-    @abstractmethod
-    def do_create(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def do_destroy(self) -> None:
-        raise NotImplementedError
-
 
 class Window(Generic[SectionT], WindowInterface):
     _popups: Dict[str, Popup]
@@ -167,7 +159,6 @@ class Window(Generic[SectionT], WindowInterface):
     def unregister_popup(self, popup: Popup) -> None:
         self._popups.pop(popup.title)
 
-    @override
     def do_create(self) -> None:
         if self._initialized:
             return
@@ -175,7 +166,6 @@ class Window(Generic[SectionT], WindowInterface):
         self.on_create()
         self._initialized = True
 
-    @override
     def do_destroy(self) -> None:
         if not self._initialized:
             return
@@ -183,7 +173,6 @@ class Window(Generic[SectionT], WindowInterface):
         self.on_destroy()
         self._initialized = False
 
-    @override
     def do_process(self) -> None:
         if not self._initialized:
             self.on_create()
