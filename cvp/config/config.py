@@ -8,6 +8,7 @@ from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
 from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
+from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.media import MediaSection
@@ -27,6 +28,7 @@ class Config(BaseConfig):
         self._medias = SectionPrefix(config=self, prefix=MEDIA_SECTION_PREFIX)
         self._demo = DemoSection(config=self)
         self._display = DisplaySection(config=self)
+        self._ffmpeg = FFmpegSection(config=self)
         self._font = FontSection(config=self)
         self._manager = ManagerSection(self)
         self._mpv = MpvSection(config=self)
@@ -54,6 +56,10 @@ class Config(BaseConfig):
     @property
     def display(self):
         return self._display
+
+    @property
+    def ffmpeg(self):
+        return self._ffmpeg
 
     @property
     def font(self):

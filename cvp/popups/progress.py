@@ -65,7 +65,7 @@ class ProgressPopup(Popup[None]):
         if self.label:
             imgui.text(self.label)
 
-        imgui.progress_bar(self.progress, 0, -1)
+        imgui.progress_bar(self.progress, (-1, 0), "Overlay text")
 
         if pygame.key.get_pressed()[pygame.K_ESCAPE]:
             imgui.close_current_popup()

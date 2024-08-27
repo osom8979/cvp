@@ -24,7 +24,7 @@ class PreferenceWindow(Window[PreferenceSection]):
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._menus = [
             AppearancePreference(),
-            FFmpegPreference(),
+            FFmpegPreference(config.ffmpeg),
         ]
 
     @property
