@@ -6,10 +6,10 @@ from unittest import TestCase, main, skipIf
 import numpy as np
 
 from cvp.ffmpeg.executable.which import which_ffmpeg
-from cvp.process.frame.reader import FrameReaderProcess
+from cvp.process.frame import FrameReaderProcess
 
 
-class ReaderTestCase(TestCase):
+class FrameTestCase(TestCase):
     @skipIf(not which_ffmpeg(), "Not found ffmpeg executable")
     def test_default(self):
         ffmpeg = which_ffmpeg()

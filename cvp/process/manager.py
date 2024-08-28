@@ -8,7 +8,7 @@ from subprocess import DEVNULL
 from typing import IO, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from cvp.arguments import CVP_HOME
-from cvp.process.frame.reader import FrameReaderProcess, FrameShape
+from cvp.process.frame import FrameReaderProcess, FrameShape
 
 
 class ProcessManager(Dict[str, FrameReaderProcess]):
