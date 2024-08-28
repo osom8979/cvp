@@ -3,7 +3,6 @@
 import io
 import os
 from collections import deque
-from signal import SIGINT
 from subprocess import DEVNULL, PIPE
 from threading import Lock, Thread
 from typing import (
@@ -20,7 +19,6 @@ from typing import (
 
 from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
 from cvp.process.process import Process
-from cvp.types.override import override
 
 
 class FrameShape(NamedTuple):
@@ -33,7 +31,7 @@ class FrameShape(NamedTuple):
         return self.width * self.height * self.channels
 
 
-class FFmpegProcess(FFmpegFrameReader):
+class FFmpegProcess(Process):
     _thread_error: Optional[BaseException]
     _deque: Deque[bytes]
 
@@ -54,13 +52,14 @@ class FFmpegProcess(FFmpegFrameReader):
     ):
         self._thread_error = None
         self._frame_shape = FrameShape(*frame_shape)
+        self._target = target
 
         self._deque = deque(maxlen=deque_maxsize)
         self._mutex = Lock()
         self._latest = bytes()
         self._latest_count = 0
 
-        self._process = Process(
+        super().__init__(
             args=args,
             buffer_size=buffer_size,
             stdin=stdin,
@@ -71,22 +70,23 @@ class FFmpegProcess(FFmpegFrameReader):
             creation_flags=creation_flags,
         )
 
-        stdout_pipe = self._process.stdout
+        stdout_pipe = self.stdout
         assert stdout_pipe is not None
+        assert isinstance(stdout_pipe, io.BufferedReader)
+
+        self._reader = FFmpegFrameReader(
+            pipe=stdout_pipe,
+            frame_size=self._frame_shape.size,
+            target=self._on_frame,
+        )
 
         self._thread = Thread(
             group=None,
-            target=self._read_pipe_stream_main,
+            target=self._on_read_pipe_stream_main,
             name=name,
             args=(),
             kwargs=None,
             daemon=None,
-        )
-
-        super().__init__(
-            pipe=stdout_pipe,
-            frame_size=self._frame_shape.size,
-            target=target,
         )
 
     @property
@@ -109,18 +109,17 @@ class FFmpegProcess(FFmpegFrameReader):
         if self._thread_error is not None:
             raise self._thread_error
 
-    def _read_pipe_stream_main(self) -> None:
+    def _on_read_pipe_stream_main(self) -> None:
         try:
-            while self._process.poll() is None:
-                self.read()
+            while self.poll() is None:
+                self._reader.read()
 
-            self.flush()
-            self.read_eof()
+            self._reader.flush()
+            self._reader.read_eof()
         except BaseException as e:
             self._thread_error = e
 
-    @override
-    def on_frame(self, data: bytes) -> None:
+    def _on_frame(self, data: bytes) -> None:
         if self._target is not None:
             self._target(data)
         else:
@@ -144,65 +143,6 @@ class FFmpegProcess(FFmpegFrameReader):
             self._latest_count += 1
 
         return self._latest
-
-    @property
-    def psutil(self):
-        return self._process.psutil
-
-    @property
-    def pid(self) -> int:
-        return self._process.pid
-
-    @property
-    def returncode(self) -> int:
-        return self._process.returncode
-
-    @property
-    def stdin(self):
-        return self._process.stdin
-
-    @property
-    def stdout(self):
-        return self._process.stdout
-
-    @property
-    def stderr(self):
-        return self._process.stderr
-
-    @property
-    def args(self):
-        return self._process.args
-
-    def poll(self) -> Optional[int]:
-        return self._process.poll()
-
-    def wait(self, timeout: Optional[float] = None) -> int:
-        return self._process.wait(timeout)
-
-    def communicate(
-        self,
-        data: Optional[bytes] = None,
-        timeout: Optional[float] = None,
-    ) -> Tuple[Optional[bytes], Optional[bytes]]:
-        # [WARNING]
-        # The data read is buffered in memory,
-        # so do not use this method if the data size is large or unlimited.
-        stdout, stderr = self._process.communicate(data, timeout)
-        assert isinstance(stdout, (type(None), bytes))
-        assert isinstance(stderr, (type(None), bytes))
-        return stdout, stderr
-
-    def send_signal(self, signum: int) -> None:
-        self._process.send_signal(signum)
-
-    def interrupt(self) -> None:
-        self._process.send_signal(SIGINT)
-
-    def terminate(self) -> None:
-        self._process.terminate()
-
-    def kill(self) -> None:
-        self._process.kill()
 
     def start_thread(self) -> None:
         self._thread.start()

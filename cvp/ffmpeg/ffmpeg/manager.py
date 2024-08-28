@@ -24,7 +24,7 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
         self._ffmpeg = ffmpeg
         self._ffprobe = ffprobe
 
-    def spawn(
+    def spawn_with_frame_reader(
         self,
         key: str,
         args: Sequence[str],
@@ -76,7 +76,7 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
             "pipe:1",
         )
         frame_shape = width, height, 3
-        return self.spawn(
+        return self.spawn_with_frame_reader(
             key,
             args=args,
             stderr=sys.stderr.fileno(),
