@@ -4,7 +4,7 @@ from collections import deque
 from io import BytesIO
 from unittest import TestCase, main
 
-from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
+from cvp.io.frame.reader import FrameReader
 
 
 class ReaderTestCase(TestCase):
@@ -15,7 +15,7 @@ class ReaderTestCase(TestCase):
         def on_frame(data: bytes) -> None:
             frames.append(data)
 
-        reader = FFmpegFrameReader(pipe, 5, target=on_frame)
+        reader = FrameReader(pipe, 5, target=on_frame)
         reader.read()
         self.assertEqual(1, len(frames))
         self.assertIsNone(reader.remain)

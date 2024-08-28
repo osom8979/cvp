@@ -7,13 +7,13 @@ from typing import IO, Callable, Optional
 from cvp.types.override import override
 
 
-class FFmpegFrameInterface(ABC):
+class FrameInterface(ABC):
     @abstractmethod
     def on_frame(self, data: bytes) -> None:
         raise NotImplementedError
 
 
-class FFmpegFrameReader(FFmpegFrameInterface):
+class FrameReader(FrameInterface):
     _remain: Optional[bytes]
 
     def __init__(

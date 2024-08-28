@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from configparser import DEFAULTSECT, ConfigParser, ExtendedInterpolation
-from functools import reduce
+from io import StringIO
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, Union, overload
@@ -63,6 +63,10 @@ class BaseConfig:
         self._separator = separator
         if filename:
             self._config.read(filename)
+
+    @property
+    def vars(self):
+        return self._vars
 
     def sections(self) -> List[str]:
         return self._config.sections()
@@ -244,15 +248,23 @@ class BaseConfig:
 
         raise TypeError(f"Unsupported default type: {type(default).__name__}")
 
-    def set(self, section: str, key: str, value: ValueUnion) -> None:
+    def encode_value(self, value: ValueUnion) -> str:
         if isinstance(value, str):
-            config_data = value
+            return value
         elif isinstance(value, Sequence):
-            config_data = reduce(
-                lambda x, y: f"{x}{self._separator}{y}",
-                value[1:],
-                str(value[0]),
-            )
+            match len(value):
+                case 0:
+                    return str()
+                case 1:
+                    return str(value[0])
+                case x:
+                    buffer = StringIO()
+                    buffer.write(str(value[0]))
+                    for i in range(1, x):
+                        buffer.write(f"{self._separator}{value[i]}")
+                    return buffer.getvalue()
         else:
-            config_data = str(value)
-        self.set_config_value(section, key, config_data)
+            return str(value)
+
+    def set(self, section: str, key: str, value: ValueUnion) -> None:
+        self.set_config_value(section, key, self.encode_value(value))

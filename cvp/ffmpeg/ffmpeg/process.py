@@ -17,7 +17,7 @@ from typing import (
     Union,
 )
 
-from cvp.ffmpeg.ffmpeg.frames.reader import FFmpegFrameReader
+from cvp.io.frame.reader import FrameReader
 from cvp.process.process import Process
 
 
@@ -74,7 +74,7 @@ class FFmpegProcess(Process):
         assert stdout_pipe is not None
         assert isinstance(stdout_pipe, io.BufferedReader)
 
-        self._reader = FFmpegFrameReader(
+        self._reader = FrameReader(
             pipe=stdout_pipe,
             frame_size=self._frame_shape.size,
             target=self._on_frame,

@@ -80,13 +80,7 @@ class BaseSection:
     def get(self, key: str, default: Sequence[float], *, raw=False) -> Sequence[float]: ...  # noqa: E501
     # fmt: on
 
-    def get(
-        self,
-        key: str,
-        default: ValueUnion,
-        *,
-        raw=False,
-    ) -> Optional[ValueUnion]:
+    def get(self, key: str, default: ValueUnion, *, raw=False) -> Optional[ValueUnion]:
         return self._config.get(self._section, key, default, raw=raw)
 
     def set(self, key: str, value: ValueUnion) -> None:
