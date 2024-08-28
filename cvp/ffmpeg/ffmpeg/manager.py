@@ -8,10 +8,10 @@ from subprocess import DEVNULL
 from typing import IO, Callable, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 from cvp.arguments import CVP_HOME
-from cvp.ffmpeg.ffmpeg.process import FFmpegProcess, FrameShape
+from cvp.process.frame.reader import FrameReaderProcess, FrameShape
 
 
-class FFmpegManager(Dict[str, FFmpegProcess]):
+class FFmpegManager(Dict[str, FrameReaderProcess]):
     def __init__(
         self,
         home: Optional[str] = None,
@@ -37,7 +37,7 @@ class FFmpegManager(Dict[str, FFmpegProcess]):
         creation_flags: Optional[int] = None,
         target: Optional[Callable[[bytes], None]] = None,
     ):
-        process = FFmpegProcess(
+        process = FrameReaderProcess.from_args(
             name=key,
             args=args,
             frame_shape=frame_shape,

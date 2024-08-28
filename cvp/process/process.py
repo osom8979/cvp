@@ -12,8 +12,15 @@ from cvp.process.flags import default_creation_flags
 
 
 class Process:
-    def __init__(
-        self,
+    def __init__(self, popen: Popen):
+        if popen.pid == 0:
+            raise ValueError("Invalid process ID")
+
+        self._popen = popen
+        self._psutil = psutil.Process(popen.pid)
+
+    @staticmethod
+    def popen(
         args: Sequence[str],
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = None,
@@ -28,7 +35,7 @@ class Process:
 
         assert isinstance(creation_flags, int)
 
-        self._popen = Popen(
+        return Popen(
             args,
             bufsize=buffer_size,
             executable=None,
@@ -56,9 +63,6 @@ class Process:
             pipesize=-1,
             process_group=None,
         )
-
-        assert self._popen.pid != 0
-        self._psutil = psutil.Process(self._popen.pid)
 
     @property
     def psutil(self):

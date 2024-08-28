@@ -6,10 +6,10 @@ from unittest import TestCase, main, skipIf
 import numpy as np
 
 from cvp.ffmpeg.executable.which import which_ffmpeg
-from cvp.ffmpeg.ffmpeg.process import FFmpegProcess
+from cvp.process.frame.reader import FrameReaderProcess
 
 
-class ProcessTestCase(TestCase):
+class ReaderTestCase(TestCase):
     @skipIf(not which_ffmpeg(), "Not found ffmpeg executable")
     def test_default(self):
         ffmpeg = which_ffmpeg()
@@ -53,7 +53,12 @@ class ProcessTestCase(TestCase):
         def on_frame(data: bytes) -> None:
             frames.append(np.ndarray(array_shape, dtype=np.uint8, buffer=data))
 
-        popen = FFmpegProcess(type(self).__name__, args, frame_shape, target=on_frame)
+        popen = FrameReaderProcess.from_args(
+            type(self).__name__,
+            args,
+            frame_shape,
+            target=on_frame,
+        )
         popen.start_thread()
         popen.join_thread()
 

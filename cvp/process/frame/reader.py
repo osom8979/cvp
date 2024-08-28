@@ -3,7 +3,7 @@
 import io
 import os
 from collections import deque
-from subprocess import DEVNULL, PIPE
+from subprocess import DEVNULL, PIPE, Popen
 from threading import Lock, Thread
 from typing import (
     IO,
@@ -31,25 +31,20 @@ class FrameShape(NamedTuple):
         return self.width * self.height * self.channels
 
 
-class FFmpegProcess(Process):
+class FrameReaderProcess(Process):
     _thread_error: Optional[BaseException]
     _deque: Deque[bytes]
 
     def __init__(
         self,
         name: str,
-        args: Sequence[str],
         frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
-        buffer_size=io.DEFAULT_BUFFER_SIZE,
-        stdin: Optional[Union[int, IO]] = None,
-        stderr: Optional[Union[int, IO]] = DEVNULL,
-        cwd: Optional[Union[str, os.PathLike[str]]] = None,
-        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
-        creation_flags: Optional[int] = None,
-        *,
+        popen: Popen,
         deque_maxsize=2,
         target: Optional[Callable[[bytes], None]] = None,
     ):
+        super().__init__(popen)
+
         self._thread_error = None
         self._frame_shape = FrameShape(*frame_shape)
         self._target = target
@@ -58,17 +53,6 @@ class FFmpegProcess(Process):
         self._mutex = Lock()
         self._latest = bytes()
         self._latest_count = 0
-
-        super().__init__(
-            args=args,
-            buffer_size=buffer_size,
-            stdin=stdin,
-            stdout=PIPE,
-            stderr=stderr,
-            cwd=cwd,
-            env=env,
-            creation_flags=creation_flags,
-        )
 
         stdout_pipe = self.stdout
         assert stdout_pipe is not None
@@ -88,6 +72,33 @@ class FFmpegProcess(Process):
             kwargs=None,
             daemon=None,
         )
+
+    @classmethod
+    def from_args(
+        cls,
+        name: str,
+        args: Sequence[str],
+        frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
+        buffer_size=io.DEFAULT_BUFFER_SIZE,
+        stdin: Optional[Union[int, IO]] = None,
+        stderr: Optional[Union[int, IO]] = DEVNULL,
+        cwd: Optional[Union[str, os.PathLike[str]]] = None,
+        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
+        creation_flags: Optional[int] = None,
+        deque_maxsize=2,
+        target: Optional[Callable[[bytes], None]] = None,
+    ):
+        popen = cls.popen(
+            args=args,
+            buffer_size=buffer_size,
+            stdin=stdin,
+            stdout=PIPE,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            creation_flags=creation_flags,
+        )
+        return cls(name, frame_shape, popen, deque_maxsize, target)
 
     @property
     def thread_error(self):
