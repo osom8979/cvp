@@ -11,7 +11,7 @@ from cvp.arguments import CVP_HOME
 from cvp.process.frame.reader import FrameReaderProcess, FrameShape
 
 
-class FFmpegManager(Dict[str, FrameReaderProcess]):
+class ProcessManager(Dict[str, FrameReaderProcess]):
     def __init__(
         self,
         home: Optional[str] = None,

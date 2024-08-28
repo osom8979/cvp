@@ -5,8 +5,8 @@ import imgui
 from cvp.config.config import Config
 from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.media import MediaSection
-from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
+from cvp.process.manager import ProcessManager
 from cvp.types.override import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import (
@@ -23,13 +23,13 @@ from cvp.widgets.hoc.window import Window
 
 
 class ManagerWindow(Window[ManagerSection]):
-    def __init__(self, ffmpegs: FFmpegManager, config: Config):
+    def __init__(self, pm: ProcessManager, config: Config):
         super().__init__(
             config.manager,
             title="Media Manager",
             closable=True,
         )
-        self._ffmpegs = ffmpegs
+        self._pm = pm
         self._medias = config.medias
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
 
@@ -117,9 +117,9 @@ class ManagerWindow(Window[ManagerSection]):
             with item_width(-1):
                 media.file = input_text_value("## File", media.file)
 
-            spawnable = self._ffmpegs.spawnable(media.section)
-            stoppable = self._ffmpegs.stoppable(media.section)
-            removable = self._ffmpegs.removable(media.section)
+            spawnable = self._pm.spawnable(media.section)
+            stoppable = self._pm.stoppable(media.section)
+            removable = self._pm.removable(media.section)
 
             imgui.separator()
             imgui.text("Frame:")
@@ -135,13 +135,13 @@ class ManagerWindow(Window[ManagerSection]):
 
             imgui.separator()
             try:
-                status = self._ffmpegs.status(media.section)
+                status = self._pm.status(media.section)
             except BaseException as e:
                 status = str(e)
             imgui.text(f"Process ({status})")
 
             if button_ex("Spawn", disabled=not spawnable):
-                self._ffmpegs.spawn_with_file(
+                self._pm.spawn_with_file(
                     media.section,
                     media.frame_width,
                     media.frame_height,
@@ -150,9 +150,9 @@ class ManagerWindow(Window[ManagerSection]):
                 pass
             imgui.same_line()
             if button_ex("Stop", disabled=not stoppable):
-                self._ffmpegs.interrupt(media.section)
+                self._pm.interrupt(media.section)
             imgui.same_line()
             if button_ex("Remove", disabled=not removable):
-                self._ffmpegs.pop(media.section)
+                self._pm.pop(media.section)
         finally:
             imgui.end_tab_item()

@@ -8,7 +8,7 @@ from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
 from cvp.config.sections.media import MediaSection
-from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
+from cvp.process.manager import ProcessManager
 from cvp.types.override import override
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
@@ -19,9 +19,9 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaSection]):
-    def __init__(self, section: MediaSection, ffmpegs: FFmpegManager):
+    def __init__(self, section: MediaSection, pm: ProcessManager):
         super().__init__(section, closable=True)
-        self._ffmpegs = ffmpegs
+        self._pm = pm
         self._flags = 0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._texture = 0
@@ -88,7 +88,7 @@ class MediaWindow(Window[MediaSection]):
         if not self._texture:
             return
 
-        process = self._ffmpegs.get(self.section.section)
+        process = self._pm.get(self.section.section)
         if process is None:
             return
 

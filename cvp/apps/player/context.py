@@ -13,11 +13,11 @@ from OpenGL.error import Error
 from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
-from cvp.ffmpeg.ffmpeg.manager import FFmpegManager
 from cvp.filesystem.permission import test_directory, test_readable
 from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
+from cvp.process.manager import ProcessManager
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 
@@ -55,15 +55,15 @@ class PlayerContext:
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._player_ini)
         self._done = False
-        self._ffmpegs = FFmpegManager()
+        self._pm = ProcessManager()
         self._windows = {
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
-        self._manager = ManagerWindow(self._ffmpegs, self._config)
+        self._manager = ManagerWindow(self._pm, self._config)
         self._preference = PreferenceWindow(self._config)
         for config in self._config.medias.values():
-            self._windows[config.section] = MediaWindow(config, self._ffmpegs)
+            self._windows[config.section] = MediaWindow(config, self._pm)
 
         self._open_file_popup = OpenFilePopup(
             title="Open file",
@@ -95,7 +95,7 @@ class PlayerContext:
         section.file = file
         section.name = file
 
-        window = MediaWindow(section, self._ffmpegs)
+        window = MediaWindow(section, self._pm)
         window.do_create()
 
         self._windows[section.section] = window
@@ -178,13 +178,13 @@ class PlayerContext:
             win.do_create()
 
     def on_exit(self) -> None:
-        for process in self._ffmpegs.values():
+        for process in self._pm.values():
             if process.poll() is not None:
                 continue
             process.interrupt()
 
         process_timeout = 2.0
-        for process in self._ffmpegs.values():
+        for process in self._pm.values():
             try:
                 process.wait(process_timeout)
             except TimeoutError:
