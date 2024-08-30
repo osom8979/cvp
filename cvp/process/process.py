@@ -2,6 +2,7 @@
 
 import io
 import os
+from argparse import Namespace
 from signal import SIGINT
 from subprocess import DEVNULL, Popen
 from typing import IO, Mapping, Optional, Sequence, Tuple, Union
@@ -12,11 +13,23 @@ from cvp.process.flags import default_creation_flags
 from cvp.process.status import ProcessStatusEx
 
 
+class ProcessInit(Namespace):
+    args: Sequence[str]
+    buffer_size: Optional[int]
+    stdin: Optional[Union[int, IO]]
+    stdout: Optional[Union[int, IO]]
+    stderr: Optional[Union[int, IO]]
+    cwd: Optional[Union[str, os.PathLike[str]]]
+    env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]]
+    creation_flags: Optional[int]
+    name: Optional[str]
+
+
 class Process:
     def __init__(
         self,
         args: Sequence[str],
-        buffer_size=io.DEFAULT_BUFFER_SIZE,
+        buffer_size: Optional[int] = None,
         stdin: Optional[Union[int, IO]] = None,
         stdout: Optional[Union[int, IO]] = DEVNULL,
         stderr: Optional[Union[int, IO]] = DEVNULL,
@@ -25,9 +38,24 @@ class Process:
         creation_flags: Optional[int] = None,
         name: Optional[str] = None,
     ):
+        self._init = Namespace(
+            args=args,
+            buffer_size=buffer_size,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            creation_flags=creation_flags,
+            name=name,
+        )
+
+        if buffer_size is None:
+            buffer_size = io.DEFAULT_BUFFER_SIZE
         if creation_flags is None:
             creation_flags = default_creation_flags()
 
+        assert isinstance(buffer_size, int)
         assert isinstance(creation_flags, int)
 
         self._popen = Popen(
@@ -60,15 +88,32 @@ class Process:
         )
         assert self._popen.pid != 0
         self._psutil = psutil.Process(self._popen.pid)
-        self._name = name
+
+    @classmethod
+    def from_namespace(cls, init: ProcessInit):
+        return cls(
+            args=init.args,
+            buffer_size=init.buffer_size,
+            stdin=init.stdin,
+            stdout=init.stdout,
+            stderr=init.stderr,
+            cwd=init.cwd,
+            env=init.env,
+            creation_flags=init.creation_flags,
+            name=init.name,
+        )
+
+    @property
+    def namespace(self):
+        return self._init
+
+    @property
+    def name(self):
+        return self._init.name
 
     @property
     def psutil(self):
         return self._psutil
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def pid(self) -> int:
