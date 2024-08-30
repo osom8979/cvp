@@ -15,8 +15,13 @@ ContextT = TypeVar("ContextT")
 class TabItem(Generic[ContextT], WidgetInterface):
     _context: Optional[ContextT]
 
-    def __init__(self, label: str, opened: Optional[bool] = None, flags=0):
-        self._label = label
+    def __init__(
+        self,
+        label: Optional[str] = None,
+        opened: Optional[bool] = None,
+        flags=0,
+    ):
+        self._label = label if label else type(self).__name__
         self._opened = opened
         self._flags = flags
         self._context = None

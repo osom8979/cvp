@@ -42,7 +42,7 @@ class ProcessesWindow(Window[ProcessesSection]):
     def selected(self, value: str) -> None:
         self.section.selected = value
 
-    def drag_sidebar_width(self):
+    def drag_sidebar_width(self) -> None:
         sidebar_width = imgui.drag_int(
             "## SideWidth",
             self.sidebar_width,

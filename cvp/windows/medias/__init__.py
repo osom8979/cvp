@@ -1,33 +1,31 @@
 # -*- coding: utf-8 -*-
 
+from typing import Optional
+from weakref import ref
+
 import imgui
 
 from cvp.config.config import Config
-from cvp.config.sections.media import MediaSection
 from cvp.config.sections.medias import MediasSection
-from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.process.manager import ProcessManager
 from cvp.types.override import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
-from cvp.widgets import (
-    begin_child,
-    button_ex,
-    end_child,
-    footer_height_to_reserve,
-    input_text_disabled,
-    input_text_value,
-    item_width,
-    text_centered,
-)
+from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
 from cvp.widgets.hoc.window import Window
+from cvp.windows.medias.tabs import MediaTabs
 
 
 class MediasWindow(Window[MediasSection]):
     def __init__(self, pm: ProcessManager, config: Config):
         super().__init__(config.manager, title="Medias", closable=True)
-        self._pm = pm
-        self._medias = config.medias
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
+        self._tabs = MediaTabs(pm)
+        self._pm = ref(pm)
+        self._medias = config.medias
+
+    @property
+    def pm(self) -> Optional[ProcessManager]:
+        return self._pm()
 
     @property
     def sidebar_width(self) -> int:
@@ -45,7 +43,7 @@ class MediasWindow(Window[MediasSection]):
     def selected(self, value: str) -> None:
         self.section.selected = value
 
-    def drag_sidebar_width(self):
+    def drag_sidebar_width(self) -> None:
         sidebar_width = imgui.drag_int(
             "## SideWidth",
             self.sidebar_width,
@@ -82,70 +80,8 @@ class MediasWindow(Window[MediasSection]):
             try:
                 media = self._medias.get(self.selected, None)
                 if media is not None:
-                    self._media_tab_bar(media)
+                    self._tabs.do_process(media)
                 else:
                     text_centered("Please select a media item")
             finally:
                 end_child()
-
-    def _media_tab_bar(self, media: MediaSection) -> None:
-        if not imgui.begin_tab_bar("MediaTabs"):
-            return
-
-        try:
-            self._basic_tab(media)
-        finally:
-            imgui.end_tab_bar()
-
-    def _basic_tab(self, media: MediaSection) -> None:
-        if not imgui.begin_tab_item("Basic").selected:
-            return
-
-        try:
-            imgui.text("Section:")
-            input_text_disabled("## Section", media.section)
-
-            imgui.text("Name:")
-            with item_width(-1):
-                media.name = input_text_value("## Name", media.name)
-
-            imgui.text("File:")
-            with item_width(-1):
-                media.file = input_text_value("## File", media.file)
-
-            spawnable = self._pm.spawnable(media.section)
-            stoppable = self._pm.stoppable(media.section)
-            removable = self._pm.removable(media.section)
-
-            imgui.separator()
-            imgui.text("Frame:")
-            media.frame_size = imgui.input_int2("Size", *media.frame_size)[1]
-            if imgui.button("Reset"):
-                media.frame_size = 0, 0
-            imgui.same_line()
-            if imgui.button("Inspect"):
-                try:
-                    media.frame_size = inspect_video_frame_size(media.file)
-                except BaseException as e:
-                    print(e)
-
-            imgui.separator()
-            status = self._pm.status(media.section)
-            imgui.text(f"Process ({status})")
-
-            if button_ex("Spawn", disabled=not spawnable):
-                self._pm.spawn_ffmpeg_with_file(
-                    key=media.section,
-                    file=media.file,
-                    width=media.frame_width,
-                    height=media.frame_height,
-                )
-                pass
-            imgui.same_line()
-            if button_ex("Stop", disabled=not stoppable):
-                self._pm.interrupt(media.section)
-            imgui.same_line()
-            if button_ex("Remove", disabled=not removable):
-                self._pm.pop(media.section)
-        finally:
-            imgui.end_tab_item()
