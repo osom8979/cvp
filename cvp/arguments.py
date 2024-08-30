@@ -14,6 +14,19 @@ from cvp.logging.logging import (
 )
 from cvp.resources.home import DEFAULT_CVP_HOME_PATH
 from cvp.system.environ import get_typed_environ_value as get_eval
+from cvp.system.environ_keys import (
+    CVP_COLORED_LOGGING,
+    CVP_DEBUG,
+    CVP_DEFAULT_LOGGING,
+    CVP_DOTENV_PATH,
+    CVP_HOME,
+    CVP_NO_DOTENV,
+    CVP_ROTATE_LOGGING_PREFIX,
+    CVP_ROTATE_LOGGING_WHEN,
+    CVP_SEVERITY,
+    CVP_SIMPLE_LOGGING,
+    CVP_VERBOSE,
+)
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -57,12 +70,12 @@ def add_dotenv_arguments(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--no-dotenv",
         action="store_true",
-        default=get_eval("NO_DOTENV", False),
+        default=get_eval(CVP_NO_DOTENV, False),
         help="Do not use dot-env file",
     )
     parser.add_argument(
         "--dotenv-path",
-        default=get_eval("DOTENV_PATH", join(getcwd(), LOCAL_DOTENV_FILENAME)),
+        default=get_eval(CVP_DOTENV_PATH, join(getcwd(), LOCAL_DOTENV_FILENAME)),
         metavar="file",
         help=f"Specifies the dot-env file (default: '{LOCAL_DOTENV_FILENAME}')",
     )
@@ -92,7 +105,7 @@ def default_argument_parser() -> ArgumentParser:
     parser.add_argument(
         "--home",
         metavar="dir",
-        default=get_eval("CVP_HOME", DEFAULT_CVP_HOME_PATH),
+        default=get_eval(CVP_HOME, DEFAULT_CVP_HOME_PATH),
         help=f"{PROG}'s home directory",
     )
 
@@ -101,40 +114,40 @@ def default_argument_parser() -> ArgumentParser:
         "--colored-logging",
         "-c",
         action="store_true",
-        default=get_eval("COLORED_LOGGING", False),
+        default=get_eval(CVP_COLORED_LOGGING, False),
         help="Use colored logging",
     )
     logging_group.add_argument(
         "--default-logging",
         action="store_true",
-        default=get_eval("DEFAULT_LOGGING", False),
+        default=get_eval(CVP_DEFAULT_LOGGING, False),
         help="Use default logging",
     )
     logging_group.add_argument(
         "--simple-logging",
         "-s",
         action="store_true",
-        default=get_eval("SIMPLE_LOGGING", False),
+        default=get_eval(CVP_SIMPLE_LOGGING, False),
         help="Use simple logging",
     )
 
     parser.add_argument(
         "--rotate-logging-prefix",
-        default=get_eval("ROTATE_LOGGING_PREFIX", ""),
+        default=get_eval(CVP_ROTATE_LOGGING_PREFIX, ""),
         metavar="prefix",
         help="Rotate logging prefix",
     )
     parser.add_argument(
         "--rotate-logging-when",
         choices=TIMED_ROTATING_WHEN,
-        default=get_eval("ROTATE_LOGGING_WHEN", DEFAULT_TIMED_ROTATING_WHEN),
+        default=get_eval(CVP_ROTATE_LOGGING_WHEN, DEFAULT_TIMED_ROTATING_WHEN),
         help=f"Rotate logging when (default: '{DEFAULT_TIMED_ROTATING_WHEN}')",
     )
 
     parser.add_argument(
         "--severity",
         choices=SEVERITIES,
-        default=get_eval("SEVERITY", SEVERITY_NAME_INFO),
+        default=get_eval(CVP_SEVERITY, SEVERITY_NAME_INFO),
         help=f"Logging severity (default: '{SEVERITY_NAME_INFO}')",
     )
 
@@ -142,14 +155,14 @@ def default_argument_parser() -> ArgumentParser:
         "--debug",
         "-d",
         action="store_true",
-        default=get_eval("DEBUG", False),
+        default=get_eval(CVP_DEBUG, False),
         help="Enable debugging mode and change logging severity to 'DEBUG'",
     )
     parser.add_argument(
         "--verbose",
         "-v",
         action="count",
-        default=get_eval("VERBOSE", 0),
+        default=get_eval(CVP_VERBOSE, 0),
         help="Be more verbose/talkative during the operation",
     )
     parser.add_argument(

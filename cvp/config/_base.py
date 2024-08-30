@@ -6,6 +6,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, Union, overload
 
+from cvp.system.environ_keys import CVP_HOME
 from cvp.types.string.to_boolean import string_to_boolean
 from cvp.variables import CONFIG_VALUE_SEPARATOR
 
@@ -59,7 +60,7 @@ class BaseConfig:
             default_section=DEFAULTSECT,
             interpolation=ExtendedInterpolation(),
         )
-        self._vars = {"CVP_HOME": cvp_home if cvp_home else str()}
+        self._vars = {CVP_HOME: cvp_home if cvp_home else str()}
         self._separator = separator
         if filename:
             self._config.read(filename)
