@@ -28,6 +28,7 @@ from cvp.windows.medias import MediasWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
+from cvp.windows.processes import ProcessesWindow
 
 
 class PlayerContext:
@@ -61,6 +62,7 @@ class PlayerContext:
             "__mpv__": MpvWindow(self._config.mpv),
         }
         self._medias = MediasWindow(self._pm, self._config)
+        self._processes = ProcessesWindow(self._pm, self._config)
         self._preference = PreferenceWindow(self._config)
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config, self._pm)
@@ -226,6 +228,8 @@ class PlayerContext:
 
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
             self._medias.opened = True
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
+            self._processes.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
             self._preference.opened = True
 
@@ -240,6 +244,7 @@ class PlayerContext:
             for win in self._windows.values():
                 win.do_process()
             self._medias.do_process()
+            self._processes.do_process()
             self._preference.do_process()
             self.on_demo_window()
         finally:
@@ -259,10 +264,13 @@ class PlayerContext:
 
                 imgui.separator()
                 _manager_opened = self._medias.opened
+                _processes_opened = self._processes.opened
                 _preference_opened = self._preference.opened
 
-                if imgui.menu_item("Media Manager", "Ctrl+Alt+M", _manager_opened)[0]:
+                if imgui.menu_item("Medias", "Ctrl+Alt+M", _manager_opened)[0]:
                     self._medias.opened = not self._medias.opened
+                if imgui.menu_item("Processes", "Ctrl+Alt+P", _processes_opened)[0]:
+                    self._processes.opened = not self._processes.opened
                 if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
                     self._preference.opened = not self._preference.opened
 
