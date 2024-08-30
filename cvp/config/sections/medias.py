@@ -13,10 +13,10 @@ class _Keys(StrEnum):
     selected = auto()
 
 
-class ManagerSection(CommonWindowSection):
+class MediasSection(CommonWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="manager"):
+    def __init__(self, config: BaseConfig, section="medias"):
         super().__init__(config=config, section=section)
 
     @property

@@ -10,8 +10,8 @@ from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
-from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.media import MediaSection
+from cvp.config.sections.medias import MediasSection
 from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
 from cvp.config.sections.preference import PreferenceSection
@@ -30,7 +30,7 @@ class Config(BaseConfig):
         self._display = DisplaySection(config=self)
         self._ffmpeg = FFmpegSection(config=self)
         self._font = FontSection(config=self)
-        self._manager = ManagerSection(self)
+        self._manager = MediasSection(self)
         self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
         self._preference = PreferenceSection(config=self)

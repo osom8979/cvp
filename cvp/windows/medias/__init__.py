@@ -3,8 +3,8 @@
 import imgui
 
 from cvp.config.config import Config
-from cvp.config.sections.manager import ManagerSection
 from cvp.config.sections.media import MediaSection
+from cvp.config.sections.medias import MediasSection
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.process.manager import ProcessManager
 from cvp.types.override import override
@@ -22,13 +22,9 @@ from cvp.widgets import (
 from cvp.widgets.hoc.window import Window
 
 
-class ManagerWindow(Window[ManagerSection]):
+class MediasWindow(Window[MediasSection]):
     def __init__(self, pm: ProcessManager, config: Config):
-        super().__init__(
-            config.manager,
-            title="Media Manager",
-            closable=True,
-        )
+        super().__init__(config.manager, title="Medias", closable=True)
         self._pm = pm
         self._medias = config.medias
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH

@@ -23,8 +23,8 @@ from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 
 # noinspection PyProtectedMember
 from cvp.widgets.hoc.window import Window
-from cvp.windows.manager import ManagerWindow
 from cvp.windows.media import MediaWindow
+from cvp.windows.medias import MediasWindow
 from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
@@ -60,7 +60,7 @@ class PlayerContext:
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
         }
-        self._manager = ManagerWindow(self._pm, self._config)
+        self._medias = MediasWindow(self._pm, self._config)
         self._preference = PreferenceWindow(self._config)
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config, self._pm)
@@ -225,7 +225,7 @@ class PlayerContext:
             self._open_url_popup.show()
 
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
-            self._manager.opened = True
+            self._medias.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
             self._preference.opened = True
 
@@ -239,7 +239,7 @@ class PlayerContext:
             self.on_popups()
             for win in self._windows.values():
                 win.do_process()
-            self._manager.do_process()
+            self._medias.do_process()
             self._preference.do_process()
             self.on_demo_window()
         finally:
@@ -258,11 +258,11 @@ class PlayerContext:
                     self._open_url_popup.show()
 
                 imgui.separator()
-                _manager_opened = self._manager.opened
+                _manager_opened = self._medias.opened
                 _preference_opened = self._preference.opened
 
                 if imgui.menu_item("Media Manager", "Ctrl+Alt+M", _manager_opened)[0]:
-                    self._manager.opened = not self._manager.opened
+                    self._medias.opened = not self._medias.opened
                 if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
                     self._preference.opened = not self._preference.opened
 
