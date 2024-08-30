@@ -4,10 +4,10 @@ from collections import deque
 from io import BytesIO
 from unittest import TestCase, main
 
-from cvp.io.frame.reader import FrameReader
+from cvp.buffers.frame import FrameBuffer
 
 
-class ReaderTestCase(TestCase):
+class FrameTestCase(TestCase):
     def test_default(self):
         pipe = BytesIO(bytearray(i for i in range(7)))
         frames = deque()
@@ -15,7 +15,7 @@ class ReaderTestCase(TestCase):
         def on_frame(data: bytes) -> None:
             frames.append(data)
 
-        reader = FrameReader(pipe, 5, target=on_frame)
+        reader = FrameBuffer(pipe, 5, target=on_frame)
         reader.read()
         self.assertEqual(1, len(frames))
         self.assertIsNone(reader.remain)

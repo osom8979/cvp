@@ -8,11 +8,7 @@ from cvp.resources.home import HomeDir
 
 
 class ProcessManager(ProcessMapper[str, Process]):
-    def __init__(
-        self,
-        section: FFmpegSection,
-        home: HomeDir,
-    ):
+    def __init__(self, section: FFmpegSection, home: HomeDir):
         super().__init__()
         self._ffmpeg = FFmpegProcessHelper(section=section, home=home)
 

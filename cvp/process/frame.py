@@ -17,7 +17,7 @@ from typing import (
     Union,
 )
 
-from cvp.io.frame.reader import FrameReader
+from cvp.buffers.frame import FrameBuffer
 from cvp.process.process import Process
 from cvp.types.override import override
 
@@ -87,7 +87,7 @@ class FrameReaderProcess(Process):
         assert stdout_pipe is not None
         assert isinstance(stdout_pipe, io.BufferedReader)
 
-        self._reader = FrameReader(
+        self._reader = FrameBuffer(
             pipe=stdout_pipe,
             frame_size=self._frame_shape.size,
             target=self._on_frame,

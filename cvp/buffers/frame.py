@@ -13,7 +13,7 @@ class FrameInterface(ABC):
         raise NotImplementedError
 
 
-class FrameReader(FrameInterface):
+class FrameBuffer(FrameInterface):
     _remain: Optional[bytes]
 
     def __init__(
