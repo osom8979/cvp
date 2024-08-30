@@ -89,7 +89,7 @@ class MediasWindow(Window[MediasSection]):
                 end_child()
 
     def _media_tab_bar(self, media: MediaSection) -> None:
-        if not imgui.begin_tab_bar("Media Tabs"):
+        if not imgui.begin_tab_bar("MediaTabs"):
             return
 
         try:

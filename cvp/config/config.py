@@ -15,6 +15,7 @@ from cvp.config.sections.medias import MediasSection
 from cvp.config.sections.mpv import MpvSection
 from cvp.config.sections.overlay import OverlaySection
 from cvp.config.sections.preference import PreferenceSection
+from cvp.config.sections.processes import ProcessesSection
 from cvp.variables import MEDIA_SECTION_PREFIX
 
 
@@ -34,6 +35,7 @@ class Config(BaseConfig):
         self._mpv = MpvSection(config=self)
         self._overlay = OverlaySection(config=self)
         self._preference = PreferenceSection(config=self)
+        self._processes = ProcessesSection(self)
 
     def add_media_section(self, name: Optional[str] = None):
         section = self._medias.join_section_name(name if name else str(uuid4()))
@@ -80,3 +82,7 @@ class Config(BaseConfig):
     @property
     def preference(self):
         return self._preference
+
+    @property
+    def processes(self):
+        return self._processes
