@@ -9,6 +9,7 @@ from cvp.process.frame import FrameReaderProcess, FrameShape
 from cvp.resources.home import HomeDir
 
 RGB24_CHANNELS: Final[int] = 3
+PIPE_STDOUT: Final[str] = "pipe:1"
 
 
 class FFmpegProcessHelper:
@@ -39,7 +40,7 @@ class FFmpegProcessHelper:
             frame_shape=frame_shape,
             stdin=None,
             stderr=stderr,
-            cwd=self._home,
+            cwd=str(self._home),
             env=env,
             creation_flags=None,
             target=None,
@@ -48,27 +49,49 @@ class FFmpegProcessHelper:
             process.thread.start()
         return process
 
-    def spawn_with_file(self, key: str, file: str, width: int, height: int):
-        args = (
-            self.ffmpeg,
-            "-hide_banner",
-            # "-fflags",
-            # "nobuffer",
-            # "-fflags",
-            # "discardcorrupt",
-            # "-flags",
-            # "low_delay",
-            # "-rtsp_transport",
-            # "tcp",
-            "-i",
-            file,
+    @staticmethod
+    def rgb24_pipe_stdout_args(width: int, height: int) -> Sequence[str]:
+        return (
             "-f",
             "rawvideo",
             "-pix_fmt",
             "rgb24",
             "-s",
             f"{width}x{height}",
-            "pipe:1",
+            PIPE_STDOUT,
+        )
+
+    def spawn_with_file(self, key: str, file: str, width: int, height: int):
+        args = (
+            self.ffmpeg,
+            "-hide_banner",
+            "-i",
+            file,
+            *self.rgb24_pipe_stdout_args(width, height),
+        )
+        frame_shape = width, height, RGB24_CHANNELS
+        return self._spawn(
+            key,
+            args=args,
+            stderr=sys.stderr.fileno(),
+            frame_shape=frame_shape,
+        )
+
+    def spawn_with_rtsp(self, key: str, url: str, width: int, height: int):
+        args = (
+            self.ffmpeg,
+            "-hide_banner",
+            "-fflags",
+            "nobuffer",
+            "-fflags",
+            "discardcorrupt",
+            "-flags",
+            "low_delay",
+            "-rtsp_transport",
+            "tcp",
+            "-i",
+            url,
+            *self.rgb24_pipe_stdout_args(width, height),
         )
         frame_shape = width, height, RGB24_CHANNELS
         return self._spawn(
