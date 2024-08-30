@@ -2,15 +2,14 @@
 
 import os
 from argparse import Namespace
-from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 import imgui
 import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.arguments import CVP_HOME, IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
+from cvp.arguments import IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
@@ -19,6 +18,7 @@ from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.process.manager import ProcessManager
 from cvp.renderer.renderer import PygameRenderer
+from cvp.resources.home import HomeDir
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 
 # noinspection PyProtectedMember
@@ -36,11 +36,11 @@ class PlayerContext:
 
     def __init__(
         self,
-        home: Optional[str] = None,
+        home: Optional[Union[str, os.PathLike[str]]] = None,
         debug=False,
         verbose=0,
     ):
-        self._home = Path(home) if home else CVP_HOME
+        self._home = HomeDir.from_path(home)
         self._imgui_ini = self._home / IMGUI_INI_FILENAME
         self._player_ini = self._home / PLAYER_INI_FILENAME
         self._debug = debug
@@ -55,7 +55,7 @@ class PlayerContext:
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._player_ini)
         self._done = False
-        self._pm = ProcessManager()
+        self._pm = ProcessManager(self._config.ffmpeg, self._home)
         self._windows = {
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),

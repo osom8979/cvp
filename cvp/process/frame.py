@@ -3,7 +3,7 @@
 import io
 import os
 from collections import deque
-from subprocess import DEVNULL, PIPE, Popen
+from subprocess import DEVNULL, PIPE
 from threading import Lock, Thread
 from typing import (
     IO,
@@ -19,6 +19,7 @@ from typing import (
 
 from cvp.io.frame.reader import FrameReader
 from cvp.process.process import Process
+from cvp.types.override import override
 
 
 class FrameShape(NamedTuple):
@@ -38,15 +39,43 @@ class FrameReaderProcess(Process):
     def __init__(
         self,
         name: str,
+        args: Sequence[str],
         frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
-        popen: Popen,
+        stdin: Optional[Union[int, IO]] = None,
+        stderr: Optional[Union[int, IO]] = DEVNULL,
+        cwd: Optional[Union[str, os.PathLike[str]]] = None,
+        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
+        creation_flags: Optional[int] = None,
         deque_maxsize=2,
         target: Optional[Callable[[bytes], None]] = None,
     ):
-        super().__init__(popen)
+        frame_shape = FrameShape(*frame_shape)
+        frame_shape_size = frame_shape.size
+        if frame_shape_size <= 0:
+            raise ValueError("Frame shape must be greater than zero")
+
+        if io.DEFAULT_BUFFER_SIZE < frame_shape.size:
+            buffer_size = frame_shape.size
+        else:
+            buffer_size = io.DEFAULT_BUFFER_SIZE
+
+        assert isinstance(buffer_size, int)
+        assert io.DEFAULT_BUFFER_SIZE <= buffer_size
+
+        super().__init__(
+            args=args,
+            buffer_size=buffer_size,
+            stdin=stdin,
+            stdout=PIPE,
+            stderr=stderr,
+            cwd=cwd,
+            env=env,
+            creation_flags=creation_flags,
+            name=name,
+        )
 
         self._thread_error = None
-        self._frame_shape = FrameShape(*frame_shape)
+        self._frame_shape = frame_shape
         self._target = target
 
         self._deque = deque(maxlen=deque_maxsize)
@@ -73,32 +102,13 @@ class FrameReaderProcess(Process):
             daemon=None,
         )
 
-    @classmethod
-    def from_args(
-        cls,
-        name: str,
-        args: Sequence[str],
-        frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
-        buffer_size=io.DEFAULT_BUFFER_SIZE,
-        stdin: Optional[Union[int, IO]] = None,
-        stderr: Optional[Union[int, IO]] = DEVNULL,
-        cwd: Optional[Union[str, os.PathLike[str]]] = None,
-        env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
-        creation_flags: Optional[int] = None,
-        deque_maxsize=2,
-        target: Optional[Callable[[bytes], None]] = None,
-    ):
-        popen = cls.popen(
-            args=args,
-            buffer_size=buffer_size,
-            stdin=stdin,
-            stdout=PIPE,
-            stderr=stderr,
-            cwd=cwd,
-            env=env,
-            creation_flags=creation_flags,
-        )
-        return cls(name, frame_shape, popen, deque_maxsize, target)
+    @property
+    def reader(self):
+        return self._reader
+
+    @property
+    def thread(self):
+        return self._thread
 
     @property
     def thread_error(self):
@@ -155,19 +165,9 @@ class FrameReaderProcess(Process):
 
         return self._latest
 
-    def start_thread(self) -> None:
-        self._thread.start()
-
-    def is_alive_thread(self) -> bool:
-        return self._thread.is_alive()
-
-    def join_thread(self, timeout: Optional[float] = None) -> None:
-        self._thread.join(timeout)
-
-    @property
-    def thread_identifier(self):
-        return self._thread.ident
-
-    @property
-    def thread_native_id(self):
-        return self._thread.native_id
+    @override
+    def is_alive(self) -> bool:
+        if self._popen.poll() is None:
+            return True
+        else:
+            return self._thread.is_alive()

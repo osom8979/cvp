@@ -4,7 +4,6 @@ from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from functools import lru_cache
 from os import R_OK, access, getcwd
 from os.path import isfile, join
-from pathlib import Path
 from typing import Final, List, Optional, Sequence
 
 from cvp.logging.logging import (
@@ -13,6 +12,7 @@ from cvp.logging.logging import (
     SEVERITY_NAME_INFO,
     TIMED_ROTATING_WHEN,
 )
+from cvp.resources.home import DEFAULT_CVP_HOME_PATH
 from cvp.system.environ import get_typed_environ_value as get_eval
 
 PROG: Final[str] = "cvp"
@@ -31,8 +31,6 @@ Simply usage:
 
 CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
 DEFAULT_CMD: Final[str] = CMD_PLAYER
-
-CVP_HOME: Final[Path] = Path.home() / ".cvp"
 
 IMGUI_INI_FILENAME: Final[str] = "imgui.ini"
 PLAYER_INI_FILENAME: Final[str] = "player.ini"
@@ -94,7 +92,7 @@ def default_argument_parser() -> ArgumentParser:
     parser.add_argument(
         "--home",
         metavar="dir",
-        default=get_eval("CVP_HOME", str(CVP_HOME)),
+        default=get_eval("CVP_HOME", DEFAULT_CVP_HOME_PATH),
         help=f"{PROG}'s home directory",
     )
 

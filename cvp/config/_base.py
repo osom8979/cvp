@@ -68,6 +68,10 @@ class BaseConfig:
     def vars(self):
         return self._vars
 
+    @property
+    def home(self):
+        return self._vars
+
     def sections(self) -> List[str]:
         return self._config.sections()
 

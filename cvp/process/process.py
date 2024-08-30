@@ -9,18 +9,12 @@ from typing import IO, Mapping, Optional, Sequence, Tuple, Union
 import psutil
 
 from cvp.process.flags import default_creation_flags
+from cvp.process.status import ProcessStatusEx
 
 
 class Process:
-    def __init__(self, popen: Popen):
-        if popen.pid == 0:
-            raise ValueError("Invalid process ID")
-
-        self._popen = popen
-        self._psutil = psutil.Process(popen.pid)
-
-    @staticmethod
-    def popen(
+    def __init__(
+        self,
         args: Sequence[str],
         buffer_size=io.DEFAULT_BUFFER_SIZE,
         stdin: Optional[Union[int, IO]] = None,
@@ -29,13 +23,14 @@ class Process:
         cwd: Optional[Union[str, os.PathLike[str]]] = None,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
         creation_flags: Optional[int] = None,
+        name: Optional[str] = None,
     ):
         if creation_flags is None:
             creation_flags = default_creation_flags()
 
         assert isinstance(creation_flags, int)
 
-        return Popen(
+        self._popen = Popen(
             args,
             bufsize=buffer_size,
             executable=None,
@@ -63,10 +58,17 @@ class Process:
             pipesize=-1,
             process_group=None,
         )
+        assert self._popen.pid != 0
+        self._psutil = psutil.Process(self._popen.pid)
+        self._name = name
 
     @property
     def psutil(self):
         return self._psutil
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def pid(self) -> int:
@@ -122,3 +124,12 @@ class Process:
 
     def kill(self) -> None:
         self._popen.kill()
+
+    def is_alive(self) -> bool:
+        return self._popen.poll() is not None
+
+    def status(self) -> ProcessStatusEx:
+        if self._popen.poll() is None:
+            return ProcessStatusEx(self._psutil.status())
+        else:
+            return ProcessStatusEx.exited

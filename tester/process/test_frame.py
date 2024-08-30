@@ -53,14 +53,14 @@ class FrameTestCase(TestCase):
         def on_frame(data: bytes) -> None:
             frames.append(np.ndarray(array_shape, dtype=np.uint8, buffer=data))
 
-        popen = FrameReaderProcess.from_args(
+        popen = FrameReaderProcess(
             type(self).__name__,
             args,
             frame_shape,
             target=on_frame,
         )
-        popen.start_thread()
-        popen.join_thread()
+        popen.thread.start()
+        popen.thread.join()
 
         self.assertIsNone(popen.thread_error)
         self.assertEqual(total_frames, len(frames))

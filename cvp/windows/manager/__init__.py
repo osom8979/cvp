@@ -134,18 +134,15 @@ class ManagerWindow(Window[ManagerSection]):
                     print(e)
 
             imgui.separator()
-            try:
-                status = self._pm.status(media.section)
-            except BaseException as e:
-                status = str(e)
+            status = self._pm.status(media.section)
             imgui.text(f"Process ({status})")
 
             if button_ex("Spawn", disabled=not spawnable):
-                self._pm.spawn_with_file(
-                    media.section,
-                    media.frame_width,
-                    media.frame_height,
-                    media.file,
+                self._pm.spawn_ffmpeg_with_file(
+                    key=media.section,
+                    file=media.file,
+                    width=media.frame_width,
+                    height=media.frame_height,
                 )
                 pass
             imgui.same_line()
