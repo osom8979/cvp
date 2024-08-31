@@ -7,6 +7,7 @@ asctime
 athlon
 athlonxp
 autodect
+blocksize
 bsfs
 buildconf
 cmov
@@ -47,6 +48,7 @@ lavfi
 levelname
 libgl
 materialdesignicons
+maxlen
 meipass
 mmxext
 muxing
