@@ -180,17 +180,7 @@ class PlayerContext:
             win.do_create()
 
     def on_exit(self) -> None:
-        for process in self._pm.values():
-            if process.poll() is not None:
-                continue
-            process.interrupt()
-
-        process_timeout = 2.0
-        for process in self._pm.values():
-            try:
-                process.wait(process_timeout)
-            except TimeoutError:
-                process.kill()
+        self._pm.teardown(self._config.processes.teardown_timeout)
 
         for win in self._windows.values():
             win.do_destroy()

@@ -14,7 +14,7 @@ from cvp.widgets.hoc.tab import TabItem
 
 class ProcessInfoTab(TabItem[Process]):
     def __init__(self, pm: ProcessManager):
-        super().__init__()
+        super().__init__("Info")
         self._pm = ref(pm)
 
     @property

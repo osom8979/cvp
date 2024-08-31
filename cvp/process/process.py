@@ -5,7 +5,7 @@ import os
 from argparse import Namespace
 from signal import SIGINT
 from subprocess import DEVNULL, Popen
-from typing import IO, Mapping, Optional, Sequence, Tuple, Union
+from typing import IO, Callable, Mapping, Optional, Sequence, Tuple, Union
 
 import psutil
 
@@ -37,6 +37,8 @@ class Process:
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
         creation_flags: Optional[int] = None,
         name: Optional[str] = None,
+        *,
+        teardown: Optional[Callable[..., None]] = None
     ):
         self._init = Namespace(
             args=args,
@@ -88,6 +90,7 @@ class Process:
         )
         assert self._popen.pid != 0
         self._psutil = psutil.Process(self._popen.pid)
+        self._teardown = teardown
 
     @classmethod
     def from_namespace(cls, init: ProcessInit):
@@ -178,3 +181,7 @@ class Process:
             return ProcessStatusEx(self._psutil.status())
         else:
             return ProcessStatusEx.exited
+
+    def teardown(self):
+        if self._teardown is not None:
+            self._teardown()

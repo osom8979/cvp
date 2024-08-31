@@ -48,6 +48,8 @@ class FrameReaderProcess(Process):
         creation_flags: Optional[int] = None,
         deque_maxsize=2,
         target: Optional[Callable[[bytes], None]] = None,
+        *,
+        teardown: Optional[Callable[..., None]] = None
     ):
         frame_shape = FrameShape(*frame_shape)
         frame_shape_size = frame_shape.size
@@ -72,6 +74,7 @@ class FrameReaderProcess(Process):
             env=env,
             creation_flags=creation_flags,
             name=name,
+            teardown=teardown,
         )
 
         self._thread_error = None
