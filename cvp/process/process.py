@@ -11,6 +11,7 @@ import psutil
 
 from cvp.process.flags import default_creation_flags
 from cvp.process.status import ProcessStatusEx
+from cvp.process.stream import StreamBufferPair
 
 
 class ProcessInit(Namespace):
@@ -38,6 +39,7 @@ class Process:
         creation_flags: Optional[int] = None,
         name: Optional[str] = None,
         *,
+        stream_buffers: Optional[StreamBufferPair] = None,
         teardown: Optional[Callable[..., None]] = None
     ):
         self._init = Namespace(
@@ -90,6 +92,7 @@ class Process:
         )
         assert self._popen.pid != 0
         self._psutil = psutil.Process(self._popen.pid)
+        self._stream_buffers = stream_buffers
         self._teardown = teardown
 
     @classmethod
@@ -183,5 +186,10 @@ class Process:
             return ProcessStatusEx.exited
 
     def teardown(self):
+        if self._stream_buffers is not None:
+            self._stream_buffers.close()
+            self._stream_buffers = None
+
         if self._teardown is not None:
             self._teardown()
+            self._teardown = None

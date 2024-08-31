@@ -8,7 +8,7 @@ from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
 from cvp.config.sections.media import MediaSection
-from cvp.process.mapper import ProcessMapper
+from cvp.process.manager import ProcessManager
 from cvp.types.override import override
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
@@ -19,7 +19,7 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaSection]):
-    def __init__(self, section: MediaSection, pm: ProcessMapper):
+    def __init__(self, section: MediaSection, pm: ProcessManager):
         super().__init__(section, closable=True)
         self._pm = pm
         self._flags = 0

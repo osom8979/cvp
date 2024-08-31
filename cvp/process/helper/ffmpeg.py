@@ -6,6 +6,7 @@ from typing import IO, Final, Mapping, Optional, Sequence, Tuple, Union
 
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.process.frame import FrameReaderProcess, FrameShape
+from cvp.process.stream import StreamBufferPair
 from cvp.resources.home import HomeDir
 
 RGB24_CHANNELS: Final[int] = 3
@@ -13,11 +14,7 @@ PIPE_STDOUT: Final[str] = "pipe:1"
 
 
 class FFmpegProcessHelper:
-    def __init__(
-        self,
-        section: FFmpegSection,
-        home: HomeDir,
-    ):
+    def __init__(self, section: FFmpegSection, home: HomeDir):
         self._section = section
         self._home = home
 
@@ -34,6 +31,16 @@ class FFmpegProcessHelper:
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
         start_thread=True,
     ):
+        stderr_path = self._home.processes.gen(name, "stderr")
+        if not stderr_path.parent.is_dir():
+            stderr_path.parent.mkdir(parents=True, exist_ok=True)
+
+        stream_buffers = StreamBufferPair(
+            stdout=None,
+            stderr=stderr_path,
+            maxlen=self._section.logging_history,
+            encoding=self._section.logging_encoding,
+        )
         process = FrameReaderProcess(
             name=name,
             args=args,
@@ -44,6 +51,7 @@ class FFmpegProcessHelper:
             env=env,
             creation_flags=None,
             target=None,
+            stream_buffers=stream_buffers,
         )
         if start_thread:
             process.thread.start()

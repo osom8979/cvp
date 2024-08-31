@@ -15,6 +15,7 @@ copytb
 copyts
 cpuflags
 datefmt
+datename
 deblocking
 deinterlace
 demuxer
@@ -28,6 +29,7 @@ dostr
 fastdecode
 fflags
 ffmpegs
+fileno
 filtergraph
 fmpeg
 fprobe
@@ -49,6 +51,7 @@ levelname
 libgl
 materialdesignicons
 maxlen
+maxtail
 meipass
 mmxext
 muxing
@@ -83,9 +86,11 @@ spawnable
 sqcif
 ssse
 stillimage
+strftime
 subpath
 svga
 sxga
+timename
 tvstd
 uxga
 vcodec

@@ -106,6 +106,16 @@ class LinesBuffer:
             assert index == -1
             self._lines[-1] += text
 
+    def update_safe(self) -> int:
+        size = self.get_filesize()
+        if size <= self._cursor:
+            return 0
+
+        if self.closed:
+            self.open()
+
+        return self.update_to_index(size)
+
     def update(self) -> int:
         return self.update_to_index(self.get_filesize())
 

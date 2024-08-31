@@ -10,17 +10,52 @@ from cvp.process.process import Process
 from cvp.resources.home import HomeDir
 
 
-class ProcessManager(ProcessMapper[str, Process]):
+class ProcessManager:
     def __init__(self, section: FFmpegSection, home: HomeDir):
-        super().__init__()
+        self._processes = ProcessMapper[str, Process]()
         self._ffmpeg = FFmpegProcessHelper(section=section, home=home)
+
+    def keys(self):
+        return self._processes.keys()
+
+    def values(self):
+        return self._processes.values()
+
+    def items(self):
+        return self._processes.items()
+
+    def spawnable(self, key: str):
+        return self._processes.spawnable(key)
+
+    def stoppable(self, key: str):
+        return self._processes.stoppable(key)
+
+    def removable(self, key: str):
+        return self._processes.removable(key)
+
+    def status(self, key: str):
+        return self._processes.status(key)
+
+    def interrupt(self, key: str):
+        return self._processes.interrupt(key)
+
+    def get(self, key: str):
+        return self._processes.get(key)
+
+    def pop(self, key: str):
+        if not self._processes.removable(key):
+            raise ValueError(f"Non-removable process: '{key}'")
+
+        process = self._processes.pop(key)
+        process.teardown()
+        return process
 
     def teardown(self, timeout: Optional[float] = None):
         logger.info("ProcessManager is terminating all processes ...")
 
         processes = list()
-        while 1 <= self.__len__():
-            processes.append(self.popitem()[1])
+        while self._processes:
+            processes.append(self._processes.popitem()[1])
 
         for proc in processes:
             if proc.poll() is not None:
@@ -46,9 +81,9 @@ class ProcessManager(ProcessMapper[str, Process]):
             logger.info(f"The exit code of process ({proc.pid}) is {proc.returncode}")
 
     def spawn_ffmpeg_with_file(self, key: str, file: str, width: int, height: int):
-        if self.__contains__(key):
+        if key in self._processes:
             raise KeyError(f"Key is exists: '{key}'")
 
         process = self._ffmpeg.spawn_with_file(key, file, width, height)
-        self.__setitem__(key, process)
+        self._processes[key] = process
         return process

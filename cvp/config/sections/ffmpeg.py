@@ -4,12 +4,15 @@ from enum import StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
+from cvp.variables import MAX_STREAM_LOGGING_HISTORY_LINES
 
 
 @unique
 class _Keys(StrEnum):
     ffmpeg = auto()
     ffprobe = auto()
+    logging_history = auto()
+    logging_encoding = auto()
 
 
 class FFmpegSection(BaseSection):
@@ -33,3 +36,19 @@ class FFmpegSection(BaseSection):
     @ffprobe.setter
     def ffprobe(self, value: str) -> None:
         self.set(self.K.ffprobe, value)
+
+    @property
+    def logging_history(self) -> int:
+        return self.get(self.K.logging_history, MAX_STREAM_LOGGING_HISTORY_LINES)
+
+    @logging_history.setter
+    def logging_history(self, value: int) -> None:
+        self.set(self.K.logging_history, value)
+
+    @property
+    def logging_encoding(self) -> str:
+        return self.get(self.K.logging_encoding, "utf-8")
+
+    @logging_encoding.setter
+    def logging_encoding(self, value: str) -> None:
+        self.set(self.K.logging_encoding, value)

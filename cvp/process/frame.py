@@ -19,6 +19,7 @@ from typing import (
 
 from cvp.buffers.frame import FrameBuffer
 from cvp.process.process import Process
+from cvp.process.stream import StreamBufferPair
 from cvp.types.override import override
 
 
@@ -49,6 +50,7 @@ class FrameReaderProcess(Process):
         deque_maxsize=2,
         target: Optional[Callable[[bytes], None]] = None,
         *,
+        stream_buffers: Optional[StreamBufferPair] = None,
         teardown: Optional[Callable[..., None]] = None
     ):
         frame_shape = FrameShape(*frame_shape)
@@ -74,6 +76,7 @@ class FrameReaderProcess(Process):
             env=env,
             creation_flags=creation_flags,
             name=name,
+            stream_buffers=stream_buffers,
             teardown=teardown,
         )
 
