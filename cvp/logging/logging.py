@@ -16,12 +16,22 @@ from logging import config as logging_config
 from logging import getLogger
 from logging.handlers import TimedRotatingFileHandler
 from sys import stdout
-from typing import Final, Literal, Optional, Sequence, Union, get_args
+from typing import Optional, Union
 
-DEFAULT_LOGGER_NAME: Final[str] = "cvp"
-MPV_LOGGER_NAME: Final[str] = "cvp.mpv"
+from cvp.logging.defaults import (
+    CVP_LOGGER_NAME,
+    DEFAULT_DATEFMT,
+    DEFAULT_FORMAT,
+    DEFAULT_LOGGING_CONFIG,
+    DEFAULT_SIMPLE_LOGGING_FORMAT,
+    DEFAULT_SIMPLE_LOGGING_STYLE,
+    DEFAULT_STYLE,
+    DEFAULT_TIMED_ROTATING_WHEN,
+    MPV_LOGGER_NAME,
+    TimedRotatingWhenLiteral,
+)
 
-logger = getLogger(DEFAULT_LOGGER_NAME)
+logger = getLogger(CVP_LOGGER_NAME)
 mpv_logger = getLogger(MPV_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"
@@ -45,91 +55,6 @@ SEVERITIES = (
     SEVERITY_NAME_NOTSET,
     SEVERITY_NAME_OFF,
 )
-
-LoggingStyleLiteral = Literal["%", "{", "$"]
-TimedRotatingWhenLiteral = Literal[
-    "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"
-]  # W0=Monday
-
-TIMED_ROTATING_WHEN: Final[Sequence[str]] = get_args(TimedRotatingWhenLiteral)
-DEFAULT_TIMED_ROTATING_WHEN: Final[str] = "D"
-
-DEFAULT_SIMPLE_LOGGING_FORMAT: Final[str] = "{levelname[0]} [{name}] {message}"
-DEFAULT_SIMPLE_LOGGING_STYLE: Final[LoggingStyleLiteral] = "{"
-
-FMT_TIME: Final[str] = "%(asctime)s.%(msecs)03d"
-FMT_THREAD: Final[str] = "%(process)d/%(thread)s"
-
-DEFAULT_FORMAT = f"{FMT_TIME} {FMT_THREAD} %(name)s %(levelname)s %(message)s"
-DEFAULT_DATEFMT: Final[str] = "%Y-%m-%d %H:%M:%S"
-DEFAULT_STYLE: Final[LoggingStyleLiteral] = "%"
-
-SIMPLE_FORMAT: Final[str] = "{levelname[0]} {asctime} {name} {message}"
-SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
-SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
-
-COLORED_FORMATTER_CLASS_PATH = (
-    f"{DEFAULT_LOGGER_NAME}.logging.formatters.colored.ColoredFormatter"
-)
-
-DEFAULT_LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": DEFAULT_FORMAT,
-            "datefmt": DEFAULT_DATEFMT,
-            "style": DEFAULT_STYLE,
-        },
-        "simple": {
-            "format": SIMPLE_FORMAT,
-            "datefmt": SIMPLE_DATEFMT,
-            "style": SIMPLE_STYLE,
-        },
-        "color": {
-            "class": COLORED_FORMATTER_CLASS_PATH,
-            "format": DEFAULT_FORMAT,
-            "datefmt": DEFAULT_DATEFMT,
-            "style": DEFAULT_STYLE,
-        },
-    },
-    "handlers": {
-        "console_default": {
-            "class": "logging.StreamHandler",
-            "level": "DEBUG",
-            "formatter": "default",
-            "stream": "ext://sys.stdout",
-        },
-        "console_simple": {
-            "class": "logging.StreamHandler",
-            "level": "DEBUG",
-            "formatter": "simple",
-            "stream": "ext://sys.stdout",
-        },
-        "console_color": {
-            "class": "logging.StreamHandler",
-            "level": "DEBUG",
-            "formatter": "color",
-            "stream": "ext://sys.stdout",
-        },
-        "file_default": {
-            "class": "logging.FileHandler",
-            "level": "DEBUG",
-            "formatter": "default",
-            "filename": "recc.log",
-            "mode": "a",
-            "encoding": "utf-8",
-            "delay": False,
-        },
-    },
-    "loggers": {
-        # root logger
-        "": {
-            "handlers": ["console_color"],
-            "level": "DEBUG",
-        },
-    },
-}
 
 
 def convert_level_number(level: Optional[Union[str, int]] = None) -> int:

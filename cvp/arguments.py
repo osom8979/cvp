@@ -6,12 +6,8 @@ from os import R_OK, access, getcwd
 from os.path import isfile, join
 from typing import Final, List, Optional, Sequence
 
-from cvp.logging.logging import (
-    DEFAULT_TIMED_ROTATING_WHEN,
-    SEVERITIES,
-    SEVERITY_NAME_INFO,
-    TIMED_ROTATING_WHEN,
-)
+from cvp.logging.defaults import DEFAULT_TIMED_ROTATING_WHEN, TIMED_ROTATING_WHEN
+from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
 from cvp.resources.home import DEFAULT_CVP_HOME_PATH
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import (
