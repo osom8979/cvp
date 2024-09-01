@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 import imgui
 
 from cvp.config.sections.logging import LoggingSection
@@ -55,11 +57,14 @@ class LoggingPreference(WidgetInterface):
             -1,
             imgui.INPUT_TEXT_ENTER_RETURNS_TRUE,
         )
+
         logging_path_changed = logging_path_result[0]
-        if logging_path_changed:
-            logging_path_value = logging_path_result[1]
-            assert isinstance(logging_path_value, str)
+        logging_path_value = logging_path_result[1]
+        assert isinstance(logging_path_value, str)
+
+        if logging_path_changed and os.path.isfile(logging_path_value):
             loads_logging_config(logging_path_value)
+            logger.info(f"Loads the logging config file: '{logging_path_value}'")
             self.config_path = logging_path_value
 
         imgui.same_line()
@@ -72,10 +77,12 @@ class LoggingPreference(WidgetInterface):
             self.severity_index,
             self._severities,
         )
+
         severity_changed = severity_result[0]
-        if severity_changed:
-            severity_index = severity_result[1]
-            assert isinstance(severity_index, int)
+        severity_index = severity_result[1]
+        assert isinstance(severity_index, int)
+
+        if severity_changed and 0 <= severity_index < len(self._severities):
             severity_value = self._severities[severity_index]
             level = convert_level_number(severity_value)
             set_root_level(level)

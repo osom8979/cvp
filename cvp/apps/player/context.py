@@ -59,8 +59,11 @@ class PlayerContext:
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._home.cvp_ini, self._home)
 
-        if os.path.isfile(self._config.logging.config_path):
-            loads_logging_config(self._config.logging.config_path)
+        logging_config_path = self._config.logging.config_path
+        if os.path.isfile(logging_config_path):
+            loads_logging_config(logging_config_path)
+            logger.info(f"Loads the logging config file: '{logging_config_path}'")
+
         root_severity = self._config.logging.root_severity
         if root_severity:
             level = convert_level_number(root_severity)
