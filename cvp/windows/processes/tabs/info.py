@@ -7,7 +7,7 @@ import imgui
 
 from cvp.process.manager import ProcessManager
 from cvp.process.process import Process
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets import button_ex, input_text_disabled, text_centered
 from cvp.widgets.hoc.tab import TabItem
 

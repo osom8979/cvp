@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
 
 

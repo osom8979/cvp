@@ -6,7 +6,7 @@ from typing import Generic, Optional, TypeVar
 
 import imgui
 
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
 
 ContextT = TypeVar("ContextT")

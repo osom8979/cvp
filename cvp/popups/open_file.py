@@ -9,7 +9,7 @@ import imgui
 import pygame
 
 from cvp.logging.logging import logger
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets import (
     begin_child,
     button_ex,

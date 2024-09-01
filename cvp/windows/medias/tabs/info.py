@@ -8,7 +8,7 @@ import imgui
 from cvp.config.sections.media import MediaSection
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.process.manager import ProcessManager
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets import (
     button_ex,
     input_text_disabled,

@@ -6,7 +6,7 @@ from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 import imgui
 
 from cvp.config.sections.commons.window import CommonWindowSection
-from cvp.types.override import override
+from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
 from cvp.widgets.hoc.popup import Popup

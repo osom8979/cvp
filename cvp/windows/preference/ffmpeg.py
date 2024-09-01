@@ -6,7 +6,7 @@ import imgui
 
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.popups.open_file import OpenFilePopup
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets import button_ex, input_text_value
 from cvp.widgets.hoc.widget import WidgetInterface
 

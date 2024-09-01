@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, Union, overload
 
 from cvp.system.environ_keys import CVP_HOME
-from cvp.types.string.to_boolean import string_to_boolean
+from cvp.types import string_to_boolean
 from cvp.variables import CONFIG_VALUE_SEPARATOR
 
 ValueUnion = Union[

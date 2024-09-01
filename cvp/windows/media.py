@@ -9,7 +9,7 @@ from OpenGL import GL
 
 from cvp.config.sections.media import MediaSection
 from cvp.process.manager import ProcessManager
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
 

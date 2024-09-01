@@ -12,7 +12,7 @@ from cvp.config.sections.mpv import MpvSection
 from cvp.gl.runtime import get_process_address
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.popups.open_file import OpenFilePopup
-from cvp.types.override import override
+from cvp.types import override
 from cvp.widgets.hoc.window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE

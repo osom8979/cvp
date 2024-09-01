@@ -4,7 +4,7 @@ from shlex import split
 from typing import List, Optional, Tuple, Union
 
 from cvp.ffmpeg.utils.video_size import VIDEO_SIZES
-from cvp.types.override import override
+from cvp.types import override
 
 
 class FileBuilder:
