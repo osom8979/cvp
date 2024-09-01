@@ -12,7 +12,13 @@ from OpenGL.error import Error
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
-from cvp.logging.logging import dumps_default_logging_config, logger
+from cvp.logging.logging import (
+    convert_level_number,
+    dumps_default_logging_config,
+    loads_logging_config,
+    logger,
+    set_root_level,
+)
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.process.manager import ProcessManager
@@ -52,6 +58,15 @@ class PlayerContext:
 
         self._readonly = not os.access(self._home, os.W_OK)
         self._config = Config(self._home.cvp_ini, self._home)
+
+        if os.path.isfile(self._config.logging.config_path):
+            loads_logging_config(self._config.logging.config_path)
+        root_severity = self._config.logging.root_severity
+        if root_severity:
+            level = convert_level_number(root_severity)
+            set_root_level(level)
+            logger.log(level, f"Changed root severity: {root_severity}")
+
         self._done = False
         self._pm = ProcessManager(self._config.ffmpeg, self._home)
         self._windows = {

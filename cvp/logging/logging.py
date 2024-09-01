@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from json import dumps
+from json import dumps, loads
 from logging import (
     CRITICAL,
     DEBUG,
@@ -137,6 +137,11 @@ def set_default_logging_config() -> None:
 def dumps_default_logging_config(cvp_home: Union[str, PathLike[str]]) -> str:
     json = dumps(DEFAULT_LOGGING_CONFIG, indent=4)
     return json.replace(f"${{{CVP_HOME}}}", str(cvp_home))
+
+
+def loads_logging_config(path: str) -> None:
+    with open(path, "rt") as f:
+        logging_config.dictConfig(loads(f.read()))
 
 
 def add_default_rotate_file_logging(

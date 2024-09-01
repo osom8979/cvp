@@ -9,6 +9,7 @@ from cvp.config.prefix import SectionPrefix
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
+from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.medias import MediasSection
@@ -26,15 +27,16 @@ class Config(BaseConfig):
         cvp_home: Optional[Union[str, PathLike[str]]] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
-        self._medias = SectionPrefix(config=self, prefix=MEDIA_SECTION_PREFIX)
-        self._demo = DemoSection(config=self)
-        self._display = DisplaySection(config=self)
-        self._ffmpeg = FFmpegSection(config=self)
-        self._font = FontSection(config=self)
+        self._medias = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+        self._demo = DemoSection(self)
+        self._display = DisplaySection(self)
+        self._ffmpeg = FFmpegSection(self)
+        self._font = FontSection(self)
+        self._logging = LoggingSection(self)
         self._manager = MediasSection(self)
-        self._mpv = MpvSection(config=self)
-        self._overlay = OverlaySection(config=self)
-        self._preference = PreferenceSection(config=self)
+        self._mpv = MpvSection(self)
+        self._overlay = OverlaySection(self)
+        self._preference = PreferenceSection(self)
         self._processes = ProcessesSection(self)
 
     def add_media_section(self, name: Optional[str] = None):
@@ -66,6 +68,10 @@ class Config(BaseConfig):
     @property
     def font(self):
         return self._font
+
+    @property
+    def logging(self):
+        return self._logging
 
     @property
     def manager(self):

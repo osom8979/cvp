@@ -13,6 +13,7 @@ from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
 from cvp.windows.preference.appearance import AppearancePreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
+from cvp.windows.preference.logging import LoggingPreference
 
 
 class PreferenceWindow(Window[PreferenceSection]):
@@ -25,6 +26,7 @@ class PreferenceWindow(Window[PreferenceSection]):
         self._menus = [
             AppearancePreference(),
             FFmpegPreference(config.ffmpeg),
+            LoggingPreference(config.logging),
         ]
 
     @property
