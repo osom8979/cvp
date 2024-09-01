@@ -12,6 +12,7 @@ from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_c
 from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
 from cvp.windows.preference.appearance import AppearancePreference
+from cvp.windows.preference.developer import DeveloperPreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
 from cvp.windows.preference.logging import LoggingPreference
 
@@ -27,6 +28,7 @@ class PreferenceWindow(Window[PreferenceSection]):
             AppearancePreference(),
             FFmpegPreference(config.ffmpeg),
             LoggingPreference(config.logging),
+            DeveloperPreference(config.developer),
         ]
 
     @property

@@ -70,6 +70,14 @@ class PlayerContext:
             set_root_level(level)
             logger.log(level, f"Changed root severity: {root_severity}")
 
+        if self._config.developer.has_debug:
+            self._debug = self._config.developer.debug
+            logger.info(f"Changed debug mode: {self._debug}")
+
+        if self._config.developer.has_verbose:
+            self._verbose = self._config.developer.verbose
+            logger.info(f"Changed verbose level: {self._verbose}")
+
         self._done = False
         self._pm = ProcessManager(self._config.ffmpeg, self._home)
         self._windows = {

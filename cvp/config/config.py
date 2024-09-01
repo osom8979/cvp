@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
+from cvp.config.sections.developer import DeveloperSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
@@ -29,6 +30,7 @@ class Config(BaseConfig):
         super().__init__(filename=filename, cvp_home=cvp_home)
         self._medias = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
         self._demo = DemoSection(self)
+        self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
         self._ffmpeg = FFmpegSection(self)
         self._font = FontSection(self)
@@ -56,6 +58,10 @@ class Config(BaseConfig):
     @property
     def demo(self):
         return self._demo
+
+    @property
+    def developer(self):
+        return self._developer
 
     @property
     def display(self):
