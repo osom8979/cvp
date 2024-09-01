@@ -6,7 +6,7 @@ from typing import Final, Tuple
 import imgui
 from overrides import override
 
-from cvp.config.sections.overlay import OverlaySection
+from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.system.usage import SystemUsage
 from cvp.widgets import (
     begin_popup_context_window,

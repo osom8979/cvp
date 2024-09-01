@@ -5,7 +5,7 @@ from weakref import ref
 
 import imgui
 
-from cvp.config.sections.media import MediaSection
+from cvp.config.sections.windows.media import MediaSection
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.process.manager import ProcessManager
 from cvp.types import override

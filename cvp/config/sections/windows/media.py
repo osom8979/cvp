@@ -4,7 +4,7 @@ from enum import StrEnum, auto, unique
 from typing import Tuple
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.commons.window import CommonWindowSection
+from cvp.config.sections.windows._base import BaseWindowSection
 
 
 @unique
@@ -23,7 +23,7 @@ class _Keys(StrEnum):
     cmds = auto()
 
 
-class MediaSection(CommonWindowSection):
+class MediaSection(BaseWindowSection):
     K = _Keys
 
     def __init__(self, config: BaseConfig, section="media"):

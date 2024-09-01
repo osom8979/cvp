@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cvp.config.sections.media import MediaSection
+from cvp.config.sections.windows.media import MediaSection
 from cvp.process.manager import ProcessManager
 from cvp.widgets.hoc.tab import TabBar
 from cvp.windows.medias.tabs.info import MediaInfoTab

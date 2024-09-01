@@ -6,7 +6,7 @@ from weakref import ref
 import imgui
 
 from cvp.config.config import Config
-from cvp.config.sections.processes import ProcessesSection
+from cvp.config.sections.windows.processes import ProcessesSection
 from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH

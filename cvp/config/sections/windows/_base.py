@@ -7,20 +7,20 @@ from cvp.config.sections._base import BaseSection
 
 
 @unique
-class _CommonWindowKeys(StrEnum):
+class BaseWindowKeys(StrEnum):
     opened = auto()
 
 
-class CommonWindowSection(BaseSection):
-    CWK = _CommonWindowKeys
+class BaseWindowSection(BaseSection):
+    BWK = BaseWindowKeys
 
     def __init__(self, config: BaseConfig, section: str):
         super().__init__(config=config, section=section)
 
     @property
     def opened(self) -> bool:
-        return self.get(self.CWK.opened, False)
+        return self.get(self.BWK.opened, False)
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self.set(self.CWK.opened, value)
+        self.set(self.BWK.opened, value)

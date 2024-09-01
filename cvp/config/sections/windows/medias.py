@@ -3,21 +3,20 @@
 from enum import StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.commons.window import CommonWindowSection
-from cvp.variables import MIN_SIDEBAR_WIDTH, PROCESS_TEARDOWN_TIMEOUT
+from cvp.config.sections.windows._base import BaseWindowSection
+from cvp.variables import MIN_SIDEBAR_WIDTH
 
 
 @unique
 class _Keys(StrEnum):
     sidebar_width = auto()
     selected = auto()
-    teardown_timeout = auto()
 
 
-class ProcessesSection(CommonWindowSection):
+class MediasSection(BaseWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="processes"):
+    def __init__(self, config: BaseConfig, section="medias"):
         super().__init__(config=config, section=section)
 
     @property
@@ -35,11 +34,3 @@ class ProcessesSection(CommonWindowSection):
     @selected.setter
     def selected(self, value: str) -> None:
         self.set(self.K.selected, value)
-
-    @property
-    def teardown_timeout(self) -> float:
-        return self.get(self.K.teardown_timeout, PROCESS_TEARDOWN_TIMEOUT)
-
-    @teardown_timeout.setter
-    def teardown_timeout(self, value: float) -> None:
-        self.set(self.K.teardown_timeout, value)

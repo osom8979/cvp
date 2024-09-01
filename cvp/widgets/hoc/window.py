@@ -5,14 +5,15 @@ from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
 
-from cvp.config.sections.commons.window import CommonWindowSection
+# noinspection PyProtectedMember
+from cvp.config.sections.windows._base import BaseWindowSection
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
 from cvp.widgets.hoc.popup import Popup
 from cvp.widgets.hoc.widget import WidgetInterface
 
-SectionT = TypeVar("SectionT", bound=CommonWindowSection)
+SectionT = TypeVar("SectionT", bound=BaseWindowSection)
 
 
 class WindowInterface(WidgetInterface):
@@ -71,7 +72,7 @@ class Window(Generic[SectionT], WindowInterface):
         debug=False,
         verbose=0,
     ) -> None:
-        assert isinstance(section, CommonWindowSection)
+        assert isinstance(section, BaseWindowSection)
         self._section = section
 
         self._static_title = title

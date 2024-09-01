@@ -4,11 +4,13 @@ import os
 from typing import Final, Optional, Tuple
 
 import imgui
-from imgui.core import _DrawList  # noqa
+
+# noinspection PyProtectedMember
+from imgui.core import _DrawList
 from mpv import MPV, MpvGlGetProcAddressFn, MpvRenderContext
 from OpenGL import GL
 
-from cvp.config.sections.mpv import MpvSection
+from cvp.config.sections.windows.mpv import MpvSection
 from cvp.gl.runtime import get_process_address
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.popups.open_file import OpenFilePopup

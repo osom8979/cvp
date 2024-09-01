@@ -3,7 +3,7 @@
 from enum import StrEnum, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.commons.window import CommonWindowSection
+from cvp.config.sections.windows._base import BaseWindowSection
 
 
 @unique
@@ -11,7 +11,7 @@ class _Keys(StrEnum):
     pass
 
 
-class DemoSection(CommonWindowSection):
+class DemoSection(BaseWindowSection):
     K = _Keys
 
     def __init__(self, config: BaseConfig, section="demo"):

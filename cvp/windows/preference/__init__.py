@@ -5,7 +5,7 @@ from typing import List
 import imgui
 
 from cvp.config.config import Config
-from cvp.config.sections.preference import PreferenceSection
+from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered

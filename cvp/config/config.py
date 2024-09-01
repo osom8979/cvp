@@ -6,16 +6,16 @@ from uuid import uuid4
 
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
-from cvp.config.sections.demo import DemoSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
-from cvp.config.sections.media import MediaSection
-from cvp.config.sections.medias import MediasSection
-from cvp.config.sections.mpv import MpvSection
-from cvp.config.sections.overlay import OverlaySection
-from cvp.config.sections.preference import PreferenceSection
-from cvp.config.sections.processes import ProcessesSection
+from cvp.config.sections.windows.demo import DemoSection
+from cvp.config.sections.windows.media import MediaSection
+from cvp.config.sections.windows.medias import MediasSection
+from cvp.config.sections.windows.mpv import MpvSection
+from cvp.config.sections.windows.overlay import OverlaySection
+from cvp.config.sections.windows.preference import PreferenceSection
+from cvp.config.sections.windows.processes import ProcessesSection
 from cvp.variables import MEDIA_SECTION_PREFIX
 
 

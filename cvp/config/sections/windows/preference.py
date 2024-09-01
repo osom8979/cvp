@@ -3,20 +3,20 @@
 from enum import StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.commons.window import CommonWindowSection
+from cvp.config.sections.windows._base import BaseWindowSection
 from cvp.variables import MIN_SIDEBAR_WIDTH
 
 
 @unique
 class _Keys(StrEnum):
     sidebar_width = auto()
-    selected = auto()
+    menu_index = auto()
 
 
-class MediasSection(CommonWindowSection):
+class PreferenceSection(BaseWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="medias"):
+    def __init__(self, config: BaseConfig, section="preference"):
         super().__init__(config=config, section=section)
 
     @property
@@ -28,9 +28,9 @@ class MediasSection(CommonWindowSection):
         self.set(self.K.sidebar_width, value)
 
     @property
-    def selected(self) -> str:
-        return self.get(self.K.selected, str())
+    def menu_index(self) -> int:
+        return self.get(self.K.menu_index, 0)
 
-    @selected.setter
-    def selected(self, value: str) -> None:
-        self.set(self.K.selected, value)
+    @menu_index.setter
+    def menu_index(self, value: int) -> None:
+        self.set(self.K.menu_index, value)

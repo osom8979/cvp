@@ -3,7 +3,7 @@
 from enum import IntEnum, StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.commons.window import CommonWindowSection
+from cvp.config.sections.windows._base import BaseWindowSection
 
 
 @unique
@@ -23,7 +23,7 @@ class _Keys(StrEnum):
     fps_error_threshold = auto()
 
 
-class OverlaySection(CommonWindowSection):
+class OverlaySection(BaseWindowSection):
     K = _Keys
 
     def __init__(self, config: BaseConfig, section="overlay"):

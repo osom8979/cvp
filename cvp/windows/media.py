@@ -7,7 +7,7 @@ import imgui
 from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
-from cvp.config.sections.media import MediaSection
+from cvp.config.sections.windows.media import MediaSection
 from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.widgets import menu_item_ex
