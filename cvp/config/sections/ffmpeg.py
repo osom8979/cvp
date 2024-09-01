@@ -4,21 +4,22 @@ from enum import StrEnum, auto, unique
 
 from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
-from cvp.variables import MAX_STREAM_LOGGING_HISTORY_LINES
+from cvp.variables import STREAM_LOGGING_MAXSIZE, STREAM_LOGGING_NEWLINE_SIZE
 
 
 @unique
 class _Keys(StrEnum):
     ffmpeg = auto()
     ffprobe = auto()
-    logging_history = auto()
+    logging_maxsize = auto()
     logging_encoding = auto()
+    logging_newline_size = auto()
 
 
 class FFmpegSection(BaseSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="font"):
+    def __init__(self, config: BaseConfig, section="ffmpeg"):
         super().__init__(config=config, section=section)
 
     @property
@@ -38,12 +39,12 @@ class FFmpegSection(BaseSection):
         self.set(self.K.ffprobe, value)
 
     @property
-    def logging_history(self) -> int:
-        return self.get(self.K.logging_history, MAX_STREAM_LOGGING_HISTORY_LINES)
+    def logging_maxsize(self) -> int:
+        return self.get(self.K.logging_maxsize, STREAM_LOGGING_MAXSIZE)
 
-    @logging_history.setter
-    def logging_history(self, value: int) -> None:
-        self.set(self.K.logging_history, value)
+    @logging_maxsize.setter
+    def logging_maxsize(self, value: int) -> None:
+        self.set(self.K.logging_maxsize, value)
 
     @property
     def logging_encoding(self) -> str:
@@ -52,3 +53,11 @@ class FFmpegSection(BaseSection):
     @logging_encoding.setter
     def logging_encoding(self, value: str) -> None:
         self.set(self.K.logging_encoding, value)
+
+    @property
+    def logging_newline_size(self) -> int:
+        return self.get(self.K.logging_newline_size, STREAM_LOGGING_NEWLINE_SIZE)
+
+    @logging_newline_size.setter
+    def logging_newline_size(self, value: int) -> None:
+        self.set(self.K.logging_newline_size, value)

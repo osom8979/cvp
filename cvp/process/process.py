@@ -142,6 +142,14 @@ class Process:
         return self._popen.stderr
 
     @property
+    def stdout_buffer(self):
+        return self._stream_buffers.stdout if self._stream_buffers is not None else None
+
+    @property
+    def stderr_buffer(self):
+        return self._stream_buffers.stderr if self._stream_buffers is not None else None
+
+    @property
     def args(self):
         return self._popen.args
 

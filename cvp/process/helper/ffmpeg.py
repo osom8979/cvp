@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
-from subprocess import DEVNULL
-from typing import IO, Final, Mapping, Optional, Sequence, Tuple, Union
+from typing import Final, Mapping, Optional, Sequence, Tuple, Union
 
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.process.frame import FrameReaderProcess, FrameShape
@@ -27,7 +25,6 @@ class FFmpegProcessHelper:
         name: str,
         args: Sequence[str],
         frame_shape: Union[FrameShape | Tuple[int, int, int] | Sequence[int]],
-        stderr: Optional[Union[int, IO]] = DEVNULL,
         env: Optional[Union[Mapping[str, str], Mapping[bytes, bytes]]] = None,
         start_thread=True,
     ):
@@ -38,15 +35,19 @@ class FFmpegProcessHelper:
         stream_buffers = StreamBufferPair(
             stdout=None,
             stderr=stderr_path,
-            maxlen=self._section.logging_history,
             encoding=self._section.logging_encoding,
+            maxsize=self._section.logging_maxsize,
+            newline_size=self._section.logging_newline_size,
         )
+        assert stream_buffers.stderr is not None
+        stderr_fileno = stream_buffers.stderr.writable_fileno()
+        assert 0 <= stderr_fileno
         process = FrameReaderProcess(
             name=name,
             args=args,
             frame_shape=frame_shape,
             stdin=None,
-            stderr=stderr,
+            stderr=stderr_fileno,
             cwd=str(self._home),
             env=env,
             creation_flags=None,
@@ -78,12 +79,7 @@ class FFmpegProcessHelper:
             *self.rgb24_pipe_stdout_args(width, height),
         )
         frame_shape = width, height, RGB24_CHANNELS
-        return self._spawn(
-            key,
-            args=args,
-            stderr=sys.stderr.fileno(),
-            frame_shape=frame_shape,
-        )
+        return self._spawn(key, args=args, frame_shape=frame_shape)
 
     def spawn_with_rtsp(self, key: str, url: str, width: int, height: int):
         args = (
@@ -102,9 +98,4 @@ class FFmpegProcessHelper:
             *self.rgb24_pipe_stdout_args(width, height),
         )
         frame_shape = width, height, RGB24_CHANNELS
-        return self._spawn(
-            key,
-            args=args,
-            stderr=sys.stderr.fileno(),
-            frame_shape=frame_shape,
-        )
+        return self._spawn(key, args=args, frame_shape=frame_shape)

@@ -11,10 +11,16 @@ class StreamBuffer(LinesBuffer):
     def __init__(
         self,
         path: Union[str, PathLike[str]],
-        maxlen: Optional[int] = None,
         encoding="utf-8",
+        maxsize: Optional[int] = None,
+        newline_size: Optional[int] = None,
     ):
-        super().__init__(path, maxlen=maxlen, encoding=encoding)
+        super().__init__(
+            path=path,
+            encoding=encoding,
+            maxsize=maxsize,
+            newline_size=newline_size,
+        )
         self.writable = open(path, "wb")
         try:
             self.open()
@@ -34,15 +40,33 @@ class StreamBuffer(LinesBuffer):
 
 
 class StreamBufferPair:
+    stdout: Optional[StreamBuffer]
+    stderr: Optional[StreamBuffer]
+
     def __init__(
         self,
         stdout: Optional[Union[str, PathLike[str]]] = None,
         stderr: Optional[Union[str, PathLike[str]]] = None,
-        maxlen: Optional[int] = None,
         encoding="utf-8",
+        maxsize: Optional[int] = None,
+        newline_size: Optional[int] = None,
     ):
-        self.stdout = StreamBuffer(stdout, maxlen, encoding) if stdout else None
-        self.stderr = StreamBuffer(stderr, maxlen, encoding) if stderr else None
+        self.stdout = None
+        self.stderr = None
+        if stdout is not None:
+            self.stdout = StreamBuffer(
+                path=stdout,
+                encoding=encoding,
+                maxsize=maxsize,
+                newline_size=newline_size,
+            )
+        if stderr is not None:
+            self.stderr = StreamBuffer(
+                path=stderr,
+                encoding=encoding,
+                maxsize=maxsize,
+                newline_size=newline_size,
+            )
 
     def close(self):
         if self.stdout is not None:
