@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Literal, Sequence, get_args
+from typing import Any, Dict, Final, Literal, Sequence, get_args
 
 CVP_LOGGER_NAME: Final[str] = "cvp"
 MPV_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.mpv"
@@ -27,7 +27,7 @@ SIMPLE_FORMAT: Final[str] = "{levelname[0]} {asctime} {name} {message}"
 SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
 SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
 
-DEFAULT_LOGGING_CONFIG = {
+DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -80,7 +80,7 @@ DEFAULT_LOGGING_CONFIG = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "default",
-            "filename": "~/.cvp/logs/cvp.log",
+            "filename": "${CVP_HOME}/logs/cvp.log",
             "mode": "a",
             "maxBytes": 10 * 1024 * 1024,
             "backupCount": 10,
@@ -91,7 +91,7 @@ DEFAULT_LOGGING_CONFIG = {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "level": "DEBUG",
             "formatter": "default",
-            "filename": "~/.cvp/logs/cvp",
+            "filename": "${CVP_HOME}/logs/cvp",
             "when": DEFAULT_TIMED_ROTATING_WHEN,
             "interval": 1,
             "backupCount": 10,
@@ -108,7 +108,7 @@ DEFAULT_LOGGING_CONFIG = {
             "level": "DEBUG",
         },
         CVP_LOGGER_NAME: {
-            "handlers": ["console_color"],
+            "handlers": ["console_color", "file_timed_rotate"],
             "level": "DEBUG",
         },
         MPV_LOGGER_NAME: {

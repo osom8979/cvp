@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from json import dumps
 from logging import (
     CRITICAL,
     DEBUG,
@@ -15,6 +16,7 @@ from logging import (
 from logging import config as logging_config
 from logging import getLogger
 from logging.handlers import TimedRotatingFileHandler
+from os import PathLike
 from sys import stdout
 from typing import Optional, Union
 
@@ -30,6 +32,7 @@ from cvp.logging.defaults import (
     MPV_LOGGER_NAME,
     TimedRotatingWhenLiteral,
 )
+from cvp.system.environ_keys import CVP_HOME
 
 logger = getLogger(CVP_LOGGER_NAME)
 mpv_logger = getLogger(MPV_LOGGER_NAME)
@@ -129,6 +132,11 @@ def set_root_level(level: Union[str, int]) -> None:
 
 def set_default_logging_config() -> None:
     logging_config.dictConfig(DEFAULT_LOGGING_CONFIG)
+
+
+def dumps_default_logging_config(cvp_home: Union[str, PathLike[str]]) -> str:
+    json = dumps(DEFAULT_LOGGING_CONFIG, indent=4)
+    return json.replace(f"${{{CVP_HOME}}}", str(cvp_home))
 
 
 def add_default_rotate_file_logging(

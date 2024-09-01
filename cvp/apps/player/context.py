@@ -13,7 +13,7 @@ from cvp.arguments import IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
-from cvp.logging.logging import logger
+from cvp.logging.logging import dumps_default_logging_config, logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.process.manager import ProcessManager
@@ -188,6 +188,9 @@ class PlayerContext:
         self._config.display.fullscreen = pygame.display.is_fullscreen()
         self._config.display.size = pygame.display.get_window_size()
         self._config.write(self._player_ini)
+
+        if not self._home.logging_json.exists():
+            self._home.logging_json.write_text(dumps_default_logging_config(self._home))
 
         if not self._imgui_ini.exists():
             self._imgui_ini.parent.mkdir(parents=True, exist_ok=True)

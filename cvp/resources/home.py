@@ -15,7 +15,10 @@ class HomeDir(PathFlavour):
     def __init__(self, path: Union[str, PathLike[str]]):
         super().__init__(path)
 
-        self.processes = ProcessesDir(self / "processes")
+        self.processes = ProcessesDir(Path(self) / "processes")
+        self.logging_json = Path(self) / "logging.json"
+        self.player_ini = Path(self) / "player.ini"
+        self.imgui_ini = Path(self) / "imgui.ini"
 
     @classmethod
     def from_path(cls, path: Optional[Union[str, PathLike[str]]] = None):
