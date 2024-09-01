@@ -3,7 +3,8 @@
 from pathlib import Path
 from unittest import TestCase, main
 
-from cvp.resources.home import DEFAULT_CVP_HOME_PATH, HomeDir
+from cvp.resources.home import HomeDir
+from cvp.variables import DEFAULT_CVP_HOME_PATH
 
 
 class HomeTestCase(TestCase):

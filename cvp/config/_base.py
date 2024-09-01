@@ -44,7 +44,7 @@ class BaseConfig:
     def __init__(
         self,
         filename: Optional[Union[str, PathLike]] = None,
-        cvp_home: Optional[str] = None,
+        cvp_home: Optional[Union[str, PathLike]] = None,
         *,
         separator=CONFIG_VALUE_SEPARATOR,
     ):
@@ -60,7 +60,7 @@ class BaseConfig:
             default_section=DEFAULTSECT,
             interpolation=ExtendedInterpolation(),
         )
-        self._vars = {CVP_HOME: cvp_home if cvp_home else str()}
+        self._vars = {CVP_HOME: str(cvp_home) if cvp_home else str()}
         self._separator = separator
         if filename:
             self._config.read(filename)

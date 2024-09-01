@@ -2,6 +2,8 @@
 
 from typing import Any, Dict, Final, Literal, Sequence, get_args
 
+from cvp.system.environ_keys import CVP_HOME
+
 CVP_LOGGER_NAME: Final[str] = "cvp"
 MPV_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.mpv"
 
@@ -80,7 +82,7 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": "DEBUG",
             "formatter": "default",
-            "filename": "${CVP_HOME}/logs/cvp.log",
+            "filename": f"${{{CVP_HOME}}}/logs/cvp.log",
             "mode": "a",
             "maxBytes": 10 * 1024 * 1024,
             "backupCount": 10,
@@ -91,7 +93,7 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "class": "logging.handlers.TimedRotatingFileHandler",
             "level": "DEBUG",
             "formatter": "default",
-            "filename": "${CVP_HOME}/logs/cvp",
+            "filename": f"${{{CVP_HOME}}}/logs/cvp",
             "when": DEFAULT_TIMED_ROTATING_WHEN,
             "interval": 1,
             "backupCount": 10,

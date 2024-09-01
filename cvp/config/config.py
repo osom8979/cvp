@@ -22,8 +22,8 @@ from cvp.variables import MEDIA_SECTION_PREFIX
 class Config(BaseConfig):
     def __init__(
         self,
-        filename: Optional[Union[str, PathLike]] = None,
-        cvp_home: Optional[str] = None,
+        filename: Optional[Union[str, PathLike[str]]] = None,
+        cvp_home: Optional[Union[str, PathLike[str]]] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
         self._medias = SectionPrefix(config=self, prefix=MEDIA_SECTION_PREFIX)

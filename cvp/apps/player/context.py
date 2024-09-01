@@ -9,7 +9,6 @@ import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.arguments import IMGUI_INI_FILENAME, PLAYER_INI_FILENAME
 from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
 from cvp.filesystem.permission import test_directory, test_readable
@@ -42,8 +41,6 @@ class PlayerContext:
         verbose=0,
     ):
         self._home = HomeDir.from_path(home)
-        self._imgui_ini = self._home / IMGUI_INI_FILENAME
-        self._player_ini = self._home / PLAYER_INI_FILENAME
         self._debug = debug
         self._verbose = verbose
 
@@ -54,7 +51,7 @@ class PlayerContext:
         test_readable(self._home)
 
         self._readonly = not os.access(self._home, os.W_OK)
-        self._config = Config(self._player_ini)
+        self._config = Config(self._home.cvp_ini, self._home)
         self._done = False
         self._pm = ProcessManager(self._config.ffmpeg, self._home)
         self._windows = {
@@ -67,9 +64,7 @@ class PlayerContext:
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config, self._pm)
 
-        self._open_file_popup = OpenFilePopup(
-            title="Open file",
-        )
+        self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
             title="Open network stream",
             label="Please enter a network URL:",
@@ -111,7 +106,7 @@ class PlayerContext:
                 section, key = force_egl_section_key()
                 logger.error(
                     f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
-                    f" section of the '{str(self._player_ini)}' file and try again."
+                    f" section of the '{str(self._home.cvp_ini)}' file and try again."
                 )
                 raise RuntimeError("Consider enabling EGL related options") from e
         finally:
@@ -156,7 +151,7 @@ class PlayerContext:
         io.display_size = size
         io.ini_file_name = None
         io.log_file_name = None
-        imgui.load_ini_settings_from_disk(str(self._imgui_ini))
+        imgui.load_ini_settings_from_disk(str(self._home.imgui_ini))
 
         self._renderer = PygameRenderer()
 
@@ -185,17 +180,21 @@ class PlayerContext:
         for win in self._windows.values():
             win.do_destroy()
 
-        self._config.display.fullscreen = pygame.display.is_fullscreen()
-        self._config.display.size = pygame.display.get_window_size()
-        self._config.write(self._player_ini)
+        if not self._readonly:
+            if not self._home.is_dir():
+                self._home.mkdir(parents=True, exist_ok=True)
 
-        if not self._home.logging_json.exists():
-            self._home.logging_json.write_text(dumps_default_logging_config(self._home))
+            self._config.display.fullscreen = pygame.display.is_fullscreen()
+            self._config.display.size = pygame.display.get_window_size()
+            self._config.write(self._home.cvp_ini)
 
-        if not self._imgui_ini.exists():
-            self._imgui_ini.parent.mkdir(parents=True, exist_ok=True)
+            if not self._home.logging_json.exists():
+                logging_json = dumps_default_logging_config(self._home)
+                self._home.logging_json.write_text(logging_json)
 
-        imgui.save_ini_settings_to_disk(str(self._imgui_ini))
+            if not self._home.imgui_ini.exists():
+                self._home.imgui_ini.parent.mkdir(parents=True, exist_ok=True)
+                imgui.save_ini_settings_to_disk(str(self._home.imgui_ini))
 
         del self._renderer
         pygame.quit()

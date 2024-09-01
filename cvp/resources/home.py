@@ -2,13 +2,16 @@
 
 from os import PathLike
 from pathlib import Path
-from typing import Final, Optional, Union
+from typing import Optional, Union
 
 from cvp.resources.subdirs.processes import ProcessesDir
 from cvp.system.path import PathFlavour
-
-DEFAULT_CVP_DIR_NAME: Final[str] = ".cvp"
-DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / DEFAULT_CVP_DIR_NAME)
+from cvp.variables import (
+    CVP_INI_FILENAME,
+    DEFAULT_CVP_HOME_PATH,
+    GUI_INI_FILENAME,
+    LOGGING_JSON_FILENAME,
+)
 
 
 class HomeDir(PathFlavour):
@@ -16,9 +19,9 @@ class HomeDir(PathFlavour):
         super().__init__(path)
 
         self.processes = ProcessesDir(Path(self) / "processes")
-        self.logging_json = Path(self) / "logging.json"
-        self.player_ini = Path(self) / "player.ini"
-        self.imgui_ini = Path(self) / "imgui.ini"
+        self.cvp_ini = Path(self) / CVP_INI_FILENAME
+        self.imgui_ini = Path(self) / GUI_INI_FILENAME
+        self.logging_json = Path(self) / LOGGING_JSON_FILENAME
 
     @classmethod
     def from_path(cls, path: Optional[Union[str, PathLike[str]]] = None):

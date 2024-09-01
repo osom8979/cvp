@@ -8,7 +8,6 @@ from typing import Final, List, Optional, Sequence
 
 from cvp.logging.defaults import DEFAULT_TIMED_ROTATING_WHEN, TIMED_ROTATING_WHEN
 from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
-from cvp.resources.home import DEFAULT_CVP_HOME_PATH
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import (
     CVP_COLORED_LOGGING,
@@ -23,6 +22,7 @@ from cvp.system.environ_keys import (
     CVP_SIMPLE_LOGGING,
     CVP_VERBOSE,
 )
+from cvp.variables import DEFAULT_CVP_HOME_PATH
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -40,9 +40,6 @@ Simply usage:
 
 CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
 DEFAULT_CMD: Final[str] = CMD_PLAYER
-
-IMGUI_INI_FILENAME: Final[str] = "imgui.ini"
-PLAYER_INI_FILENAME: Final[str] = "player.ini"
 
 LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
 TEST_DOTENV_FILENAME: Final[str] = ".env.test"
