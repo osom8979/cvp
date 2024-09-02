@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from abc import abstractmethod
 from collections import OrderedDict
 from typing import Generic, Optional, TypeVar
 
@@ -57,7 +56,6 @@ class TabItem(Generic[ContextT], WidgetInterface):
         if self._context is not None:
             self.on_context(self._context)
 
-    @abstractmethod
     def on_context(self, context: ContextT) -> None:
         pass
 

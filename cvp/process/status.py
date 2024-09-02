@@ -37,5 +37,6 @@ class ProcessStatusEx(StrEnum):
     waiting = STATUS_WAITING  # FreeBSD
     suspended = STATUS_SUSPENDED  # NetBSD
     parked = STATUS_PARKED  # Linux
-    exited = "exited"  # cvp
-    not_exists = "not-exists"  # cvp
+    no_such = "no-such"  # psutil.NoSuchProcess
+    not_exists = "not-exists"  # IndexError
+    exited = "exited"

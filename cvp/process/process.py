@@ -189,7 +189,10 @@ class Process:
 
     def status(self) -> ProcessStatusEx:
         if self._popen.poll() is None:
-            return ProcessStatusEx(self._psutil.status())
+            try:
+                return ProcessStatusEx(self._psutil.status())
+            except psutil.NoSuchProcess:
+                return ProcessStatusEx.no_such
         else:
             return ProcessStatusEx.exited
 
