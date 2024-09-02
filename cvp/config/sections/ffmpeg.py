@@ -2,7 +2,10 @@
 
 from enum import StrEnum, auto, unique
 
+from overrides import override
+
 from cvp.config._base import BaseConfig
+from cvp.config.proxy import ValueProxy
 from cvp.config.sections._base import BaseSection
 from cvp.variables import STREAM_LOGGING_MAXSIZE, STREAM_LOGGING_NEWLINE_SIZE
 
@@ -61,3 +64,29 @@ class FFmpegSection(BaseSection):
     @logging_newline_size.setter
     def logging_newline_size(self, value: int) -> None:
         self.set(self.K.logging_newline_size, value)
+
+
+class FFmpegProxy(ValueProxy):
+    def __init__(self, section: FFmpegSection):
+        self._section = section
+
+    @override
+    def set(self, value: str) -> None:
+        self._section.ffmpeg = value
+
+    @override
+    def get(self) -> str:
+        return self._section.ffmpeg
+
+
+class FFprobeProxy(ValueProxy):
+    def __init__(self, section: FFmpegSection):
+        self._section = section
+
+    @override
+    def set(self, value: str) -> None:
+        self._section.ffprobe = value
+
+    @override
+    def get(self) -> str:
+        return self._section.ffprobe

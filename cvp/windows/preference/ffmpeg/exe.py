@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
 from shutil import which
 from typing import List, Optional, Sequence
 from weakref import ref
 
 import imgui
 
-from cvp.config.sections.ffmpeg import FFmpegSection
+from cvp.config.proxy import ValueProxy
+from cvp.config.sections.ffmpeg import FFmpegProxy, FFmpegSection, FFprobeProxy
 from cvp.popups.open_file import OpenFilePopup
 from cvp.process.manager import ProcessManager
 from cvp.types import override
@@ -16,44 +16,8 @@ from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.tab import TabBar, TabItem
 
 
-class MutableProxy(ABC):
-    @abstractmethod
-    def set(self, value: str) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get(self) -> str:
-        raise NotImplementedError
-
-
-class FFmpegProxy(MutableProxy):
-    def __init__(self, section: FFmpegSection):
-        self._section = section
-
-    @override
-    def set(self, value: str) -> None:
-        self._section.ffmpeg = value
-
-    @override
-    def get(self) -> str:
-        return self._section.ffmpeg
-
-
-class FFprobeProxy(MutableProxy):
-    def __init__(self, section: FFmpegSection):
-        self._section = section
-
-    @override
-    def set(self, value: str) -> None:
-        self._section.ffprobe = value
-
-    @override
-    def get(self) -> str:
-        return self._section.ffprobe
-
-
 class ExeItem(TabItem, PopupPropagator):
-    def __init__(self, filename: str, proxy: MutableProxy, pm: ProcessManager):
+    def __init__(self, filename: str, proxy: ValueProxy, pm: ProcessManager):
         super().__init__(filename)
         self._filename = filename
         self._proxy = proxy
