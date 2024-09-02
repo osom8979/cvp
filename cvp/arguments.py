@@ -6,22 +6,8 @@ from os import R_OK, access, getcwd
 from os.path import isfile, join
 from typing import Final, List, Optional, Sequence
 
-from cvp.logging.defaults import DEFAULT_TIMED_ROTATING_WHEN, TIMED_ROTATING_WHEN
-from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
 from cvp.system.environ import get_typed_environ_value as get_eval
-from cvp.system.environ_keys import (
-    CVP_COLORED_LOGGING,
-    CVP_DEBUG,
-    CVP_DEFAULT_LOGGING,
-    CVP_DOTENV_PATH,
-    CVP_HOME,
-    CVP_NO_DOTENV,
-    CVP_ROTATE_LOGGING_PREFIX,
-    CVP_ROTATE_LOGGING_WHEN,
-    CVP_SEVERITY,
-    CVP_SIMPLE_LOGGING,
-    CVP_VERBOSE,
-)
+from cvp.system.environ_keys import CVP_DOTENV_PATH, CVP_HOME, CVP_NO_DOTENV
 from cvp.variables import DEFAULT_CVP_HOME_PATH
 
 PROG: Final[str] = "cvp"
@@ -43,12 +29,6 @@ DEFAULT_CMD: Final[str] = CMD_PLAYER
 
 LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
 TEST_DOTENV_FILENAME: Final[str] = ".env.test"
-
-PRINTER_ATTR_KEY: Final[str] = "_printer"
-
-VERBOSE_LEVEL_0: Final[int] = 0
-VERBOSE_LEVEL_1: Final[int] = 1
-VERBOSE_LEVEL_2: Final[int] = 2
 
 
 @lru_cache
@@ -101,75 +81,11 @@ def default_argument_parser() -> ArgumentParser:
         default=get_eval(CVP_HOME, DEFAULT_CVP_HOME_PATH),
         help=f"{PROG}'s home directory",
     )
-
-    logging_group = parser.add_mutually_exclusive_group()
-    logging_group.add_argument(
-        "--colored-logging",
-        "-c",
-        action="store_true",
-        default=get_eval(CVP_COLORED_LOGGING, False),
-        help="Use colored logging",
-    )
-    logging_group.add_argument(
-        "--default-logging",
-        action="store_true",
-        default=get_eval(CVP_DEFAULT_LOGGING, False),
-        help="Use default logging",
-    )
-    logging_group.add_argument(
-        "--simple-logging",
-        "-s",
-        action="store_true",
-        default=get_eval(CVP_SIMPLE_LOGGING, False),
-        help="Use simple logging",
-    )
-
-    parser.add_argument(
-        "--rotate-logging-prefix",
-        default=get_eval(CVP_ROTATE_LOGGING_PREFIX, ""),
-        metavar="prefix",
-        help="Rotate logging prefix",
-    )
-    parser.add_argument(
-        "--rotate-logging-when",
-        choices=TIMED_ROTATING_WHEN,
-        default=get_eval(CVP_ROTATE_LOGGING_WHEN, DEFAULT_TIMED_ROTATING_WHEN),
-        help=f"Rotate logging when (default: '{DEFAULT_TIMED_ROTATING_WHEN}')",
-    )
-
-    parser.add_argument(
-        "--severity",
-        choices=SEVERITIES,
-        default=get_eval(CVP_SEVERITY, SEVERITY_NAME_INFO),
-        help=f"Logging severity (default: '{SEVERITY_NAME_INFO}')",
-    )
-
-    parser.add_argument(
-        "--debug",
-        "-d",
-        action="store_true",
-        default=get_eval(CVP_DEBUG, False),
-        help="Enable debugging mode and change logging severity to 'DEBUG'",
-    )
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        action="count",
-        default=get_eval(CVP_VERBOSE, 0),
-        help="Be more verbose/talkative during the operation",
-    )
     parser.add_argument(
         "--version",
         "-V",
         action="version",
         version=version(),
-    )
-
-    parser.add_argument(
-        "-D",
-        action="store_true",
-        default=False,
-        help="Same as ['-c', '-d', '-vv'] flags",
     )
 
     subparsers = parser.add_subparsers(dest="cmd")

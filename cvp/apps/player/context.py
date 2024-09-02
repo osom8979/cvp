@@ -2,6 +2,7 @@
 
 import os
 from argparse import Namespace
+from threading import Event
 from typing import Dict, Optional, Tuple, Union
 
 import imgui
@@ -41,16 +42,9 @@ class PlayerContext:
     _renderer: PygameRenderer
     _windows: Dict[str, Window]
 
-    def __init__(
-        self,
-        home: Optional[Union[str, os.PathLike[str]]] = None,
-        debug=False,
-        verbose=0,
-    ):
+    def __init__(self, home: Optional[Union[str, os.PathLike[str]]] = None):
+        self._done = Event()
         self._home = HomeDir.from_path(home)
-        self._debug = debug
-        self._verbose = verbose
-        self._done = False
 
         if not self._home.exists():
             self._home.mkdir(parents=True, exist_ok=True)
@@ -72,14 +66,6 @@ class PlayerContext:
             set_root_level(level)
             logger.log(level, f"Changed root severity: {root_severity}")
 
-        if self._config.developer.has_debug:
-            self._debug = self._config.developer.debug
-            logger.info(f"Changed debug mode: {self._debug}")
-
-        if self._config.developer.has_verbose:
-            self._verbose = self._config.developer.verbose
-            logger.info(f"Changed verbose level: {self._verbose}")
-
         thread_workers = self._config.concurrency.thread_workers
         process_workers = self._config.concurrency.process_workers
         self._pm = ProcessManager(
@@ -95,7 +81,8 @@ class PlayerContext:
         }
         self._medias = MediasWindow(self._pm, self._config)
         self._processes = ProcessesWindow(self._pm, self._config)
-        self._preference = PreferenceWindow(self._config)
+        self._preference = PreferenceWindow(self._pm, self._config)
+
         for config in self._config.medias.values():
             self._windows[config.section] = MediaWindow(config, self._pm)
 
@@ -110,16 +97,18 @@ class PlayerContext:
     @classmethod
     def from_namespace(cls, args: Namespace):
         assert isinstance(args.home, str)
-        assert isinstance(args.debug, bool)
-        assert isinstance(args.verbose, int)
-        return cls(
-            home=args.home,
-            debug=args.debug,
-            verbose=args.verbose,
-        )
+        return cls(home=args.home)
 
-    def quit(self):
-        self._done = True
+    @property
+    def debug(self) -> bool:
+        return self._config.debug
+
+    @property
+    def verbose(self) -> int:
+        return self._config.verbose
+
+    def quit(self) -> None:
+        self._done.set()
 
     def add_media_window(self, file: str) -> None:
         section = self._config.add_media_section()
@@ -238,7 +227,7 @@ class PlayerContext:
         pygame.quit()
 
     def on_process(self) -> None:
-        while not self._done:
+        while not self._done.is_set():
             self.on_event()
             self.on_frame()
 
@@ -313,7 +302,7 @@ class PlayerContext:
                 for key, win in self._windows.items():
                     if imgui.menu_item(key, None, win.opened)[0]:
                         win.opened = not win.opened
-                if self._debug:
+                if self.debug:
                     imgui.separator()
                     if imgui.menu_item("Demo", None, self._config.demo.opened)[0]:
                         self._config.demo.opened = not self._config.demo.opened
@@ -329,7 +318,7 @@ class PlayerContext:
             self.add_media_window(url)
 
     def on_demo_window(self) -> None:
-        if not self._debug:
+        if not self.debug:
             return
         if not self._config.demo.opened:
             return

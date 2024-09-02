@@ -6,6 +6,7 @@ import imgui
 
 from cvp.config.config import Config
 from cvp.config.sections.windows.preference import PreferenceSection
+from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
@@ -22,13 +23,13 @@ from cvp.windows.preference.logging import LoggingPreference
 class PreferenceWindow(Window[PreferenceSection]):
     _menus: List[WidgetInterface]
 
-    def __init__(self, config: Config):
+    def __init__(self, pm: ProcessManager, config: Config):
         super().__init__(config.preference, title="Preference", closable=True)
         self._config = config
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._menus = [
             AppearancePreference(config.appearance),
-            FFmpegPreference(config.ffmpeg),
+            FFmpegPreference(config.ffmpeg, pm),
             LoggingPreference(config.logging),
             ConcurrencyPreference(config.concurrency),
             DeveloperPreference(config.developer),

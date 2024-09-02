@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from shutil import which
-from typing import Sequence
+from typing import Optional, Sequence
+from weakref import ref
 
 import imgui
 
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.popups.open_file import OpenFilePopup
+from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.widgets import button_ex, input_text_value
 from cvp.widgets.hoc.popup import Popup, PopupPropagator
@@ -14,8 +16,9 @@ from cvp.widgets.hoc.widget import WidgetInterface
 
 
 class FFmpegPreference(PopupPropagator, WidgetInterface):
-    def __init__(self, section: FFmpegSection, label="FFmpeg"):
+    def __init__(self, section: FFmpegSection, pm: ProcessManager, label="FFmpeg"):
         self._section = section
+        self._pm = ref(pm)
         self._label = label
         self._ffmpeg_browser = OpenFilePopup(
             "Select ffmpeg executable",
@@ -28,6 +31,10 @@ class FFmpegPreference(PopupPropagator, WidgetInterface):
 
     def __str__(self):
         return self._label
+
+    @property
+    def pm(self) -> Optional[ProcessManager]:
+        return self._pm()
 
     @property
     @override
