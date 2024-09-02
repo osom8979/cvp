@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
+from cvp.config.sections.appearance import AppearanceSection
 from cvp.config.sections.concurrency import ConcurrencySection
 from cvp.config.sections.developer import DeveloperSection
 from cvp.config.sections.display import DisplaySection
@@ -30,6 +31,7 @@ class Config(BaseConfig):
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
         self._medias = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+        self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
         self._demo = DemoSection(self)
         self._developer = DeveloperSection(self)
@@ -64,6 +66,10 @@ class Config(BaseConfig):
             key = self._medias.split_section_name(section)
             result[key] = MediaSection(config=self, section=section)
         return result
+
+    @property
+    def appearance(self):
+        return self._appearance
 
     @property
     def concurrency(self):

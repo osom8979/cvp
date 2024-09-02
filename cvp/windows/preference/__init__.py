@@ -27,7 +27,7 @@ class PreferenceWindow(Window[PreferenceSection]):
         self._config = config
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._menus = [
-            AppearancePreference(),
+            AppearancePreference(config.appearance),
             FFmpegPreference(config.ffmpeg),
             LoggingPreference(config.logging),
             ConcurrencyPreference(config.concurrency),

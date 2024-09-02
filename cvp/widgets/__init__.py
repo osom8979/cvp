@@ -14,6 +14,7 @@ from cvp.widgets.input_text_value import input_text_value
 from cvp.widgets.item_width import item_width
 from cvp.widgets.menu_item_ex import menu_item_ex
 from cvp.widgets.set_window_min_size import set_window_min_size
+from cvp.widgets.styles import default_style_colors, style_colors
 from cvp.widgets.text_centered import text_centered
 
 __all__ = (
@@ -32,5 +33,7 @@ __all__ = (
     "item_width",
     "menu_item_ex",
     "set_window_min_size",
+    "default_style_colors",
+    "style_colors",
     "text_centered",
 )

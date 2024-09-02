@@ -28,6 +28,7 @@ from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 
 # noinspection PyProtectedMember
 from cvp.widgets.hoc.window import Window
+from cvp.widgets.styles import default_style_colors
 from cvp.windows.media import MediaWindow
 from cvp.windows.medias import MediasWindow
 from cvp.windows.mpv import MpvWindow
@@ -203,6 +204,9 @@ class PlayerContext:
 
         io.font_global_scale /= self._config.font.scale
         self._renderer.refresh_font_texture()
+
+        theme = self._config.appearance.theme
+        default_style_colors(theme)
 
         GL.glClearColor(0, 0, 0, 1)
         for win in self._windows.values():

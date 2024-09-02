@@ -11,7 +11,7 @@ from cvp.system.path import PathFlavour
 from cvp.variables import (
     CVP_INI_FILENAME,
     DEFAULT_CVP_HOME_PATH,
-    GUI_INI_FILENAME,
+    IMGUI_INI_FILENAME,
     LOGGING_JSON_FILENAME,
 )
 
@@ -32,7 +32,7 @@ class HomeDir(PathFlavour):
                 self.processes.mkdir(parents=False, exist_ok=True)
 
         self.cvp_ini = Path(self) / CVP_INI_FILENAME
-        self.imgui_ini = Path(self) / GUI_INI_FILENAME
+        self.imgui_ini = Path(self) / IMGUI_INI_FILENAME
         self.logging_json = Path(self) / LOGGING_JSON_FILENAME
 
     @classmethod
