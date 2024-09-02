@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from typing import Sequence
 
 import imgui
 
@@ -12,18 +13,29 @@ from cvp.logging.logging import (
     logger,
     set_root_level,
 )
+from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
+from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 
 
-class LoggingPreference(WidgetInterface):
+class LoggingPreference(PopupPropagator, WidgetInterface):
     def __init__(self, section: LoggingSection, label="Logging"):
         self._section = section
         self._label = label
         self._severities = list(SEVERITIES)
+        self._logging_browser = OpenFilePopup(
+            "Select logging config file",
+            target=self.on_logging_file,
+        )
 
     def __str__(self):
         return self._label
+
+    @property
+    @override
+    def popups(self) -> Sequence[Popup]:
+        return [self._logging_browser]
 
     @property
     def config_path(self) -> str:
@@ -48,9 +60,12 @@ class LoggingPreference(WidgetInterface):
         except ValueError:
             return -1
 
+    def on_logging_file(self, file: str) -> None:
+        self.config_path = file
+
     @override
     def on_process(self) -> None:
-        imgui.text("Logging json path:")
+        imgui.text("Logging config file:")
         logging_path_result = imgui.input_text(
             "##LoggingPath",
             self.config_path,
@@ -69,7 +84,7 @@ class LoggingPreference(WidgetInterface):
 
         imgui.same_line()
         if imgui.button("Browse"):
-            pass
+            self._logging_browser.show()
 
         imgui.text("Root severity:")
         severity_result = imgui.combo(

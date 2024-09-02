@@ -3,7 +3,7 @@
 import os
 from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 import imgui
 import pygame
@@ -33,8 +33,11 @@ class OpenFilePopup(Popup[str]):
         show_hidden=False,
         centered=True,
         flags=0,
+        *,
+        target: Optional[Callable[[str], None]] = None,
+        oneshot: Optional[bool] = None,
     ):
-        super().__init__(title, centered, flags)
+        super().__init__(title, centered, flags, target=target, oneshot=oneshot)
 
         if isinstance(directory, Path) and directory.is_dir():
             dir_path = directory

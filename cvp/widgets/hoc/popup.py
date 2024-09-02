@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, Optional, TypeVar
+from typing import Callable, Generic, Optional, Sequence, TypeVar
 
 import imgui
 
@@ -23,6 +23,8 @@ class Popup(Generic[ResultT], ABC):
         *,
         min_width=MIN_POPUP_WIDTH,
         min_height=MIN_POPUP_HEIGHT,
+        target: Optional[Callable[[ResultT], None]] = None,
+        oneshot: Optional[bool] = None,
     ):
         self._title = title if title else type(self).__name__
 
@@ -33,8 +35,9 @@ class Popup(Generic[ResultT], ABC):
         self._min_width = min_width
         self._min_height = min_height
 
-        self._target = None
         self._result = None
+        self._target = target
+        self._oneshot = bool(oneshot)
 
     @property
     def title(self):
@@ -56,8 +59,26 @@ class Popup(Generic[ResultT], ABC):
     def result(self, value: Optional[ResultT]) -> None:
         self._result = value
 
-    def show(self) -> None:
+    def show(
+        self,
+        title: Optional[str] = None,
+        target: Optional[Callable[[ResultT], None]] = None,
+        oneshot: Optional[bool] = None,
+    ) -> None:
         self._visible = True
+        if title is not None:
+            self._title = title
+        if target is not None:
+            self._target = target
+        if oneshot is not None:
+            self._oneshot = oneshot
+
+    def show_oneshot(
+        self,
+        title: Optional[str] = None,
+        target: Optional[Callable[[ResultT], None]] = None,
+    ) -> None:
+        self.show(title, target, oneshot=True)
 
     def do_process(self) -> Optional[ResultT]:
         if self._visible:
@@ -81,10 +102,19 @@ class Popup(Generic[ResultT], ABC):
             self._result = self.on_process()
             if self._target is not None and self._result is not None:
                 self._target(self._result)
+                if self._oneshot:
+                    self._target = None
             return self._result
         finally:
             imgui.end_popup()
 
     @abstractmethod
     def on_process(self) -> Optional[ResultT]:
+        raise NotImplementedError
+
+
+class PopupPropagator(ABC):
+    @property
+    @abstractmethod
+    def popups(self) -> Sequence[Popup]:
         raise NotImplementedError

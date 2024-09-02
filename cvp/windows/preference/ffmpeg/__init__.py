@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from shutil import which
+from typing import Sequence
 
 import imgui
 
@@ -8,18 +9,30 @@ from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
 from cvp.widgets import button_ex, input_text_value
+from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 
 
-class FFmpegPreference(WidgetInterface):
+class FFmpegPreference(PopupPropagator, WidgetInterface):
     def __init__(self, section: FFmpegSection, label="FFmpeg"):
         self._section = section
         self._label = label
-        self._ffmpeg_open = OpenFilePopup()
-        self._ffprobe_open = OpenFilePopup()
+        self._ffmpeg_browser = OpenFilePopup(
+            "Select ffmpeg executable",
+            target=self.on_ffmpeg_file,
+        )
+        self._ffprobe_browser = OpenFilePopup(
+            "Select ffprobe executable",
+            target=self.on_ffprobe_file,
+        )
 
     def __str__(self):
         return self._label
+
+    @property
+    @override
+    def popups(self) -> Sequence[Popup]:
+        return [self._ffmpeg_browser, self._ffprobe_browser]
 
     @property
     def ffmpeg(self) -> str:
@@ -37,8 +50,14 @@ class FFmpegPreference(WidgetInterface):
     def ffprobe(self, value: str) -> None:
         self._section.ffprobe = value
 
+    def on_ffmpeg_file(self, file: str) -> None:
+        self.ffmpeg = file
+
+    def on_ffprobe_file(self, file: str) -> None:
+        self.ffprobe = file
+
     @staticmethod
-    def exe_group(name: str, path: str, browse: OpenFilePopup) -> str:
+    def exe_group(name: str, path: str, browser: OpenFilePopup) -> str:
         imgui.text(f"{name} executable")
         path = input_text_value(f"##{name}Path", path)
 
@@ -54,16 +73,12 @@ class FFmpegPreference(WidgetInterface):
             pass
         imgui.same_line()
         if imgui.button(f"Browse##{name}Browse"):
-            browse.show()
-
-        result = browse.do_process()
-        if result:
-            path = result
+            browser.show()
 
         return path
 
     @override
     def on_process(self) -> None:
-        self.ffmpeg = self.exe_group("ffmpeg", self.ffmpeg, self._ffmpeg_open)
+        self.ffmpeg = self.exe_group("ffmpeg", self.ffmpeg, self._ffmpeg_browser)
         imgui.separator()
-        self.ffprobe = self.exe_group("ffprobe", self.ffprobe, self._ffprobe_open)
+        self.ffprobe = self.exe_group("ffprobe", self.ffprobe, self._ffprobe_browser)

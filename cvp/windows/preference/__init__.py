@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
+from typing import Any, List
 
 import imgui
 
@@ -9,6 +9,7 @@ from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
+from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
 from cvp.windows.preference.appearance import AppearancePreference
@@ -30,6 +31,12 @@ class PreferenceWindow(Window[PreferenceSection]):
             LoggingPreference(config.logging),
             DeveloperPreference(config.developer),
         ]
+
+        for menu in self._menus:
+            if not isinstance(menu, PopupPropagator):
+                continue
+            for popup in menu.popups:
+                self.register_popup(popup)
 
     @property
     def sidebar_width(self) -> int:
@@ -91,3 +98,7 @@ class PreferenceWindow(Window[PreferenceSection]):
                     text_centered("Please select a menu item")
             finally:
                 end_child()
+
+    @override
+    def on_popup(self, popup: Popup, result: Any) -> None:
+        pass

@@ -73,7 +73,6 @@ class MediaInfoTab(TabItem[MediaSection]):
                 width=context.frame_width,
                 height=context.frame_height,
             )
-            pass
         imgui.same_line()
         if button_ex("Stop", disabled=not stoppable):
             pm.interrupt(context.section)
