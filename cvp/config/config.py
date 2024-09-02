@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
+from cvp.config.sections.concurrency import ConcurrencySection
 from cvp.config.sections.developer import DeveloperSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
@@ -29,6 +30,7 @@ class Config(BaseConfig):
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
         self._medias = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+        self._concurrency = ConcurrencySection(self)
         self._demo = DemoSection(self)
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
@@ -48,12 +50,24 @@ class Config(BaseConfig):
         return MediaSection(config=self, section=section)
 
     @property
+    def debug(self):
+        return self._developer.debug
+
+    @property
+    def verbose(self):
+        return self._developer.verbose
+
+    @property
     def medias(self) -> Dict[str, MediaSection]:
         result = dict()
         for section in self._medias.sections():
             key = self._medias.split_section_name(section)
             result[key] = MediaSection(config=self, section=section)
         return result
+
+    @property
+    def concurrency(self):
+        return self._concurrency
 
     @property
     def demo(self):

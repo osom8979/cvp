@@ -13,6 +13,7 @@ from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
 from cvp.windows.preference.appearance import AppearancePreference
+from cvp.windows.preference.concurrency import ConcurrencyPreference
 from cvp.windows.preference.developer import DeveloperPreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
 from cvp.windows.preference.logging import LoggingPreference
@@ -29,6 +30,7 @@ class PreferenceWindow(Window[PreferenceSection]):
             AppearancePreference(),
             FFmpegPreference(config.ffmpeg),
             LoggingPreference(config.logging),
+            ConcurrencyPreference(config.concurrency),
             DeveloperPreference(config.developer),
         ]
 

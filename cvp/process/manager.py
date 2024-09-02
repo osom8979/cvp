@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Optional
 
 from cvp.config.sections.ffmpeg import FFmpegSection
@@ -8,10 +9,27 @@ from cvp.process.helper.ffmpeg import FFmpegProcessHelper
 from cvp.process.mapper import ProcessMapper
 from cvp.process.process import Process
 from cvp.resources.home import HomeDir
+from cvp.variables import MAX_PROCESS_WORKERS, MAX_THREAD_WORKERS, THREAD_POOL_PREFIX
 
 
 class ProcessManager:
-    def __init__(self, section: FFmpegSection, home: HomeDir):
+    def __init__(
+        self,
+        section: FFmpegSection,
+        home: HomeDir,
+        thread_workers=MAX_THREAD_WORKERS,
+        thread_name_prefix=THREAD_POOL_PREFIX,
+        process_workers=MAX_PROCESS_WORKERS,
+    ):
+        logger.info(f"Create ThreadPoolExecutor(max_workers={thread_workers}) of PM")
+        self._thread_pool = ThreadPoolExecutor(
+            max_workers=thread_workers,
+            thread_name_prefix=thread_name_prefix,
+        )
+
+        logger.info(f"Create ProcessPoolExecutor(max_workers={process_workers}) of PM")
+        self._process_pool = ProcessPoolExecutor(max_workers=process_workers)
+
         self._processes = ProcessMapper[str, Process]()
         self._ffmpeg = FFmpegProcessHelper(section=section, home=home)
 
@@ -79,6 +97,12 @@ class ProcessManager:
 
         for proc in processes:
             logger.info(f"The exit code of process ({proc.pid}) is {proc.returncode}")
+
+        logger.info("Shutting down PM's thread pool...")
+        self._thread_pool.shutdown(wait=True)
+
+        logger.info("Shutting down PM's process pool...")
+        self._process_pool.shutdown(wait=True)
 
     def spawn_ffmpeg_with_file(self, key: str, file: str, width: int, height: int):
         if key in self._processes:

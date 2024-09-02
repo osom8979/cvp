@@ -15,6 +15,11 @@ MEDIA_SECTION_PREFIX: Final[str] = "media."
 
 DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / CVP_HOME_DIRNAME)
 
+MAX_THREAD_WORKERS: Final[int] = 5
+MAX_PROCESS_WORKERS: Final[int] = 5
+
+THREAD_POOL_PREFIX: Final[str] = "cvp.threadpool"
+
 MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 

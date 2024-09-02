@@ -49,6 +49,7 @@ class PlayerContext:
         self._home = HomeDir.from_path(home)
         self._debug = debug
         self._verbose = verbose
+        self._done = False
 
         if not self._home.exists():
             self._home.mkdir(parents=True, exist_ok=True)
@@ -78,8 +79,15 @@ class PlayerContext:
             self._verbose = self._config.developer.verbose
             logger.info(f"Changed verbose level: {self._verbose}")
 
-        self._done = False
-        self._pm = ProcessManager(self._config.ffmpeg, self._home)
+        thread_workers = self._config.concurrency.thread_workers
+        process_workers = self._config.concurrency.process_workers
+        self._pm = ProcessManager(
+            self._config.ffmpeg,
+            home=self._home,
+            thread_workers=thread_workers,
+            process_workers=process_workers,
+        )
+
         self._windows = {
             "__overlay__": OverlayWindow(self._config.overlay),
             "__mpv__": MpvWindow(self._config.mpv),
