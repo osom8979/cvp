@@ -32,13 +32,13 @@ class PlayerContext(Context):
 
     def __init__(self, home: Optional[Union[str, os.PathLike[str]]] = None):
         super().__init__(home)
-
         self._windows = OrderedDict[str, Window]()
+
         self._overlay = OverlayWindow(self._config.overlay)
         self._mpv = MpvWindow(self._config.mpv)
-        self._medias = MediasWindow(self._config)
-        self._processes = ProcessesWindow(self._config)
-        self._preference = PreferenceWindow(self._config)
+        self._medias = MediasWindow(self._config.manager)
+        self._processes = ProcessesWindow(self._config.processes)
+        self._preference = PreferenceWindow(self._config.preference)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(

@@ -15,6 +15,8 @@ MEDIA_SECTION_PREFIX: Final[str] = "media."
 
 DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / CVP_HOME_DIRNAME)
 
+LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
+
 MAX_THREAD_WORKERS: Final[int] = 5
 MAX_PROCESS_WORKERS: Final[int] = 5
 

@@ -79,8 +79,6 @@ class Window(Generic[SectionT], WindowInterface):
         flags: Optional[int] = None,
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
-        debug=False,
-        verbose=0,
     ) -> None:
         assert isinstance(section, BaseWindowSection)
         self._section = section
@@ -91,8 +89,6 @@ class Window(Generic[SectionT], WindowInterface):
 
         self._min_width = min_width
         self._min_height = min_height
-        self._debug = debug
-        self._verbose = verbose
 
         self._context = None
         self._initialized = False

@@ -2,11 +2,10 @@
 
 import imgui
 
-from cvp.config.config import Config
 from cvp.config.sections.windows.medias import MediasSection
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
-from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
+from cvp.widgets import begin_child, end_child, text_centered
 from cvp.widgets.hoc.window import Window
 from cvp.windows.medias.tabs import MediaTabs
 
@@ -14,8 +13,8 @@ from cvp.windows.medias.tabs import MediaTabs
 class MediasWindow(Window[MediasSection]):
     _tabs: MediaTabs
 
-    def __init__(self, config: Config):
-        super().__init__(config.manager, title="Medias", closable=True)
+    def __init__(self, section: MediasSection):
+        super().__init__(section, title="Medias", closable=True)
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
 
     @override
@@ -75,7 +74,7 @@ class MediasWindow(Window[MediasSection]):
 
         imgui.same_line()
 
-        if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
+        if begin_child("## Main", -1, -1).visible:
             try:
                 media = self.medias.get(self.selected, None)
                 if media is not None:

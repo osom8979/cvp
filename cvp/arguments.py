@@ -8,7 +8,7 @@ from typing import Final, List, Optional, Sequence
 
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import CVP_DOTENV_PATH, CVP_HOME, CVP_NO_DOTENV
-from cvp.variables import DEFAULT_CVP_HOME_PATH
+from cvp.variables import DEFAULT_CVP_HOME_PATH, LOCAL_DOTENV_FILENAME
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -23,9 +23,6 @@ Simply usage:
 
 CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
 DEFAULT_CMD: Final[str] = CMD_PLAYER
-
-LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
-TEST_DOTENV_FILENAME: Final[str] = ".env.test"
 
 
 @lru_cache
@@ -86,12 +83,7 @@ def default_argument_parser() -> ArgumentParser:
     )
 
     subparsers = parser.add_subparsers(dest="cmd")
-    subparsers.add_parser(
-        name=CMD_PLAYER,
-        help=CMD_PLAYER_HELP,
-        formatter_class=RawDescriptionHelpFormatter,
-        epilog=CMD_PLAYER_EPILOG,
-    )
+    add_player_parser(subparsers)
 
     return parser
 

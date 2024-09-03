@@ -4,11 +4,10 @@ from typing import Any, List
 
 import imgui
 
-from cvp.config.config import Config
 from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
-from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
+from cvp.widgets import begin_child, end_child, text_centered
 from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
@@ -22,8 +21,8 @@ from cvp.windows.preference.logging import LoggingPreference
 class PreferenceWindow(Window[PreferenceSection]):
     _menus: List[WidgetInterface]
 
-    def __init__(self, config: Config):
-        super().__init__(config.preference, title="Preference", closable=True)
+    def __init__(self, section: PreferenceSection):
+        super().__init__(section, title="Preference", closable=True)
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
 
     @override
@@ -91,7 +90,7 @@ class PreferenceWindow(Window[PreferenceSection]):
 
         imgui.same_line()
 
-        if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
+        if begin_child("## Main", -1, -1).visible:
             try:
                 if 0 <= self.menu_index < len(self._menus):
                     menu = self._menus[self.menu_index]
