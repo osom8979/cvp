@@ -5,47 +5,28 @@ from http import HTTPStatus
 from http.client import HTTPResponse
 from shutil import move, unpack_archive
 from tempfile import TemporaryDirectory
-from typing import Final, List, NamedTuple, Optional, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 from urllib.request import urlopen
 
 from cvp.hashfunc.checksum import Method
 from cvp.hashfunc.checksum import checksum as calc_checksum
-
-DEFAULT_DOWNLOAD_TIMEOUT: Final[float] = 30.0
-
-
-class ExtractPath(NamedTuple):
-    archive_path: str
-    extract_path: str
-
-
-class Checksum(NamedTuple):
-    hash_method: Method
-    hash_value: str
-
-    @classmethod
-    def parse(cls, method_value: str, delimiter=":"):
-        method, value = method_value.split(delimiter, 1)
-        assert isinstance(method, str)
-        assert isinstance(value, str)
-        return cls(Method(method.strip().lower()), value.strip())
+from cvp.resources.download.links.tuples import Checksum, ExtractPair, LinkInfo
 
 
 class DownloadArchive:
     _url: str
     _components: ParseResult
-    _paths: List[ExtractPath]
+    _paths: List[ExtractPair]
     _checksum: Optional[Checksum]
 
     def __init__(
         self,
         url: Union[str, ParseResult],
-        paths: Sequence[Union[Tuple[str, str], ExtractPath]],
+        paths: Sequence[Union[Tuple[str, str], ExtractPair]],
         extract_root: str,
         cache_dir: str,
         temp_dir: Optional[str] = None,
-        *,
         checksum: Optional[Union[str, Tuple[str, str], Checksum]] = None,
     ):
         if not paths:
@@ -61,14 +42,14 @@ class DownloadArchive:
 
         self._paths = list()
         for path in paths:
-            if isinstance(path, ExtractPath):
+            if isinstance(path, ExtractPair):
                 self._paths.append(path)
             else:
                 assert isinstance(path, tuple)
                 assert len(path) == 2
                 assert isinstance(path[0], str)
                 assert isinstance(path[1], str)
-                self._paths.append(ExtractPath(path[0], path[1]))
+                self._paths.append(ExtractPair(path[0], path[1]))
 
         if checksum:
             if isinstance(checksum, Checksum):
@@ -86,6 +67,23 @@ class DownloadArchive:
         self._extract_root = extract_root
         self._cache_dir = cache_dir
         self._temp_dir = temp_dir
+
+    @classmethod
+    def from_link(
+        cls,
+        link: LinkInfo,
+        extract_root: str,
+        cache_dir: str,
+        temp_dir: Optional[str] = None,
+    ):
+        return cls(
+            url=link.url,
+            paths=link.paths,
+            extract_root=extract_root,
+            cache_dir=cache_dir,
+            temp_dir=temp_dir,
+            checksum=link.checksum,
+        )
 
     def __repr__(self):
         return f"<DownloadArchive {self._url}>"
@@ -158,11 +156,7 @@ class DownloadArchive:
                 dest = os.path.join(self._extract_root, path.extract_path)
                 move(src, dest)
 
-    def prepare(
-        self,
-        timeout: Optional[float] = DEFAULT_DOWNLOAD_TIMEOUT,
-        verify_checksum=True,
-    ) -> None:
+    def prepare(self, timeout: Optional[float] = None, verify_checksum=True) -> None:
         assert self.paths
 
         if self.has_extract_files:
