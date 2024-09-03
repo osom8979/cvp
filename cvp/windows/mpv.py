@@ -69,8 +69,7 @@ class MpvWindow(Window[MpvSection]):
         self._mpv = None
         self._render = None
 
-        self._popup = OpenFilePopup("Open video file")
-        self._popup.target = self.on_open_file
+        self._popup = OpenFilePopup("Open video file", target=self.on_open_file)
         self.register_popup(self._popup)
 
     def on_open_file(self, file: str) -> None:

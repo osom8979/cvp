@@ -36,9 +36,9 @@ class PlayerContext(Context):
         self._windows = OrderedDict[str, Window]()
         self._overlay = OverlayWindow(self._config.overlay)
         self._mpv = MpvWindow(self._config.mpv)
-        self._medias = MediasWindow(self._pm, self._config)
-        self._processes = ProcessesWindow(self._pm, self._config)
-        self._preference = PreferenceWindow(self._pm, self._config)
+        self._medias = MediasWindow(self._config)
+        self._processes = ProcessesWindow(self._config)
+        self._preference = PreferenceWindow(self._config)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -68,7 +68,7 @@ class PlayerContext(Context):
         section.opened = True
         section.file = file
         section.name = file
-        self.add_window(MediaWindow(section, self._pm))
+        self.add_window(MediaWindow(section))
 
     def start(self) -> None:
         self.on_init()
@@ -154,7 +154,7 @@ class PlayerContext(Context):
             self._medias,
             self._processes,
             self._preference,
-            *[MediaWindow(c, self._pm) for c in self.config.medias.values()],
+            *[MediaWindow(c) for c in self.config.medias.values()],
         )
 
     def on_exit(self) -> None:

@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
-from weakref import ref
-
 import imgui
 
 from cvp.config.config import Config
 from cvp.config.sections.windows.processes import ProcessesSection
-from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
@@ -16,15 +12,15 @@ from cvp.windows.processes.tabs import ProcessTabs
 
 
 class ProcessesWindow(Window[ProcessesSection]):
-    def __init__(self, pm: ProcessManager, config: Config):
+    _tabs: ProcessTabs
+
+    def __init__(self, config: Config):
         super().__init__(config.processes, title="Processes", closable=True)
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._tabs = ProcessTabs(pm)
-        self._pm = ref(pm)
 
-    @property
-    def pm(self) -> Optional[ProcessManager]:
-        return self._pm()
+    @override
+    def on_create(self) -> None:
+        self._tabs = ProcessTabs(self.context.pm)
 
     @property
     def sidebar_width(self) -> int:
@@ -66,12 +62,10 @@ class ProcessesWindow(Window[ProcessesSection]):
                 imgui.separator()
 
                 if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                    pm = self.pm
-                    if pm is not None:
-                        for key, section in pm.items():
-                            if imgui.selectable(section.name, key == self.selected)[1]:
-                                self.selected = key
-                        imgui.end_list_box()
+                    for key, section in self.context.pm.items():
+                        if imgui.selectable(section.name, key == self.selected)[1]:
+                            self.selected = key
+                    imgui.end_list_box()
             finally:
                 end_child()
 
@@ -79,14 +73,10 @@ class ProcessesWindow(Window[ProcessesSection]):
 
         if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
             try:
-                pm = self.pm
-                if pm is not None:
-                    proc = pm.get(self.selected)
-                    if proc is not None:
-                        self._tabs.do_process(proc)
-                    else:
-                        text_centered("Please select a process item")
+                proc = self.context.pm.get(self.selected)
+                if proc is not None:
+                    self._tabs.do_process(proc)
                 else:
-                    text_centered("ProcessManager reference is dead")
+                    text_centered("Please select a process item")
             finally:
                 end_child()

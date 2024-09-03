@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from shutil import which
-from typing import List, Optional, Sequence
-from weakref import ref
+from typing import List, Sequence
 
 import imgui
 
@@ -30,7 +29,7 @@ class ExeItem(TabItem, PopupPropagator):
         self._filename = filename
         self._proxy = proxy
         self._links = links
-        self._pm = ref(pm)
+        self._pm = pm
 
         self._sms = list(str(sm) for sm in SysMach)
         self._current_sm = get_system_machine()
@@ -46,10 +45,6 @@ class ExeItem(TabItem, PopupPropagator):
     @override
     def popups(self) -> Sequence[Popup]:
         return [self._browser]
-
-    @property
-    def pm(self) -> Optional[ProcessManager]:
-        return self._pm()
 
     @property
     def exe_path(self) -> str:

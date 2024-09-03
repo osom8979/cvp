@@ -136,6 +136,26 @@ class Window(Generic[SectionT], WindowInterface):
     def get_flags(self) -> int:
         return self._static_flags if self._static_flags else 0
 
+    @property
+    def context(self):
+        return self.get_context()
+
+    @property
+    def key(self):
+        return self.get_key()
+
+    @property
+    def title(self):
+        return self.get_title()
+
+    @property
+    def closable(self):
+        return self.get_closable()
+
+    @property
+    def flags(self) -> int:
+        return self.get_flags()
+
     @override
     def begin(self) -> Tuple[bool, bool]:
         expanded, opened = imgui.begin(

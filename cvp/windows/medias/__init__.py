@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
-from weakref import ref
-
 import imgui
 
 from cvp.config.config import Config
 from cvp.config.sections.windows.medias import MediasSection
-from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, footer_height_to_reserve, text_centered
@@ -16,16 +12,15 @@ from cvp.windows.medias.tabs import MediaTabs
 
 
 class MediasWindow(Window[MediasSection]):
-    def __init__(self, pm: ProcessManager, config: Config):
-        super().__init__(config.manager, title="Medias", closable=True)
-        self._config = config
-        self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._tabs = MediaTabs(pm)
-        self._pm = ref(pm)
+    _tabs: MediaTabs
 
-    @property
-    def pm(self) -> Optional[ProcessManager]:
-        return self._pm()
+    def __init__(self, config: Config):
+        super().__init__(config.manager, title="Medias", closable=True)
+        self._min_sidebar_width = MIN_SIDEBAR_WIDTH
+
+    @override
+    def on_create(self) -> None:
+        self._tabs = MediaTabs(self.context.pm)
 
     @property
     def sidebar_width(self) -> int:
@@ -45,7 +40,7 @@ class MediasWindow(Window[MediasSection]):
 
     @property
     def medias(self):
-        return self._config.medias
+        return self.context.config.medias
 
     def drag_sidebar_width(self) -> None:
         sidebar_width = imgui.drag_int(
