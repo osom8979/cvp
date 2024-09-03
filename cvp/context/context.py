@@ -89,6 +89,7 @@ class Context:
     def teardown(self) -> None:
         self._pm.teardown(self._config.processes.teardown_timeout)
 
+    def save_config(self) -> None:
         if self._readonly:
             logger.warning("Runs in read-only mode")
             return

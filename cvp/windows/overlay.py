@@ -26,7 +26,7 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 class OverlayWindow(Window[OverlaySection]):
     def __init__(self, section: OverlaySection):
-        super().__init__(section, title="Overlay", flags=OVERLAY_WINDOW_FLAGS)
+        super().__init__(section, flags=OVERLAY_WINDOW_FLAGS)
 
         self._normal_color = 0.0, 1.0, 0.0
         self._warning_color = 1.0, 1.0, 0.0

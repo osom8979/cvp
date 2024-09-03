@@ -7,6 +7,7 @@ import imgui
 
 # noinspection PyProtectedMember
 from cvp.config.sections.windows._base import BaseWindowSection
+from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
@@ -17,6 +18,14 @@ SectionT = TypeVar("SectionT", bound=BaseWindowSection)
 
 
 class WindowInterface(WidgetInterface):
+    @abstractmethod
+    def get_context(self) -> Context:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_key(self) -> str:
+        raise NotImplementedError
+
     @abstractmethod
     def get_title(self) -> str:
         raise NotImplementedError
@@ -59,6 +68,7 @@ class WindowInterface(WidgetInterface):
 
 
 class Window(Generic[SectionT], WindowInterface):
+    _context: Optional[Context]
     _popups: Dict[str, Popup]
 
     def __init__(
@@ -84,6 +94,7 @@ class Window(Generic[SectionT], WindowInterface):
         self._debug = debug
         self._verbose = verbose
 
+        self._context = None
         self._initialized = False
         self._popups = dict()
 
@@ -102,6 +113,16 @@ class Window(Generic[SectionT], WindowInterface):
     @opened.setter
     def opened(self, value: bool) -> None:
         self._section.opened = value
+
+    @override
+    def get_context(self) -> Context:
+        if self._context is None:
+            raise ValueError("Context is not assigned")
+        return self._context
+
+    @override
+    def get_key(self) -> str:
+        return f"{type(self).__name__}@{id(self)}"
 
     @override
     def get_title(self) -> str:
@@ -160,24 +181,26 @@ class Window(Generic[SectionT], WindowInterface):
     def unregister_popup(self, popup: Popup) -> None:
         self._popups.pop(popup.title)
 
-    def do_create(self) -> None:
+    def do_create(self, context: Context) -> None:
         if self._initialized:
-            return
+            raise ValueError("Already initialized")
 
+        self._context = context
         self.on_create()
         self._initialized = True
 
     def do_destroy(self) -> None:
         if not self._initialized:
-            return
+            raise ValueError("Not initialized")
 
         self.on_destroy()
         self._initialized = False
 
     def do_process(self) -> None:
         if not self._initialized:
-            self.on_create()
-            self._initialized = True
+            raise ValueError("Not initialized")
+        if self._context is None:
+            raise ValueError("Context is not assigned")
 
         if not self.opened:
             return

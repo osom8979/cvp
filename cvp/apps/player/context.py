@@ -2,32 +2,21 @@
 
 import os
 from argparse import Namespace
-from threading import Event
-from typing import Dict, Optional, Tuple, Union
+from collections import OrderedDict
+from typing import Optional, Tuple, Union
 
 import imgui
 import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.config.config import Config
 from cvp.config.sections.display import force_egl_section_key
-from cvp.filesystem.permission import test_directory, test_readable
-from cvp.logging.logging import (
-    convert_level_number,
-    dumps_default_logging_config,
-    loads_logging_config,
-    logger,
-    set_root_level,
-)
+from cvp.context import Context
+from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
-from cvp.process.manager import ProcessManager
 from cvp.renderer.renderer import PygameRenderer
-from cvp.resources.home import HomeDir
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
-
-# noinspection PyProtectedMember
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.media import MediaWindow
@@ -38,53 +27,18 @@ from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow
 
 
-class PlayerContext:
+class PlayerContext(Context):
     _renderer: PygameRenderer
-    _windows: Dict[str, Window]
 
     def __init__(self, home: Optional[Union[str, os.PathLike[str]]] = None):
-        self._done = Event()
-        self._home = HomeDir.from_path(home)
+        super().__init__(home)
 
-        if not self._home.exists():
-            self._home.mkdir(parents=True, exist_ok=True)
-
-        test_directory(self._home)
-        test_readable(self._home)
-
-        self._readonly = not os.access(self._home, os.W_OK)
-        self._config = Config(self._home.cvp_ini, self._home)
-
-        logging_config_path = self._config.logging.config_path
-        if os.path.isfile(logging_config_path):
-            loads_logging_config(logging_config_path)
-            logger.info(f"Loads the logging config file: '{logging_config_path}'")
-
-        root_severity = self._config.logging.root_severity
-        if root_severity:
-            level = convert_level_number(root_severity)
-            set_root_level(level)
-            logger.log(level, f"Changed root severity: {root_severity}")
-
-        thread_workers = self._config.concurrency.thread_workers
-        process_workers = self._config.concurrency.process_workers
-        self._pm = ProcessManager(
-            self._config.ffmpeg,
-            home=self._home,
-            thread_workers=thread_workers,
-            process_workers=process_workers,
-        )
-
-        self._windows = {
-            "__overlay__": OverlayWindow(self._config.overlay),
-            "__mpv__": MpvWindow(self._config.mpv),
-        }
+        self._windows = OrderedDict[str, Window]()
+        self._overlay = OverlayWindow(self._config.overlay)
+        self._mpv = MpvWindow(self._config.mpv)
         self._medias = MediasWindow(self._pm, self._config)
         self._processes = ProcessesWindow(self._pm, self._config)
         self._preference = PreferenceWindow(self._pm, self._config)
-
-        for config in self._config.medias.values():
-            self._windows[config.section] = MediaWindow(config, self._pm)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -99,27 +53,22 @@ class PlayerContext:
         assert isinstance(args.home, str)
         return cls(home=args.home)
 
-    @property
-    def debug(self) -> bool:
-        return self._config.debug
+    def add_windows(self, *windows: Window) -> None:
+        for window in windows:
+            self.add_window(window)
 
-    @property
-    def verbose(self) -> int:
-        return self._config.verbose
+    def add_window(self, window: Window, key: Optional[str] = None) -> None:
+        window.do_create(self)
+        key = key if key else window.get_key()
+        assert isinstance(key, str)
+        self._windows[key] = window
 
-    def quit(self) -> None:
-        self._done.set()
-
-    def add_media_window(self, file: str) -> None:
+    def add_new_media_window(self, file: str) -> None:
         section = self._config.add_media_section()
         section.opened = True
         section.file = file
         section.name = file
-
-        window = MediaWindow(section, self._pm)
-        window.do_create()
-
-        self._windows[section.section] = window
+        self.add_window(MediaWindow(section, self._pm))
 
     def start(self) -> None:
         self.on_init()
@@ -130,7 +79,7 @@ class PlayerContext:
                 section, key = force_egl_section_key()
                 logger.error(
                     f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
-                    f" section of the '{str(self._home.cvp_ini)}' file and try again."
+                    f" section of the '{str(self.home.cvp_ini)}' file and try again."
                 )
                 raise RuntimeError("Consider enabling EGL related options") from e
         finally:
@@ -140,8 +89,8 @@ class PlayerContext:
     def pygame_display_size(self) -> Tuple[int, int]:
         assert pygame.display.get_init(), "pygame must be initialized"
 
-        w = self._config.display.width
-        h = self._config.display.height
+        w = self.config.display.width
+        h = self.config.display.height
         if w >= 1 and h >= 1:
             return w, h
         else:
@@ -151,13 +100,13 @@ class PlayerContext:
     @property
     def pygame_display_flags(self) -> int:
         common_flags = pygame.DOUBLEBUF | pygame.OPENGL
-        if self._config.display.fullscreen:
+        if self.config.display.fullscreen:
             return common_flags | pygame.FULLSCREEN
         else:
             return common_flags | pygame.RESIZABLE
 
     def on_init(self) -> None:
-        if self._config.display.force_egl:
+        if self.config.display.force_egl:
             os.environ["SDL_VIDEO_X11_FORCE_EGL"] = "1"
 
         pygame.init()
@@ -175,59 +124,57 @@ class PlayerContext:
         io.display_size = size
         io.ini_file_name = None
         io.log_file_name = None
-        imgui.load_ini_settings_from_disk(str(self._home.gui_ini))
+        imgui.load_ini_settings_from_disk(str(self.home.gui_ini))
 
         self._renderer = PygameRenderer()
 
         io.fonts.clear()
-        pixels = self._config.font.pixels
-        scale = self._config.font.scale
+        pixels = self.config.font.pixels
+        scale = self.config.font.scale
         font_size_pixels = pixels * scale
         add_jbm_font(font_size_pixels)
         add_ngc_font(font_size_pixels)
 
-        user_font = self._config.font.family
+        user_font = self.config.font.family
         if user_font and os.path.isfile(user_font):
             korean_ranges = io.fonts.get_glyph_ranges_korean()
             io.fonts.add_font_from_file_ttf(user_font, font_size_pixels, korean_ranges)
 
-        io.font_global_scale /= self._config.font.scale
+        io.font_global_scale /= self.config.font.scale
         self._renderer.refresh_font_texture()
 
-        theme = self._config.appearance.theme
+        theme = self.config.appearance.theme
         default_style_colors(theme)
 
         GL.glClearColor(0, 0, 0, 1)
-        for win in self._windows.values():
-            win.do_create()
+
+        self.add_windows(
+            self._overlay,
+            self._mpv,
+            self._medias,
+            self._processes,
+            self._preference,
+            *[MediaWindow(c, self._pm) for c in self.config.medias.values()],
+        )
 
     def on_exit(self) -> None:
-        self._pm.teardown(self._config.processes.teardown_timeout)
+        self.teardown()
 
-        for win in self._windows.values():
+        while self._windows:
+            key, win = self._windows.popitem(last=False)
             win.do_destroy()
 
-        if not self._readonly:
-            if not self._home.is_dir():
-                self._home.mkdir(parents=True, exist_ok=True)
-
-            self._config.display.fullscreen = pygame.display.is_fullscreen()
-            self._config.display.size = pygame.display.get_window_size()
-            self._config.write(self._home.cvp_ini)
-
-            if not self._home.logging_json.exists():
-                logging_json = dumps_default_logging_config(self._home)
-                self._home.logging_json.write_text(logging_json)
-
-            if not self._home.gui_ini.exists():
-                self._home.gui_ini.parent.mkdir(parents=True, exist_ok=True)
-                imgui.save_ini_settings_to_disk(str(self._home.gui_ini))
+        if not self.readonly:
+            self.config.display.fullscreen = pygame.display.is_fullscreen()
+            self.config.display.size = pygame.display.get_window_size()
+            self.save_config()
+            imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
 
         del self._renderer
         pygame.quit()
 
     def on_process(self) -> None:
-        while not self._done.is_set():
+        while not self.is_done():
             self.on_event()
             self.on_frame()
 
@@ -262,9 +209,6 @@ class PlayerContext:
             self.on_popups()
             for win in self._windows.values():
                 win.do_process()
-            self._medias.do_process()
-            self._processes.do_process()
-            self._preference.do_process()
             self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not
@@ -311,11 +255,11 @@ class PlayerContext:
     def on_popups(self) -> None:
         file = self._open_file_popup.do_process()
         if file:
-            self.add_media_window(file)
+            self.add_new_media_window(file)
 
         url = self._open_url_popup.do_process()
         if url:
-            self.add_media_window(url)
+            self.add_new_media_window(url)
 
     def on_demo_window(self) -> None:
         if not self.debug:

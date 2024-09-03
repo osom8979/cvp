@@ -18,10 +18,10 @@ from cvp.windows.medias.tabs import MediaTabs
 class MediasWindow(Window[MediasSection]):
     def __init__(self, pm: ProcessManager, config: Config):
         super().__init__(config.manager, title="Medias", closable=True)
+        self._config = config
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._tabs = MediaTabs(pm)
         self._pm = ref(pm)
-        self._medias = config.medias
 
     @property
     def pm(self) -> Optional[ProcessManager]:
@@ -42,6 +42,10 @@ class MediasWindow(Window[MediasSection]):
     @selected.setter
     def selected(self, value: str) -> None:
         self.section.selected = value
+
+    @property
+    def medias(self):
+        return self._config.medias
 
     def drag_sidebar_width(self) -> None:
         sidebar_width = imgui.drag_int(
@@ -67,7 +71,7 @@ class MediasWindow(Window[MediasSection]):
                 imgui.separator()
 
                 if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                    for key, section in self._medias.items():
+                    for key, section in self.medias.items():
                         if imgui.selectable(section.name, key == self.selected)[1]:
                             self.selected = key
                     imgui.end_list_box()
@@ -78,7 +82,7 @@ class MediasWindow(Window[MediasSection]):
 
         if begin_child("## Main", -1, -footer_height_to_reserve()).visible:
             try:
-                media = self._medias.get(self.selected, None)
+                media = self.medias.get(self.selected, None)
                 if media is not None:
                     self._tabs.do_process(media)
                 else:

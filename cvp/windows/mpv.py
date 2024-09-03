@@ -53,7 +53,7 @@ def _logging_handler(level: str, prefix: str, text: str) -> None:
 class MpvWindow(Window[MpvSection]):
     _file: Optional[str]
     _mpv: Optional[MPV]
-    _context: Optional[MpvRenderContext]
+    _render: Optional[MpvRenderContext]
 
     def __init__(self, section: MpvSection):
         super().__init__(section, closable=True, flags=imgui.WINDOW_MENU_BAR)
@@ -67,7 +67,7 @@ class MpvWindow(Window[MpvSection]):
 
         self._file = None
         self._mpv = None
-        self._context = None
+        self._render = None
 
         self._popup = OpenFilePopup("Open video file")
         self._popup.target = self.on_open_file
@@ -194,7 +194,7 @@ class MpvWindow(Window[MpvSection]):
             return
 
         self._mpv = MPV(log_handler=_logging_handler, loglevel="debug")
-        self._context = MpvRenderContext(
+        self._render = MpvRenderContext(
             mpv=self._mpv,
             api_type="opengl",
             opengl_init_params={
@@ -206,34 +206,34 @@ class MpvWindow(Window[MpvSection]):
         self._file = file
 
     def close(self) -> None:
-        if self._context:
-            self._context.free()
+        if self._render:
+            self._render.free()
         if self._mpv:
             self._mpv.terminate()
 
         self._file = None
         self._mpv = None
-        self._context = None
+        self._render = None
 
     @property
     def context_opened(self) -> bool:
-        if self._context is not None:
+        if self._render is not None:
             assert self._file is not None
             assert self._mpv is not None
-            assert self._context is not None
+            assert self._render is not None
             return True
         else:
             assert self._file is None
             assert self._mpv is None
-            assert self._context is None
+            assert self._render is None
             return False
 
     def render(self, size: Tuple[int, int]) -> None:
-        if not self._context:
+        if not self._render:
             return
         if not self._fbo:
             return
-        if not self._context.update():
+        if not self._render.update():
             return
 
         width = size[0]
@@ -244,7 +244,7 @@ class MpvWindow(Window[MpvSection]):
         assert isinstance(width, int)
         assert isinstance(height, int)
 
-        self._context.render(
+        self._render.render(
             flip_y=False,
             opengl_fbo=dict(w=width, h=height, fbo=self._fbo),
         )
