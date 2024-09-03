@@ -12,10 +12,7 @@ from cvp.variables import DEFAULT_CVP_HOME_PATH
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
-EPILOG = f"""
-Apply general debugging options:
-  {PROG} -D ...
-"""
+EPILOG: Final[str] = ""
 
 CMD_PLAYER: Final[str] = "player"
 CMD_PLAYER_HELP: Final[str] = "Desktop GUI"
@@ -79,7 +76,7 @@ def default_argument_parser() -> ArgumentParser:
         "--home",
         metavar="dir",
         default=get_eval(CVP_HOME, DEFAULT_CVP_HOME_PATH),
-        help=f"{PROG}'s home directory",
+        help=f"{PROG}'s home directory (default: '{DEFAULT_CVP_HOME_PATH}')",
     )
     parser.add_argument(
         "--version",

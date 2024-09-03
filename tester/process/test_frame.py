@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from io import StringIO
+from shutil import which
 from unittest import TestCase, main, skipIf
 
 import numpy as np
 
-from cvp.ffmpeg.executable.which import which_ffmpeg
 from cvp.process.frame import FrameReaderProcess
 
 
 class FrameTestCase(TestCase):
-    @skipIf(not which_ffmpeg(), "Not found ffmpeg executable")
+    @skipIf(not which("ffmpeg"), "Not found ffmpeg executable")
     def test_default(self):
-        ffmpeg = which_ffmpeg()
+        ffmpeg = which("ffmpeg")
         self.assertIsInstance(ffmpeg, str)
 
         duration = 3

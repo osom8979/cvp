@@ -175,7 +175,7 @@ class PlayerContext:
         io.display_size = size
         io.ini_file_name = None
         io.log_file_name = None
-        imgui.load_ini_settings_from_disk(str(self._home.imgui_ini))
+        imgui.load_ini_settings_from_disk(str(self._home.gui_ini))
 
         self._renderer = PygameRenderer()
 
@@ -219,9 +219,9 @@ class PlayerContext:
                 logging_json = dumps_default_logging_config(self._home)
                 self._home.logging_json.write_text(logging_json)
 
-            if not self._home.imgui_ini.exists():
-                self._home.imgui_ini.parent.mkdir(parents=True, exist_ok=True)
-                imgui.save_ini_settings_to_disk(str(self._home.imgui_ini))
+            if not self._home.gui_ini.exists():
+                self._home.gui_ini.parent.mkdir(parents=True, exist_ok=True)
+                imgui.save_ini_settings_to_disk(str(self._home.gui_ini))
 
         del self._renderer
         pygame.quit()

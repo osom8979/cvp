@@ -81,6 +81,8 @@ class ExeItem(TabItem, PopupPropagator):
         if button_ex(f"Browse##{self._label}Browse"):
             self._browser.show()
 
+        imgui.separator()
+
 
 class ExeTabs(TabBar, PopupPropagator):
     def __init__(self, section: FFmpegSection, pm: ProcessManager):

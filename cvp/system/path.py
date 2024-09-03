@@ -9,3 +9,6 @@ class PathFlavour(Path):
 
     def __init__(self, *_):
         super().__init__()
+
+    def as_path(self):
+        return Path(self)

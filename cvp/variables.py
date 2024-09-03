@@ -5,7 +5,7 @@ from typing import Final
 
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
 CVP_INI_FILENAME: Final[str] = "cvp.ini"
-IMGUI_INI_FILENAME: Final[str] = "gui.ini"
+GUI_INI_FILENAME: Final[str] = "gui.ini"
 LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
