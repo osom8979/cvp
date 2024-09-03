@@ -1,7 +1,4 @@
 *
-!bin/
-!cache/
 !fonts/
 !.gitignore
 !__init__.py
-!download.py

@@ -9,7 +9,6 @@ from typing import Final, List, NamedTuple, Optional, Sequence, Tuple, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 from urllib.request import urlopen
 
-from cvp.assets import get_assets_dir, get_cache_dir
 from cvp.hashfunc.checksum import Method
 from cvp.hashfunc.checksum import checksum as calc_checksum
 
@@ -43,10 +42,11 @@ class DownloadArchive:
         self,
         url: Union[str, ParseResult],
         paths: Sequence[Union[Tuple[str, str], ExtractPath]],
-        checksum: Optional[Union[str, Tuple[str, str], Checksum]] = None,
-        extract_root: Optional[str] = None,
-        cache_dir: Optional[str] = None,
+        extract_root: str,
+        cache_dir: str,
         temp_dir: Optional[str] = None,
+        *,
+        checksum: Optional[Union[str, Tuple[str, str], Checksum]] = None,
     ):
         if not paths:
             raise ValueError("No paths given")
@@ -83,8 +83,8 @@ class DownloadArchive:
         else:
             self._checksum = None
 
-        self._extract_root = extract_root if extract_root else get_assets_dir()
-        self._cache_dir = cache_dir if cache_dir else get_cache_dir()
+        self._extract_root = extract_root
+        self._cache_dir = cache_dir
         self._temp_dir = temp_dir
 
     def __repr__(self):
