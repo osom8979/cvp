@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from typing import Dict, Final
+
 from cvp.resources.download.links.ffmpeg import BtbN, evermeet
 from cvp.resources.download.links.tuples import LinkInfo
 from cvp.system.platform import SysMach
 
-FFMPEG_LINKS = {
+LinkMap = Dict[SysMach, LinkInfo]
+
+FFMPEG_LINKS: Final[LinkMap] = {
     SysMach.windows_x64: LinkInfo(
         url=BtbN.WIN64_URL,
         paths=[(BtbN.WIN64_FFMPEG_SUB_PATH, "bin/ffmpeg.exe")],
@@ -22,7 +26,7 @@ FFMPEG_LINKS = {
     ),
 }
 
-FFPROBE_LINKS = {
+FFPROBE_LINKS: Final[LinkMap] = {
     SysMach.windows_x64: LinkInfo(
         url=BtbN.WIN64_URL,
         paths=[(BtbN.WIN64_FFPROBE_SUB_PATH, "bin/ffprobe.exe")],
