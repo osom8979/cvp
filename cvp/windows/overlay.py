@@ -7,6 +7,7 @@ import imgui
 from overrides import override
 
 from cvp.config.sections.windows.overlay import OverlaySection
+from cvp.context import Context
 from cvp.system.usage import SystemUsage
 from cvp.widgets import (
     begin_popup_context_window,
@@ -25,8 +26,14 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 
 
 class OverlayWindow(Window[OverlaySection]):
-    def __init__(self, section: OverlaySection):
-        super().__init__(section, flags=OVERLAY_WINDOW_FLAGS)
+    def __init__(self, context: Context):
+        super().__init__(
+            context=context,
+            section=context.config.overlay,
+            title="Overlay",
+            closable=False,
+            flags=OVERLAY_WINDOW_FLAGS,
+        )
 
         self._normal_color = 0.0, 1.0, 0.0
         self._warning_color = 1.0, 1.0, 0.0

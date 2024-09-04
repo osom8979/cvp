@@ -11,6 +11,7 @@ from OpenGL import GL
 from OpenGL.error import Error
 
 from cvp.config.sections.display import force_egl_section_key
+from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
@@ -34,11 +35,11 @@ class PlayerContext(Context):
         super().__init__(home)
         self._windows = OrderedDict[str, Window]()
 
-        self._overlay = OverlayWindow(self._config.overlay)
-        self._mpv = MpvWindow(self._config.mpv)
-        self._medias = MediasWindow(self._config.manager)
-        self._processes = ProcessesWindow(self._config.processes)
-        self._preference = PreferenceWindow(self._config.preference)
+        self._overlay = OverlayWindow(self)
+        self._mpv = MpvWindow(self)
+        self._medias = MediasWindow(self)
+        self._processes = ProcessesWindow(self)
+        self._preference = PreferenceWindow(self)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -58,17 +59,24 @@ class PlayerContext(Context):
             self.add_window(window)
 
     def add_window(self, window: Window, key: Optional[str] = None) -> None:
-        window.do_create(self)
         key = key if key else window.key
         assert isinstance(key, str)
+        window.do_create()
         self._windows[key] = window
+
+    def add_media_windows(self, *sections: MediaSection) -> None:
+        for section in sections:
+            self.add_media_window(section)
+
+    def add_media_window(self, section: MediaSection) -> None:
+        self.add_window(MediaWindow(self, section))
 
     def add_new_media_window(self, file: str) -> None:
         section = self._config.add_media_section()
         section.opened = True
         section.file = file
         section.name = file
-        self.add_window(MediaWindow(section))
+        self.add_media_window(section)
 
     def start(self) -> None:
         self.on_init()
@@ -154,8 +162,8 @@ class PlayerContext(Context):
             self._medias,
             self._processes,
             self._preference,
-            *[MediaWindow(c) for c in self.config.medias.values()],
         )
+        self.add_media_windows(*self.config.medias.values())
 
     def on_exit(self) -> None:
         self.teardown()

@@ -8,6 +8,7 @@ from imgui.core import _DrawList  # noqa
 from OpenGL import GL
 
 from cvp.config.sections.windows.media import MediaSection
+from cvp.context import Context
 from cvp.types import override
 from cvp.widgets import menu_item_ex
 from cvp.widgets.hoc.window import Window
@@ -18,8 +19,14 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaSection]):
-    def __init__(self, section: MediaSection):
-        super().__init__(section, closable=True)
+    def __init__(self, context: Context, section: MediaSection):
+        super().__init__(
+            context=context,
+            section=section,
+            title="Media",
+            closable=True,
+            flags=None,
+        )
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._texture = 0
         self._pbo = 0

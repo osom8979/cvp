@@ -20,7 +20,7 @@ SectionT = TypeVar("SectionT", bound=BaseWindowSection)
 class WindowInterface(WidgetInterface):
     @property
     @abstractmethod
-    def context(self) -> Context:
+    def context(self):
         raise NotImplementedError
 
     @property
@@ -63,11 +63,12 @@ class WindowInterface(WidgetInterface):
 
 
 class Window(Generic[SectionT], WindowInterface):
-    _context: Optional[Context]
+    _context: Context
     _popups: Dict[str, Popup]
 
     def __init__(
         self,
+        context: Context,
         section: SectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
@@ -75,7 +76,10 @@ class Window(Generic[SectionT], WindowInterface):
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
     ) -> None:
+        assert isinstance(context, Context)
         assert isinstance(section, BaseWindowSection)
+
+        self._context = context
         self._section = section
 
         title = title if title else type(self).__name__
@@ -89,7 +93,6 @@ class Window(Generic[SectionT], WindowInterface):
         self._min_width = min_width
         self._min_height = min_height
 
-        self._context = None
         self._initialized = False
         self._popups = dict()
 
@@ -120,8 +123,6 @@ class Window(Generic[SectionT], WindowInterface):
     @property
     @override
     def context(self):
-        if self._context is None:
-            raise ValueError("Context is not assigned")
         return self._context
 
     @property
@@ -175,11 +176,10 @@ class Window(Generic[SectionT], WindowInterface):
     def unregister_popup(self, popup: Popup) -> None:
         self._popups.pop(popup.title)
 
-    def do_create(self, context: Context) -> None:
+    def do_create(self) -> None:
         if self._initialized:
             raise ValueError("Already initialized")
 
-        self._context = context
         self.on_create()
         self._initialized = True
 
@@ -193,8 +193,6 @@ class Window(Generic[SectionT], WindowInterface):
     def do_process(self) -> None:
         if not self._initialized:
             raise ValueError("Not initialized")
-        if self._context is None:
-            raise ValueError("Context is not assigned")
 
         if not self.opened:
             return

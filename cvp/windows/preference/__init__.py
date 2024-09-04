@@ -5,6 +5,7 @@ from typing import Any, List
 import imgui
 
 from cvp.config.sections.windows.preference import PreferenceSection
+from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, text_centered
@@ -21,18 +22,22 @@ from cvp.windows.preference.logging import LoggingPreference
 class PreferenceWindow(Window[PreferenceSection]):
     _menus: List[WidgetInterface]
 
-    def __init__(self, section: PreferenceSection):
-        super().__init__(section, title="Preference", closable=True)
+    def __init__(self, context: Context):
+        super().__init__(
+            context=context,
+            section=context.config.preference,
+            title="Preference",
+            closable=True,
+            flags=None,
+        )
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
 
-    @override
-    def on_create(self) -> None:
         self._menus = [
-            AppearancePreference(self.context.config.appearance),
-            FFmpegPreference(self.context.config.ffmpeg, self.context.pm),
-            LoggingPreference(self.context.config.logging),
-            ConcurrencyPreference(self.context.config.concurrency),
-            DeveloperPreference(self.context.config.developer),
+            AppearancePreference(context.config.appearance),
+            FFmpegPreference(context.config.ffmpeg, context.pm),
+            LoggingPreference(context.config.logging),
+            ConcurrencyPreference(context.config.concurrency),
+            DeveloperPreference(context.config.developer),
         ]
 
         for menu in self._menus:

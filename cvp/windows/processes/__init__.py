@@ -3,6 +3,7 @@
 import imgui
 
 from cvp.config.sections.windows.processes import ProcessesSection
+from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, text_centered
@@ -11,14 +12,15 @@ from cvp.windows.processes.tabs import ProcessTabs
 
 
 class ProcessesWindow(Window[ProcessesSection]):
-    _tabs: ProcessTabs
-
-    def __init__(self, section: ProcessesSection):
-        super().__init__(section, title="Processes", closable=True)
+    def __init__(self, context: Context):
+        super().__init__(
+            context=context,
+            section=context.config.processes,
+            title="Processes",
+            closable=True,
+            flags=None,
+        )
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-
-    @override
-    def on_create(self) -> None:
         self._tabs = ProcessTabs(self.context.pm)
 
     @property

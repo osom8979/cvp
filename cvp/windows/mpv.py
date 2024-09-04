@@ -11,6 +11,7 @@ from mpv import MPV, MpvGlGetProcAddressFn, MpvRenderContext
 from OpenGL import GL
 
 from cvp.config.sections.windows.mpv import MpvSection
+from cvp.context import Context
 from cvp.gl.runtime import get_process_address
 from cvp.logging.logging import DEBUG, convert_level_number, logger, mpv_logger
 from cvp.popups.open_file import OpenFilePopup
@@ -55,8 +56,14 @@ class MpvWindow(Window[MpvSection]):
     _mpv: Optional[MPV]
     _render: Optional[MpvRenderContext]
 
-    def __init__(self, section: MpvSection):
-        super().__init__(section, closable=True, flags=imgui.WINDOW_MENU_BAR)
+    def __init__(self, context: Context):
+        super().__init__(
+            context=context,
+            section=context.config.mpv,
+            title="Mpv",
+            closable=True,
+            flags=imgui.WINDOW_MENU_BAR,
+        )
 
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._playback = 0.0
