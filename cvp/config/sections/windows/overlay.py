@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import IntEnum, StrEnum, auto, unique
+from typing import Sequence
 
 from cvp.config._base import BaseConfig
 from cvp.config.sections.windows._base import BaseWindowSection
@@ -21,6 +22,9 @@ class _Keys(StrEnum):
     alpha = auto()
     fps_warning_threshold = auto()
     fps_error_threshold = auto()
+    normal_color = auto()
+    warning_color = auto()
+    error_color = auto()
 
 
 class OverlaySection(BaseWindowSection):
@@ -112,3 +116,27 @@ class OverlaySection(BaseWindowSection):
     @fps_error_threshold.setter
     def fps_error_threshold(self, value: float) -> None:
         self.set(self.K.fps_error_threshold, value)
+
+    @property
+    def normal_color(self) -> Sequence[float]:
+        return self.get(self.K.normal_color, (0.0, 1.0, 0.0))
+
+    @normal_color.setter
+    def normal_color(self, value: Sequence[float]) -> None:
+        self.set(self.K.normal_color, value)
+
+    @property
+    def warning_color(self) -> Sequence[float]:
+        return self.get(self.K.warning_color, (1.0, 1.0, 0.0))
+
+    @warning_color.setter
+    def warning_color(self, value: Sequence[float]) -> None:
+        self.set(self.K.warning_color, value)
+
+    @property
+    def error_color(self) -> Sequence[float]:
+        return self.get(self.K.error_color, (1.0, 0.0, 0.0))
+
+    @error_color.setter
+    def error_color(self, value: Sequence[float]) -> None:
+        self.set(self.K.error_color, value)

@@ -13,10 +13,11 @@ class Percentage(NamedTuple):
 
 class SystemUsage:
     def __init__(self, interval: Optional[float] = None):
+        self.interval = interval
+
         self._latest_cpu_usage = 0.0
         self._latest_vmem_usage = 0.0
         self._latest_time = time()
-        self._interval = interval
 
     @property
     def percentage(self) -> Percentage:
@@ -31,8 +32,8 @@ class SystemUsage:
     def update_interval(self) -> Percentage:
         current = time()
 
-        if self._interval is not None:
-            if current - self._latest_time < self._interval:
+        if self.interval is not None:
+            if current - self._latest_time < self.interval:
                 return self.percentage
 
         return self.update(current)

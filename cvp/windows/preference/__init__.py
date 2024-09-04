@@ -22,17 +22,14 @@ class PreferenceWindow(Window[PreferenceSection]):
     _menus: List[WidgetInterface]
 
     def __init__(self):
-        context = self.propagated_context()
-
         super().__init__(
-            context.config.preference,
+            self.propagated_context().config.preference,
             title="Preference",
             closable=True,
             flags=None,
         )
 
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-
         self._menus = [
             AppearancePreference(),
             FFmpegPreference(),

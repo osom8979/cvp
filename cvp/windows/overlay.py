@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import floor
-from typing import Final, Tuple
+from typing import Final, Sequence, Tuple
 
 import imgui
 from overrides import override
@@ -27,16 +27,11 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 class OverlayWindow(Window[OverlaySection]):
     def __init__(self):
         super().__init__(
-            section=self.propagated_context().config.overlay,
+            self.propagated_context().config.overlay,
             title="Overlay",
             closable=False,
             flags=OVERLAY_WINDOW_FLAGS,
         )
-
-        self._normal_color = 0.0, 1.0, 0.0
-        self._warning_color = 1.0, 1.0, 0.0
-        self._error_color = 1.0, 0.0, 0.0
-
         self._usage = SystemUsage(interval=1.0)
 
     @property
@@ -65,13 +60,13 @@ class OverlayWindow(Window[OverlaySection]):
         y = 0.0 if self.is_top_side else 1.0
         return x, y
 
-    def get_framerate_color(self, framerate: float) -> Tuple[float, float, float]:
+    def get_framerate_color(self, framerate: float) -> Sequence[float]:
         if framerate >= self.section.fps_warning_threshold:
-            return self._normal_color
+            return self.section.normal_color
         elif framerate >= self.section.fps_error_threshold:
-            return self._warning_color
+            return self.section.warning_color
         else:
-            return self._error_color
+            return self.section.error_color
 
     @override
     def begin(self) -> Tuple[bool, bool]:

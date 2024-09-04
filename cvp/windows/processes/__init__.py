@@ -13,11 +13,12 @@ from cvp.windows.processes.tabs import ProcessTabs
 class ProcessesWindow(Window[ProcessesSection]):
     def __init__(self):
         super().__init__(
-            section=self.propagated_context().config.processes,
+            self.propagated_context().config.processes,
             title="Processes",
             closable=True,
             flags=None,
         )
+
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._tabs = ProcessTabs()
 

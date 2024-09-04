@@ -18,6 +18,7 @@ class MediasWindow(Window[MediasSection]):
             closable=True,
             flags=None,
         )
+
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._tabs = MediaTabs()
 
