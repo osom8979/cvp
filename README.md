@@ -29,6 +29,5 @@ Computer Vision Player
 
 ## License
 
-**cvp** inherits the underlying libmpv's license, which can be either
-[GPLv2 or later](./LICENSE.GPLv2.0) (default) or [LGPLv2.1 or later](./LICENSE.LGPLv2.1).
-For details, see [the mpv copyright page](https://github.com/mpv-player/mpv/blob/master/Copyright).
+See the [LICENSE](./LICENSE) file for details. In summary,
+**cvp** is licensed under the **MIT license**.
