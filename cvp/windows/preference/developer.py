@@ -2,15 +2,14 @@
 
 import imgui
 
-from cvp.config.sections.developer import DeveloperSection
 from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
 
 
 class DeveloperPreference(WidgetInterface):
-    def __init__(self, section: DeveloperSection, label="Developer"):
-        self._section = section
+    def __init__(self, label="Developer"):
+        self._section = self.propagated_context().config.developer
         self._label = label
 
     def __str__(self):

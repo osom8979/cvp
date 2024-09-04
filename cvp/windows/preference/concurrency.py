@@ -2,15 +2,14 @@
 
 import imgui
 
-from cvp.config.sections.concurrency import ConcurrencySection
 from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
 
 
 class ConcurrencyPreference(WidgetInterface):
-    def __init__(self, section: ConcurrencySection, label="Concurrency"):
-        self._section = section
+    def __init__(self, label="Concurrency"):
+        self._section = self.propagated_context().config.concurrency
         self._label = label
         self._show_restart = False
 

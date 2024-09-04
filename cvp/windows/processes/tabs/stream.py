@@ -31,12 +31,12 @@ class ProcessStreamTab(TabItem[Process]):
         return cls(StreamType.stderr)
 
     @override
-    def on_context(self, context: Process) -> None:
+    def on_item(self, item: Process) -> None:
         match self._stream:
             case StreamType.stdout:
-                buffer = context.stdout_buffer
+                buffer = item.stdout_buffer
             case StreamType.stderr:
-                buffer = context.stderr_buffer
+                buffer = item.stderr_buffer
             case _:
                 assert False, "Inaccessible section"
 

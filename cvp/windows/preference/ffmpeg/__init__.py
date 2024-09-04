@@ -2,8 +2,6 @@
 
 from typing import Sequence
 
-from cvp.config.sections.ffmpeg import FFmpegSection
-from cvp.process.manager import ProcessManager
 from cvp.types import override
 from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
@@ -11,10 +9,10 @@ from cvp.windows.preference.ffmpeg.exe import ExeTabs
 
 
 class FFmpegPreference(PopupPropagator, WidgetInterface):
-    def __init__(self, section: FFmpegSection, pm: ProcessManager, label="FFmpeg"):
-        self._section = section
+    def __init__(self, label="FFmpeg"):
+        self._section = self.propagated_context().config.ffmpeg
         self._label = label
-        self._tabs = ExeTabs(section, pm)
+        self._tabs = ExeTabs()
 
     def __str__(self):
         return self._label

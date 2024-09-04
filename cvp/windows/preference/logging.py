@@ -5,7 +5,6 @@ from typing import Sequence
 
 import imgui
 
-from cvp.config.sections.logging import LoggingSection
 from cvp.logging.logging import (
     SEVERITIES,
     convert_level_number,
@@ -20,8 +19,8 @@ from cvp.widgets.hoc.widget import WidgetInterface
 
 
 class LoggingPreference(PopupPropagator, WidgetInterface):
-    def __init__(self, section: LoggingSection, label="Logging"):
-        self._section = section
+    def __init__(self, label="Logging"):
+        self._section = self.propagated_context().config.logging
         self._label = label
         self._severities = list(SEVERITIES)
         self._logging_browser = OpenFilePopup(

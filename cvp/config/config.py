@@ -31,7 +31,7 @@ class Config(BaseConfig):
         cvp_home: Optional[Union[str, PathLike[str]]] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
-        self._medias = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+        self._media_sections = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
         self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
         self._demo = DemoSection(self)
@@ -40,31 +40,23 @@ class Config(BaseConfig):
         self._ffmpeg = FFmpegSection(self)
         self._font = FontSection(self)
         self._logging = LoggingSection(self)
-        self._manager = MediasSection(self)
+        self._medias = MediasSection(self)
         self._mpv = MpvSection(self)
         self._overlay = OverlaySection(self)
         self._preference = PreferenceSection(self)
         self._processes = ProcessesSection(self)
 
     def add_media_section(self, name: Optional[str] = None):
-        section = self._medias.join_section_name(name if name else str(uuid4()))
+        section = self._media_sections.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
         return MediaSection(config=self, section=section)
 
     @property
-    def debug(self):
-        return self._developer.debug
-
-    @property
-    def verbose(self):
-        return self._developer.verbose
-
-    @property
-    def medias(self):
+    def media_sections(self):
         result = OrderedDict[str, MediaSection]()
-        for section in self._medias.sections():
-            key = self._medias.split_section_name(section)
+        for section in self._media_sections.sections():
+            key = self._media_sections.split_section_name(section)
             result[key] = MediaSection(config=self, section=section)
         return result
 
@@ -101,8 +93,8 @@ class Config(BaseConfig):
         return self._logging
 
     @property
-    def manager(self):
-        return self._manager
+    def medias(self):
+        return self._medias
 
     @property
     def mpv(self):
@@ -119,3 +111,11 @@ class Config(BaseConfig):
     @property
     def processes(self):
         return self._processes
+
+    @property
+    def debug(self):
+        return self._developer.debug
+
+    @property
+    def verbose(self):
+        return self._developer.verbose

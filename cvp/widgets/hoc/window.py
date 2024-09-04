@@ -68,18 +68,18 @@ class Window(Generic[SectionT], WindowInterface):
 
     def __init__(
         self,
-        context: Context,
         section: SectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
+        *,
+        context: Optional[Context] = None,
     ) -> None:
-        assert isinstance(context, Context)
         assert isinstance(section, BaseWindowSection)
 
-        self._context = context
+        self._context = context if context is not None else self.propagated_context()
         self._section = section
 
         title = title if title else type(self).__name__

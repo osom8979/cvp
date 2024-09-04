@@ -3,7 +3,6 @@
 import imgui
 
 from cvp.config.sections.windows.medias import MediasSection
-from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, text_centered
@@ -12,16 +11,15 @@ from cvp.windows.medias.tabs import MediaTabs
 
 
 class MediasWindow(Window[MediasSection]):
-    def __init__(self, context: Context):
+    def __init__(self):
         super().__init__(
-            context=context,
-            section=context.config.manager,
+            self.propagated_context().config.medias,
             title="Medias",
             closable=True,
             flags=None,
         )
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
-        self._tabs = MediaTabs(context.pm)
+        self._tabs = MediaTabs()
 
     @property
     def sidebar_width(self) -> int:
@@ -39,10 +37,6 @@ class MediasWindow(Window[MediasSection]):
     def selected(self, value: str) -> None:
         self.section.selected = value
 
-    @property
-    def medias(self):
-        return self.context.config.medias
-
     def drag_sidebar_width(self) -> None:
         sidebar_width = imgui.drag_int(
             "## SideWidth",
@@ -58,6 +52,8 @@ class MediasWindow(Window[MediasSection]):
 
     @override
     def on_process(self) -> None:
+        media_sections = self.context.config.media_sections
+
         if begin_child("## Sidebar", self.sidebar_width, border=True).visible:
             try:
                 content_width = imgui.get_content_region_available_width()
@@ -67,7 +63,7 @@ class MediasWindow(Window[MediasSection]):
                 imgui.separator()
 
                 if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                    for key, section in self.medias.items():
+                    for key, section in media_sections.items():
                         label = f"{section.title}##{key}"
                         if imgui.selectable(label, key == self.selected)[1]:
                             self.selected = key
@@ -79,7 +75,7 @@ class MediasWindow(Window[MediasSection]):
 
         if begin_child("## Main", -1, -1).visible:
             try:
-                media = self.medias.get(self.selected, None)
+                media = media_sections.get(self.selected, None)
                 if media is not None:
                     self._tabs.do_process(media)
                 else:

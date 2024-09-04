@@ -12,7 +12,7 @@ from OpenGL.error import Error
 
 from cvp.config.sections.display import force_egl_section_key
 from cvp.config.sections.windows.media import MediaSection
-from cvp.context import Context
+from cvp.context import Context, ContextPropagator
 from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -22,7 +22,6 @@ from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.media import MediaWindow
 from cvp.windows.medias import MediasWindow
-from cvp.windows.mpv import MpvWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow
@@ -35,11 +34,11 @@ class PlayerContext(Context):
         super().__init__(home)
         self._windows = OrderedDict[str, Window]()
 
-        self._overlay = OverlayWindow(self)
-        self._mpv = MpvWindow(self)
-        self._medias = MediasWindow(self)
-        self._processes = ProcessesWindow(self)
-        self._preference = PreferenceWindow(self)
+        with ContextPropagator(self):
+            self._overlay = OverlayWindow()
+            self._medias = MediasWindow()
+            self._processes = ProcessesWindow()
+            self._preference = PreferenceWindow()
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -69,7 +68,8 @@ class PlayerContext(Context):
             self.add_media_window(section)
 
     def add_media_window(self, section: MediaSection) -> None:
-        self.add_window(MediaWindow(self, section))
+        with ContextPropagator(self):
+            self.add_window(MediaWindow(section))
 
     def add_new_media_window(self, file: str) -> None:
         section = self._config.add_media_section()
@@ -158,12 +158,11 @@ class PlayerContext(Context):
 
         self.add_windows(
             self._overlay,
-            self._mpv,
             self._medias,
             self._processes,
             self._preference,
         )
-        self.add_media_windows(*self.config.medias.values())
+        self.add_media_windows(*self.config.media_sections.values())
 
     def on_exit(self) -> None:
         self.teardown()

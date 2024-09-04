@@ -5,33 +5,41 @@ from typing import Generic, Optional, TypeVar
 
 import imgui
 
+from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
 
-ContextT = TypeVar("ContextT")
+ItemT = TypeVar("ItemT")
 
 
-class TabItem(Generic[ContextT], WidgetInterface):
-    _context: Optional[ContextT]
+class TabItem(Generic[ItemT], WidgetInterface):
+    _item: Optional[ItemT]
 
     def __init__(
         self,
         label: Optional[str] = None,
         opened: Optional[bool] = None,
         flags=0,
+        *,
+        context: Optional[Context] = None,
     ):
+        self._context = context if context is not None else self.propagated_context()
         self._label = label if label else type(self).__name__
         self._opened = opened
         self._flags = flags
-        self._context = None
+        self._item = None
+
+    @property
+    def context(self):
+        return self._context
 
     @property
     def label(self):
         return self._label
 
     @property
-    def context(self):
-        return self._context
+    def item(self):
+        return self._item
 
     def begin(self):
         return imgui.begin_tab_item(self._label, self._opened, self._flags)
@@ -40,43 +48,54 @@ class TabItem(Generic[ContextT], WidgetInterface):
         assert self
         imgui.end_tab_item()
 
-    def do_process(self, context: Optional[ContextT] = None) -> None:
+    def do_process(self, item: Optional[ItemT] = None) -> None:
         if not self.begin().selected:
             return
 
-        self._context = context
+        self._item = item
         try:
             self.on_process()
         finally:
-            self._context = None
+            self._item = None
             self.end()
 
     @override
     def on_process(self) -> None:
-        if self._context is not None:
-            self.on_context(self._context)
+        if self._item is not None:
+            self.on_item(self._item)
 
-    def on_context(self, context: ContextT) -> None:
+    def on_item(self, item: ItemT) -> None:
         pass
 
 
-class TabBar(Generic[ContextT], WidgetInterface):
+class TabBar(Generic[ItemT], WidgetInterface):
     _items: OrderedDict[str, TabItem]
-    _context: Optional[ContextT]
+    _item: Optional[ItemT]
 
-    def __init__(self, identifier: Optional[str] = None, flags=0):
+    def __init__(
+        self,
+        identifier: Optional[str] = None,
+        flags=0,
+        *,
+        context: Optional[Context] = None,
+    ):
+        self._context = context if context is not None else self.propagated_context()
         self._identifier = identifier if identifier else type(self).__name__
         self._flags = flags
         self._items = OrderedDict()
-        self._context = None
+        self._item = None
+
+    @property
+    def context(self):
+        return self._context
 
     @property
     def identifier(self):
         return self._identifier
 
     @property
-    def context(self):
-        return self._context
+    def item(self):
+        return self._item
 
     def register(self, item: TabItem) -> None:
         self._items[item.label] = item
@@ -88,18 +107,18 @@ class TabBar(Generic[ContextT], WidgetInterface):
         assert self
         imgui.end_tab_bar()
 
-    def do_process(self, context: Optional[ContextT] = None) -> None:
+    def do_process(self, item: Optional[ItemT] = None) -> None:
         if not self.begin().opened:
             return
 
-        self._context = context
+        self._item = item
         try:
             self.on_process()
         finally:
-            self._context = None
+            self._item = None
             self.end()
 
     @override
     def on_process(self) -> None:
         for item in self._items.values():
-            item.do_process(self._context)
+            item.do_process(self._item)

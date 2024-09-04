@@ -6,9 +6,8 @@ from typing import List, Sequence
 import imgui
 
 from cvp.config.proxy import ValueProxy
-from cvp.config.sections.ffmpeg import FFmpegProxy, FFmpegSection, FFprobeProxy
+from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.popups.open_file import OpenFilePopup
-from cvp.process.manager import ProcessManager
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.system.platform import SysMach, get_system_machine
 from cvp.types import override
@@ -18,18 +17,11 @@ from cvp.widgets.hoc.tab import TabBar, TabItem
 
 
 class ExeItem(TabItem, PopupPropagator):
-    def __init__(
-        self,
-        filename: str,
-        proxy: ValueProxy,
-        links: LinkMap,
-        pm: ProcessManager,
-    ):
+    def __init__(self, filename: str, proxy: ValueProxy, links: LinkMap):
         super().__init__(filename)
         self._filename = filename
         self._proxy = proxy
         self._links = links
-        self._pm = pm
 
         self._sms = list(str(sm) for sm in SysMach)
         self._current_sm = get_system_machine()
@@ -112,10 +104,11 @@ class ExeItem(TabItem, PopupPropagator):
 
 
 class ExeTabs(TabBar, PopupPropagator):
-    def __init__(self, section: FFmpegSection, pm: ProcessManager):
+    def __init__(self):
         super().__init__()
-        self.register(ExeItem("ffmpeg", FFmpegProxy(section), FFMPEG_LINKS, pm))
-        self.register(ExeItem("ffprobe", FFprobeProxy(section), FFPROBE_LINKS, pm))
+        section = self.propagated_context().config.ffmpeg
+        self.register(ExeItem("ffmpeg", FFmpegProxy(section), FFMPEG_LINKS))
+        self.register(ExeItem("ffprobe", FFprobeProxy(section), FFPROBE_LINKS))
 
     @property
     @override
