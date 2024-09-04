@@ -10,12 +10,12 @@ from cvp.config.sections.windows._base import BaseWindowSection
 @unique
 class Mode(StrEnum):
     file = auto()
+    url = auto()
     manual = auto()
 
 
 @unique
 class _Keys(StrEnum):
-    name_ = "name"
     mode = auto()
     file = auto()
     frame_width = auto()
@@ -28,14 +28,6 @@ class MediaSection(BaseWindowSection):
 
     def __init__(self, config: BaseConfig, section="media"):
         super().__init__(config=config, section=section)
-
-    @property
-    def name(self) -> str:
-        return self.get(self.K.name_, str())
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.set(self.K.name_, value)
 
     @property
     def mode(self) -> Mode:

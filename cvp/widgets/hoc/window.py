@@ -18,24 +18,19 @@ SectionT = TypeVar("SectionT", bound=BaseWindowSection)
 
 
 class WindowInterface(WidgetInterface):
+    @property
     @abstractmethod
-    def get_context(self) -> Context:
+    def context(self) -> Context:
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def get_key(self) -> str:
+    def key(self) -> str:
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def get_title(self) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_closable(self) -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_flags(self) -> int:
+    def label(self) -> str:
         raise NotImplementedError
 
     @abstractmethod
@@ -83,9 +78,13 @@ class Window(Generic[SectionT], WindowInterface):
         assert isinstance(section, BaseWindowSection)
         self._section = section
 
-        self._static_title = title
-        self._static_closable = closable
-        self._static_flags = flags
+        title = title if title else type(self).__name__
+        assert isinstance(title, str)
+        if not self._section.has_title:
+            self._section.title = title
+
+        self.closable = closable if closable else False
+        self.flags = flags if flags else 0
 
         self._min_width = min_width
         self._min_height = min_height
@@ -110,55 +109,34 @@ class Window(Generic[SectionT], WindowInterface):
     def opened(self, value: bool) -> None:
         self._section.opened = value
 
+    @property
+    def title(self) -> str:
+        return self._section.title
+
+    @title.setter
+    def title(self, value: str) -> None:
+        self._section.title = value
+
+    @property
     @override
-    def get_context(self) -> Context:
+    def context(self):
         if self._context is None:
             raise ValueError("Context is not assigned")
         return self._context
 
-    @override
-    def get_key(self) -> str:
-        return f"{type(self).__name__}@{id(self)}"
-
-    @override
-    def get_title(self) -> str:
-        return self._static_title if self._static_title else type(self).__name__
-
-    @override
-    def get_closable(self) -> bool:
-        return self._static_closable if self._static_closable else False
-
-    @override
-    def get_flags(self) -> int:
-        return self._static_flags if self._static_flags else 0
-
     @property
-    def context(self):
-        return self.get_context()
-
-    @property
+    @override
     def key(self):
-        return self.get_key()
+        return self.section.section
 
     @property
-    def title(self):
-        return self.get_title()
-
-    @property
-    def closable(self):
-        return self.get_closable()
-
-    @property
-    def flags(self) -> int:
-        return self.get_flags()
+    @override
+    def label(self) -> str:
+        return f"{self.title}###{self.key}"
 
     @override
     def begin(self) -> Tuple[bool, bool]:
-        expanded, opened = imgui.begin(
-            self.get_title(),
-            self.get_closable(),
-            self.get_flags(),
-        )
+        expanded, opened = imgui.begin(self.label, self.closable, self.flags)
         assert isinstance(expanded, bool)
         assert isinstance(opened, bool)
         return expanded, opened

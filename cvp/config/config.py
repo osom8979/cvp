@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
 from os import PathLike
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 from uuid import uuid4
 
 from cvp.config._base import BaseConfig
@@ -60,8 +61,8 @@ class Config(BaseConfig):
         return self._developer.verbose
 
     @property
-    def medias(self) -> Dict[str, MediaSection]:
-        result = dict()
+    def medias(self):
+        result = OrderedDict[str, MediaSection]()
         for section in self._medias.sections():
             key = self._medias.split_section_name(section)
             result[key] = MediaSection(config=self, section=section)

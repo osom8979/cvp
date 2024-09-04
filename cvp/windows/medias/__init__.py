@@ -66,7 +66,8 @@ class MediasWindow(Window[MediasSection]):
 
                 if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
                     for key, section in self.medias.items():
-                        if imgui.selectable(section.name, key == self.selected)[1]:
+                        label = f"{section.title}##{key}"
+                        if imgui.selectable(label, key == self.selected)[1]:
                             self.selected = key
                     imgui.end_list_box()
             finally:

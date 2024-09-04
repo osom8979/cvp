@@ -26,11 +26,6 @@ class MediaWindow(Window[MediaSection]):
         self._prev_frame_index = 0
 
     @override
-    def get_key(self) -> str:
-        assert isinstance(self.section, MediaSection)
-        return self.section.section
-
-    @override
     def on_create(self) -> None:
         assert self._texture == 0
         assert self._pbo == 0
@@ -71,11 +66,6 @@ class MediaWindow(Window[MediaSection]):
 
         GL.glDeleteBuffers(1, self._pbo)
         self._pbo = 0
-
-    @override
-    def get_title(self) -> str:
-        name = self.section.name
-        return (name if name else type(self).__name__) + "###" + self.section.section
 
     @override
     def on_process(self) -> None:

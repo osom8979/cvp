@@ -9,6 +9,7 @@ from cvp.config.sections._base import BaseSection
 @unique
 class BaseWindowKeys(StrEnum):
     opened = auto()
+    title_ = "title"
 
 
 class BaseWindowSection(BaseSection):
@@ -18,9 +19,25 @@ class BaseWindowSection(BaseSection):
         super().__init__(config=config, section=section)
 
     @property
+    def has_opened(self) -> bool:
+        return self.has(self.BWK.opened)
+
+    @property
     def opened(self) -> bool:
         return self.get(self.BWK.opened, False)
 
     @opened.setter
     def opened(self, value: bool) -> None:
         self.set(self.BWK.opened, value)
+
+    @property
+    def has_title(self) -> bool:
+        return self.has(self.BWK.title_)
+
+    @property
+    def title(self) -> str:
+        return self.get(self.BWK.title_, str())
+
+    @title.setter
+    def title(self, value: str) -> None:
+        self.set(self.BWK.title_, value)

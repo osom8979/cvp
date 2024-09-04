@@ -59,7 +59,7 @@ class PlayerContext(Context):
 
     def add_window(self, window: Window, key: Optional[str] = None) -> None:
         window.do_create(self)
-        key = key if key else window.get_key()
+        key = key if key else window.key
         assert isinstance(key, str)
         self._windows[key] = window
 

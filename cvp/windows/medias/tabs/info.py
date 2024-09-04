@@ -20,9 +20,9 @@ class MediaInfoTab(TabItem[MediaSection]):
         imgui.text("Section:")
         input_text_disabled("## Section", context.section)
 
-        imgui.text("Name:")
+        imgui.text("Title:")
         with item_width(-1):
-            context.name = input_text_value("## Name", context.name)
+            context.title = input_text_value("## Title", context.title)
 
         imgui.text("File:")
         with item_width(-1):
