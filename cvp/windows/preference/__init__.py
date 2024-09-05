@@ -17,6 +17,7 @@ from cvp.windows.preference.concurrency import ConcurrencyPreference
 from cvp.windows.preference.developer import DeveloperPreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
 from cvp.windows.preference.logging import LoggingPreference
+from cvp.windows.preference.overlay import OverlayPreference
 
 
 class PreferenceWindow(Window[PreferenceSection]):
@@ -35,6 +36,7 @@ class PreferenceWindow(Window[PreferenceSection]):
         self._menus = [
             AppearancePreference(context),
             FFmpegPreference(context),
+            OverlayPreference(context),
             LoggingPreference(context),
             ConcurrencyPreference(context),
             DeveloperPreference(context),
