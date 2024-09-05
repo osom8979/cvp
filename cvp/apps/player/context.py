@@ -12,7 +12,7 @@ from OpenGL.error import Error
 
 from cvp.config.sections.display import force_egl_section_key
 from cvp.config.sections.windows.media import MediaSection
-from cvp.context import Context, ContextPropagator
+from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -34,11 +34,10 @@ class PlayerContext(Context):
         super().__init__(home)
         self._windows = OrderedDict[str, Window]()
 
-        with ContextPropagator(self):
-            self._overlay = OverlayWindow()
-            self._medias = MediasWindow()
-            self._processes = ProcessesWindow()
-            self._preference = PreferenceWindow()
+        self._overlay = OverlayWindow(self)
+        self._medias = MediasWindow(self)
+        self._processes = ProcessesWindow(self)
+        self._preference = PreferenceWindow(self)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -68,8 +67,7 @@ class PlayerContext(Context):
             self.add_media_window(section)
 
     def add_media_window(self, section: MediaSection) -> None:
-        with ContextPropagator(self):
-            self.add_window(MediaWindow(section))
+        self.add_window(MediaWindow(self, section))
 
     def add_new_media_window(self, file: str) -> None:
         section = self._config.add_media_section()

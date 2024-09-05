@@ -3,6 +3,7 @@
 import imgui
 
 from cvp.config.sections.windows.media import MediaSection
+from cvp.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.logging.logging import logger
 from cvp.types import override
@@ -11,8 +12,8 @@ from cvp.widgets.hoc.tab import TabItem
 
 
 class MediaInfoTab(TabItem[MediaSection]):
-    def __init__(self):
-        super().__init__("Info")
+    def __init__(self, context: Context):
+        super().__init__(context, "Info")
 
     @override
     def on_item(self, item: MediaSection) -> None:

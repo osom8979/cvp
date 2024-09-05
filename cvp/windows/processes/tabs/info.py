@@ -2,6 +2,7 @@
 
 import imgui
 
+from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
 from cvp.widgets import button_ex, input_text_disabled
@@ -9,8 +10,8 @@ from cvp.widgets.hoc.tab import TabItem
 
 
 class ProcessInfoTab(TabItem[Process]):
-    def __init__(self):
-        super().__init__("Info")
+    def __init__(self, context: Context):
+        super().__init__(context, "Info")
 
     @override
     def on_item(self, item: Process) -> None:

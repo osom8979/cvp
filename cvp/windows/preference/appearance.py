@@ -2,6 +2,7 @@
 
 import imgui
 
+from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.hoc.widget import WidgetInterface
@@ -9,8 +10,8 @@ from cvp.widgets.styles import Styles, style_colors
 
 
 class AppearancePreference(WidgetInterface):
-    def __init__(self, label="Appearance"):
-        self._section = self.propagated_context().config.appearance
+    def __init__(self, context: Context, label="Appearance"):
+        self._section = context.config.appearance
         self._label = label
         self._styles = [str(s.name) for s in Styles]
 

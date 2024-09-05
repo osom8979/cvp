@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List
+from typing import List
 
 import imgui
 
 from cvp.config.sections.windows.preference import PreferenceSection
+from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, text_centered
-from cvp.widgets.hoc.popup import Popup, PopupPropagator
+from cvp.widgets.hoc.popup import PopupPropagator
 from cvp.widgets.hoc.widget import WidgetInterface
 from cvp.widgets.hoc.window import Window
 from cvp.windows.preference.appearance import AppearancePreference
@@ -21,9 +22,10 @@ from cvp.windows.preference.logging import LoggingPreference
 class PreferenceWindow(Window[PreferenceSection]):
     _menus: List[WidgetInterface]
 
-    def __init__(self):
+    def __init__(self, context: Context):
         super().__init__(
-            self.propagated_context().config.preference,
+            context=context,
+            section=context.config.preference,
             title="Preference",
             closable=True,
             flags=None,
@@ -31,11 +33,11 @@ class PreferenceWindow(Window[PreferenceSection]):
 
         self._min_sidebar_width = MIN_SIDEBAR_WIDTH
         self._menus = [
-            AppearancePreference(),
-            FFmpegPreference(),
-            LoggingPreference(),
-            ConcurrencyPreference(),
-            DeveloperPreference(),
+            AppearancePreference(context),
+            FFmpegPreference(context),
+            LoggingPreference(context),
+            ConcurrencyPreference(context),
+            DeveloperPreference(context),
         ]
 
         for menu in self._menus:
@@ -104,7 +106,3 @@ class PreferenceWindow(Window[PreferenceSection]):
                     text_centered("Please select a menu item")
             finally:
                 end_child()
-
-    @override
-    def on_popup(self, popup: Popup, result: Any) -> None:
-        pass

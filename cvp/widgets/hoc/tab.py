@@ -17,13 +17,12 @@ class TabItem(Generic[ItemT], WidgetInterface):
 
     def __init__(
         self,
+        context: Context,
         label: Optional[str] = None,
         opened: Optional[bool] = None,
         flags=0,
-        *,
-        context: Optional[Context] = None,
     ):
-        self._context = context if context is not None else self.propagated_context()
+        self._context = context
         self._label = label if label else type(self).__name__
         self._opened = opened
         self._flags = flags
@@ -74,12 +73,11 @@ class TabBar(Generic[ItemT], WidgetInterface):
 
     def __init__(
         self,
+        context: Context,
         identifier: Optional[str] = None,
         flags=0,
-        *,
-        context: Optional[Context] = None,
     ):
-        self._context = context if context is not None else self.propagated_context()
+        self._context = context
         self._identifier = identifier if identifier else type(self).__name__
         self._flags = flags
         self._items = OrderedDict()

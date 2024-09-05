@@ -7,6 +7,7 @@ import imgui
 
 from cvp.config.proxy import ValueProxy
 from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
+from cvp.context import Context
 from cvp.popups.open_file import OpenFilePopup
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.system.platform import SysMach, get_system_machine
@@ -17,9 +18,15 @@ from cvp.widgets.hoc.tab import TabBar, TabItem
 
 
 class ExeItem(TabItem, PopupPropagator):
-    def __init__(self, filename: str, proxy: ValueProxy, links: LinkMap):
-        super().__init__(filename)
-        self._filename = filename
+    def __init__(
+        self,
+        context: Context,
+        name: str,
+        proxy: ValueProxy,
+        links: LinkMap,
+    ):
+        super().__init__(context, label=name)
+        self._filename = name
         self._proxy = proxy
         self._links = links
 
@@ -31,6 +38,24 @@ class ExeItem(TabItem, PopupPropagator):
         self._browser = OpenFilePopup(
             f"Select {self._filename} executable",
             target=self.on_browser,
+        )
+
+    @classmethod
+    def from_ffmpeg(cls, context: Context):
+        return cls(
+            context=context,
+            name="ffmpeg",
+            proxy=FFmpegProxy(context.config.ffmpeg),
+            links=FFMPEG_LINKS,
+        )
+
+    @classmethod
+    def from_ffprobe(cls, context: Context):
+        return cls(
+            context=context,
+            name="ffprobe",
+            proxy=FFprobeProxy(context.config.ffmpeg),
+            links=FFPROBE_LINKS,
         )
 
     @property
@@ -104,11 +129,10 @@ class ExeItem(TabItem, PopupPropagator):
 
 
 class ExeTabs(TabBar, PopupPropagator):
-    def __init__(self):
-        super().__init__()
-        section = self.propagated_context().config.ffmpeg
-        self.register(ExeItem("ffmpeg", FFmpegProxy(section), FFMPEG_LINKS))
-        self.register(ExeItem("ffprobe", FFprobeProxy(section), FFPROBE_LINKS))
+    def __init__(self, context: Context):
+        super().__init__(context)
+        self.register(ExeItem.from_ffmpeg(context))
+        self.register(ExeItem.from_ffprobe(context))
 
     @property
     @override
