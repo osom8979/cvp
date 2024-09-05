@@ -4,6 +4,7 @@ PyYAML==6.0.2
 WSDiscovery==2.0.0
 coloredlogs==15.0.1
 cvlayer==0.32.0
+httpx==0.27.2
 imgui==2.0.0
 numpy==2.0.1
 opencv-python-headless==4.10.0.84

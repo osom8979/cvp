@@ -8,6 +8,7 @@ from cvp.resources.subdirs.bin import BinDir
 from cvp.resources.subdirs.cache import CacheDir
 from cvp.resources.subdirs.logs import LogsDir
 from cvp.resources.subdirs.processes import ProcessesDir
+from cvp.resources.subdirs.temp import TempDir
 from cvp.system.path import PathFlavour
 from cvp.variables import (
     CVP_INI_FILENAME,
@@ -25,12 +26,14 @@ class HomeDir(PathFlavour):
         self.cache = CacheDir(self.as_path() / "cache")
         self.logs = LogsDir(self.as_path() / "logs")
         self.processes = ProcessesDir(self.as_path() / "processes")
+        self.temp = TempDir(self.as_path() / "temp")
 
         self._dirs = [
             self.bin,
             self.cache,
             self.logs,
             self.processes,
+            self.temp,
         ]
 
         if os.access(self, os.W_OK):

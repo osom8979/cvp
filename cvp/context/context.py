@@ -15,6 +15,9 @@ from cvp.logging.logging import (
     set_root_level,
 )
 from cvp.process.manager import ProcessManager
+from cvp.resources.download.archive import DownloadArchive
+from cvp.resources.download.links.tuples import LinkInfo
+from cvp.resources.download.runner import DownloadRunner
 from cvp.resources.home import HomeDir
 
 
@@ -85,6 +88,27 @@ class Context:
 
     def is_done(self) -> bool:
         return self._done.is_set()
+
+    def make_downloader(self, link: LinkInfo):
+        return DownloadArchive.from_link(
+            link=link,
+            extract_root=self._home,
+            cache_dir=self._home.cache,
+            temp_dir=self._home.temp,
+        )
+
+    def start_download_thread(
+        self,
+        downloader: DownloadArchive,
+        download_timeout: Optional[float] = None,
+        verify_checksum=True,
+    ):
+        return DownloadRunner(
+            executor=self._pm.thread_pool,
+            downloader=downloader,
+            download_timeout=download_timeout,
+            verify_checksum=verify_checksum,
+        )
 
     def teardown(self) -> None:
         self._pm.teardown(self._config.processes.teardown_timeout)

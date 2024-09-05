@@ -66,7 +66,7 @@ class FFmpegSection(BaseSection):
         self.set(self.K.logging_newline_size, value)
 
 
-class FFmpegProxy(ValueProxy):
+class FFmpegProxy(ValueProxy[str]):
     def __init__(self, section: FFmpegSection):
         self._section = section
 
@@ -79,7 +79,7 @@ class FFmpegProxy(ValueProxy):
         return self._section.ffmpeg
 
 
-class FFprobeProxy(ValueProxy):
+class FFprobeProxy(ValueProxy[str]):
     def __init__(self, section: FFmpegSection):
         self._section = section
 

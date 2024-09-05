@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from typing import Optional
+from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
+from typing import Callable, Optional, ParamSpec, TypeVar
 
 from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.logging.logging import logger
@@ -10,6 +10,10 @@ from cvp.process.mapper import ProcessMapper
 from cvp.process.process import Process
 from cvp.resources.home import HomeDir
 from cvp.variables import MAX_PROCESS_WORKERS, MAX_THREAD_WORKERS, THREAD_POOL_PREFIX
+
+SubmitResultT = TypeVar("SubmitResultT")
+SubmitParamT = ParamSpec("SubmitParamT")
+SubmitCallable = Callable[SubmitParamT, SubmitResultT]
 
 
 class ProcessManager:
@@ -32,6 +36,30 @@ class ProcessManager:
 
         self._processes = ProcessMapper[str, Process]()
         self._ffmpeg = FFmpegProcessHelper(section=section, home=home)
+
+    @property
+    def thread_pool(self):
+        return self._thread_pool
+
+    @property
+    def process_pool(self):
+        return self._process_pool
+
+    def submit_thread(
+        self,
+        fn: Callable[SubmitParamT, SubmitResultT],
+        *args: SubmitParamT.args,
+        **kwargs: SubmitParamT.kwargs,
+    ) -> Future[SubmitResultT]:
+        return self._thread_pool.submit(fn, *args, **kwargs)
+
+    def submit_process(
+        self,
+        fn: Callable[SubmitParamT, SubmitResultT],
+        *args: SubmitParamT.args,
+        **kwargs: SubmitParamT.kwargs,
+    ) -> Future[SubmitResultT]:
+        return self._process_pool.submit(fn, *args, **kwargs)
 
     def keys(self):
         return self._processes.keys()

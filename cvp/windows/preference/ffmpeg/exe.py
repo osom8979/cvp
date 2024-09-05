@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from shutil import which
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 import imgui
 
@@ -10,14 +10,17 @@ from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.context import Context
 from cvp.popups.open_file import OpenFilePopup
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
+from cvp.resources.download.runner import DownloadRunner
 from cvp.system.platform import SysMach, get_system_machine
 from cvp.types import override
-from cvp.widgets import button_ex, item_width
+from cvp.widgets import button_ex
 from cvp.widgets.hoc.popup import Popup, PopupPropagator
 from cvp.widgets.hoc.tab import TabBar, TabItem
 
 
 class ExeItem(TabItem, PopupPropagator):
+    _runner: Optional[DownloadRunner]
+
     def __init__(
         self,
         context: Context,
@@ -28,7 +31,7 @@ class ExeItem(TabItem, PopupPropagator):
         super().__init__(context, label=name)
         self._filename = name
         self._proxy = proxy
-        self._links = links
+        self._downs = {sm: context.make_downloader(link) for sm, link in links.items()}
 
         self._sms = list(str(sm) for sm in SysMach)
         self._current_sm = get_system_machine()
@@ -39,6 +42,7 @@ class ExeItem(TabItem, PopupPropagator):
             f"Select {self._filename} executable",
             target=self.on_browser,
         )
+        self._runner = None
 
     @classmethod
     def from_ffmpeg(cls, context: Context):
@@ -78,12 +82,11 @@ class ExeItem(TabItem, PopupPropagator):
     def on_process(self) -> None:
         imgui.text(f"{self._label} executable")
 
-        with item_width(-1):
-            path_result = imgui.input_text(
-                "##Path",
-                self.exe_path,
-                imgui.INPUT_TEXT_ENTER_RETURNS_TRUE,
-            )
+        path_result = imgui.input_text(
+            "##Path",
+            self.exe_path,
+            imgui.INPUT_TEXT_ENTER_RETURNS_TRUE,
+        )
 
         path_changed = path_result[0]
         if path_changed:
@@ -115,17 +118,25 @@ class ExeItem(TabItem, PopupPropagator):
         self._sms_index = imgui.combo("##SysMach", self._sms_index, self._sms)[1]
         sys_mach = SysMach(self._sms[self._sms_index])
 
-        imgui.same_line()
-        if imgui.button("Check current platform"):
+        if imgui.small_button("Check current platform"):
             self._sms_index = self._current_sm_index
 
-        link = self._links.get(sys_mach)
-        if link is None:
+        down = self._downs.get(sys_mach)
+        if down is None:
             imgui.text_colored("This platform is not supported", 1.0, 0.1, 0.1)
             return
 
         if self._sms_index != self._current_sm_index:
             imgui.text_colored("Does not match the current platform", 1.0, 1.0, 0.0)
+
+        imgui.text("URL:")
+        imgui.text_unformatted(down.url)
+
+        if button_ex("Download Archive", disabled=self._runner is not None):
+            self._runner = self.context.start_download_thread(down, 30.0, True)
+
+        if self._runner is not None:
+            imgui.text(str(self._runner.state))
 
 
 class ExeTabs(TabBar, PopupPropagator):

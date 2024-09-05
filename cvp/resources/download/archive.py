@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-from http import HTTPStatus
-from http.client import HTTPResponse
 from shutil import move, unpack_archive
+from ssl import SSLContext
 from tempfile import TemporaryDirectory
 from typing import List, Optional, Sequence, Tuple, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
-from urllib.request import urlopen
+
+import httpx
 
 from cvp.hashfunc.checksum import Method
 from cvp.hashfunc.checksum import checksum as calc_checksum
@@ -51,6 +51,10 @@ class DownloadArchive:
                 assert isinstance(path[1], str)
                 self._paths.append(ExtractPair(path[0], path[1]))
 
+        self._extract_root = extract_root
+        self._cache_dir = cache_dir
+        self._temp_dir = temp_dir
+
         if checksum:
             if isinstance(checksum, Checksum):
                 self._checksum = checksum
@@ -63,10 +67,6 @@ class DownloadArchive:
                 self._checksum = Checksum.parse(checksum.strip())
         else:
             self._checksum = None
-
-        self._extract_root = extract_root
-        self._cache_dir = cache_dir
-        self._temp_dir = temp_dir
 
     @classmethod
     def from_link(
@@ -86,7 +86,7 @@ class DownloadArchive:
         )
 
     def __repr__(self):
-        return f"<DownloadArchive {self._url}>"
+        return f"<{type(self).__name__} {self._url}>"
 
     @property
     def has_path(self) -> bool:
@@ -101,6 +101,10 @@ class DownloadArchive:
         return self._url
 
     @property
+    def checksum(self):
+        return self._checksum
+
+    @property
     def paths(self):
         return self._paths
 
@@ -109,8 +113,8 @@ class DownloadArchive:
         return [os.path.join(self._extract_root, p.extract_path) for p in self._paths]
 
     @property
-    def has_extract_files(self):
-        return all((os.path.isfile(p) for p in self.extract_files))
+    def any_extract_files(self):
+        return any((os.path.isfile(p) for p in self.extract_files))
 
     @property
     def root_url(self) -> str:
@@ -124,19 +128,41 @@ class DownloadArchive:
     def cache_path(self) -> str:
         return os.path.join(self._cache_dir, self.filename)
 
-    def healthcheck(
+    def request_content_length(
         self,
         timeout: Optional[float] = None,
-        status: Sequence[Union[int, HTTPStatus]] = (HTTPStatus.OK,),
-    ) -> bool:
-        with urlopen(self.root_url, timeout=timeout) as response:
-            assert isinstance(response, HTTPResponse)
-            return response.status in status
+        follow_redirects=True,
+        verify: Union[str, bool, SSLContext] = True,
+    ) -> int:
+        with httpx.Client(follow_redirects=follow_redirects, verify=verify) as client:
+            response = client.head(self._url, timeout=timeout)
+            return int(response.headers["Content-Length"])
 
-    def download_archive(self, timeout: Optional[float] = None) -> None:
-        with urlopen(self._url, timeout=timeout) as response:
-            with open(self.cache_path, "wb") as f:
-                f.write(response.read())
+    def download_streaming(
+        self,
+        timeout: Optional[float] = None,
+        follow_redirects=True,
+        verify: Union[str, bool, SSLContext] = True,
+    ):
+        with httpx.stream(
+            "GET",
+            self._url,
+            timeout=timeout,
+            follow_redirects=follow_redirects,
+            verify=verify,
+        ) as response:
+            for data in response.iter_bytes():
+                yield data
+
+    def download(
+        self,
+        timeout: Optional[float] = None,
+        follow_redirects=True,
+        verify: Union[str, bool, SSLContext] = True,
+    ) -> None:
+        with open(self.cache_path, "wb") as f:
+            for data in self.download_streaming(timeout, follow_redirects, verify):
+                f.write(data)
 
     def verify_checksum(self) -> bool:
         if not self._checksum:
@@ -155,24 +181,3 @@ class DownloadArchive:
                 src = os.path.join(tmpdir, path.archive_path)
                 dest = os.path.join(self._extract_root, path.extract_path)
                 move(src, dest)
-
-    def prepare(self, timeout: Optional[float] = None, verify_checksum=True) -> None:
-        assert self.paths
-
-        if self.has_extract_files:
-            return
-
-        if not os.path.isfile(self.cache_path):
-            self.download_archive(timeout=timeout)
-
-        if not os.path.isfile(self.cache_path):
-            raise FileNotFoundError("Not found cache file")
-
-        if verify_checksum and not self.verify_checksum():
-            raise ValueError("Invalid checksum")
-
-        self.extract()
-
-        for path in self.extract_files:
-            if not os.path.isfile(path):
-                raise FileNotFoundError(f"'{path}' is not a file")

@@ -9,6 +9,7 @@ GUI_INI_FILENAME: Final[str] = "gui.ini"
 LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
+CHECKSUM_DELIMITER: Final[str] = ":"
 
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
 FLOW_SECTION_PREFIX: Final[str] = "flow."

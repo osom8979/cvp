@@ -5,6 +5,7 @@ from typing import Any, Dict, Final, Literal, Sequence, get_args
 from cvp.system.environ_keys import CVP_HOME
 
 CVP_LOGGER_NAME: Final[str] = "cvp"
+CVP_DOWNLOAD_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.download"
 
 TimedRotatingWhenLiteral = Literal[
     "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"
@@ -110,11 +111,14 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
     "loggers": {
         # root logger
         "": {
-            "handlers": ["stdout_colored"],
+            "handlers": ["timed_rotating_file_default"],
             "level": "DEBUG",
         },
         CVP_LOGGER_NAME: {
-            "handlers": ["timed_rotating_file_default"],
+            "handlers": ["stdout_colored"],
+            "level": "DEBUG",
+        },
+        CVP_DOWNLOAD_LOGGER_NAME: {
             "level": "DEBUG",
         },
     },
