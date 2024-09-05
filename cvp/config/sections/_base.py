@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, List, Optional, Sequence, Tuple, overload
+from typing import Dict, List, Tuple
 
-from cvp.config._base import BaseConfig, ValueUnion
+from cvp.config._base import BaseConfig, ValueT
 
 
 class BaseSection:
@@ -32,7 +32,7 @@ class BaseSection:
 
     def extends(self, o: Dict[str, str]) -> None:
         for key, value in o.items():
-            self._config.set_config_value(self._section, key, value)
+            self._config.set(self._section, key, value)
 
     def has(self, key: str) -> bool:
         return self._config.has(self._section, key)
@@ -60,28 +60,8 @@ class BaseSection:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    # fmt: off
-    @overload
-    def get(self, key: str, default: str, *, raw=False) -> str: ...
-    @overload
-    def get(self, key: str, default: bool, *, raw=False) -> bool: ...
-    @overload
-    def get(self, key: str, default: int, *, raw=False) -> int: ...
-    @overload
-    def get(self, key: str, default: float, *, raw=False) -> float: ...
-
-    @overload
-    def get(self, key: str, default: Sequence[str], *, raw=False) -> Sequence[str]: ...
-    @overload
-    def get(self, key: str, default: Sequence[bool], *, raw=False) -> Sequence[bool]: ...  # noqa: E501
-    @overload
-    def get(self, key: str, default: Sequence[int], *, raw=False) -> Sequence[int]: ...
-    @overload
-    def get(self, key: str, default: Sequence[float], *, raw=False) -> Sequence[float]: ...  # noqa: E501
-    # fmt: on
-
-    def get(self, key: str, default: ValueUnion, *, raw=False) -> Optional[ValueUnion]:
+    def get(self, key: str, default: ValueT, *, raw=False) -> ValueT:
         return self._config.get(self._section, key, default, raw=raw)
 
-    def set(self, key: str, value: ValueUnion) -> None:
+    def set(self, key: str, value: ValueT) -> None:
         self._config.set(self._section, key, value)

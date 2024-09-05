@@ -4,11 +4,24 @@ from configparser import DEFAULTSECT, ConfigParser, ExtendedInterpolation
 from io import StringIO
 from os import PathLike
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, Union, overload
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union, overload
 
 from cvp.system.environ_keys import CVP_HOME
 from cvp.types import string_to_boolean
 from cvp.variables import CONFIG_VALUE_SEPARATOR
+
+CastT = TypeVar("CastT")
+ValueT = TypeVar(
+    "ValueT",
+    str,
+    bool,
+    int,
+    float,
+    Sequence[str],
+    Sequence[bool],
+    Sequence[int],
+    Sequence[float],
+)
 
 ValueUnion = Union[
     str,
@@ -20,17 +33,17 @@ ValueUnion = Union[
     Sequence[int],
     Sequence[float],
 ]
-SerializedObject = Dict[str, Dict[str, str]]
+SerializedDict = Dict[str, Dict[str, str]]
 
 
-def config_dumps(config: ConfigParser) -> SerializedObject:
+def config_dumps(config: ConfigParser) -> SerializedDict:
     result = dict()
     for section in config.sections():
         result[section] = {key: value for key, value in config.items(section, raw=True)}
     return result
 
 
-def config_loads(config: ConfigParser, o: SerializedObject) -> None:
+def config_loads(config: ConfigParser, o: SerializedDict) -> None:
     for section, items in o.items():
         if not config.has_section(section):
             config.add_section(section)
@@ -110,10 +123,10 @@ class BaseConfig:
     def remove_option(self, section: str, option: str) -> bool:
         return self._config.remove_option(section, option)
 
-    def dumps(self) -> SerializedObject:
+    def dumps(self) -> SerializedDict:
         return config_dumps(self._config)
 
-    def extends(self, o: Union["BaseConfig", ConfigParser, SerializedObject]) -> None:
+    def extends(self, o: Union["BaseConfig", ConfigParser, SerializedDict]) -> None:
         if isinstance(o, BaseConfig):
             config_loads(self._config, o.dumps())
         elif isinstance(o, ConfigParser):
@@ -131,31 +144,14 @@ class BaseConfig:
         with Path(filename).open("w") as fp:
             self._config.write(fp)
 
-    def get_config_value(self, section: str, key: str, default=None) -> Optional[str]:
-        if section not in self._config:
-            return default
-        if key not in self._config[section]:
-            return default
-        return self._config[section][key]
-
-    def add_section(self, section: str) -> None:
-        self._config.add_section(section)
-
-    def set_config_value(
-        self,
-        section: str,
-        key: str,
-        value: Optional[str] = None,
-    ) -> None:
-        if section not in self._config:
-            self._config.add_section(section)
-        self._config.set(section, key, value)
-
     def has_section(self, section: str) -> bool:
         return self._config.has_section(section)
 
     def has_option(self, section: str, key: str) -> bool:
         return self._config.has_option(section, key)
+
+    def add_section(self, section: str) -> None:
+        self._config.add_section(section)
 
     def has(self, section: str, key: Optional[str] = None) -> bool:
         if not self._config.has_section(section):
@@ -187,22 +183,7 @@ class BaseConfig:
     @overload
     def get(self, section: str, key: str, *, raw=False) -> Optional[str]: ...
     @overload
-    def get(self, section: str, key: str, default: str, *, raw=False) -> str: ...
-    @overload
-    def get(self, section: str, key: str, default: bool, *, raw=False) -> bool: ...
-    @overload
-    def get(self, section: str, key: str, default: int, *, raw=False) -> int: ...
-    @overload
-    def get(self, section: str, key: str, default: float, *, raw=False) -> float: ...
-
-    @overload
-    def get(self, section: str, key: str, default: Sequence[str], *, raw=False) -> Sequence[str]: ...  # noqa: E501
-    @overload
-    def get(self, section: str, key: str, default: Sequence[bool], *, raw=False) -> Sequence[bool]: ...  # noqa: E501
-    @overload
-    def get(self, section: str, key: str, default: Sequence[int], *, raw=False) -> Sequence[int]: ...  # noqa: E501
-    @overload
-    def get(self, section: str, key: str, default: Sequence[float], *, raw=False) -> Sequence[float]: ...  # noqa: E501
+    def get(self, section: str, key: str, default: ValueT, *, raw=False) -> ValueT: ...
     # fmt: on
 
     def get(
@@ -219,27 +200,28 @@ class BaseConfig:
         if not self._config.has_option(section, key):
             return default
 
+        value = self._config.get(section, key, raw=raw, vars=self._vars)
+
         if default is None:
-            return self._config.get(section, key, raw=raw, vars=self._vars)
+            return value
 
         assert default is not None
 
         if isinstance(default, str):
-            return self._config.get(section, key, raw=raw, vars=self._vars)
+            return value
 
         elif isinstance(default, bool):
-            _boolean_value = self._config.get(section, key, raw=raw, vars=self._vars)
-            return string_to_boolean(_boolean_value)
+            return string_to_boolean(value)
 
         elif isinstance(default, int):
-            return self._config.getint(section, key, raw=raw, vars=self._vars)
+            return int(value.strip())
 
         elif isinstance(default, float):
-            return self._config.getfloat(section, key, raw=raw, vars=self._vars)
+            return float(value.strip())
 
         elif isinstance(default, Sequence):
-            value = self._config.get(section, key, raw=raw, vars=self._vars)
             items = value.split(self._separator)
+
             if len(default) == 0:
                 return tuple(items)
             elif isinstance(default[0], str):
@@ -271,5 +253,13 @@ class BaseConfig:
         else:
             return str(value)
 
-    def set(self, section: str, key: str, value: ValueUnion) -> None:
-        self.set_config_value(section, key, self.encode_value(value))
+    def set(self, section: str, key: str, value: Optional[ValueUnion]) -> None:
+        if section not in self._config:
+            self._config.add_section(section)
+
+        if value is None:
+            self._config.set(section, key)
+        else:
+            value = self.encode_value(value)
+            assert isinstance(value, str)
+            self._config.set(section, key, value)

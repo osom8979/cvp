@@ -66,15 +66,15 @@ class BaseTestCase(TestCase):
         config = BaseConfig()
         self.assertFalse(config)
 
-        config.set_config_value("A", "B", "1")
+        config.set("A", "B", "1")
         self.assertTrue(config)
         self.assertEqual(1, len(config))
 
         for item in config:
             self.assertTupleEqual(("A", "b", "1"), item)  # It only hits once.
 
-        self.assertEqual("1", config.get_config_value("A", "B", "?"))
-        self.assertEqual("?", config.get_config_value("A", "C", "?"))
+        self.assertEqual("1", config.get("A", "B", "?"))
+        self.assertEqual("?", config.get("A", "C", "?"))
 
         self.assertTrue(config.has("A", "B"))
         self.assertFalse(config.has("A", "C"))
@@ -89,7 +89,7 @@ class BaseTestCase(TestCase):
 
     def test_get_set(self):
         config = BaseConfig()
-        config.set_config_value("A", "B", "1")
+        config.set("A", "B", "1")
 
         self.assertSetEqual({"A"}, set(config.sections()))
         self.assertSetEqual({"b"}, set(config.options("A")))
@@ -108,7 +108,7 @@ class BaseTestCase(TestCase):
 
     def test_get_items(self):
         config = BaseConfig()
-        config.set_config_value("x", "y", "1 , 0")
+        config.set("x", "y", "1 , 0")
 
         val5 = config.get("x", "y", ())
         val6 = config.get("x", "y", ("?",))
@@ -124,9 +124,9 @@ class BaseTestCase(TestCase):
 
     def test_interpolation(self):
         config = BaseConfig(cvp_home=self.temp_dir.name)
-        config.set_config_value("A", "z", "${CVP_HOME}")
-        config.set_config_value("B", "y", "KKK")
-        config.set_config_value("C", "x", "${B:y}")
+        config.set("A", "z", "${CVP_HOME}")
+        config.set("B", "y", "KKK")
+        config.set("C", "x", "${B:y}")
 
         self.assertEqual("${CVP_HOME}", config.get("A", "z", raw=True))
         self.assertEqual(self.temp_dir.name, config.get("A", "z", raw=False))
@@ -137,7 +137,7 @@ class BaseTestCase(TestCase):
         self.assertEqual("${B:y}", config.get("C", "x", raw=True))
         self.assertEqual("KKK", config.get("C", "x", raw=False))
 
-        config.set_config_value("D", "u", "${A:z}")
+        config.set("D", "u", "${A:z}")
         self.assertEqual("${A:z}", config.get("D", "u", raw=True))
         with self.assertRaises(InterpolationMissingOptionError):
             config.get("D", "u", raw=False)  # "${A:z}" -> "${CVP_HOME}" -> ...
