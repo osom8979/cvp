@@ -15,12 +15,14 @@ from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
+from cvp.config.sections.windows.flow import FlowSection
+from cvp.config.sections.windows.flows import FlowsSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.medias import MediasSection
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.config.sections.windows.processes import ProcessesSection
-from cvp.variables import MEDIA_SECTION_PREFIX
+from cvp.variables import FLOW_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
 class Config(BaseConfig):
@@ -30,13 +32,16 @@ class Config(BaseConfig):
         cvp_home: Optional[Union[str, PathLike[str]]] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
+        self._flow_sections = SectionPrefix(self, prefix=FLOW_SECTION_PREFIX)
         self._media_sections = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+
         self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
         self._demo = DemoSection(self)
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
         self._ffmpeg = FFmpegSection(self)
+        self._flows = FlowsSection(self)
         self._font = FontSection(self)
         self._logging = LoggingSection(self)
         self._medias = MediasSection(self)
@@ -44,11 +49,25 @@ class Config(BaseConfig):
         self._preference = PreferenceSection(self)
         self._processes = ProcessesSection(self)
 
+    def add_flow_section(self, name: Optional[str] = None):
+        section = self._flow_sections.join_section_name(name if name else str(uuid4()))
+        if self.has_section(section):
+            raise KeyError(f"Section '{section}' already exists")
+        return FlowSection(config=self, section=section)
+
     def add_media_section(self, name: Optional[str] = None):
         section = self._media_sections.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
         return MediaSection(config=self, section=section)
+
+    @property
+    def flow_sections(self):
+        result = OrderedDict[str, FlowSection]()
+        for section in self._flow_sections.sections():
+            key = self._flow_sections.split_section_name(section)
+            result[key] = FlowSection(config=self, section=section)
+        return result
 
     @property
     def media_sections(self):
@@ -81,6 +100,10 @@ class Config(BaseConfig):
     @property
     def ffmpeg(self):
         return self._ffmpeg
+
+    @property
+    def flows(self):
+        return self._flows
 
     @property
     def font(self):

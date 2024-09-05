@@ -11,6 +11,7 @@ LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
 
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
+FLOW_SECTION_PREFIX: Final[str] = "flow."
 MEDIA_SECTION_PREFIX: Final[str] = "media."
 
 DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / CVP_HOME_DIRNAME)
