@@ -4,7 +4,6 @@ WSDiscovery==2.0.0
 coloredlogs==15.0.1
 cvlayer==0.32.0
 imgui==2.0.0
-mpv==1.0.7
 numpy==2.0.1
 opencv-python-headless==4.10.0.84
 orjson==3.10.6

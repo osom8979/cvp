@@ -29,13 +29,11 @@ from cvp.logging.defaults import (
     DEFAULT_SIMPLE_LOGGING_STYLE,
     DEFAULT_STYLE,
     DEFAULT_TIMED_ROTATING_WHEN,
-    MPV_LOGGER_NAME,
     TimedRotatingWhenLiteral,
 )
 from cvp.system.environ_keys import CVP_HOME
 
 logger = getLogger(CVP_LOGGER_NAME)
-mpv_logger = getLogger(MPV_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"
 SEVERITY_NAME_FATAL = "fatal"

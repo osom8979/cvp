@@ -5,7 +5,6 @@ from typing import Any, Dict, Final, Literal, Sequence, get_args
 from cvp.system.environ_keys import CVP_HOME
 
 CVP_LOGGER_NAME: Final[str] = "cvp"
-MPV_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.mpv"
 
 TimedRotatingWhenLiteral = Literal[
     "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"
@@ -116,9 +115,6 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
         },
         CVP_LOGGER_NAME: {
             "handlers": ["timed_rotating_file_default"],
-            "level": "DEBUG",
-        },
-        MPV_LOGGER_NAME: {
             "level": "DEBUG",
         },
     },

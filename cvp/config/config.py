@@ -17,7 +17,6 @@ from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.medias import MediasSection
-from cvp.config.sections.windows.mpv import MpvSection
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.config.sections.windows.processes import ProcessesSection
@@ -41,7 +40,6 @@ class Config(BaseConfig):
         self._font = FontSection(self)
         self._logging = LoggingSection(self)
         self._medias = MediasSection(self)
-        self._mpv = MpvSection(self)
         self._overlay = OverlaySection(self)
         self._preference = PreferenceSection(self)
         self._processes = ProcessesSection(self)
@@ -95,10 +93,6 @@ class Config(BaseConfig):
     @property
     def medias(self):
         return self._medias
-
-    @property
-    def mpv(self):
-        return self._mpv
 
     @property
     def overlay(self):
