@@ -114,14 +114,10 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "handlers": ["stdout_colored", "timed_rotating_file_default"],
             "level": "DEBUG",
         },
-        CVP_LOGGER_NAME: {
-            "level": "DEBUG",
-        },
-        CVP_DOWNLOAD_LOGGER_NAME: {
-            "level": "DEBUG",
-        },
-        "OpenGL": {
-            "level": "DEBUG",
-        },
+        "OpenGL": {"level": "DEBUG"},
+        "httpcore": {"level": "DEBUG"},
+        "httpx": {"level": "DEBUG"},
+        CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
+        CVP_LOGGER_NAME: {"level": "DEBUG"},
     },
 }

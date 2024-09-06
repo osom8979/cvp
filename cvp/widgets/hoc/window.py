@@ -75,23 +75,24 @@ class Window(Generic[SectionT], WindowInterface):
         flags: Optional[int] = None,
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
+        use_config_title=False,
     ) -> None:
         assert isinstance(context, Context)
         assert isinstance(section, BaseWindowSection)
 
         self._context = context
         self._section = section
+        self._title = title if title else type(self).__name__
 
-        title = title if title else type(self).__name__
-        assert isinstance(title, str)
         if not self._section.has_title:
-            self._section.title = title
+            self._section.title = self._title
 
         self.closable = closable if closable else False
         self.flags = flags if flags else 0
 
         self._min_width = min_width
         self._min_height = min_height
+        self._use_config_title = use_config_title
 
         self._initialized = False
         self._popups = dict()
@@ -114,7 +115,10 @@ class Window(Generic[SectionT], WindowInterface):
 
     @property
     def title(self) -> str:
-        return self._section.title
+        if self._use_config_title:
+            return self._section.title
+        else:
+            return self._title
 
     @title.setter
     def title(self, value: str) -> None:
