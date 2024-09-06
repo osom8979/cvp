@@ -53,15 +53,3 @@ class DisplaySection(BaseSection):
     @fullscreen.setter
     def fullscreen(self, value: bool) -> None:
         self.set(self.K.fullscreen, value)
-
-    @property
-    def force_egl(self) -> bool:
-        return self.get(self.K.force_egl, False)
-
-    @force_egl.setter
-    def force_egl(self, value: bool) -> None:
-        self.set(self.K.force_egl, value)
-
-
-def force_egl_section_key() -> Tuple[str, str]:
-    return str(DisplaySection(BaseConfig()).section), str(DisplaySection.K.force_egl)

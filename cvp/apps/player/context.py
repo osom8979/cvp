@@ -10,7 +10,6 @@ import pygame
 from OpenGL import GL
 from OpenGL.error import Error
 
-from cvp.config.sections.display import force_egl_section_key
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.logging.logging import logger
@@ -82,7 +81,8 @@ class PlayerContext(Context):
             self.on_process()
         except Error as e:
             if str(e) == "Attempt to retrieve context when no valid context":
-                section, key = force_egl_section_key()
+                section = str(self.config.graphic.section)
+                key = str(self.config.graphic.K.force_egl)
                 logger.error(
                     f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
                     f" section of the '{str(self.home.cvp_ini)}' file and try again."
@@ -112,7 +112,7 @@ class PlayerContext(Context):
             return common_flags | pygame.RESIZABLE
 
     def on_init(self) -> None:
-        if self.config.display.force_egl:
+        if self.config.graphic.force_egl:
             os.environ["SDL_VIDEO_X11_FORCE_EGL"] = "1"
 
         pygame.init()
