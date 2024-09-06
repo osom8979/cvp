@@ -18,12 +18,12 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
-from cvp.config.sections.windows.flow_manager import FlowManagerSection
+from cvp.config.sections.windows.manager.flow import FlowManagerSection
+from cvp.config.sections.windows.manager.media import MediaManagerSection
+from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.config.sections.windows.media import MediaSection
-from cvp.config.sections.windows.media_manager import MediaManagerSection
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.config.sections.windows.preference import PreferenceSection
-from cvp.config.sections.windows.processes import ProcessesSection
 from cvp.variables import FLOW_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
@@ -52,7 +52,7 @@ class Config(BaseConfig):
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
         self._preference = PreferenceSection(self)
-        self._processes = ProcessesSection(self)
+        self._processes = ProcessManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
         section = self._flow_sections.join_section_name(name if name else str(uuid4()))

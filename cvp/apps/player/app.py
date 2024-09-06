@@ -22,8 +22,8 @@ from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
+from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.media import MediaWindow
-from cvp.windows.media_manager import MediaManagerWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow

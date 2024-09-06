@@ -2,7 +2,7 @@
 
 import imgui
 
-from cvp.config.sections.windows.processes import ProcessesSection
+from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
@@ -11,7 +11,7 @@ from cvp.widgets.hoc.window import Window
 from cvp.windows.processes.tabs import ProcessTabs
 
 
-class ProcessesWindow(Window[ProcessesSection]):
+class ProcessesWindow(Window[ProcessManagerSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

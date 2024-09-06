@@ -118,7 +118,7 @@ class ExeItem(TabItem, PopupPropagator):
         self._sms_index = imgui.combo("##SysMach", self._sms_index, self._sms)[1]
         sys_mach = SysMach(self._sms[self._sms_index])
 
-        if imgui.small_button("Check current platform"):
+        if imgui.button("Check current platform"):
             self._sms_index = self._current_sm_index
 
         down = self._downs.get(sys_mach)
