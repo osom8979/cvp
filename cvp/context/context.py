@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from argparse import Namespace
 from os import PathLike
 from threading import Event
 from typing import Optional, Union
@@ -19,6 +20,7 @@ from cvp.resources.download.archive import DownloadArchive
 from cvp.resources.download.links.tuples import LinkInfo
 from cvp.resources.download.runner import DownloadRunner
 from cvp.resources.home import HomeDir
+from cvp.system.environ_keys import PYOPENGL_USE_ACCELERATE, SDL_VIDEO_X11_FORCE_EGL
 
 
 class Context:
@@ -58,6 +60,21 @@ class Context:
             thread_workers=thread_workers,
             process_workers=process_workers,
         )
+
+        if self.config.graphic.has_force_egl:
+            force_egl = "1" if self.config.graphic.force_egl else "0"
+            os.environ[SDL_VIDEO_X11_FORCE_EGL] = force_egl
+            logger.info(f"Update environ: {SDL_VIDEO_X11_FORCE_EGL}={force_egl}")
+
+        if self.config.graphic.has_use_accelerate:
+            use_accelerate = "1" if self.config.graphic.use_accelerate else "0"
+            os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
+            logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
+
+    @classmethod
+    def from_namespace(cls, args: Namespace):
+        assert isinstance(args.home, str)
+        return cls(home=args.home)
 
     @property
     def readonly(self):
@@ -113,27 +130,51 @@ class Context:
     def teardown(self) -> None:
         self._pm.teardown(self._config.processes.teardown_timeout)
 
-    def save_config(self) -> None:
+    def validate_writable_home(self) -> None:
         if self._readonly:
-            logger.warning("Runs in read-only mode")
-            return
+            raise ValueError("Runs in read-only mode")
 
         if not self._home.is_dir():
-            logger.info(f"Create home directory: '{str(self._home)}'")
+            logger.debug(f"Create home directory: '{str(self._home)}'")
             self._home.mkdir(parents=True, exist_ok=True)
 
             if not self._home.is_dir():
-                logger.error(f"Home is not a directory type: '{str(self._home)}'")
-                return
+                raise NotADirectoryError(
+                    f"Home is not a directory type: '{str(self._home)}'"
+                )
 
         if not os.access(self._home, os.W_OK):
-            logger.error(f"No write permission in home directory: '{str(self._home)}'")
-            return
+            raise PermissionError(
+                f"No write permission in home directory: '{str(self._home)}'"
+            )
 
-        self._config.write(self._home.cvp_ini)
+    def save_config_unsafe(self) -> None:
+        config_path = str(self._home.cvp_ini)
+        logger.info(f"Save the config file: '{config_path}'")
+        self._config.write(config_path)
 
+    def save_config(self) -> None:
+        try:
+            self.validate_writable_home()
+        except BaseException as e:
+            logger.error(e)
+        else:
+            self.save_config_unsafe()
+
+    def save_logging_config_unsafe(self) -> None:
+        logging_json = dumps_default_logging_config(cvp_home=self._home)
+        logging_config_path = str(self._home.logging_json)
+        logger.info(f"Save the default logging config file: '{logging_config_path}'")
+        self._home.logging_json.write_text(logging_json)
+
+    def save_logging_config(self) -> None:
+        try:
+            self.validate_writable_home()
+        except BaseException as e:
+            logger.error(e)
+        else:
+            self.save_logging_config_unsafe()
+
+    def save_logging_config_if_not_exists(self) -> None:
         if not self._home.logging_json.exists():
-            logging_config_path = str(self._home.logging_json)
-            logger.debug(f"Save the default log config file: '{logging_config_path}'")
-            logging_json = dumps_default_logging_config(cvp_home=self._home)
-            self._home.logging_json.write_text(logging_json)
+            self.save_logging_config()

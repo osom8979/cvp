@@ -26,12 +26,20 @@ class FFmpegSection(BaseSection):
         super().__init__(config=config, section=section)
 
     @property
+    def has_ffmpeg(self) -> bool:
+        return self.has(self.K.ffmpeg)
+
+    @property
     def ffmpeg(self) -> str:
         return self.get(self.K.ffmpeg, "ffmpeg")
 
     @ffmpeg.setter
     def ffmpeg(self, value: str) -> None:
         self.set(self.K.ffmpeg, value)
+
+    @property
+    def has_ffprobe(self) -> bool:
+        return self.has(self.K.ffprobe)
 
     @property
     def ffprobe(self) -> str:
@@ -71,12 +79,16 @@ class FFmpegProxy(ValueProxy[str]):
         self._section = section
 
     @override
-    def set(self, value: str) -> None:
-        self._section.ffmpeg = value
+    def has(self) -> bool:
+        return self._section.has_ffmpeg
 
     @override
     def get(self) -> str:
         return self._section.ffmpeg
+
+    @override
+    def set(self, value: str) -> None:
+        self._section.ffmpeg = value
 
 
 class FFprobeProxy(ValueProxy[str]):
@@ -84,9 +96,13 @@ class FFprobeProxy(ValueProxy[str]):
         self._section = section
 
     @override
-    def set(self, value: str) -> None:
-        self._section.ffprobe = value
+    def has(self) -> bool:
+        return self._section.has_ffprobe
 
     @override
     def get(self) -> str:
         return self._section.ffprobe
+
+    @override
+    def set(self, value: str) -> None:
+        self._section.ffprobe = value

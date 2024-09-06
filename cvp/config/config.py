@@ -9,6 +9,7 @@ from cvp.config._base import BaseConfig
 from cvp.config.prefix import SectionPrefix
 from cvp.config.sections.appearance import AppearanceSection
 from cvp.config.sections.concurrency import ConcurrencySection
+from cvp.config.sections.context import ContextSection
 from cvp.config.sections.developer import DeveloperSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
@@ -38,6 +39,7 @@ class Config(BaseConfig):
 
         self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
+        self._context = ContextSection(self)
         self._demo = DemoSection(self)
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
@@ -86,6 +88,10 @@ class Config(BaseConfig):
     @property
     def concurrency(self):
         return self._concurrency
+
+    @property
+    def context(self):
+        return self._context
 
     @property
     def demo(self):

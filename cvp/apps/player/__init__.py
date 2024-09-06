@@ -2,13 +2,15 @@
 
 from argparse import Namespace
 
+from cvp.context import Context
 from cvp.renderer.pygame import hide_pygame_prompt
 
 
 def player_main(args: Namespace) -> None:
     hide_pygame_prompt()
 
-    from cvp.apps.player.context import PlayerContext
+    context = Context.from_namespace(args)
 
-    context = PlayerContext.from_namespace(args)
-    context.start()
+    from cvp.apps.player.app import PlayerApplication
+
+    PlayerApplication(context).start()

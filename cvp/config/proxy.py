@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
 from typing import Generic
 
 from cvp.config._base import ValueT
 
 
-class ValueProxy(Generic[ValueT], ABC):
-    @abstractmethod
-    def set(self, value: ValueT) -> None:
+class ValueProxy(Generic[ValueT]):
+    def has(self) -> bool:
         raise NotImplementedError
 
-    @abstractmethod
     def get(self) -> ValueT:
+        raise NotImplementedError
+
+    def set(self, value: ValueT) -> None:
         raise NotImplementedError

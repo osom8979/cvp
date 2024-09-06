@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-from argparse import Namespace
 from collections import OrderedDict
-from typing import Optional, Tuple, Union
+from io import StringIO
+from typing import Any, Optional, Tuple
+from warnings import catch_warnings
 
 import imgui
 import pygame
 from OpenGL import GL
+from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
 
 from cvp.config.sections.windows.media import MediaSection
@@ -26,17 +28,26 @@ from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow
 
 
-class PlayerContext(Context):
+class AutoFixerError(Exception):
+    def __init__(self, section: str, option: str, value: Any):
+        value_text = f"'{value}'" if isinstance(value, str) else str(value)
+        super().__init__(
+            "Due to AutoFixer, "
+            f"'{option}' in [{section}] was automatically corrected to {value_text}"
+        )
+
+
+class PlayerApplication:
     _renderer: PygameRenderer
 
-    def __init__(self, home: Optional[Union[str, os.PathLike[str]]] = None):
-        super().__init__(home)
+    def __init__(self, context: Context):
+        self._context = context
         self._windows = OrderedDict[str, Window]()
 
-        self._overlay = OverlayWindow(self)
-        self._medias = MediasWindow(self)
-        self._processes = ProcessesWindow(self)
-        self._preference = PreferenceWindow(self)
+        self._overlay = OverlayWindow(self._context)
+        self._medias = MediasWindow(self._context)
+        self._processes = ProcessesWindow(self._context)
+        self._preference = PreferenceWindow(self._context)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -45,11 +56,6 @@ class PlayerContext(Context):
             ok="Open",
             cancel="Close",
         )
-
-    @classmethod
-    def from_namespace(cls, args: Namespace):
-        assert isinstance(args.home, str)
-        return cls(home=args.home)
 
     def add_windows(self, *windows: Window) -> None:
         for window in windows:
@@ -66,14 +72,59 @@ class PlayerContext(Context):
             self.add_media_window(section)
 
     def add_media_window(self, section: MediaSection) -> None:
-        self.add_window(MediaWindow(self, section))
+        self.add_window(MediaWindow(self._context, section))
+
+    @property
+    def home(self):
+        return self._context.home
+
+    @property
+    def config(self):
+        return self._context.config
+
+    @property
+    def debug(self):
+        return self._context.debug
+
+    @property
+    def verbose(self):
+        return self._context.verbose
 
     def add_new_media_window(self, file: str) -> None:
-        section = self._config.add_media_section()
+        section = self.config.add_media_section()
         section.opened = True
         section.file = file
         section.name = file
         self.add_media_window(section)
+
+    def _raise_force_egl_error(self, error: Error) -> None:
+        section = str(self.config.graphic.section)
+        key = str(self.config.graphic.K.force_egl)
+
+        logger.warning(
+            f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
+            f" section of the '{str(self.home.cvp_ini)}' file and try again."
+        )
+
+        if (
+            not self._context.readonly
+            and self.config.context.auto_fixer
+            and not self.config.graphic.has_force_egl
+        ):
+            self.config.graphic.force_egl = True
+            try:
+                self._context.validate_writable_home()
+            except BaseException as e1:
+                logger.error(e1)
+            else:
+                try:
+                    self._context.save_config_unsafe()
+                except BaseException as e2:
+                    logger.error(e2)
+                else:
+                    raise AutoFixerError(section, key, True) from error
+
+        raise RuntimeError("Consider enabling EGL related options") from error
 
     def start(self) -> None:
         self.on_init()
@@ -81,13 +132,9 @@ class PlayerContext(Context):
             self.on_process()
         except Error as e:
             if str(e) == "Attempt to retrieve context when no valid context":
-                section = str(self.config.graphic.section)
-                key = str(self.config.graphic.K.force_egl)
-                logger.error(
-                    f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
-                    f" section of the '{str(self.home.cvp_ini)}' file and try again."
-                )
-                raise RuntimeError("Consider enabling EGL related options") from e
+                self._raise_force_egl_error(e)
+            else:
+                raise
         finally:
             self.on_exit()
 
@@ -111,19 +158,84 @@ class PlayerContext(Context):
         else:
             return common_flags | pygame.RESIZABLE
 
+    def _validate_accelerate_available(self) -> None:
+        if not self.config.graphic.has_use_accelerate:
+            return
+
+        use_accelerate = self.config.graphic.use_accelerate
+        if use_accelerate != ACCELERATE_AVAILABLE:
+            raise ValueError(
+                f"The set 'use_accelerate' value ({use_accelerate}) "
+                f"and 'accelerate_available' value ({ACCELERATE_AVAILABLE}) "
+                "must be the same.\n"
+                "Calling configuration and environment variables should take "
+                "precedence over importing PyOpenGL."
+            )
+
+    def _raise_use_accelerate_error(self, error: ValueError) -> None:
+        # 'numpy.dtype size changed, may indicate binary incompatibility.
+        # Expected 96 from C header, got 88 from PyObject', 1,
+        # <OpenGL.platform.baseplatform.glGenTextures object at 0x7b0a5ec96800>
+
+        section = str(self.config.graphic.section)
+        key = str(self.config.graphic.K.use_accelerate)
+
+        logger.warning(
+            f"Please modify the value of '{key}' to 'False' in the '[{section}]'"
+            f" section of the '{str(self.home.cvp_ini)}' file and try again."
+        )
+
+        if (
+            not self._context.readonly
+            and self.config.context.auto_fixer
+            and not self.config.graphic.has_use_accelerate
+        ):
+            try:
+                self._context.validate_writable_home()
+            except BaseException as e1:
+                logger.error(e1)
+            else:
+                try:
+                    self.config.graphic.use_accelerate = False
+                    self._context.save_config_unsafe()
+                except BaseException as e2:
+                    logger.error(e2)
+                else:
+                    raise AutoFixerError(section, key, True) from error
+
+        raise RuntimeError(
+            "Consider disabling PyOpenGL_accelerate related options"
+        ) from error
+
     def on_init(self) -> None:
-        if self.config.graphic.force_egl:
-            os.environ["SDL_VIDEO_X11_FORCE_EGL"] = "1"
+        if self.debug:
+            self._validate_accelerate_available()
 
         pygame.init()
+
+        try:
+            GL.glDeleteTextures(1, GL.glGenTextures(1))
+        except ValueError as e:
+            self._raise_use_accelerate_error(e)
 
         size = self.pygame_display_size
         flags = self.pygame_display_flags
 
-        # [Warning]
-        # PyGame seems to be running through X11 on top of wayland,
-        # instead of wayland directly `pygame.display.set_mode(size, flags)`
-        pygame.display.set_mode(size, flags)
+        with catch_warnings(record=True) as wms:
+            # [Warning]
+            # PyGame seems to be running through X11 on top of wayland,
+            # instead of wayland directly `pygame.display.set_mode(size, flags)`
+            pygame.display.set_mode(size, flags)
+
+            for wm in wms:
+                buffer = StringIO()
+                if self.verbose >= 1:
+                    buffer.write(f"<{wm.category.__name__} ")
+                    buffer.write(f"message='{str(wm.message)}' ")
+                    buffer.write(f"file={wm.filename}:{wm.lineno}>")
+                else:
+                    buffer.write(f"{str(wm.message)}")
+                logger.warning(buffer.getvalue())
 
         imgui.create_context()
         io = imgui.get_io()
@@ -163,35 +275,35 @@ class PlayerContext(Context):
         self.add_media_windows(*self.config.media_sections.values())
 
     def on_exit(self) -> None:
-        self.teardown()
+        self._context.teardown()
 
         while self._windows:
             key, win = self._windows.popitem(last=False)
             win.do_destroy()
 
-        if not self.readonly:
+        if not self._context.readonly:
             self.config.display.fullscreen = pygame.display.is_fullscreen()
             self.config.display.size = pygame.display.get_window_size()
-            self.save_config()
+            self._context.save_config()
             imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
 
         del self._renderer
         pygame.quit()
 
     def on_process(self) -> None:
-        while not self.is_done():
+        while not self._context.is_done():
             self.on_event()
             self.on_frame()
 
     def on_event(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.quit()
+                self._context.quit()
             self._renderer.do_event(event)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
-            self.quit()
+            self._context.quit()
         if keys[pygame.K_LCTRL] and keys[pygame.K_o]:
             self._open_file_popup.show()
         if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
@@ -244,7 +356,7 @@ class PlayerContext(Context):
 
                 imgui.separator()
                 if imgui.menu_item("Quit", "Ctrl+Q")[0]:
-                    self.quit()
+                    self._context.quit()
                 imgui.end_menu()
 
             if imgui.begin_menu("Windows"):
@@ -253,8 +365,8 @@ class PlayerContext(Context):
                         win.opened = not win.opened
                 if self.debug:
                     imgui.separator()
-                    if imgui.menu_item("Demo", None, self._config.demo.opened)[0]:
-                        self._config.demo.opened = not self._config.demo.opened
+                    if imgui.menu_item("Demo", None, self.config.demo.opened)[0]:
+                        self.config.demo.opened = not self.config.demo.opened
                 imgui.end_menu()
 
     def on_popups(self) -> None:
@@ -269,6 +381,6 @@ class PlayerContext(Context):
     def on_demo_window(self) -> None:
         if not self.debug:
             return
-        if not self._config.demo.opened:
+        if not self.config.demo.opened:
             return
         imgui.show_test_window()
