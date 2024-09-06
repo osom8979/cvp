@@ -19,6 +19,10 @@ class LoggingSection(BaseSection):
         super().__init__(config=config, section=section)
 
     @property
+    def has_config_path(self) -> bool:
+        return self.has(self.K.config_path)
+
+    @property
     def config_path(self) -> str:
         return self.get(self.K.config_path, str())
 

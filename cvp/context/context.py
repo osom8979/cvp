@@ -41,6 +41,14 @@ class Context:
 
         self._config = Config(self._home.cvp_ini, self._home)
 
+        if not self._readonly:
+            if not self._home.logging_json.exists():
+                self.save_logging_config()
+            if not self._config.logging.has_config_path:
+                logging_config_path = str(self._home.logging_json)
+                self._config.logging.config_path = logging_config_path
+                logger.info(f"Initialize logging config file: '{logging_config_path}'")
+
         logging_config_path = self._config.logging.config_path
         if os.path.isfile(logging_config_path):
             loads_logging_config(logging_config_path)
@@ -174,7 +182,3 @@ class Context:
             logger.error(e)
         else:
             self.save_logging_config_unsafe()
-
-    def save_logging_config_if_not_exists(self) -> None:
-        if not self._home.logging_json.exists():
-            self.save_logging_config()

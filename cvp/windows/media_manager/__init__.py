@@ -8,15 +8,15 @@ from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
 from cvp.widgets import begin_child, end_child, text_centered
 from cvp.widgets.hoc.window import Window
-from cvp.windows.medias.tabs import MediaTabs
+from cvp.windows.media_manager.tabs import MediaTabs
 
 
-class MediasWindow(Window[MediaManagerSection]):
+class MediaManagerWindow(Window[MediaManagerSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
             section=context.config.media_manager,
-            title="Medias",
+            title="Media Manager",
             closable=True,
             flags=None,
         )

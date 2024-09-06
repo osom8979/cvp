@@ -23,7 +23,7 @@ from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.media import MediaWindow
-from cvp.windows.medias import MediasWindow
+from cvp.windows.media_manager import MediaManagerWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow
@@ -37,7 +37,7 @@ class PlayerApplication:
         self._windows = OrderedDict[str, Window]()
 
         self._overlay = OverlayWindow(self._context)
-        self._medias = MediasWindow(self._context)
+        self._medias = MediaManagerWindow(self._context)
         self._processes = ProcessesWindow(self._context)
         self._preference = PreferenceWindow(self._context)
 

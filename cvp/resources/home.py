@@ -42,8 +42,6 @@ class HomeDir(PathFlavour):
             for dir_path in self._dirs:
                 if not dir_path.is_dir():
                     dir_path.mkdir(parents=False, exist_ok=True)
-                if not dir_path.is_dir():
-                    dir_path.mkdir(parents=False, exist_ok=True)
 
         self.cvp_ini = self.as_path() / CVP_INI_FILENAME
         self.gui_ini = self.as_path() / GUI_INI_FILENAME

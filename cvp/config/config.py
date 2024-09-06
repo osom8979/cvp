@@ -34,6 +34,7 @@ class Config(BaseConfig):
         cvp_home: Optional[Union[str, PathLike[str]]] = None,
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
+
         self._flow_sections = SectionPrefix(self, prefix=FLOW_SECTION_PREFIX)
         self._media_sections = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
 

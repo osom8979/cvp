@@ -3,7 +3,7 @@
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.widgets.hoc.tab import TabBar
-from cvp.windows.medias.tabs.info import MediaInfoTab
+from cvp.windows.media_manager.tabs.info import MediaInfoTab
 
 
 class MediaTabs(TabBar[MediaSection]):
