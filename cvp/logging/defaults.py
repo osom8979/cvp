@@ -111,14 +111,16 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
     "loggers": {
         # root logger
         "": {
-            "handlers": ["timed_rotating_file_default"],
+            "handlers": ["stdout_colored", "timed_rotating_file_default"],
             "level": "DEBUG",
         },
         CVP_LOGGER_NAME: {
-            "handlers": ["stdout_colored"],
             "level": "DEBUG",
         },
         CVP_DOWNLOAD_LOGGER_NAME: {
+            "level": "DEBUG",
+        },
+        "OpenGL": {
             "level": "DEBUG",
         },
     },

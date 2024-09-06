@@ -6,6 +6,14 @@ from cvp.config._base import ValueT
 
 
 class ValueProxy(Generic[ValueT]):
+    @property
+    def section(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def option(self) -> str:
+        raise NotImplementedError
+
     def has(self) -> bool:
         raise NotImplementedError
 

@@ -7,6 +7,7 @@ from typing import Callable, Dict
 
 from cvp.apps.player import player_main
 from cvp.arguments import CMD_PLAYER
+from cvp.context.autofixer import AutoFixerError
 from cvp.logging.logging import logger
 
 
@@ -24,6 +25,8 @@ def run_app(cmd: str, args: Namespace) -> int:
 
     try:
         app(args)
+    except AutoFixerError as e:
+        logger.warning(f"{e}, Please restart the application")
     except CancelledError:
         logger.debug("An cancelled signal was detected")
     except KeyboardInterrupt:

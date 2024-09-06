@@ -3,7 +3,7 @@
 import os
 from collections import OrderedDict
 from io import StringIO
-from typing import Any, Optional, Tuple
+from typing import Optional, Tuple
 from warnings import catch_warnings
 
 import imgui
@@ -14,6 +14,7 @@ from OpenGL.error import Error
 
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
+from cvp.context.autofixer import AutoFixer
 from cvp.logging.logging import logger
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -26,15 +27,6 @@ from cvp.windows.medias import MediasWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
 from cvp.windows.processes import ProcessesWindow
-
-
-class AutoFixerError(Exception):
-    def __init__(self, section: str, option: str, value: Any):
-        value_text = f"'{value}'" if isinstance(value, str) else str(value)
-        super().__init__(
-            "Due to AutoFixer, "
-            f"'{option}' in [{section}] was automatically corrected to {value_text}"
-        )
 
 
 class PlayerApplication:
@@ -98,33 +90,13 @@ class PlayerApplication:
         self.add_media_window(section)
 
     def _raise_force_egl_error(self, error: Error) -> None:
-        section = str(self.config.graphic.section)
-        key = str(self.config.graphic.K.force_egl)
-
-        logger.warning(
-            f"Please modify the value of '{key}' to 'True' in the '[{section}]'"
-            f" section of the '{str(self.home.cvp_ini)}' file and try again."
+        fixer = AutoFixer[bool, Error](
+            self._context,
+            self.config.graphic,
+            self.config.graphic.K.force_egl,
+            True,
         )
-
-        if (
-            not self._context.readonly
-            and self.config.context.auto_fixer
-            and not self.config.graphic.has_force_egl
-        ):
-            self.config.graphic.force_egl = True
-            try:
-                self._context.validate_writable_home()
-            except BaseException as e1:
-                logger.error(e1)
-            else:
-                try:
-                    self._context.save_config_unsafe()
-                except BaseException as e2:
-                    logger.error(e2)
-                else:
-                    raise AutoFixerError(section, key, True) from error
-
-        raise RuntimeError("Consider enabling EGL related options") from error
+        fixer.run(error)
 
     def start(self) -> None:
         self.on_init()
@@ -176,36 +148,13 @@ class PlayerApplication:
         # 'numpy.dtype size changed, may indicate binary incompatibility.
         # Expected 96 from C header, got 88 from PyObject', 1,
         # <OpenGL.platform.baseplatform.glGenTextures object at 0x7b0a5ec96800>
-
-        section = str(self.config.graphic.section)
-        key = str(self.config.graphic.K.use_accelerate)
-
-        logger.warning(
-            f"Please modify the value of '{key}' to 'False' in the '[{section}]'"
-            f" section of the '{str(self.home.cvp_ini)}' file and try again."
+        fixer = AutoFixer[bool, ValueError](
+            self._context,
+            self.config.graphic,
+            self.config.graphic.K.use_accelerate,
+            False,
         )
-
-        if (
-            not self._context.readonly
-            and self.config.context.auto_fixer
-            and not self.config.graphic.has_use_accelerate
-        ):
-            try:
-                self._context.validate_writable_home()
-            except BaseException as e1:
-                logger.error(e1)
-            else:
-                try:
-                    self.config.graphic.use_accelerate = False
-                    self._context.save_config_unsafe()
-                except BaseException as e2:
-                    logger.error(e2)
-                else:
-                    raise AutoFixerError(section, key, True) from error
-
-        raise RuntimeError(
-            "Consider disabling PyOpenGL_accelerate related options"
-        ) from error
+        fixer.run(error)
 
     def on_init(self) -> None:
         if self.debug:
