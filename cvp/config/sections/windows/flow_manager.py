@@ -13,10 +13,10 @@ class _Keys(StrEnum):
     selected = auto()
 
 
-class MediasSection(BaseWindowSection):
+class FlowManagerSection(BaseWindowSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="medias"):
+    def __init__(self, config: BaseConfig, section="flow_manager"):
         super().__init__(config=config, section=section)
 
     @property

@@ -18,9 +18,9 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
-from cvp.config.sections.windows.flows import FlowsSection
+from cvp.config.sections.windows.flow_manager import FlowManagerSection
 from cvp.config.sections.windows.media import MediaSection
-from cvp.config.sections.windows.medias import MediasSection
+from cvp.config.sections.windows.media_manager import MediaManagerSection
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.config.sections.windows.preference import PreferenceSection
 from cvp.config.sections.windows.processes import ProcessesSection
@@ -44,11 +44,11 @@ class Config(BaseConfig):
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
         self._ffmpeg = FFmpegSection(self)
-        self._flows = FlowsSection(self)
+        self._flow_manager = FlowManagerSection(self)
         self._font = FontSection(self)
         self._graphic = GraphicSection(self)
         self._logging = LoggingSection(self)
-        self._medias = MediasSection(self)
+        self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
         self._preference = PreferenceSection(self)
         self._processes = ProcessesSection(self)
@@ -110,8 +110,8 @@ class Config(BaseConfig):
         return self._ffmpeg
 
     @property
-    def flows(self):
-        return self._flows
+    def flow_manager(self):
+        return self._flow_manager
 
     @property
     def font(self):
@@ -126,8 +126,8 @@ class Config(BaseConfig):
         return self._logging
 
     @property
-    def medias(self):
-        return self._medias
+    def media_manager(self):
+        return self._media_manager
 
     @property
     def overlay(self):

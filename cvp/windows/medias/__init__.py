@@ -2,7 +2,7 @@
 
 import imgui
 
-from cvp.config.sections.windows.medias import MediasSection
+from cvp.config.sections.windows.media_manager import MediaManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
@@ -11,11 +11,11 @@ from cvp.widgets.hoc.window import Window
 from cvp.windows.medias.tabs import MediaTabs
 
 
-class MediasWindow(Window[MediasSection]):
+class MediasWindow(Window[MediaManagerSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.medias,
+            section=context.config.media_manager,
             title="Medias",
             closable=True,
             flags=None,
