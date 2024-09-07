@@ -6,7 +6,7 @@ from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
-from cvp.widgets.hoc.manager import ItemsProxy, ManagerWindow
+from cvp.widgets.hoc.manager_tab import ItemsProxy, ManagerTab
 from cvp.windows.managers.process.info import ProcessInfoTab
 from cvp.windows.managers.process.stream import ProcessStreamTab
 
@@ -20,7 +20,7 @@ class ProcessesProxy(ItemsProxy[Process]):
         return self._context.pm.processes
 
 
-class ProcessManagerWindow(ManagerWindow[ProcessManagerSection, Process]):
+class ProcessManagerWindow(ManagerTab[ProcessManagerSection, Process]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

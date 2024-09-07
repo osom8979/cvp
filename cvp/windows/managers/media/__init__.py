@@ -6,7 +6,7 @@ from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets.hoc.manager import ItemsProxy, ManagerWindow
+from cvp.widgets.hoc.manager_tab import ItemsProxy, ManagerTab
 from cvp.windows.managers.media.info import MediaInfoTab
 
 
@@ -19,7 +19,7 @@ class MediaSectionsProxy(ItemsProxy[MediaSection]):
         return self._context.config.media_sections
 
 
-class MediaManagerWindow(ManagerWindow[MediaManagerSection, MediaSection]):
+class MediaManagerWindow(ManagerTab[MediaManagerSection, MediaSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

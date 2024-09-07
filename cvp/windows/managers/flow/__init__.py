@@ -6,7 +6,7 @@ from cvp.config.sections.windows.flow import FlowSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets.hoc.manager import ItemsProxy, ManagerWindow
+from cvp.widgets.hoc.manager_tab import ItemsProxy, ManagerTab
 from cvp.windows.managers.flow.info import FlowInfoTab
 
 
@@ -19,7 +19,7 @@ class FlowSectionsProxy(ItemsProxy[FlowSection]):
         return self._context.config.flow_sections
 
 
-class FlowManagerWindow(ManagerWindow[FlowManagerSection, FlowSection]):
+class FlowManagerWindow(ManagerTab[FlowManagerSection, FlowSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

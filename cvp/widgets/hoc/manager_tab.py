@@ -23,7 +23,7 @@ class ItemsProxy(Generic[ItemT], ABC):
         raise NotImplementedError
 
 
-class ManagerWindow(Window[ManagerSectionT], Generic[ManagerSectionT, ItemT]):
+class ManagerTab(Window[ManagerSectionT], Generic[ManagerSectionT, ItemT]):
     def __init__(
         self,
         context: Context,
