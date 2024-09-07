@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
+from typing import Mapping
 
 from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.media import MediaSection
@@ -15,7 +15,7 @@ class MediaSectionsProxy(ItemsProxy[MediaSection]):
         self._context = context
 
     @override
-    def __call__(self) -> OrderedDict[str, MediaSection]:
+    def __call__(self) -> Mapping[str, MediaSection]:
         return self._context.config.media_sections
 
 

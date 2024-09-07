@@ -45,6 +45,10 @@ class ProcessManager:
     def process_pool(self):
         return self._process_pool
 
+    @property
+    def processes(self):
+        return self._processes
+
     def submit_thread(
         self,
         fn: Callable[SubmitParamT, SubmitResultT],

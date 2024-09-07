@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
+from typing import Mapping
 
 from cvp.config.sections.windows.flow import FlowSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
@@ -15,7 +15,7 @@ class FlowSectionsProxy(ItemsProxy[FlowSection]):
         self._context = context
 
     @override
-    def __call__(self) -> OrderedDict[str, FlowSection]:
+    def __call__(self) -> Mapping[str, FlowSection]:
         return self._context.config.flow_sections
 
 

@@ -111,6 +111,8 @@ class ManagerWindow(Window[ManagerSectionT], Generic[ManagerSectionT, ItemT]):
                             title = getattr(item, "title")
                         elif hasattr(item, "label"):
                             title = getattr(item, "label")
+                        elif hasattr(item, "name"):
+                            title = getattr(item, "name")
                         else:
                             title = str(item)
 

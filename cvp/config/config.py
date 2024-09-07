@@ -52,7 +52,7 @@ class Config(BaseConfig):
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
         self._preference = PreferenceSection(self)
-        self._processes = ProcessManagerSection(self)
+        self._process_manager = ProcessManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
         section = self._flow_sections.join_section_name(name if name else str(uuid4()))
@@ -139,8 +139,8 @@ class Config(BaseConfig):
         return self._preference
 
     @property
-    def processes(self):
-        return self._processes
+    def process_manager(self):
+        return self._process_manager
 
     @property
     def debug(self):

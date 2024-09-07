@@ -24,10 +24,10 @@ from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
+from cvp.windows.managers.process import ProcessManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceWindow
-from cvp.windows.processes import ProcessesWindow
 
 
 class PlayerApplication:
@@ -40,7 +40,7 @@ class PlayerApplication:
         self._overlay = OverlayWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
         self._flow_manager = FlowManagerWindow(self._context)
-        self._processes = ProcessesWindow(self._context)
+        self._processes = ProcessManagerWindow(self._context)
         self._preference = PreferenceWindow(self._context)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
