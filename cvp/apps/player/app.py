@@ -22,6 +22,7 @@ from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
+from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
@@ -37,7 +38,8 @@ class PlayerApplication:
         self._windows = OrderedDict[str, Window]()
 
         self._overlay = OverlayWindow(self._context)
-        self._medias = MediaManagerWindow(self._context)
+        self._media_manager = MediaManagerWindow(self._context)
+        self._flow_manager = FlowManagerWindow(self._context)
         self._processes = ProcessesWindow(self._context)
         self._preference = PreferenceWindow(self._context)
 
@@ -66,6 +68,13 @@ class PlayerApplication:
     def add_media_window(self, section: MediaSection) -> None:
         self.add_window(MediaWindow(self._context, section))
 
+    def add_new_media_window(self, file: str) -> None:
+        section = self.config.add_media_section()
+        section.opened = True
+        section.file = file
+        section.name = file
+        self.add_media_window(section)
+
     @property
     def home(self):
         return self._context.home
@@ -81,34 +90,6 @@ class PlayerApplication:
     @property
     def verbose(self):
         return self._context.verbose
-
-    def add_new_media_window(self, file: str) -> None:
-        section = self.config.add_media_section()
-        section.opened = True
-        section.file = file
-        section.name = file
-        self.add_media_window(section)
-
-    def _raise_force_egl_error(self, error: Error) -> None:
-        fixer = AutoFixer[bool, Error](
-            self._context,
-            self.config.graphic,
-            self.config.graphic.K.force_egl,
-            True,
-        )
-        fixer.run(error)
-
-    def start(self) -> None:
-        self.on_init()
-        try:
-            self.on_process()
-        except Error as e:
-            if str(e) == "Attempt to retrieve context when no valid context":
-                self._raise_force_egl_error(e)
-            else:
-                raise
-        finally:
-            self.on_exit()
 
     @property
     def pygame_display_size(self) -> Tuple[int, int]:
@@ -129,6 +110,15 @@ class PlayerApplication:
             return common_flags | pygame.FULLSCREEN
         else:
             return common_flags | pygame.RESIZABLE
+
+    def _raise_force_egl_error(self, error: Error) -> None:
+        fixer = AutoFixer[bool, Error](
+            self._context,
+            self.config.graphic,
+            self.config.graphic.K.force_egl,
+            True,
+        )
+        fixer.run(error)
 
     def _validate_accelerate_available(self) -> None:
         if not self.config.graphic.has_use_accelerate:
@@ -155,6 +145,18 @@ class PlayerApplication:
             False,
         )
         fixer.run(error)
+
+    def start(self) -> None:
+        self.on_init()
+        try:
+            self.on_process()
+        except Error as e:
+            if str(e) == "Attempt to retrieve context when no valid context":
+                self._raise_force_egl_error(e)
+            else:
+                raise
+        finally:
+            self.on_exit()
 
     def on_init(self) -> None:
         if self.debug:
@@ -217,7 +219,8 @@ class PlayerApplication:
 
         self.add_windows(
             self._overlay,
-            self._medias,
+            self._media_manager,
+            self._flow_manager,
             self._processes,
             self._preference,
         )
@@ -259,7 +262,9 @@ class PlayerApplication:
             self._open_url_popup.show()
 
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
-            self._medias.opened = True
+            self._media_manager.opened = True
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
+            self._flow_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
             self._processes.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
@@ -283,40 +288,52 @@ class PlayerApplication:
             self._renderer.render(imgui.get_draw_data())
             pygame.display.flip()
 
+    def on_file_menu(self) -> None:
+        if imgui.menu_item("Open file", "Ctrl+O")[0]:
+            self._open_file_popup.show()
+        if imgui.menu_item("Open network", "Ctrl+N")[0]:
+            self._open_url_popup.show()
+        imgui.separator()
+        if imgui.menu_item("Quit", "Ctrl+Q")[0]:
+            self._context.quit()
+
+    def on_managers_menu(self) -> None:
+        manager_opened = self._media_manager.opened
+        flow_opened = self._flow_manager.opened
+        processes_opened = self._processes.opened
+        preference_opened = self._preference.opened
+
+        if imgui.menu_item("Media Manager", "Ctrl+Alt+M", manager_opened)[0]:
+            self._media_manager.opened = not self._media_manager.opened
+        if imgui.menu_item("Flow Manager", "Ctrl+Alt+F", flow_opened)[0]:
+            self._flow_manager.opened = not self._flow_manager.opened
+        if imgui.menu_item("Processes", "Ctrl+Alt+P", processes_opened)[0]:
+            self._processes.opened = not self._processes.opened
+        if imgui.menu_item("Preference", "Ctrl+Alt+S", preference_opened)[0]:
+            self._preference.opened = not self._preference.opened
+
+    def on_windows_menu(self) -> None:
+        for key, win in self._windows.items():
+            if imgui.menu_item(key, None, win.opened)[0]:
+                win.opened = not win.opened
+        if self.debug:
+            imgui.separator()
+            if imgui.menu_item("Demo", None, self.config.demo.opened)[0]:
+                self.config.demo.opened = not self.config.demo.opened
+
     def on_main_menu(self) -> None:
         with imgui.begin_main_menu_bar():
-            if imgui.begin_menu("File"):
-                if imgui.menu_item("Open file", "Ctrl+O")[0]:
-                    self._open_file_popup.show()
-                if imgui.menu_item("Open network", "Ctrl+N")[0]:
-                    self._open_url_popup.show()
-
-                imgui.separator()
-                _manager_opened = self._medias.opened
-                _processes_opened = self._processes.opened
-                _preference_opened = self._preference.opened
-
-                if imgui.menu_item("Medias", "Ctrl+Alt+M", _manager_opened)[0]:
-                    self._medias.opened = not self._medias.opened
-                if imgui.menu_item("Processes", "Ctrl+Alt+P", _processes_opened)[0]:
-                    self._processes.opened = not self._processes.opened
-                if imgui.menu_item("Preference", "Ctrl+Alt+S", _preference_opened)[0]:
-                    self._preference.opened = not self._preference.opened
-
-                imgui.separator()
-                if imgui.menu_item("Quit", "Ctrl+Q")[0]:
-                    self._context.quit()
-                imgui.end_menu()
-
-            if imgui.begin_menu("Windows"):
-                for key, win in self._windows.items():
-                    if imgui.menu_item(key, None, win.opened)[0]:
-                        win.opened = not win.opened
-                if self.debug:
-                    imgui.separator()
-                    if imgui.menu_item("Demo", None, self.config.demo.opened)[0]:
-                        self.config.demo.opened = not self.config.demo.opened
-                imgui.end_menu()
+            menus = (
+                ("File", self.on_file_menu),
+                ("Managers", self.on_managers_menu),
+                ("Windows", self.on_windows_menu),
+            )
+            for name, func in menus:
+                if imgui.begin_menu(name):
+                    try:
+                        func()
+                    finally:
+                        imgui.end_menu()
 
     def on_popups(self) -> None:
         file = self._open_file_popup.do_process()
