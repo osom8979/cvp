@@ -19,7 +19,7 @@ MenuItemT = TypeVar("MenuItemT")
 
 class ManagerInterface(Generic[MenuItemT], ABC):
     @abstractmethod
-    def query_menu_title(self, key: str, menu: MenuItemT) -> str:
+    def query_menu_title(self, key: str, item: MenuItemT) -> str:
         raise NotImplementedError
 
     @abstractmethod
@@ -123,12 +123,12 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
                 end_child()
 
     @override
-    def query_menu_title(self, key: str, menu: MenuItemT) -> str:
-        if hasattr(menu, "title"):
-            return getattr(menu, "title")
-        elif hasattr(menu, "label"):
-            return getattr(menu, "label")
-        elif hasattr(menu, "name"):
-            return getattr(menu, "name")
+    def query_menu_title(self, key: str, item: MenuItemT) -> str:
+        if hasattr(item, "title"):
+            return getattr(item, "title")
+        elif hasattr(item, "label"):
+            return getattr(item, "label")
+        elif hasattr(item, "name"):
+            return getattr(item, "name")
         else:
-            return str(menu)
+            return str(item)

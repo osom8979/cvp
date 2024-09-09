@@ -8,10 +8,10 @@ from cvp.config.sections.windows.overlay import Anchor
 from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.types import override
-from cvp.widgets.hoc.widget import WidgetInterface
+from cvp.windows.managers.preference._base import PreferenceWidget
 
 
-class OverlayPreference(WidgetInterface):
+class OverlayPreference(PreferenceWidget):
     _anchors: List[Anchor]
 
     def __init__(self, context: Context, label="Overlay"):
@@ -22,7 +22,9 @@ class OverlayPreference(WidgetInterface):
         self._anchor_names = [str(a.name) for a in Anchor]
         self._anchor_index = self._anchors.index(self._section.anchor)
 
-    def __str__(self):
+    @property
+    @override
+    def label(self) -> str:
         return self._label
 
     @override

@@ -5,17 +5,19 @@ from typing import Sequence
 from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.hoc.popup import Popup, PopupPropagator
-from cvp.widgets.hoc.widget import WidgetInterface
-from cvp.windows.preference.ffmpeg.exe import ExeTabs
+from cvp.windows.managers.preference._base import PreferenceWidget
+from cvp.windows.managers.preference.ffmpeg.exe import ExeTabs
 
 
-class FFmpegPreference(PopupPropagator, WidgetInterface):
+class FFmpegPreference(PopupPropagator, PreferenceWidget):
     def __init__(self, context: Context, label="FFmpeg"):
         self._section = context.config.ffmpeg
         self._label = label
         self._tabs = ExeTabs(context)
 
-    def __str__(self):
+    @property
+    @override
+    def label(self) -> str:
         return self._label
 
     @property

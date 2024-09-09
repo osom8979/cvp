@@ -24,10 +24,10 @@ from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
+from cvp.windows.managers.preference import PreferenceManagerWindow
 from cvp.windows.managers.process import ProcessManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
-from cvp.windows.preference import PreferenceWindow
 
 
 class PlayerApplication:
@@ -40,8 +40,8 @@ class PlayerApplication:
         self._overlay = OverlayWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
         self._flow_manager = FlowManagerWindow(self._context)
-        self._processes = ProcessManagerWindow(self._context)
-        self._preference = PreferenceWindow(self._context)
+        self._process_manager = ProcessManagerWindow(self._context)
+        self._preference_manager = PreferenceManagerWindow(self._context)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -221,8 +221,8 @@ class PlayerApplication:
             self._overlay,
             self._media_manager,
             self._flow_manager,
-            self._processes,
-            self._preference,
+            self._process_manager,
+            self._preference_manager,
         )
         self.add_media_windows(*self.config.media_sections.values())
 
@@ -266,9 +266,9 @@ class PlayerApplication:
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
             self._flow_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
-            self._processes.opened = True
+            self._process_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
-            self._preference.opened = True
+            self._preference_manager.opened = True
 
         self._renderer.do_tick()
 
@@ -298,19 +298,21 @@ class PlayerApplication:
             self._context.quit()
 
     def on_managers_menu(self) -> None:
-        manager_opened = self._media_manager.opened
-        flow_opened = self._flow_manager.opened
-        processes_opened = self._processes.opened
-        preference_opened = self._preference.opened
-
-        if imgui.menu_item("Media Manager", "Ctrl+Alt+M", manager_opened)[0]:
+        if imgui.menu_item("Medias", "Ctrl+Alt+M", self._media_manager.opened)[0]:
             self._media_manager.opened = not self._media_manager.opened
-        if imgui.menu_item("Flow Manager", "Ctrl+Alt+F", flow_opened)[0]:
+        if imgui.menu_item("Flows", "Ctrl+Alt+F", self._flow_manager.opened)[0]:
             self._flow_manager.opened = not self._flow_manager.opened
-        if imgui.menu_item("Processes", "Ctrl+Alt+P", processes_opened)[0]:
-            self._processes.opened = not self._processes.opened
-        if imgui.menu_item("Preference", "Ctrl+Alt+S", preference_opened)[0]:
-            self._preference.opened = not self._preference.opened
+        if imgui.menu_item("Processes", "Ctrl+Alt+P", self._process_manager.opened)[0]:
+            self._process_manager.opened = not self._process_manager.opened
+
+        imgui.separator()
+
+        if imgui.menu_item(
+            "Preference",
+            "Ctrl+Alt+S",
+            self._preference_manager.opened,
+        )[0]:
+            self._preference_manager.opened = not self._preference_manager.opened
 
     def on_windows_menu(self) -> None:
         for key, win in self._windows.items():
