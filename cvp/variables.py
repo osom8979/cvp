@@ -13,6 +13,7 @@ CHECKSUM_DELIMITER: Final[str] = ":"
 
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
 FLOW_SECTION_PREFIX: Final[str] = "flow."
+LAYOUT_SECTION_PREFIX: Final[str] = "layout."
 MEDIA_SECTION_PREFIX: Final[str] = "media."
 
 DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / CVP_HOME_DIRNAME)

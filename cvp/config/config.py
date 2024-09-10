@@ -18,13 +18,19 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
+from cvp.config.sections.windows.layout import LayoutSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
+from cvp.config.sections.windows.manager.layout import LayoutManagerSection
 from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.manager.preference import PreferenceManagerSection
 from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.overlay import OverlaySection
-from cvp.variables import FLOW_SECTION_PREFIX, MEDIA_SECTION_PREFIX
+from cvp.variables import (
+    FLOW_SECTION_PREFIX,
+    LAYOUT_SECTION_PREFIX,
+    MEDIA_SECTION_PREFIX,
+)
 
 
 class Config(BaseConfig):
@@ -35,8 +41,9 @@ class Config(BaseConfig):
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
 
-        self._flow_sections = SectionPrefix(self, prefix=FLOW_SECTION_PREFIX)
-        self._media_sections = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
+        self._flow_prefix = SectionPrefix(self, prefix=FLOW_SECTION_PREFIX)
+        self._layout_prefix = SectionPrefix(self, prefix=LAYOUT_SECTION_PREFIX)
+        self._media_prefix = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
 
         self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
@@ -48,6 +55,7 @@ class Config(BaseConfig):
         self._flow_manager = FlowManagerSection(self)
         self._font = FontSection(self)
         self._graphic = GraphicSection(self)
+        self._layout_manager = LayoutManagerSection(self)
         self._logging = LoggingSection(self)
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
@@ -55,13 +63,19 @@ class Config(BaseConfig):
         self._process_manager = ProcessManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
-        section = self._flow_sections.join_section_name(name if name else str(uuid4()))
+        section = self._flow_prefix.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
         return FlowSection(config=self, section=section)
 
+    def add_layout_section(self, name: Optional[str] = None):
+        section = self._layout_prefix.join_section_name(name if name else str(uuid4()))
+        if self.has_section(section):
+            raise KeyError(f"Section '{section}' already exists")
+        return LayoutSection(config=self, section=section)
+
     def add_media_section(self, name: Optional[str] = None):
-        section = self._media_sections.join_section_name(name if name else str(uuid4()))
+        section = self._media_prefix.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
         return MediaSection(config=self, section=section)
@@ -69,16 +83,24 @@ class Config(BaseConfig):
     @property
     def flow_sections(self):
         result = OrderedDict[str, FlowSection]()
-        for section in self._flow_sections.sections():
-            key = self._flow_sections.split_section_name(section)
+        for section in self._flow_prefix.sections():
+            key = self._flow_prefix.split_section_name(section)
             result[key] = FlowSection(config=self, section=section)
+        return result
+
+    @property
+    def layout_sections(self):
+        result = OrderedDict[str, LayoutSection]()
+        for section in self._layout_prefix.sections():
+            key = self._layout_prefix.split_section_name(section)
+            result[key] = LayoutSection(config=self, section=section)
         return result
 
     @property
     def media_sections(self):
         result = OrderedDict[str, MediaSection]()
-        for section in self._media_sections.sections():
-            key = self._media_sections.split_section_name(section)
+        for section in self._media_prefix.sections():
+            key = self._media_prefix.split_section_name(section)
             result[key] = MediaSection(config=self, section=section)
         return result
 
@@ -121,6 +143,10 @@ class Config(BaseConfig):
     @property
     def graphic(self):
         return self._graphic
+
+    @property
+    def layout_manager(self):
+        return self._layout_manager
 
     @property
     def logging(self):
