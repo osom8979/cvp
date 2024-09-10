@@ -58,12 +58,12 @@ class FlowWindow(Window[FlowSection]):
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
     def on_popup_menu(self):
-        assert self
-        if imgui.begin_popup_context_window():
-            if menu_item_ex("Option 1"):
-                print("Option 1 selected")
-            if menu_item_ex("Option 2"):
-                print("Option 2 selected")
-            if menu_item_ex("Option 3"):
-                print("Option 3 selected")
+        if not imgui.begin_popup_context_window().opened:
+            return
+
+        try:
+            imgui.separator()
+            if menu_item_ex("Close"):
+                self.opened = False
+        finally:
             imgui.end_popup()

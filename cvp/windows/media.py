@@ -80,8 +80,8 @@ class MediaWindow(Window[MediaSection]):
     def on_process(self) -> None:
         self.begin_child_canvas()
         try:
-            self._child()
-            self._popup()
+            self.on_canvas()
+            self.on_popup_menu()
         finally:
             imgui.end_child()
 
@@ -178,7 +178,7 @@ class MediaWindow(Window[MediaSection]):
         imgui.pop_style_color()
         imgui.pop_style_var()
 
-    def _child(self):
+    def on_canvas(self):
         cx, cy = imgui.get_cursor_screen_pos()
         cw, ch = imgui.get_content_region_available()
 
@@ -194,12 +194,13 @@ class MediaWindow(Window[MediaSection]):
         p2 = cx + cw, cy + ch
         draw_list.add_image(self._texture, p1, p2, (0, 0), (1, 1))
 
-    def _popup(self):
-        if imgui.begin_popup_context_window():
-            if menu_item_ex("Option 1"):
-                print("Option 1 selected")
-            if menu_item_ex("Option 2"):
-                print("Option 2 selected")
-            if menu_item_ex("Option 3"):
-                print("Option 3 selected")
+    def on_popup_menu(self):
+        if not imgui.begin_popup_context_window().opened:
+            return
+
+        try:
+            imgui.separator()
+            if menu_item_ex("Close"):
+                self.opened = False
+        finally:
             imgui.end_popup()
