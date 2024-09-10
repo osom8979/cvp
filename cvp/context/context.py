@@ -8,6 +8,7 @@ from typing import Optional, Union
 
 from cvp.config.config import Config
 from cvp.filesystem.permission import test_directory, test_readable
+from cvp.flow.manager import FlowManager
 from cvp.logging.logging import (
     convert_level_number,
     dumps_default_logging_config,
@@ -79,6 +80,8 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
+        self._fm = FlowManager()
+
     @classmethod
     def from_namespace(cls, args: Namespace):
         assert isinstance(args.home, str)
@@ -99,6 +102,10 @@ class Context:
     @property
     def pm(self):
         return self._pm
+
+    @property
+    def fm(self):
+        return self._fm
 
     @property
     def debug(self) -> bool:
