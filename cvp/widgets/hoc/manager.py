@@ -10,7 +10,7 @@ from cvp.config.sections.windows.manager._base import BaseManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
-from cvp.widgets import begin_child, end_child, text_centered
+from cvp.widgets import begin_child, text_centered
 from cvp.widgets.hoc.window import Window
 
 ManagerSectionT = TypeVar("ManagerSectionT", bound=BaseManagerSection)
@@ -92,35 +92,29 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
     def on_process(self) -> None:
         menus = self.get_menus()
 
-        if begin_child("## SideChild", self.sidebar_width, border=True).visible:
-            try:
-                content_width = imgui.get_content_region_available_width()
-                imgui.set_next_item_width(content_width)
-                self.drag_sidebar_width()
+        with begin_child("## SideChild", self.sidebar_width, border=True):
+            content_width = imgui.get_content_region_available_width()
+            imgui.set_next_item_width(content_width)
+            self.drag_sidebar_width()
 
-                imgui.separator()
+            imgui.separator()
 
-                if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                    for key, menu in menus.items():
-                        title = self.query_menu_title(key, menu)
-                        label = f"{title}##{key}"
-                        if imgui.selectable(label, key == self.selected)[1]:
-                            self.selected = key
-                    imgui.end_list_box()
-            finally:
-                end_child()
+            if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
+                for key, menu in menus.items():
+                    title = self.query_menu_title(key, menu)
+                    label = f"{title}##{key}"
+                    if imgui.selectable(label, key == self.selected)[1]:
+                        self.selected = key
+                imgui.end_list_box()
 
         imgui.same_line()
 
-        if begin_child("## MainChild", -1, -1).visible:
-            try:
-                selected_menu = menus.get(self.selected)
-                if selected_menu is not None:
-                    self.on_menu(self.selected, selected_menu)
-                else:
-                    text_centered("Please select a item")
-            finally:
-                end_child()
+        with begin_child("## MainChild", -1, -1):
+            selected_menu = menus.get(self.selected)
+            if selected_menu is not None:
+                self.on_menu(self.selected, selected_menu)
+            else:
+                text_centered("Please select a item")
 
     @override
     def query_menu_title(self, key: str, item: MenuItemT) -> str:

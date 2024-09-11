@@ -7,7 +7,7 @@ import imgui
 from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
-from cvp.widgets import begin_child, end_child, text_centered
+from cvp.widgets import begin_child, text_centered
 from cvp.widgets.hoc.tab import TabItem
 
 
@@ -49,12 +49,9 @@ class ProcessStreamTab(TabItem[Process]):
 
         self._auto_scroll = imgui.checkbox("Auto Scroll", self._auto_scroll)[1]
 
-        if begin_child("## Logging", border=True).visible:
-            try:
-                imgui.text_unformatted(buffer.getvalue())
+        with begin_child("## Logging", border=True):
+            imgui.text_unformatted(buffer.getvalue())
 
-                if self._auto_scroll:
-                    # if imgui.get_scroll_y() >= imgui.get_scroll_max_y()
-                    imgui.set_scroll_here_y(1.0)
-            finally:
-                end_child()
+            if self._auto_scroll:
+                # if imgui.get_scroll_y() >= imgui.get_scroll_max_y()
+                imgui.set_scroll_here_y(1.0)
