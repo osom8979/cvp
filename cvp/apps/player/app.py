@@ -23,6 +23,7 @@ from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.managers.flow import FlowManagerWindow
+from cvp.windows.managers.layout import LayoutManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.managers.preference import PreferenceManagerWindow
 from cvp.windows.managers.process import ProcessManagerWindow
@@ -40,6 +41,7 @@ class PlayerApplication:
         self._overlay = OverlayWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
         self._flow_manager = FlowManagerWindow(self._context)
+        self._layout_manager = LayoutManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._preference_manager = PreferenceManagerWindow(self._context)
 
@@ -221,6 +223,7 @@ class PlayerApplication:
             self._overlay,
             self._media_manager,
             self._flow_manager,
+            self._layout_manager,
             self._process_manager,
             self._preference_manager,
         )
@@ -265,6 +268,8 @@ class PlayerApplication:
             self._media_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
             self._flow_manager.opened = True
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_l]:
+            self._layout_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
             self._process_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
@@ -298,11 +303,13 @@ class PlayerApplication:
             self._context.quit()
 
     def on_managers_menu(self) -> None:
-        if imgui.menu_item("Medias", "Ctrl+Alt+M", self._media_manager.opened)[0]:
+        if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
             self._media_manager.opened = not self._media_manager.opened
-        if imgui.menu_item("Flows", "Ctrl+Alt+F", self._flow_manager.opened)[0]:
+        if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow_manager.opened)[0]:
             self._flow_manager.opened = not self._flow_manager.opened
-        if imgui.menu_item("Processes", "Ctrl+Alt+P", self._process_manager.opened)[0]:
+        if imgui.menu_item("Layout", "Ctrl+Alt+L", self._layout_manager.opened)[0]:
+            self._layout_manager.opened = not self._layout_manager.opened
+        if imgui.menu_item("Process", "Ctrl+Alt+P", self._process_manager.opened)[0]:
             self._process_manager.opened = not self._process_manager.opened
 
         imgui.separator()
