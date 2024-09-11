@@ -9,6 +9,7 @@ from overrides import override
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.context import Context
 from cvp.system.usage import SystemUsage
+from cvp.variables import VERBOSE_LEVEL_1 as VL1
 from cvp.widgets import (
     begin_popup_context_window,
     end_popup_context_window,
@@ -80,9 +81,14 @@ class OverlayWindow(Window[OverlaySection]):
 
     @override
     def on_process(self) -> None:
-        framerate = imgui.get_io().framerate
-        framerate_color = self.get_framerate_color(framerate)
-        imgui.text_colored(f"FPS: {floor(framerate)}", *framerate_color)
+        io = imgui.get_io()
+        framerate_color = self.get_framerate_color(io.framerate)
+        imgui.text_colored(f"FPS: {floor(io.framerate)}", *framerate_color)
+
+        if self.context.debug and self.context.verbose >= VL1:
+            imgui.text(f"Vertices: {io.metrics_render_vertices}")
+            imgui.text(f"Indices: {io.metrics_render_indices}")
+            imgui.text(f"Visible Windows: {io.metrics_render_windows}")
 
         imgui.separator()
 
