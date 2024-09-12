@@ -30,6 +30,7 @@ from cvp.windows.managers.process import ProcessManagerWindow
 from cvp.windows.managers.window import WindowManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
+from cvp.windows.stitching import StitchingWindow
 
 
 class PlayerApplication:
@@ -40,9 +41,10 @@ class PlayerApplication:
         self._windows = WindowMapper()
 
         self._overlay = OverlayWindow(self._context)
+        self._stitching = StitchingWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
         self._flow_manager = FlowManagerWindow(self._context)
-        self._layout_manager = LayoutManagerWindow(self._context)
+        self._layout_manager = LayoutManagerWindow(self._context, self._windows)
         self._process_manager = ProcessManagerWindow(self._context)
         self._preference_manager = PreferenceManagerWindow(self._context)
         self._window_manager = WindowManagerWindow(self._context, self._windows)
@@ -223,6 +225,7 @@ class PlayerApplication:
 
         self.add_windows(
             self._overlay,
+            self._stitching,
             self._media_manager,
             self._flow_manager,
             self._layout_manager,

@@ -27,6 +27,7 @@ from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.config.sections.windows.manager.window import WindowManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.overlay import OverlaySection
+from cvp.config.sections.windows.stitching import StitchingSection
 from cvp.variables import (
     FLOW_SECTION_PREFIX,
     LAYOUT_SECTION_PREFIX,
@@ -60,6 +61,7 @@ class Config(BaseConfig):
         self._logging = LoggingSection(self)
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
+        self._stitching = StitchingSection(self)
         self._preference_manager = PreferenceManagerSection(self)
         self._process_manager = ProcessManagerSection(self)
         self._window_manager = WindowManagerSection(self)
@@ -161,6 +163,10 @@ class Config(BaseConfig):
     @property
     def overlay(self):
         return self._overlay
+
+    @property
+    def stitching(self):
+        return self._stitching
 
     @property
     def preference_manager(self):
