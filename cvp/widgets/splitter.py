@@ -8,7 +8,8 @@ import imgui
 from cvp.widgets.draw_list import get_window_draw_list
 
 AVAILABLE_REGION_SIZE: Final[float] = -1.0
-DEFAULT_SPLITTER_SIZE: Final[float] = 4.0
+DEFAULT_SPLITTER_SIZE: Final[float] = 3.0
+DEFAULT_SPLITTER_THICKNESS: Final[float] = 2.0
 
 
 @unique
@@ -19,6 +20,7 @@ class SplitterOrientation(Enum):
 
 class SplitterResult(NamedTuple):
     changed: bool
+    hovered: bool
     value: float
 
     def __bool__(self) -> bool:
@@ -31,6 +33,7 @@ def splitter(
     width: float,
     height: float,
     flags=0,
+    thickness=DEFAULT_SPLITTER_THICKNESS,
 ):
     cx, cy = imgui.get_cursor_screen_pos()
     cw, ch = imgui.get_content_region_available()
@@ -54,6 +57,9 @@ def splitter(
         case _:
             assert False, "Inaccessible Section"
 
+    width = width if width != 0.0 else -1.0
+    height = height if height != 0.0 else -1.0
+
     imgui.invisible_button(identifier, width, height, flags)
     item_active = imgui.is_item_active()
     item_hovered = imgui.is_item_hovered()
@@ -69,7 +75,7 @@ def splitter(
     stroke_color = imgui.get_color_u32_rgba(*color)
 
     draw_list = get_window_draw_list()
-    draw_list.add_line(begin[0], begin[1], end[0], end[1], stroke_color)
+    draw_list.add_line(begin[0], begin[1], end[0], end[1], stroke_color, thickness)
 
     if item_active:
         match orientation:
@@ -79,9 +85,9 @@ def splitter(
                 mouse_delta = imgui.get_io().mouse_delta.y
             case _:
                 assert False, "Inaccessible Section"
-        return SplitterResult(True, mouse_delta)
+        return SplitterResult(True, item_hovered, mouse_delta)
     else:
-        return SplitterResult(False, 0)
+        return SplitterResult(False, item_hovered, 0)
 
 
 def vertical_splitter(
@@ -89,8 +95,16 @@ def vertical_splitter(
     width=DEFAULT_SPLITTER_SIZE,
     height=AVAILABLE_REGION_SIZE,
     flags=0,
+    thickness=DEFAULT_SPLITTER_THICKNESS,
 ):
-    return splitter(identifier, SplitterOrientation.vertical, width, height, flags)
+    return splitter(
+        identifier=identifier,
+        orientation=SplitterOrientation.vertical,
+        width=width,
+        height=height,
+        flags=flags,
+        thickness=thickness,
+    )
 
 
 def horizontal_splitter(
@@ -98,5 +112,13 @@ def horizontal_splitter(
     width=AVAILABLE_REGION_SIZE,
     height=DEFAULT_SPLITTER_SIZE,
     flags=0,
+    thickness=DEFAULT_SPLITTER_THICKNESS,
 ):
-    return splitter(identifier, SplitterOrientation.horizontal, width, height, flags)
+    return splitter(
+        identifier=identifier,
+        orientation=SplitterOrientation.horizontal,
+        width=width,
+        height=height,
+        flags=flags,
+        thickness=thickness,
+    )

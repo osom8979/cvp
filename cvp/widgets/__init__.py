@@ -16,6 +16,7 @@ from cvp.widgets.item_width import item_width
 from cvp.widgets.menu_item_ex import menu_item_ex
 from cvp.widgets.set_window_min_size import set_window_min_size
 from cvp.widgets.splitter import horizontal_splitter, vertical_splitter
+from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.widgets.styles import default_style_colors, style_colors
 from cvp.widgets.text_centered import text_centered
 
@@ -38,6 +39,7 @@ __all__ = (
     "set_window_min_size",
     "horizontal_splitter",
     "vertical_splitter",
+    "SplitterWithCursor",
     "default_style_colors",
     "style_colors",
     "text_centered",
