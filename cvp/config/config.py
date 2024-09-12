@@ -24,6 +24,7 @@ from cvp.config.sections.windows.manager.layout import LayoutManagerSection
 from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.manager.preference import PreferenceManagerSection
 from cvp.config.sections.windows.manager.process import ProcessManagerSection
+from cvp.config.sections.windows.manager.window import WindowManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.variables import (
@@ -61,6 +62,7 @@ class Config(BaseConfig):
         self._overlay = OverlaySection(self)
         self._preference_manager = PreferenceManagerSection(self)
         self._process_manager = ProcessManagerSection(self)
+        self._window_manager = WindowManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
         section = self._flow_prefix.join_section_name(name if name else str(uuid4()))
@@ -167,6 +169,10 @@ class Config(BaseConfig):
     @property
     def process_manager(self):
         return self._process_manager
+
+    @property
+    def window_manager(self):
+        return self._window_manager
 
     @property
     def debug(self):

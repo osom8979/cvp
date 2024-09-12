@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from collections import OrderedDict
 from io import StringIO
 from typing import Optional, Tuple
 from warnings import catch_warnings
@@ -21,12 +20,14 @@ from cvp.popups.open_file import OpenFilePopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
+from cvp.widgets.hoc.window_mapper import WindowMapper
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.layout import LayoutManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.managers.preference import PreferenceManagerWindow
 from cvp.windows.managers.process import ProcessManagerWindow
+from cvp.windows.managers.window import WindowManagerWindow
 from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
 
@@ -36,7 +37,7 @@ class PlayerApplication:
 
     def __init__(self, context: Context):
         self._context = context
-        self._windows = OrderedDict[str, Window]()
+        self._windows = WindowMapper()
 
         self._overlay = OverlayWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
@@ -44,6 +45,7 @@ class PlayerApplication:
         self._layout_manager = LayoutManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._preference_manager = PreferenceManagerWindow(self._context)
+        self._window_manager = WindowManagerWindow(self._context, self._windows)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
         self._open_url_popup = InputTextPopup(
@@ -226,6 +228,7 @@ class PlayerApplication:
             self._layout_manager,
             self._process_manager,
             self._preference_manager,
+            self._window_manager,
         )
         self.add_media_windows(*self.config.media_sections.values())
 
@@ -274,6 +277,8 @@ class PlayerApplication:
             self._process_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
             self._preference_manager.opened = True
+        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_w]:
+            self._window_manager.opened = True
 
         self._renderer.do_tick()
 
@@ -311,6 +316,8 @@ class PlayerApplication:
             self._layout_manager.opened = not self._layout_manager.opened
         if imgui.menu_item("Process", "Ctrl+Alt+P", self._process_manager.opened)[0]:
             self._process_manager.opened = not self._process_manager.opened
+        if imgui.menu_item("Window", "Ctrl+Alt+W", self._window_manager.opened)[0]:
+            self._window_manager.opened = not self._window_manager.opened
 
         imgui.separator()
 
