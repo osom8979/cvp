@@ -3,12 +3,11 @@
 from typing import Final
 
 import imgui
-from imgui.core import _DrawList  # noqa
 
 from cvp.config.sections.windows.flow import FlowSection
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets import menu_item_ex
+from cvp.widgets import get_window_draw_list, menu_item_ex
 from cvp.widgets.hoc.window import Window
 
 WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -51,9 +50,7 @@ class FlowWindow(Window[FlowSection]):
         cx, cy = imgui.get_cursor_screen_pos()
         cw, ch = imgui.get_content_region_available()
 
-        draw_list = imgui.get_window_draw_list()
-        assert isinstance(draw_list, _DrawList)
-
+        draw_list = get_window_draw_list()
         filled_color = imgui.get_color_u32_rgba(*self._clear_color)
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
