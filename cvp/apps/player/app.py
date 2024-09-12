@@ -22,6 +22,7 @@ from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window import Window
 from cvp.widgets.hoc.window_mapper import WindowMapper
 from cvp.widgets.styles import default_style_colors
+from cvp.windows.labeling import LabelingWindow
 from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.layout import LayoutManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
@@ -40,6 +41,7 @@ class PlayerApplication:
         self._context = context
         self._windows = WindowMapper()
 
+        self._labeling = LabelingWindow(self._context)
         self._overlay = OverlayWindow(self._context)
         self._stitching = StitchingWindow(self._context)
         self._media_manager = MediaManagerWindow(self._context)
@@ -224,6 +226,7 @@ class PlayerApplication:
         GL.glClearColor(0, 0, 0, 1)
 
         self.add_windows(
+            self._labeling,
             self._overlay,
             self._stitching,
             self._media_manager,

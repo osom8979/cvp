@@ -18,6 +18,7 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
+from cvp.config.sections.windows.labeling import LabelingSection
 from cvp.config.sections.windows.layout import LayoutSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
 from cvp.config.sections.windows.manager.layout import LayoutManagerSection
@@ -57,13 +58,14 @@ class Config(BaseConfig):
         self._flow_manager = FlowManagerSection(self)
         self._font = FontSection(self)
         self._graphic = GraphicSection(self)
+        self._labeling = LabelingSection(self)
         self._layout_manager = LayoutManagerSection(self)
         self._logging = LoggingSection(self)
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
-        self._stitching = StitchingSection(self)
         self._preference_manager = PreferenceManagerSection(self)
         self._process_manager = ProcessManagerSection(self)
+        self._stitching = StitchingSection(self)
         self._window_manager = WindowManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
@@ -149,6 +151,10 @@ class Config(BaseConfig):
         return self._graphic
 
     @property
+    def labeling(self):
+        return self._labeling
+
+    @property
     def layout_manager(self):
         return self._layout_manager
 
@@ -165,16 +171,16 @@ class Config(BaseConfig):
         return self._overlay
 
     @property
-    def stitching(self):
-        return self._stitching
-
-    @property
     def preference_manager(self):
         return self._preference_manager
 
     @property
     def process_manager(self):
         return self._process_manager
+
+    @property
+    def stitching(self):
+        return self._stitching
 
     @property
     def window_manager(self):
