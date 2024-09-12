@@ -38,9 +38,9 @@ pip install cvp
 ### from source
 
 ```shell
-git clone https://github.com/osom8979/cvp ~/.cvp.app
-cd ~/.cvp.app
-./python -V
+git clone https://github.com/osom8979/cvp "$HOME/.local/share/cvp"
+cd "$HOME/.local/share/cvp"
+./run
 ```
 
 ## License

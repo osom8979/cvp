@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+
+from enum import Enum, auto, unique
+from typing import Final, NamedTuple, Tuple
+
+import imgui
+
+from cvp.widgets import get_window_draw_list
+
+AVAILABLE_REGION_SIZE: Final[float] = -1.0
+DEFAULT_SPLITTER_SIZE: Final[float] = 4.0
+
+
+@unique
+class SplitterOrientation(Enum):
+    vertical = auto()
+    horizontal = auto()
+
+
+class SplitterResult(NamedTuple):
+    changed: bool
+    value: float
+
+    def __bool__(self) -> bool:
+        return self.changed
+
+
+def splitter(
+    identifier: str,
+    orientation: SplitterOrientation,
+    width: float,
+    height: float,
+    flags=0,
+):
+    cx, cy = imgui.get_cursor_screen_pos()
+    cw, ch = imgui.get_content_region_available()
+
+    begin: Tuple[float, float]
+    end: Tuple[float, float]
+
+    match orientation:
+        case SplitterOrientation.vertical:
+            if width <= 0:
+                raise ValueError("The 'width' argument must be greater than zero")
+            height = height if height >= 0 else ch + height - AVAILABLE_REGION_SIZE
+            begin = cx + (width / 2), cy
+            end = begin[0], cy + height
+        case SplitterOrientation.horizontal:
+            if height <= 0:
+                raise ValueError("The 'height' argument must be greater than zero")
+            width = width if width >= 0 else cw + width - AVAILABLE_REGION_SIZE
+            begin = cx, cy + (height / 2)
+            end = cx + width, begin[1]
+        case _:
+            assert False, "Inaccessible Section"
+
+    imgui.invisible_button(identifier, width, height, flags)
+    item_active = imgui.is_item_active()
+    item_hovered = imgui.is_item_hovered()
+
+    if item_active:
+        style = imgui.COLOR_SEPARATOR_ACTIVE
+    elif item_hovered:
+        style = imgui.COLOR_SEPARATOR_HOVERED
+    else:
+        style = imgui.COLOR_SEPARATOR
+
+    color = imgui.get_style_color_vec_4(style)
+    stroke_color = imgui.get_color_u32_rgba(*color)
+
+    draw_list = get_window_draw_list()
+    draw_list.add_line(begin[0], begin[1], end[0], end[1], stroke_color)
+
+    if item_active:
+        match orientation:
+            case SplitterOrientation.vertical:
+                mouse_delta = imgui.get_io().mouse_delta.x
+            case SplitterOrientation.horizontal:
+                mouse_delta = imgui.get_io().mouse_delta.y
+            case _:
+                assert False, "Inaccessible Section"
+        return SplitterResult(True, mouse_delta)
+    else:
+        return SplitterResult(False, 0)
+
+
+def vertical_splitter(
+    identifier: str,
+    width=DEFAULT_SPLITTER_SIZE,
+    height=AVAILABLE_REGION_SIZE,
+    flags=0,
+):
+    return splitter(identifier, SplitterOrientation.vertical, width, height, flags)
+
+
+def horizontal_splitter(
+    identifier: str,
+    width=AVAILABLE_REGION_SIZE,
+    height=DEFAULT_SPLITTER_SIZE,
+    flags=0,
+):
+    return splitter(identifier, SplitterOrientation.horizontal, width, height, flags)

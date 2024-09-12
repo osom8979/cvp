@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
+from math import floor
 from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
+import pygame
 
 # noinspection PyProtectedMember
 from cvp.config.sections.windows.manager._base import BaseManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH
-from cvp.widgets import begin_child, text_centered
+from cvp.widgets import begin_child, text_centered, vertical_splitter
 from cvp.widgets.hoc.window import Window
 
 ManagerSectionT = TypeVar("ManagerSectionT", bound=BaseManagerSection)
@@ -49,6 +51,8 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
             flags=flags,
         )
         self._min_sidebar_width = min_sidebar_width
+        self._prev_splitter_hovered = False
+        self._prev_cursor = pygame.cursors.Cursor()
 
     @property
     def sidebar_width(self) -> int:
@@ -106,6 +110,23 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
                     if imgui.selectable(label, key == self.selected)[1]:
                         self.selected = key
                 imgui.end_list_box()
+
+        imgui.same_line()
+
+        if vs_result := vertical_splitter("## VSplitter"):
+            sidebar_width_value = self.sidebar_width + floor(vs_result.value)
+            if sidebar_width_value < self._min_sidebar_width:
+                sidebar_width_value = self._min_sidebar_width
+            self.sidebar_width = sidebar_width_value
+
+        splitter_hovered = imgui.is_item_hovered()
+        if not self._prev_splitter_hovered and splitter_hovered:
+            self._prev_cursor = pygame.mouse.get_cursor()
+            pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_SIZEWE)
+            self._prev_splitter_hovered = True
+        if self._prev_splitter_hovered and not splitter_hovered:
+            pygame.mouse.set_cursor(self._prev_cursor)
+            self._prev_splitter_hovered = False
 
         imgui.same_line()
 
