@@ -6,14 +6,25 @@ from os import R_OK, access, getcwd
 from os.path import isfile, join
 from typing import Final, List, Optional, Sequence
 
+from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import (
+    CVP_COLORED_LOGGING,
+    CVP_DEBUG,
     CVP_DOTENV_PATH,
     CVP_HOME,
+    CVP_LOGGING_SEVERITY,
+    CVP_LOGGING_STEP,
     CVP_NO_DOTENV,
+    CVP_SIMPLE_LOGGING,
     CVP_USE_UVLOOP,
+    CVP_VERBOSE,
 )
-from cvp.variables import DEFAULT_CVP_HOME_PATH, LOCAL_DOTENV_FILENAME
+from cvp.variables import (
+    DEFAULT_CVP_HOME_PATH,
+    DEFAULT_LOGGING_STEP,
+    LOCAL_DOTENV_FILENAME,
+)
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -35,6 +46,8 @@ Simply usage:
 
 CMDS: Final[Sequence[str]] = CMD_PLAYER, CMD_WORKER
 DEFAULT_CMD: Final[str] = CMD_PLAYER
+
+DEFAULT_SEVERITY: Final[str] = SEVERITY_NAME_INFO
 
 
 @lru_cache
@@ -81,12 +94,62 @@ def add_worker_parser(subparsers) -> None:
     )
     assert isinstance(parser, ArgumentParser)
 
+    logging_group = parser.add_mutually_exclusive_group()
+    logging_group.add_argument(
+        "--colored-logging",
+        "-c",
+        action="store_true",
+        default=get_eval(CVP_COLORED_LOGGING, False),
+        help="Use colored logging",
+    )
+    logging_group.add_argument(
+        "--simple-logging",
+        "-s",
+        action="store_true",
+        default=get_eval(CVP_SIMPLE_LOGGING, False),
+        help="Use simple logging",
+    )
+
+    parser.add_argument(
+        "--logging-step",
+        type=int,
+        default=get_eval(CVP_LOGGING_STEP, DEFAULT_LOGGING_STEP),
+        help="An iterative step that emits statistics results to a logger",
+    )
+    parser.add_argument(
+        "--logging-severity",
+        choices=SEVERITIES,
+        default=get_eval(CVP_LOGGING_SEVERITY, DEFAULT_SEVERITY),
+        help=f"Logging severity (default: '{DEFAULT_SEVERITY}')",
+    )
+
     parser.add_argument(
         "--use-uvloop",
         action="store_true",
         default=get_eval(CVP_USE_UVLOOP, False),
         help="Replace the event loop with uvloop",
     )
+    parser.add_argument(
+        "--debug",
+        "-d",
+        action="store_true",
+        default=get_eval(CVP_DEBUG, False),
+        help="Enable debugging mode and change logging severity to 'DEBUG'",
+    )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        action="count",
+        default=get_eval(CVP_VERBOSE, 0),
+        help="Be more verbose/talkative during the operation",
+    )
+    parser.add_argument(
+        "-D",
+        action="store_true",
+        default=False,
+        help="Same as ['-c', '-d', '-vv'] flags",
+    )
+
     parser.add_argument(
         "opts",
         nargs=REMAINDER,

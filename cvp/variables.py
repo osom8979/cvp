@@ -30,6 +30,9 @@ MAX_PROCESS_WORKERS: Final[int] = 5
 
 THREAD_POOL_PREFIX: Final[str] = "cvp.threadpool"
 
+DEFAULT_LOGGING_STEP: Final[int] = 1000
+DEFAULT_SLOW_CALLBACK_DURATION: Final[float] = 0.05
+
 MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 

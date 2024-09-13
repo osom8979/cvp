@@ -6,14 +6,15 @@ from functools import lru_cache
 from typing import Callable, Dict
 
 from cvp.apps.player import player_main
-from cvp.arguments import CMD_PLAYER
+from cvp.apps.worker import worker_main
+from cvp.arguments import CMD_PLAYER, CMD_WORKER
 from cvp.context.autofixer import AutoFixerError
 from cvp.logging.logging import logger
 
 
 @lru_cache
 def cmd_apps() -> Dict[str, Callable[[Namespace], None]]:
-    return {CMD_PLAYER: player_main}
+    return {CMD_PLAYER: player_main, CMD_WORKER: worker_main}
 
 
 def run_app(cmd: str, args: Namespace) -> int:
@@ -29,7 +30,7 @@ def run_app(cmd: str, args: Namespace) -> int:
         logger.warning(f"{e}, Please restart the application")
     except CancelledError:
         logger.debug("An cancelled signal was detected")
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, InterruptedError):
         logger.warning("An interrupt signal was detected")
     except SystemExit as e:
         assert isinstance(e.code, int)

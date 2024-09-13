@@ -1,31 +1,42 @@
 # -*- coding: utf-8 -*-
 
-from argparse import Namespace
-from asyncio import sleep
+from asyncio import get_running_loop, sleep
 from multiprocessing.queues import Queue
 from typing import Optional
 
 from cvp.aio.run import aio_run
 from cvp.logging.logging import worker_logger as logger
-from cvp.msg import Message
+from cvp.variables import DEFAULT_LOGGING_STEP, DEFAULT_SLOW_CALLBACK_DURATION
 
 
 class WorkerApplication:
-    _queue: Optional[Queue[Message]]
-
-    def __init__(self, *args, queue: Optional[Queue] = None, use_uvloop=False):
+    def __init__(
+        self,
+        *args,
+        queue: Optional[Queue] = None,
+        logging_step=DEFAULT_LOGGING_STEP,
+        slow_callback_duration=DEFAULT_SLOW_CALLBACK_DURATION,
+        use_uvloop=False,
+        debug=False,
+        verbose=0,
+    ):
         self._args = args
         self._queue = queue
+        self._logging_step = logging_step
+        self._slow_callback_duration = slow_callback_duration
         self._use_uvloop = use_uvloop
-
-    @classmethod
-    def from_namespace(cls, args: Namespace):
-        assert isinstance(args.use_uvloop, bool)
-        assert isinstance(args.opts, list)
-        return cls(*args.opts, queue=None, use_uvloop=args.use_uvloop)
+        self._debug = debug
+        self._verbose = verbose
 
     async def on_main(self):
         logger.debug(f"Initial arguments: {self._args}")
+
+        loop = get_running_loop()
+        loop.slow_callback_duration = self._slow_callback_duration
+
+        if self._debug:
+            loop.set_debug(True)
+
         try:
             while True:
                 await sleep(1.0)
@@ -36,5 +47,5 @@ class WorkerApplication:
     def start(self) -> None:
         try:
             aio_run(self.on_main(), self._use_uvloop)
-        except KeyboardInterrupt as e:
-            logger.warning(e)
+        except (KeyboardInterrupt, InterruptedError):
+            logger.warning("An interrupt signal was detected")

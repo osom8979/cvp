@@ -132,6 +132,10 @@ def set_root_level(level: Union[str, int]) -> None:
     getLogger().setLevel(convert_level_number(level))
 
 
+def set_asyncio_level(level: Union[str, int]) -> None:
+    getLogger("asyncio").setLevel(convert_level_number(level))
+
+
 def set_default_logging_config() -> None:
     logging_config.dictConfig(DEFAULT_LOGGING_CONFIG)
 
@@ -149,6 +153,7 @@ def loads_logging_config(path: str) -> None:
 def add_default_rotate_file_logging(
     prefix: str,
     when: Union[str, TimedRotatingWhenLiteral] = DEFAULT_TIMED_ROTATING_WHEN,
+    name: Optional[str] = None,
     level=DEBUG,
 ) -> None:
     formatter = Formatter(
@@ -162,10 +167,10 @@ def add_default_rotate_file_logging(
     handler.setFormatter(formatter)
     handler.setLevel(level)
 
-    getLogger().addHandler(handler)
+    getLogger(name).addHandler(handler)
 
 
-def add_default_colored_logging(level=DEBUG) -> None:
+def add_default_colored_logging(name: Optional[str] = None, level=DEBUG) -> None:
     from cvp.logging.formatters.colored import ColoredFormatter
 
     formatter = ColoredFormatter(
@@ -178,10 +183,10 @@ def add_default_colored_logging(level=DEBUG) -> None:
     handler.setFormatter(formatter)
     handler.setLevel(level)
 
-    getLogger().addHandler(handler)
+    getLogger(name).addHandler(handler)
 
 
-def add_default_logging(level=DEBUG) -> None:
+def add_default_logging(name: Optional[str] = None, level=DEBUG) -> None:
     formatter = Formatter(
         fmt=DEFAULT_FORMAT,
         datefmt=DEFAULT_DATEFMT,
@@ -192,10 +197,10 @@ def add_default_logging(level=DEBUG) -> None:
     handler.setFormatter(formatter)
     handler.setLevel(level)
 
-    getLogger().addHandler(handler)
+    getLogger(name).addHandler(handler)
 
 
-def add_simple_logging(level=DEBUG) -> None:
+def add_simple_logging(name: Optional[str] = None, level=DEBUG) -> None:
     formatter = Formatter(
         fmt=DEFAULT_SIMPLE_LOGGING_FORMAT,
         style=DEFAULT_SIMPLE_LOGGING_STYLE,
@@ -205,4 +210,4 @@ def add_simple_logging(level=DEBUG) -> None:
     handler.setFormatter(formatter)
     handler.setLevel(level)
 
-    getLogger().addHandler(handler)
+    getLogger(name).addHandler(handler)
