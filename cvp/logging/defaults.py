@@ -6,6 +6,7 @@ from cvp.system.environ_keys import CVP_HOME
 
 CVP_LOGGER_NAME: Final[str] = "cvp"
 CVP_DOWNLOAD_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.download"
+CVP_WORKER_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.worker"
 
 TimedRotatingWhenLiteral = Literal[
     "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"

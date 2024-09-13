@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from argparse import ArgumentParser, Namespace, RawDescriptionHelpFormatter
+from argparse import REMAINDER, ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from functools import lru_cache
 from os import R_OK, access, getcwd
 from os.path import isfile, join
 from typing import Final, List, Optional, Sequence
 
 from cvp.system.environ import get_typed_environ_value as get_eval
-from cvp.system.environ_keys import CVP_DOTENV_PATH, CVP_HOME, CVP_NO_DOTENV
+from cvp.system.environ_keys import (
+    CVP_DOTENV_PATH,
+    CVP_HOME,
+    CVP_NO_DOTENV,
+    CVP_USE_UVLOOP,
+)
 from cvp.variables import DEFAULT_CVP_HOME_PATH, LOCAL_DOTENV_FILENAME
 
 PROG: Final[str] = "cvp"
@@ -21,7 +26,14 @@ Simply usage:
   {PROG} {CMD_PLAYER}
 """
 
-CMDS: Final[Sequence[str]] = (CMD_PLAYER,)
+CMD_WORKER: Final[str] = "worker"
+CMD_WORKER_HELP: Final[str] = "Background Worker"
+CMD_WORKER_EPILOG = f"""
+Simply usage:
+  {PROG} {CMD_WORKER}
+"""
+
+CMDS: Final[Sequence[str]] = CMD_PLAYER, CMD_WORKER
 DEFAULT_CMD: Final[str] = CMD_PLAYER
 
 
@@ -59,6 +71,29 @@ def add_player_parser(subparsers) -> None:
     assert isinstance(parser, ArgumentParser)
 
 
+def add_worker_parser(subparsers) -> None:
+    # noinspection SpellCheckingInspection
+    parser = subparsers.add_parser(
+        name=CMD_WORKER,
+        help=CMD_WORKER_HELP,
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog=CMD_WORKER_EPILOG,
+    )
+    assert isinstance(parser, ArgumentParser)
+
+    parser.add_argument(
+        "--use-uvloop",
+        action="store_true",
+        default=get_eval(CVP_USE_UVLOOP, False),
+        help="Replace the event loop with uvloop",
+    )
+    parser.add_argument(
+        "opts",
+        nargs=REMAINDER,
+        help="Worker pipeline arguments",
+    )
+
+
 def default_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(
         prog=PROG,
@@ -84,6 +119,7 @@ def default_argument_parser() -> ArgumentParser:
 
     subparsers = parser.add_subparsers(dest="cmd")
     add_player_parser(subparsers)
+    add_worker_parser(subparsers)
 
     return parser
 

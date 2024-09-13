@@ -25,6 +25,11 @@ class ProcessManager:
         thread_name_prefix=THREAD_POOL_PREFIX,
         process_workers=MAX_PROCESS_WORKERS,
     ):
+        if thread_workers < 1:
+            raise ValueError("The 'thread_workers' argument must be at least 2")
+        if process_workers < 1:
+            raise ValueError("The 'process_workers' argument must be at least 2")
+
         logger.info(f"Create ThreadPoolExecutor(max_workers={thread_workers}) of PM")
         self._thread_pool = ThreadPoolExecutor(
             max_workers=thread_workers,

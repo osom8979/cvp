@@ -31,6 +31,10 @@ class GraphicSection(BaseSection):
         self.set(self.K.force_egl, value)
 
     @property
+    def force_egl_environ(self) -> str:
+        return "1" if self.force_egl else "0"
+
+    @property
     def has_use_accelerate(self) -> bool:
         return self.has(self.K.use_accelerate)
 
@@ -41,3 +45,7 @@ class GraphicSection(BaseSection):
     @use_accelerate.setter
     def use_accelerate(self, value: bool) -> None:
         self.set(self.K.use_accelerate, value)
+
+    @property
+    def use_accelerate_environ(self) -> str:
+        return "1" if self.use_accelerate else "0"

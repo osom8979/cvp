@@ -71,12 +71,12 @@ class Context:
         )
 
         if self.config.graphic.has_force_egl:
-            force_egl = "1" if self.config.graphic.force_egl else "0"
+            force_egl = self.config.graphic.force_egl_environ
             os.environ[SDL_VIDEO_X11_FORCE_EGL] = force_egl
             logger.info(f"Update environ: {SDL_VIDEO_X11_FORCE_EGL}={force_egl}")
 
         if self.config.graphic.has_use_accelerate:
-            use_accelerate = "1" if self.config.graphic.use_accelerate else "0"
+            use_accelerate = self.config.graphic.use_accelerate_environ
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
