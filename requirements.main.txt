@@ -12,5 +12,6 @@ orjson==3.10.6
 psutil==6.0.0
 pygame-ce==2.4.1
 python-dotenv==1.0.1
+uvloop==0.20.0
 watchdog==5.0.0
 zeep==4.2.1
