@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC
-from typing import Optional
+from typing import Mapping, Optional
 
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets.hoc.manager import Manager, ManagerSectionT, MenuItemT
-from cvp.widgets.hoc.tab import TabBar, TabItem
+from cvp.widgets.hoc.manager import Manager, ManagerSectionT
 
 
-class ManagerTab(Manager[ManagerSectionT, MenuItemT], ABC):
+class SidebarWithMain(Manager[ManagerSectionT, None]):
+    __menus_faker__: Mapping[str, None] = dict()
+
     def __init__(
         self,
         context: Context,
@@ -22,8 +22,6 @@ class ManagerTab(Manager[ManagerSectionT, MenuItemT], ABC):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
-        tabs_identifier: Optional[str] = None,
-        tabs_flags=0,
     ):
         super().__init__(
             context=context,
@@ -36,15 +34,23 @@ class ManagerTab(Manager[ManagerSectionT, MenuItemT], ABC):
             modifiable_title=modifiable_title,
             min_sidebar_width=min_sidebar_width,
         )
-        self._tabs = TabBar[MenuItemT](
-            context=context,
-            identifier=tabs_identifier,
-            flags=tabs_flags,
-        )
-
-    def register(self, item: TabItem[MenuItemT]) -> None:
-        self._tabs.register(item)
 
     @override
-    def on_menu(self, key: str, item: MenuItemT) -> None:
-        self._tabs.do_process(item)
+    def query_menu_title(self, key: str, item: None) -> str:
+        raise NotImplementedError
+
+    @override
+    def get_menus(self) -> Mapping[str, None]:
+        return self.__menus_faker__
+
+    @override
+    def on_menu(self, key: str, item: None) -> None:
+        raise NotImplementedError
+
+    @override
+    def on_process_sidebar(self) -> None:
+        pass
+
+    @override
+    def on_process_main(self) -> None:
+        pass

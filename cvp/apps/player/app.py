@@ -41,14 +41,14 @@ class PlayerApplication:
         self._context = context
         self._windows = WindowMapper()
 
-        self._labeling = LabelingWindow(self._context)
-        self._overlay = OverlayWindow(self._context)
-        self._stitching = StitchingWindow(self._context)
-        self._media_manager = MediaManagerWindow(self._context)
         self._flow_manager = FlowManagerWindow(self._context)
+        self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManagerWindow(self._context, self._windows)
-        self._process_manager = ProcessManagerWindow(self._context)
+        self._media_manager = MediaManagerWindow(self._context)
+        self._overlay = OverlayWindow(self._context)
         self._preference_manager = PreferenceManagerWindow(self._context)
+        self._process_manager = ProcessManagerWindow(self._context)
+        self._stitching = StitchingWindow(self._context)
         self._window_manager = WindowManagerWindow(self._context, self._windows)
 
         self._open_file_popup = OpenFilePopup(title="Open file")
@@ -226,14 +226,14 @@ class PlayerApplication:
         GL.glClearColor(0, 0, 0, 1)
 
         self.add_windows(
-            self._labeling,
-            self._overlay,
-            self._stitching,
-            self._media_manager,
             self._flow_manager,
+            self._labeling_manager,
             self._layout_manager,
-            self._process_manager,
+            self._media_manager,
+            self._overlay,
             self._preference_manager,
+            self._process_manager,
+            self._stitching,
             self._window_manager,
         )
         self.add_media_windows(*self.config.media_sections.values())

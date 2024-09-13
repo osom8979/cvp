@@ -3,7 +3,7 @@
 from enum import StrEnum, unique
 
 from cvp.config._base import BaseConfig
-from cvp.config.sections.windows._base import BaseWindowSection
+from cvp.config.sections.windows.manager._base import BaseManagerSection
 
 
 @unique
@@ -11,8 +11,8 @@ class _Keys(StrEnum):
     pass
 
 
-class StitchingSection(BaseWindowSection):
+class LabelingManagerSection(BaseManagerSection):
     K = _Keys
 
-    def __init__(self, config: BaseConfig, section="stitching"):
+    def __init__(self, config: BaseConfig, section="labeling_manager"):
         super().__init__(config=config, section=section)

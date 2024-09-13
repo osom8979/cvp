@@ -15,6 +15,7 @@ class ControlTab:
 
     def _main(self):
         imgui.text("View")
+
         self.pan_x, self.pan_y = imgui.drag_float2(
             "Pan", self.pan_x, self.pan_y, 0.1, 0.0, 0.0, "%.1f"
         )[1]

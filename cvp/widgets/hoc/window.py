@@ -8,6 +8,7 @@ import imgui
 # noinspection PyProtectedMember
 from cvp.config.sections.windows._base import BaseWindowSection
 from cvp.context import Context
+from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
@@ -75,7 +76,7 @@ class Window(Generic[SectionT], WindowInterface):
         flags: Optional[int] = None,
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
-        use_config_title=False,
+        modifiable_title=False,
     ) -> None:
         assert isinstance(context, Context)
         assert isinstance(section, BaseWindowSection)
@@ -92,7 +93,7 @@ class Window(Generic[SectionT], WindowInterface):
 
         self._min_width = min_width
         self._min_height = min_height
-        self._use_config_title = use_config_title
+        self._modifiable_title = modifiable_title
 
         self._initialized = False
         self._popups = dict()
@@ -115,13 +116,18 @@ class Window(Generic[SectionT], WindowInterface):
 
     @property
     def title(self) -> str:
-        if self._use_config_title:
+        if self._modifiable_title:
             return self._section.title
         else:
             return self._title
 
     @title.setter
     def title(self, value: str) -> None:
+        if not self._modifiable_title:
+            logger.warning(
+                f"{repr(self)} "
+                "The title of a window that cannot be renamed should not be changed"
+            )
         self._section.title = value
 
     @property
@@ -138,6 +144,12 @@ class Window(Generic[SectionT], WindowInterface):
     @override
     def label(self) -> str:
         return f"{self.title}###{self.key}"
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} key={self.key}>"
+
+    def __str__(self) -> str:
+        return self.label
 
     @override
     def begin(self) -> Tuple[bool, bool]:

@@ -18,17 +18,17 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
-from cvp.config.sections.windows.labeling import LabelingSection
 from cvp.config.sections.windows.layout import LayoutSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
+from cvp.config.sections.windows.manager.labeling import LabelingManagerSection
 from cvp.config.sections.windows.manager.layout import LayoutManagerSection
 from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.manager.preference import PreferenceManagerSection
 from cvp.config.sections.windows.manager.process import ProcessManagerSection
+from cvp.config.sections.windows.manager.stitching import StitchingManagerSection
 from cvp.config.sections.windows.manager.window import WindowManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.overlay import OverlaySection
-from cvp.config.sections.windows.stitching import StitchingSection
 from cvp.variables import (
     FLOW_SECTION_PREFIX,
     LAYOUT_SECTION_PREFIX,
@@ -58,14 +58,14 @@ class Config(BaseConfig):
         self._flow_manager = FlowManagerSection(self)
         self._font = FontSection(self)
         self._graphic = GraphicSection(self)
-        self._labeling = LabelingSection(self)
+        self._labeling_manager = LabelingManagerSection(self)
         self._layout_manager = LayoutManagerSection(self)
         self._logging = LoggingSection(self)
         self._media_manager = MediaManagerSection(self)
         self._overlay = OverlaySection(self)
         self._preference_manager = PreferenceManagerSection(self)
         self._process_manager = ProcessManagerSection(self)
-        self._stitching = StitchingSection(self)
+        self._stitching_manager = StitchingManagerSection(self)
         self._window_manager = WindowManagerSection(self)
 
     def add_flow_section(self, name: Optional[str] = None):
@@ -151,8 +151,8 @@ class Config(BaseConfig):
         return self._graphic
 
     @property
-    def labeling(self):
-        return self._labeling
+    def labeling_manager(self):
+        return self._labeling_manager
 
     @property
     def layout_manager(self):
@@ -179,8 +179,8 @@ class Config(BaseConfig):
         return self._process_manager
 
     @property
-    def stitching(self):
-        return self._stitching
+    def stitching_manager(self):
+        return self._stitching_manager
 
     @property
     def window_manager(self):

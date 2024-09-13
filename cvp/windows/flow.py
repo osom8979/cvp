@@ -23,7 +23,7 @@ class FlowWindow(Window[FlowSection]):
             title="Flow",
             closable=True,
             flags=None,
-            use_config_title=True,
+            modifiable_title=True,
         )
         self._clear_color = 0.5, 0.5, 0.5, 1.0
 

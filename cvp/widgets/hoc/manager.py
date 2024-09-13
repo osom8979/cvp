@@ -10,7 +10,7 @@ import imgui
 from cvp.config.sections.windows.manager._base import BaseManagerSection
 from cvp.context import Context
 from cvp.types import override
-from cvp.variables import MIN_SIDEBAR_WIDTH
+from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import SplitterWithCursor, begin_child, text_centered
 from cvp.widgets.hoc.window import Window
 
@@ -28,11 +28,25 @@ class ManagerInterface(Generic[MenuItemT], ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def on_process_sidebar(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_process_splitter(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_process_main(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_menu(self, key: str, item: MenuItemT) -> None:
         raise NotImplementedError
 
 
-class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
+class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
+    _current_menus: Optional[Mapping[str, MenuItemT]]
+
     def __init__(
         self,
         context: Context,
@@ -40,6 +54,9 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
+        min_width=MIN_WINDOW_WIDTH,
+        min_height=MIN_WINDOW_HEIGHT,
+        modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
     ):
         super().__init__(
@@ -48,8 +65,12 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
             title=title,
             closable=closable,
             flags=flags,
+            min_width=min_width,
+            min_height=min_height,
+            modifiable_title=modifiable_title,
         )
         self._min_sidebar_width = min_sidebar_width
+        self._current_menus = None
         self._splitter = SplitterWithCursor.from_vertical("## VSplitter")
 
     @property
@@ -70,36 +91,15 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
 
     @override
     def on_process(self) -> None:
-        menus = self.get_menus()
-
-        with begin_child("## SideChild", self.sidebar_width, border=False):
-            content_width = imgui.get_content_region_available_width()
-            imgui.set_next_item_width(content_width)
-
-            if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                for key, menu in menus.items():
-                    title = self.query_menu_title(key, menu)
-                    label = f"{title}##{key}"
-                    if imgui.selectable(label, key == self.selected)[1]:
-                        self.selected = key
-                imgui.end_list_box()
-
-        imgui.same_line()
-
-        if splitter_result := self._splitter.do_process():
-            sidebar_width_value = self.sidebar_width + floor(splitter_result.value)
-            if sidebar_width_value < self._min_sidebar_width:
-                sidebar_width_value = self._min_sidebar_width
-            self.sidebar_width = sidebar_width_value
-
-        imgui.same_line()
-
-        with begin_child("## MainChild", -1, -1):
-            selected_menu = menus.get(self.selected)
-            if selected_menu is not None:
-                self.on_menu(self.selected, selected_menu)
-            else:
-                text_centered("Please select a item")
+        self._current_menus = self.get_menus()
+        try:
+            self.on_process_sidebar()
+            imgui.same_line()
+            self.on_process_splitter()
+            imgui.same_line()
+            self.on_process_main()
+        finally:
+            self._current_menus = None
 
     @override
     def query_menu_title(self, key: str, item: MenuItemT) -> str:
@@ -111,3 +111,46 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT], ABC):
             return getattr(item, "name")
         else:
             return str(item)
+
+    @override
+    def get_menus(self) -> Mapping[str, MenuItemT]:
+        return dict()
+
+    @override
+    def on_process_sidebar(self) -> None:
+        assert self._current_menus is not None
+
+        with begin_child("## SideChild", self.sidebar_width, border=False):
+            content_width = imgui.get_content_region_available_width()
+            imgui.set_next_item_width(content_width)
+
+            if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
+                for key, menu in self._current_menus.items():
+                    title = self.query_menu_title(key, menu)
+                    label = f"{title}##{key}"
+                    if imgui.selectable(label, key == self.selected)[1]:
+                        self.selected = key
+                imgui.end_list_box()
+
+    @override
+    def on_process_splitter(self) -> None:
+        if splitter_result := self._splitter.do_process():
+            sidebar_width_value = self.sidebar_width + floor(splitter_result.value)
+            if sidebar_width_value < self._min_sidebar_width:
+                sidebar_width_value = self._min_sidebar_width
+            self.sidebar_width = sidebar_width_value
+
+    @override
+    def on_process_main(self) -> None:
+        assert self._current_menus is not None
+
+        with begin_child("## MainChild", -1, -1):
+            selected_menu = self._current_menus.get(self.selected)
+            if selected_menu is not None:
+                self.on_menu(self.selected, selected_menu)
+            else:
+                text_centered("Please select a item")
+
+    @override
+    def on_menu(self, key: str, item: MenuItemT) -> None:
+        pass
