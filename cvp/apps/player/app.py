@@ -2,7 +2,7 @@
 
 import os
 from io import StringIO
-from typing import Optional, Tuple
+from typing import Tuple
 from warnings import catch_warnings
 
 import imgui
@@ -11,15 +11,12 @@ from OpenGL import GL
 from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
 
-from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
 from cvp.logging.logging import logger
-from cvp.popups.input_text import InputTextPopup
-from cvp.popups.open_file import OpenFilePopup
+from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
-from cvp.widgets.hoc.window import Window
 from cvp.widgets.hoc.window_mapper import WindowMapper
 from cvp.widgets.styles import default_style_colors
 from cvp.windows.labeling import LabelingWindow
@@ -29,7 +26,6 @@ from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.managers.preference import PreferenceManagerWindow
 from cvp.windows.managers.process import ProcessManagerWindow
 from cvp.windows.managers.window import WindowManagerWindow
-from cvp.windows.media import MediaWindow
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.stitching import StitchingWindow
 
@@ -44,44 +40,19 @@ class PlayerApplication:
         self._flow_manager = FlowManagerWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManagerWindow(self._context, self._windows)
-        self._media_manager = MediaManagerWindow(self._context)
+        self._media_manager = MediaManagerWindow(self._context, self._windows)
         self._overlay = OverlayWindow(self._context)
         self._preference_manager = PreferenceManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._stitching = StitchingWindow(self._context)
         self._window_manager = WindowManagerWindow(self._context, self._windows)
 
-        self._open_file_popup = OpenFilePopup(title="Open file")
-        self._open_url_popup = InputTextPopup(
-            title="Open network stream",
-            label="Please enter a network URL:",
-            ok="Open",
-            cancel="Close",
+        self._confirm_quit = ConfirmPopup(
+            title="Exit",
+            label="Are you sure you want to exit?",
+            ok="Exit",
+            cancel="No",
         )
-
-    def add_windows(self, *windows: Window) -> None:
-        for window in windows:
-            self.add_window(window)
-
-    def add_window(self, window: Window, key: Optional[str] = None) -> None:
-        key = key if key else window.key
-        assert isinstance(key, str)
-        window.do_create()
-        self._windows[key] = window
-
-    def add_media_windows(self, *sections: MediaSection) -> None:
-        for section in sections:
-            self.add_media_window(section)
-
-    def add_media_window(self, section: MediaSection) -> None:
-        self.add_window(MediaWindow(self._context, section))
-
-    def add_new_media_window(self, file: str) -> None:
-        section = self.config.add_media_section()
-        section.opened = True
-        section.file = file
-        section.name = file
-        self.add_media_window(section)
 
     @property
     def home(self):
@@ -225,7 +196,7 @@ class PlayerApplication:
 
         GL.glClearColor(0, 0, 0, 1)
 
-        self.add_windows(
+        self._windows.add_windows(
             self._flow_manager,
             self._labeling_manager,
             self._layout_manager,
@@ -236,14 +207,10 @@ class PlayerApplication:
             self._stitching,
             self._window_manager,
         )
-        self.add_media_windows(*self.config.media_sections.values())
 
     def on_exit(self) -> None:
         self._context.teardown()
-
-        while self._windows:
-            key, win = self._windows.popitem(last=False)
-            win.do_destroy()
+        self._windows.do_destroy()
 
         if not self._context.readonly:
             self.config.display.fullscreen = pygame.display.is_fullscreen()
@@ -262,16 +229,12 @@ class PlayerApplication:
     def on_event(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self._context.quit()
+                self._confirm_quit.show()
             self._renderer.do_event(event)
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
-            self._context.quit()
-        if keys[pygame.K_LCTRL] and keys[pygame.K_o]:
-            self._open_file_popup.show()
-        if keys[pygame.K_LCTRL] and keys[pygame.K_n]:
-            self._open_url_popup.show()
+            self._confirm_quit.show()
 
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
             self._media_manager.opened = True
@@ -294,8 +257,7 @@ class PlayerApplication:
             GL.glClear(GL.GL_COLOR_BUFFER_BIT)
             self.on_main_menu()
             self.on_popups()
-            for win in self._windows.values():
-                win.do_process()
+            self._windows.do_process()
             self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not
@@ -305,13 +267,9 @@ class PlayerApplication:
             pygame.display.flip()
 
     def on_file_menu(self) -> None:
-        if imgui.menu_item("Open file", "Ctrl+O")[0]:
-            self._open_file_popup.show()
-        if imgui.menu_item("Open network", "Ctrl+N")[0]:
-            self._open_url_popup.show()
-        imgui.separator()
+        # imgui.separator()
         if imgui.menu_item("Quit", "Ctrl+Q")[0]:
-            self._context.quit()
+            self._confirm_quit.show()
 
     def on_managers_menu(self) -> None:
         if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
@@ -350,6 +308,7 @@ class PlayerApplication:
                 ("Managers", self.on_managers_menu),
                 ("Windows", self.on_windows_menu),
             )
+
             for name, func in menus:
                 if imgui.begin_menu(name):
                     try:
@@ -358,13 +317,8 @@ class PlayerApplication:
                         imgui.end_menu()
 
     def on_popups(self) -> None:
-        file = self._open_file_popup.do_process()
-        if file:
-            self.add_new_media_window(file)
-
-        url = self._open_url_popup.do_process()
-        if url:
-            self.add_new_media_window(url)
+        if self._confirm_quit.do_process():
+            self._context.quit()
 
     def on_demo_window(self) -> None:
         if not self.debug:

@@ -32,6 +32,14 @@ class ManagerInterface(Generic[MenuItemT], ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def on_process_sidebar_top(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_process_sidebar_bottom(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_process_splitter(self) -> None:
         raise NotImplementedError
 
@@ -45,7 +53,7 @@ class ManagerInterface(Generic[MenuItemT], ABC):
 
 
 class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
-    _current_menus: Optional[Mapping[str, MenuItemT]]
+    _latest_menus: Optional[Mapping[str, MenuItemT]]
 
     def __init__(
         self,
@@ -70,7 +78,7 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
             modifiable_title=modifiable_title,
         )
         self._min_sidebar_width = min_sidebar_width
-        self._current_menus = None
+        self._latest_menus = None
         self._splitter = SplitterWithCursor.from_vertical("## VSplitter")
 
     @property
@@ -89,17 +97,18 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
     def selected(self, value: str) -> None:
         self.section.selected = value
 
+    @property
+    def latest_menus(self):
+        return self._latest_menus
+
     @override
     def on_process(self) -> None:
-        self._current_menus = self.get_menus()
-        try:
-            self.on_process_sidebar()
-            imgui.same_line()
-            self.on_process_splitter()
-            imgui.same_line()
-            self.on_process_main()
-        finally:
-            self._current_menus = None
+        self._latest_menus = self.get_menus()
+        self.on_process_sidebar()
+        imgui.same_line()
+        self.on_process_splitter()
+        imgui.same_line()
+        self.on_process_main()
 
     @override
     def query_menu_title(self, key: str, item: MenuItemT) -> str:
@@ -118,22 +127,35 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
 
     @override
     def on_process_sidebar(self) -> None:
-        assert self._current_menus is not None
+        assert self._latest_menus is not None
 
         with begin_child("## SideChild", self.sidebar_width, border=False):
-            content_width = imgui.get_content_region_available_width()
-            imgui.set_next_item_width(content_width)
+            self.on_process_sidebar_top()
+            self.on_process_sidebar_bottom()
 
-            if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
-                for key, menu in self._current_menus.items():
-                    title = self.query_menu_title(key, menu)
-                    label = f"{title}##{key}"
-                    if imgui.selectable(label, key == self.selected)[1]:
-                        self.selected = key
-                imgui.end_list_box()
+    @override
+    def on_process_sidebar_top(self) -> None:
+        assert self._latest_menus is not None
+
+    @override
+    def on_process_sidebar_bottom(self) -> None:
+        assert self._latest_menus is not None
+
+        content_width = imgui.get_content_region_available_width()
+        imgui.set_next_item_width(content_width)
+
+        if imgui.begin_list_box("## SideList", width=-1, height=-1).opened:
+            for key, menu in self._latest_menus.items():
+                title = self.query_menu_title(key, menu)
+                label = f"{title}##{key}"
+                if imgui.selectable(label, key == self.selected)[1]:
+                    self.selected = key
+            imgui.end_list_box()
 
     @override
     def on_process_splitter(self) -> None:
+        assert self._latest_menus is not None
+
         if splitter_result := self._splitter.do_process():
             sidebar_width_value = self.sidebar_width + floor(splitter_result.value)
             if sidebar_width_value < self._min_sidebar_width:
@@ -142,10 +164,10 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
 
     @override
     def on_process_main(self) -> None:
-        assert self._current_menus is not None
+        assert self._latest_menus is not None
 
         with begin_child("## MainChild", -1, -1):
-            selected_menu = self._current_menus.get(self.selected)
+            selected_menu = self._latest_menus.get(self.selected)
             if selected_menu is not None:
                 self.on_menu(self.selected, selected_menu)
             else:

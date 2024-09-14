@@ -37,6 +37,15 @@ class MediaSection(BaseWindowSection):
     def mode(self, value: Mode) -> None:
         self.set(self.K.mode, str(value))
 
+    def set_file_mode(self) -> None:
+        self.mode = Mode.file
+
+    def set_url_mode(self) -> None:
+        self.mode = Mode.url
+
+    def set_manual_mode(self) -> None:
+        self.mode = Mode.manual
+
     @property
     def file(self) -> str:
         return self.get(self.K.file, str())

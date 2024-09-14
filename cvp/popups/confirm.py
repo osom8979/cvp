@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
+from typing import Callable, Optional
 
 import imgui
 import pygame
 
 from cvp.types import override
+from cvp.variables import MIN_POPUP_CONFIRM_HEIGHT, MIN_POPUP_CONFIRM_WIDTH
 from cvp.widgets.button_ex import button_ex
 from cvp.widgets.hoc.popup import Popup
 
@@ -18,9 +19,23 @@ class ConfirmPopup(Popup[bool]):
         ok: Optional[str] = None,
         cancel: Optional[str] = None,
         centered=True,
-        flags=0,
+        flags=imgui.WINDOW_ALWAYS_AUTO_RESIZE,
+        *,
+        min_width=MIN_POPUP_CONFIRM_WIDTH,
+        min_height=MIN_POPUP_CONFIRM_HEIGHT,
+        target: Optional[Callable[[bool], None]] = None,
+        oneshot: Optional[bool] = None,
     ):
-        super().__init__(title, centered, flags)
+        super().__init__(
+            title,
+            centered,
+            flags,
+            min_width=min_width,
+            min_height=min_height,
+            target=target,
+            oneshot=oneshot,
+        )
+
         self._label = label if label else str()
         self._ok_button_label = ok if ok else "Ok"
         self._cancel_button_label = cancel if cancel else "Cancel"
