@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 from typing import Mapping
 
 import imgui
@@ -66,8 +67,11 @@ class MediaManagerWindow(ManagerTab[MediaManagerSection, MediaSection]):
         section = self.context.config.add_media_section()
         section.opened = True
         section.file = file
-        section.title = file
         section.mode = mode
+        if mode == MediaSectionMode.file:
+            section.title = os.path.basename(file)
+        else:
+            section.title = file
         self.add_media_window(section)
 
     def close_media(self, key: str) -> None:
@@ -105,4 +109,6 @@ class MediaManagerWindow(ManagerTab[MediaManagerSection, MediaSection]):
             return
 
         selected_menu = self.latest_menus.get(self.selected)
+        assert selected_menu is not None
+
         self.close_media(selected_menu.section)

@@ -10,10 +10,10 @@ import pygame
 
 from cvp.logging.logging import logger
 from cvp.types import override
+from cvp.variables import MIN_OPEN_FILE_POPUP_HEIGHT, MIN_OPEN_FILE_POPUP_WIDTH
 from cvp.widgets import (
     begin_child,
     button_ex,
-    end_child,
     footer_height_to_reserve,
     set_window_min_size,
 )
@@ -34,10 +34,20 @@ class OpenFilePopup(Popup[str]):
         centered=True,
         flags=0,
         *,
+        min_width=MIN_OPEN_FILE_POPUP_WIDTH,
+        min_height=MIN_OPEN_FILE_POPUP_HEIGHT,
         target: Optional[Callable[[str], None]] = None,
         oneshot: Optional[bool] = None,
     ):
-        super().__init__(title, centered, flags, target=target, oneshot=oneshot)
+        super().__init__(
+            title,
+            centered,
+            flags,
+            min_width=min_width,
+            min_height=min_height,
+            target=target,
+            oneshot=oneshot,
+        )
 
         if isinstance(directory, Path) and directory.is_dir():
             dir_path = directory
@@ -107,31 +117,28 @@ class OpenFilePopup(Popup[str]):
             else:
                 logger.warning(f"Invalid location: '{loc_text}'")
 
-        if begin_child("Files", 0, -footer_height_to_reserve(), border=True):
-            try:
-                if self._current_dir != self._location_text:
-                    # Update items
-                    self._current_dir = self._location_text
-                    self._selected = str()
-                    self._items = self.list_items(self._current_dir, self._show_hidden)
+        with begin_child("Files", 0, -footer_height_to_reserve(), border=True):
+            if self._current_dir != self._location_text:
+                # Update items
+                self._current_dir = self._location_text
+                self._selected = str()
+                self._items = self.list_items(self._current_dir, self._show_hidden)
 
-                for item in self._items:
-                    item_path = os.path.join(self._location_text, item)
-                    selected = item_path == self._selected
+            for item in self._items:
+                item_path = os.path.join(self._location_text, item)
+                selected = item_path == self._selected
 
-                    if os.path.isfile(item_path):
-                        if imgui.selectable(item, selected, DOUBLE_CLICK)[0]:
-                            self._selected = item_path
-                            if imgui.is_mouse_double_clicked(0):
-                                imgui.close_current_popup()
-                                return item_path
-                    elif os.path.isdir(item_path):
-                        if imgui.selectable(item + "/", selected, DOUBLE_CLICK)[0]:
-                            self._selected = item_path
-                            if imgui.is_mouse_double_clicked(0):
-                                self._location_text = item_path
-            finally:
-                end_child()
+                if os.path.isfile(item_path):
+                    if imgui.selectable(item, selected, DOUBLE_CLICK)[0]:
+                        self._selected = item_path
+                        if imgui.is_mouse_double_clicked(0):
+                            imgui.close_current_popup()
+                            return item_path
+                elif os.path.isdir(item_path):
+                    if imgui.selectable(item + "/", selected, DOUBLE_CLICK)[0]:
+                        self._selected = item_path
+                        if imgui.is_mouse_double_clicked(0):
+                            self._location_text = item_path
 
         imgui.separator()
 

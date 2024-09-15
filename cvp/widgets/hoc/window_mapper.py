@@ -45,6 +45,8 @@ class WindowMapper(OrderedDict[str, Window]):
             win.do_destroy()
 
     def do_process(self):
-        windows = list(self.values())
-        for win in windows:
+        # [IMPORTANT]
+        # Do not change the iteration count as elem may be removed in `do_process()`.
+        # This method creates a shallow copy of the `list` object.
+        for win in list(self.values()):
             win.do_process()

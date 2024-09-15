@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Callable, Generic, Optional, Sequence, TypeVar
+from uuid import uuid4
 
 import imgui
 
@@ -21,6 +22,7 @@ class Popup(Generic[ResultT], ABC):
         centered=True,
         flags=0,
         *,
+        identifier: Optional[str] = None,
         min_width=MIN_POPUP_WIDTH,
         min_height=MIN_POPUP_HEIGHT,
         target: Optional[Callable[[ResultT], None]] = None,
@@ -31,6 +33,7 @@ class Popup(Generic[ResultT], ABC):
         self._visible = False
         self._centered = centered
         self._flags = flags
+        self._identifier = identifier if identifier else str(uuid4())
 
         self._min_width = min_width
         self._min_height = min_height
@@ -59,6 +62,14 @@ class Popup(Generic[ResultT], ABC):
     def result(self, value: Optional[ResultT]) -> None:
         self._result = value
 
+    @property
+    def identifier(self):
+        return self._identifier
+
+    @property
+    def popup_label(self):
+        return f"{self._title}###{self._identifier}"
+
     def show(
         self,
         title: Optional[str] = None,
@@ -82,7 +93,7 @@ class Popup(Generic[ResultT], ABC):
 
     def do_process(self) -> Optional[ResultT]:
         if self._visible:
-            imgui.open_popup(self._title)
+            imgui.open_popup(self.popup_label)
             self._visible = False
 
         if self._centered:
@@ -90,7 +101,7 @@ class Popup(Generic[ResultT], ABC):
             px, py = 0.5, 0.5
             imgui.set_next_window_position(x, y, imgui.APPEARING, px, py)
 
-        modal = imgui.begin_popup_modal(self._title, None, self._flags)  # noqa
+        modal = imgui.begin_popup_modal(self.popup_label, None, self._flags)  # noqa
         if not modal.opened:
             self._result = None
             return None

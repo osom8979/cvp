@@ -33,9 +33,7 @@ class WorkerApplication:
 
         loop = get_running_loop()
         loop.slow_callback_duration = self._slow_callback_duration
-
-        if self._debug:
-            loop.set_debug(True)
+        loop.set_debug(self._debug)
 
         try:
             while True:
