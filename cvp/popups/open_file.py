@@ -10,7 +10,7 @@ import pygame
 
 from cvp.logging.logging import logger
 from cvp.types import override
-from cvp.variables import MIN_OPEN_FILE_POPUP_HEIGHT, MIN_OPEN_FILE_POPUP_WIDTH
+from cvp.variables import MIN_POPUP_OPEN_FILE_HEIGHT, MIN_POPUP_OPEN_FILE_WIDTH
 from cvp.widgets import (
     begin_child,
     button_ex,
@@ -34,8 +34,8 @@ class OpenFilePopup(Popup[str]):
         centered=True,
         flags=0,
         *,
-        min_width=MIN_OPEN_FILE_POPUP_WIDTH,
-        min_height=MIN_OPEN_FILE_POPUP_HEIGHT,
+        min_width=MIN_POPUP_OPEN_FILE_WIDTH,
+        min_height=MIN_POPUP_OPEN_FILE_HEIGHT,
         target: Optional[Callable[[str], None]] = None,
         oneshot: Optional[bool] = None,
     ):
