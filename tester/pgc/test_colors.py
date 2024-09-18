@@ -3,8 +3,8 @@
 from unittest import TestCase, main
 
 from pygame.color import Color
-from cvp.inspect.member import get_public_instance_attributes
 
+from cvp.inspect.member import get_public_instance_attributes
 from cvp.pgc import colors
 from cvp.pgc.colors import color_to_hex_code
 

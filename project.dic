@@ -10,6 +10,7 @@ aarch
 aatrigon
 abstractevent
 akaze
+appendleft
 armv
 asctime
 athlon
@@ -42,6 +43,7 @@ doreturn
 dostr
 doublebuf
 eventable
+extendleft
 fastdecode
 fblits
 fflags
