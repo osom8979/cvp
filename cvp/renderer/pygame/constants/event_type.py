@@ -1,0 +1,153 @@
+# -*- coding: utf-8 -*-
+
+from enum import IntEnum, unique
+from typing import Final, Sequence
+
+from pygame import constants
+from pygame.event import custom_type
+
+BUTTON_CLICK_LEFT: Final[int] = custom_type()
+BUTTON_CLICK_MIDDLE: Final[int] = custom_type()
+BUTTON_CLICK_RIGHT: Final[int] = custom_type()
+BUTTON_CLICK_WHEEL_UP: Final[int] = custom_type()
+BUTTON_CLICK_WHEEL_DOWN: Final[int] = custom_type()
+BUTTON_CLICK_X1: Final[int] = custom_type()
+BUTTON_CLICK_X2: Final[int] = custom_type()
+
+
+@unique
+class EventType(IntEnum):
+    QUIT = constants.QUIT
+    ACTIVE_EVENT = constants.ACTIVEEVENT
+    KEY_DOWN = constants.KEYDOWN
+    KEY_UP = constants.KEYUP
+    MOUSE_MOTION = constants.MOUSEMOTION
+    MOUSE_BUTTON_UP = constants.MOUSEBUTTONUP
+    MOUSE_BUTTON_DOWN = constants.MOUSEBUTTONDOWN
+    JOY_AXIS_MOTION = constants.JOYAXISMOTION
+    JOY_BALL_MOTION = constants.JOYBALLMOTION
+    JOY_HAT_MOTION = constants.JOYHATMOTION
+    JOY_BUTTON_UP = constants.JOYBUTTONUP
+    JOY_BUTTON_DOWN = constants.JOYBUTTONDOWN
+    VIDEO_RESIZE = constants.VIDEORESIZE
+    VIDEO_EXPOSE = constants.VIDEOEXPOSE
+    USER_EVENT = constants.USEREVENT
+
+    # [PyGame 1.9.5 SDL2]
+    AUDIO_DEVICE_ADDED = constants.AUDIODEVICEADDED
+    AUDIO_DEVICE_REMOVED = constants.AUDIODEVICEREMOVED
+    FINGER_MOTION = constants.FINGERMOTION
+    FINGER_DOWN = constants.FINGERDOWN
+    FINGER_UP = constants.FINGERUP
+    MOUSE_WHEEL = constants.MOUSEWHEEL
+    MULTI_GESTURE = constants.MULTIGESTURE
+    TEXT_EDITING = constants.TEXTEDITING
+    TEXT_INPUT = constants.TEXTINPUT
+
+    # [PyGame 2]
+    DROP_FILE = constants.DROPFILE
+    DROP_BEGIN = constants.DROPBEGIN
+    DROP_COMPLETE = constants.DROPCOMPLETE
+    DROP_TEXT = constants.DROPTEXT
+    MIDI_IN = constants.MIDIIN
+    MIDI_OUT = constants.MIDIOUT
+    CONTROLLER_DEVICE_ADDED = constants.CONTROLLERDEVICEADDED
+    JOY_DEVICE_ADDED = constants.JOYDEVICEADDED
+    CONTROLLER_DEVICE_REMOVED = constants.CONTROLLERDEVICEREMOVED
+    JOY_DEVICE_REMOVED = constants.JOYDEVICEREMOVED
+    CONTROLLER_DEVICE_REMAPPED = constants.CONTROLLERDEVICEREMAPPED
+    KEYMAP_CHANGED = constants.KEYMAPCHANGED
+    CLIPBOARD_UPDATE = constants.CLIPBOARDUPDATE
+    RENDER_TARGETS_RESET = constants.RENDER_TARGETS_RESET
+    RENDER_DEVICE_RESET = constants.RENDER_DEVICE_RESET
+    LOCALE_CHANGED = constants.LOCALECHANGED  # (SDL backend >= 2.0.14)
+
+    # [PyGame 2.0.1]
+    WINDOW_SHOWN = constants.WINDOWSHOWN
+    WINDOW_HIDDEN = constants.WINDOWHIDDEN
+    WINDOW_EXPOSED = constants.WINDOWEXPOSED
+    WINDOW_MOVED = constants.WINDOWMOVED
+    WINDOW_RESIZED = constants.WINDOWRESIZED
+    WINDOW_SIZE_CHANGED = constants.WINDOWSIZECHANGED
+    WINDOW_MINIMIZED = constants.WINDOWMINIMIZED
+    WINDOW_MAXIMIZED = constants.WINDOWMAXIMIZED
+    WINDOW_RESTORED = constants.WINDOWRESTORED
+    WINDOW_ENTER = constants.WINDOWENTER
+    WINDOW_LEAVE = constants.WINDOWLEAVE
+    WINDOW_FOCUS_GAINED = constants.WINDOWFOCUSGAINED
+    WINDOW_FOCUS_LOST = constants.WINDOWFOCUSLOST
+    WINDOW_CLOSE = constants.WINDOWCLOSE
+    WINDOW_TAKE_FOCUS = constants.WINDOWTAKEFOCUS
+    WINDOW_HIT_TEST = constants.WINDOWHITTEST
+    WINDOW_ICC_PROF_CHANGED = constants.WINDOWICCPROFCHANGED  # (SDL backend >= 2.0.18)
+    WINDOW_DISPLAY_CHANGED = constants.WINDOWDISPLAYCHANGED  # (SDL backend >= 2.0.18)
+
+    # [Android]
+    APP_TERMINATING = constants.APP_TERMINATING
+    APP_LOW_MEMORY = constants.APP_LOWMEMORY
+    APP_WILL_ENTER_BACKGROUND = constants.APP_WILLENTERBACKGROUND
+    APP_DID_ENTER_BACKGROUND = constants.APP_DIDENTERBACKGROUND
+    APP_WILL_ENTER_FOREGROUND = constants.APP_WILLENTERFOREGROUND
+    APP_DID_ENTER_FOREGROUND = constants.APP_DIDENTERFOREGROUND
+
+    # [Custom Types]
+    EX_BUTTON_CLICK_LEFT = BUTTON_CLICK_LEFT
+    EX_BUTTON_CLICK_MIDDLE = BUTTON_CLICK_MIDDLE
+    EX_BUTTON_CLICK_RIGHT = BUTTON_CLICK_RIGHT
+    EX_BUTTON_CLICK_WHEEL_UP = BUTTON_CLICK_WHEEL_UP
+    EX_BUTTON_CLICK_WHEEL_DOWN = BUTTON_CLICK_WHEEL_DOWN
+    EX_BUTTON_CLICK_X1 = BUTTON_CLICK_X1
+    EX_BUTTON_CLICK_X2 = BUTTON_CLICK_X2
+
+
+KEY_EVENTS: Final[Sequence[EventType]] = (
+    EventType.KEY_UP,
+    EventType.KEY_DOWN,
+)
+
+MOUSE_EVENTS: Final[Sequence[EventType]] = (
+    EventType.MOUSE_MOTION,
+    EventType.MOUSE_BUTTON_UP,
+    EventType.MOUSE_BUTTON_DOWN,
+    EventType.MOUSE_WHEEL,
+)
+
+JOY_EVENTS: Final[Sequence[EventType]] = (
+    EventType.JOY_AXIS_MOTION,
+    EventType.JOY_BALL_MOTION,
+    EventType.JOY_HAT_MOTION,
+    EventType.JOY_BUTTON_UP,
+    EventType.JOY_BUTTON_DOWN,
+    EventType.JOY_DEVICE_ADDED,
+    EventType.JOY_DEVICE_REMOVED,
+)
+
+WINDOW_EVENTS: Final[Sequence[EventType]] = (
+    EventType.WINDOW_SHOWN,
+    EventType.WINDOW_HIDDEN,
+    EventType.WINDOW_EXPOSED,
+    EventType.WINDOW_MOVED,
+    EventType.WINDOW_RESIZED,
+    EventType.WINDOW_SIZE_CHANGED,
+    EventType.WINDOW_MINIMIZED,
+    EventType.WINDOW_MAXIMIZED,
+    EventType.WINDOW_RESTORED,
+    EventType.WINDOW_ENTER,
+    EventType.WINDOW_LEAVE,
+    EventType.WINDOW_FOCUS_GAINED,
+    EventType.WINDOW_FOCUS_LOST,
+    EventType.WINDOW_CLOSE,
+    EventType.WINDOW_TAKE_FOCUS,
+    EventType.WINDOW_HIT_TEST,
+    EventType.WINDOW_ICC_PROF_CHANGED,
+    EventType.WINDOW_DISPLAY_CHANGED,
+)
+
+ANDROID_EVENTS: Final[Sequence[EventType]] = (
+    EventType.APP_TERMINATING,
+    EventType.APP_LOW_MEMORY,
+    EventType.APP_WILL_ENTER_BACKGROUND,
+    EventType.APP_DID_ENTER_BACKGROUND,
+    EventType.APP_WILL_ENTER_FOREGROUND,
+    EventType.APP_DID_ENTER_FOREGROUND,
+)

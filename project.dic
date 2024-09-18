@@ -1,6 +1,7 @@
 # IDEA plugin: Dictionary
 # https://plugins.jetbrains.com/plugin/12089-dictionary
 
+Keymod
 aarch
 akaze
 armv
@@ -28,6 +29,7 @@ dnow
 dnowext
 dockerignore
 dostr
+doublebuf
 fastdecode
 fflags
 ffmpegs
@@ -44,13 +46,20 @@ hqvga
 hsxga
 hvga
 hwaccels
+hwsurface
 infiles
 isync
 kdci
 kflat
+lalt
 lavfi
+lctrl
+leftbracket
+leftparen
 levelname
 libgl
+lmeta
+lsuper
 materialdesignicons
 maxlen
 maxtail
@@ -61,8 +70,10 @@ muxing
 nanum
 nobuffer
 nocov
+noframe
 ntsc
 nullsrc
+numlock
 outfiles
 paletted
 paletted
@@ -75,18 +86,27 @@ qpal
 qphist
 qqvga
 qsxga
+quotedbl
 qvga
 qxga
+ralt
 rawvideo
 rawvideo
+rctrl
 remapper
 returncode
+rightbracket
+rightparen
+rmeta
+rsuper
 sameq
+scrollock
 setend
 sntsc
 spal
 spawnable
 sqcif
+srcalpha
 ssse
 stillimage
 strfmt
@@ -94,6 +114,7 @@ strftime
 subpath
 svga
 sxga
+sysreq
 timename
 tvstd
 uxga
