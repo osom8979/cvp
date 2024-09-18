@@ -3,7 +3,7 @@
 from overrides import override
 from pygame.surface import Surface
 
-from cvp.renderer.pygame.transforms._interface import TransformInterface
+from cvp.pgc.transforms._interface import TransformInterface
 
 
 class TransformBase(TransformInterface):

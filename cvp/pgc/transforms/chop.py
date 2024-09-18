@@ -4,8 +4,8 @@ from overrides import override
 from pygame.surface import Surface
 from pygame.transform import chop
 
-from cvp.renderer.pygame.transforms._base import TransformBase
-from cvp.renderer.pygame.types import RectValue
+from cvp.pgc.transforms._base import TransformBase
+from cvp.pgc.types import RectValue
 
 
 class ChopTransform(TransformBase):

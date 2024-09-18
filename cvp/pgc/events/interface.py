@@ -5,10 +5,10 @@ from typing import Optional, Tuple
 
 from pygame import constants
 
-from cvp.renderer.pygame.constants.button_type import ButtonType
-from cvp.renderer.pygame.constants.keycode import Keycode
-from cvp.renderer.pygame.constants.keymod import Keymod
-from cvp.renderer.pygame.events.abc import abstractevent
+from cvp.pgc.constants.button_type import ButtonType
+from cvp.pgc.constants.keycode import Keycode
+from cvp.pgc.constants.keymod import Keymod
+from cvp.pgc.events.abc import abstractevent
 
 
 class EventInterface(metaclass=ABCMeta):

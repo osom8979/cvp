@@ -4,7 +4,7 @@ from overrides import override
 from pygame.surface import Surface
 from pygame.transform import scale2x
 
-from cvp.renderer.pygame.transforms._base import TransformBase
+from cvp.pgc.transforms._base import TransformBase
 
 
 class Scale2xTransform(TransformBase):

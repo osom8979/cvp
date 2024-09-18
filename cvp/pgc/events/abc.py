@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from functools import wraps
 
-from cvp.renderer.pygame.events.attribute import set_event_type
+from cvp.pgc.events.attribute import set_event_type
 
 
 def abstractevent(event_type: int):

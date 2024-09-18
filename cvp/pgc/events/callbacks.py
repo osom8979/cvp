@@ -4,10 +4,10 @@ from typing import Optional, Tuple
 
 from overrides import override
 
-from cvp.renderer.pygame.constants.button_type import ButtonType
-from cvp.renderer.pygame.constants.keycode import Keycode
-from cvp.renderer.pygame.constants.keymod import Keymod
-from cvp.renderer.pygame.events.interface import EventInterface
+from cvp.pgc.constants.button_type import ButtonType
+from cvp.pgc.constants.keycode import Keycode
+from cvp.pgc.constants.keymod import Keymod
+from cvp.pgc.events.interface import EventInterface
 
 
 class EventCallbacks(EventInterface):

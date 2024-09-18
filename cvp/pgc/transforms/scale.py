@@ -4,8 +4,8 @@ from overrides import override
 from pygame.surface import Surface
 from pygame.transform import scale
 
-from cvp.renderer.pygame.transforms._base import TransformBase
-from cvp.renderer.pygame.types import Sequence
+from cvp.pgc.transforms._base import TransformBase
+from cvp.pgc.types import Sequence
 
 
 class ScaleTransform(TransformBase):

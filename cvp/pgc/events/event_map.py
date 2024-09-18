@@ -7,9 +7,9 @@ from pygame.event import Event
 from pygame.event import event_name as get_event_name
 
 from cvp.inspect.bind import force_bind
-from cvp.renderer.pygame.constants.event_type import EventType
-from cvp.renderer.pygame.events.attribute import get_event_type, has_event_type
-from cvp.renderer.pygame.events.interface import EventInterface
+from cvp.pgc.constants.event_type import EventType
+from cvp.pgc.events.attribute import get_event_type, has_event_type
+from cvp.pgc.events.interface import EventInterface
 
 
 class EventCallable:
