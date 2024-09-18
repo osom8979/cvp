@@ -1,9 +1,13 @@
 # IDEA plugin: Dictionary
 # https://plugins.jetbrains.com/plugin/12089-dictionary
 
-Rotozoom
-Smoothscale
+aacircle
+aaellipse
+aaline
+aalines
+aapolygon
 aarch
+aatrigon
 abstractevent
 akaze
 armv
@@ -12,10 +16,14 @@ athlon
 athlonxp
 autodect
 baseplatform
+bitsize
+blendmode
+blits
 blocksize
 bsfs
 buildconf
 cmov
+colorkey
 copytb
 copyts
 cpuflags
@@ -30,9 +38,11 @@ discardcorrupt
 dnow
 dnowext
 dockerignore
+doreturn
 dostr
 doublebuf
 fastdecode
+fblits
 fflags
 ffmpegs
 fileno
@@ -40,15 +50,18 @@ filtergraph
 fmpeg
 fprobe
 framebuffers
+frect
 fwqvga
 getbuffer
 ghcr
 hexdigest
+hline
 hqvga
 hsxga
 hvga
 hwaccels
 hwsurface
+imageable
 infiles
 iscapture
 isync
@@ -72,7 +85,9 @@ maxtail
 meipass
 mmxext
 multiband
+mustlock
 muxing
+namehint
 nanum
 navyblue
 nobuffer
@@ -85,6 +100,7 @@ outfiles
 paletted
 paletted
 popens
+premul
 premult
 psnr
 pythonpath
@@ -107,10 +123,12 @@ rgbx
 rightbracket
 rightparen
 rmeta
+rotozoom
 rsuper
 sameq
 scrollock
 setend
+smoothscale
 sntsc
 spal
 spawnable
@@ -121,6 +139,7 @@ stillimage
 strfmt
 strftime
 subpath
+surfaceable
 svga
 sxga
 sysreq
@@ -133,6 +152,7 @@ veryslow
 vfpv
 vimspector
 violetred
+vline
 whsxga
 whuxga
 woxga
