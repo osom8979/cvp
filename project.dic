@@ -3,6 +3,7 @@
 
 Keymod
 aarch
+abstractevent
 akaze
 armv
 asctime
@@ -48,6 +49,7 @@ hvga
 hwaccels
 hwsurface
 infiles
+iscapture
 isync
 kdci
 kflat
