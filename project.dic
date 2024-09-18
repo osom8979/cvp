@@ -41,6 +41,7 @@ dockerignore
 doreturn
 dostr
 doublebuf
+eventable
 fastdecode
 fblits
 fflags
@@ -66,6 +67,7 @@ infiles
 iscapture
 isync
 kdci
+keyboardable
 keymod
 kflat
 lalt
@@ -84,6 +86,7 @@ maxlen
 maxtail
 meipass
 mmxext
+mouseable
 multiband
 mustlock
 muxing
@@ -143,10 +146,12 @@ surfaceable
 svga
 sxga
 sysreq
+systemable
 timename
 tvstd
 uxga
 vcodec
+versionable
 veryfast
 veryslow
 vfpv
