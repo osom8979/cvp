@@ -89,6 +89,7 @@ spawnable
 sqcif
 ssse
 stillimage
+strfmt
 strftime
 subpath
 svga

@@ -14,6 +14,7 @@ from OpenGL.error import Error
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
 from cvp.logging.logging import logger
+from cvp.logging.profile import ProfileLogging
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
@@ -36,6 +37,7 @@ class PlayerApplication:
     def __init__(self, context: Context):
         self._context = context
         self._windows = WindowMapper()
+        self._profiler = ProfileLogging(logger)
 
         self._flow_manager = FlowManagerWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
@@ -223,8 +225,9 @@ class PlayerApplication:
 
     def on_process(self) -> None:
         while not self._context.is_done():
-            self.on_event()
-            self.on_frame()
+            with self._profiler:
+                self.on_event()
+                self.on_frame()
 
     def on_event(self) -> None:
         for event in pygame.event.get():
