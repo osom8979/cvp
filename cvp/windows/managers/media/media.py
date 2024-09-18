@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ctypes import addressof, c_void_p, create_string_buffer, memmove
-from typing import Final
+from typing import Final, Tuple
 
 import imgui
 from OpenGL import GL
@@ -63,6 +63,13 @@ class MediaWindow(Window[MediaSection]):
 
         assert self._texture != 0
         assert self._pbo != 0
+
+    @override
+    def begin(self) -> Tuple[bool, bool]:
+        imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
+        result = super().begin()
+        imgui.pop_style_var()
+        return result
 
     @override
     def on_destroy(self) -> None:
@@ -172,8 +179,7 @@ class MediaWindow(Window[MediaSection]):
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         child_flags = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
-        space = imgui.get_style().item_spacing.y
-        imgui.begin_child("Canvas", 0, -space, border=True, flags=child_flags)  # noqa
+        imgui.begin_child("Canvas", 0, 0, border=True, flags=child_flags)  # noqa
         imgui.pop_style_color()
         imgui.pop_style_var()
 

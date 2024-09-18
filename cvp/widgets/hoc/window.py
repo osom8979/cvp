@@ -98,6 +98,95 @@ class Window(Generic[SectionT], WindowInterface):
         self._initialized = False
         self._popups = dict()
 
+    def has_flag(self, flag: int) -> bool:
+        return bool(self.flags & flag)
+
+    def set_flag(self, flag: int, enable: bool) -> None:
+        if enable:
+            self.flags |= flag
+        else:
+            self.flags &= ~flag
+
+    @property
+    def no_titlebar(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_TITLE_BAR)
+
+    @no_titlebar.setter
+    def no_titlebar(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_TITLE_BAR, value)
+
+    @property
+    def no_scrollbar(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_SCROLLBAR)
+
+    @no_scrollbar.setter
+    def no_scrollbar(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_SCROLLBAR, value)
+
+    @property
+    def no_menu(self) -> bool:
+        return not self.has_flag(imgui.WINDOW_MENU_BAR)
+
+    @no_menu.setter
+    def no_menu(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_MENU_BAR, not value)
+
+    @property
+    def no_move(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_MOVE)
+
+    @no_move.setter
+    def no_move(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_MOVE, value)
+
+    @property
+    def no_resize(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_RESIZE)
+
+    @no_resize.setter
+    def no_resize(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_RESIZE, value)
+
+    @property
+    def no_collapse(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_COLLAPSE)
+
+    @no_collapse.setter
+    def no_collapse(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_COLLAPSE, value)
+
+    @property
+    def no_nav(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_NAV)
+
+    @no_nav.setter
+    def no_nav(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_NAV, value)
+
+    @property
+    def no_background(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_BACKGROUND)
+
+    @no_background.setter
+    def no_background(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_BACKGROUND, value)
+
+    @property
+    def no_bring_to_front(self) -> bool:
+        return self.has_flag(imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS)
+
+    @no_bring_to_front.setter
+    def no_bring_to_front(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS, value)
+
+    @property
+    def unsaved_document(self) -> bool:
+        return self.has_flag(imgui.WINDOW_UNSAVED_DOCUMENT)
+
+    @unsaved_document.setter
+    def unsaved_document(self, value: bool) -> None:
+        self.set_flag(imgui.WINDOW_UNSAVED_DOCUMENT, value)
+
     @property
     def section(self) -> SectionT:
         return self._section
