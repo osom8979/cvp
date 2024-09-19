@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from overrides import override
 from pygame.surface import Surface
 from pygame.transform import chop
 
 from cvp.pgc.transforms._base import TransformBase
 from cvp.pgc.types import RectValue
+from cvp.types import override
 
 
 class ChopTransform(TransformBase):

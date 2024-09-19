@@ -2,12 +2,11 @@
 
 from typing import Optional, Tuple
 
-from overrides import override
-
 from cvp.pgc.constants.button_type import ButtonType
 from cvp.pgc.constants.keycode import Keycode
 from cvp.pgc.constants.keymod import Keymod
 from cvp.pgc.events.interface import EventInterface
+from cvp.types import override
 
 
 class EventCallbacks(EventInterface):

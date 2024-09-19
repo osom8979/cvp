@@ -2,12 +2,12 @@
 
 from typing import Sequence, Union
 
-from overrides import override
 from pygame.surface import Surface
 from pygame.transform import scale_by
 
 from cvp.pgc.transforms._base import TransformBase
 from cvp.pgc.types import SequenceProtocol
+from cvp.types import override
 
 
 class ScaleByTransform(TransformBase):

@@ -2,11 +2,10 @@
 
 from enum import StrEnum, auto, unique
 
-from overrides import override
-
 from cvp.config._base import BaseConfig
 from cvp.config.proxy import ValueProxy
 from cvp.config.sections._base import BaseSection
+from cvp.types import override
 from cvp.variables import STREAM_LOGGING_MAXSIZE, STREAM_LOGGING_NEWLINE_SIZE
 
 

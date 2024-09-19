@@ -4,11 +4,11 @@ from math import floor
 from typing import Final, Sequence, Tuple
 
 import imgui
-from overrides import override
 
 from cvp.config.sections.windows.overlay import OverlaySection
 from cvp.context import Context
 from cvp.system.usage import SystemUsage
+from cvp.types import override
 from cvp.variables import VERBOSE_LEVEL_1 as VL1
 from cvp.widgets import (
     begin_popup_context_window,

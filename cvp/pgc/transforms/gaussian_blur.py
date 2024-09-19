@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from overrides import override
 from pygame.surface import Surface
 from pygame.transform import gaussian_blur
 
 from cvp.pgc.transforms._base import TransformBase
+from cvp.types import override
 
 
 class GaussianBlurTransform(TransformBase):
