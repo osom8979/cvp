@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC
+from typing import Sequence
 
 from pygame import draw as pg_draw
 
 from cvp.pgc.surface._property import SurfacePropertyInterface
-from cvp.pgc.types import ColorValue, Coordinate, RectValue, Sequence
+from cvp.pgc.types import ColorValue, Coordinate, RectValue, SequenceProtocol
 
 
 class Drawable(SurfacePropertyInterface, ABC):
@@ -33,6 +34,7 @@ class Drawable(SurfacePropertyInterface, ABC):
         )
 
     def draw_polygon(self, color: ColorValue, points: Sequence[Coordinate], width=0):
+        assert isinstance(points, SequenceProtocol)
         return pg_draw.polygon(self.surface, color, points, width)
 
     def draw_circle(
@@ -87,6 +89,7 @@ class Drawable(SurfacePropertyInterface, ABC):
         points: Sequence[Coordinate],
         width=1,
     ):
+        assert isinstance(points, SequenceProtocol)
         return pg_draw.lines(self.surface, color, closed, points, width)
 
     def draw_aaline(
@@ -103,4 +106,5 @@ class Drawable(SurfacePropertyInterface, ABC):
         closed: bool,
         points: Sequence[Coordinate],
     ):
+        assert isinstance(points, SequenceProtocol)
         return pg_draw.aalines(self.surface, color, closed, points)

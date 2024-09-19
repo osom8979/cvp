@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Sequence, Tuple, Union
 
 from pygame import display as pg_display
 from pygame.constants import FULLSCREEN
 from pygame.surface import Surface
 from pygame.window import Window
 
-from cvp.pgc.types import Coordinate, RectValue, Sequence
+from cvp.pgc.types import Coordinate, RectValue, SequenceProtocol
 
 
 class Displayable:
@@ -31,6 +31,7 @@ class Displayable:
         display=0,
         vsync=0,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_display.set_mode(size, flags, depth, display, vsync)
 
     @staticmethod
@@ -84,6 +85,7 @@ class Displayable:
 
     @staticmethod
     def display_mode_ok(size: Sequence[int], flags=0, depth=0, display=0):
+        assert isinstance(size, SequenceProtocol)
         return pg_display.mode_ok(size, flags, depth, display)
 
     @staticmethod
@@ -116,6 +118,9 @@ class Displayable:
         green: Sequence[int],
         blue: Sequence[int],
     ):
+        assert isinstance(red, SequenceProtocol)
+        assert isinstance(green, SequenceProtocol)
+        assert isinstance(blue, SequenceProtocol)
         return pg_display.set_gamma_ramp(red, green, blue)
 
     @staticmethod
@@ -135,6 +140,7 @@ class Displayable:
 
     @staticmethod
     def display_set_palette(palette: Sequence[Union[int, str, Sequence[int]]]):
+        assert isinstance(palette, SequenceProtocol)
         return pg_display.set_palette(palette)
 
     @staticmethod
@@ -179,6 +185,7 @@ class Displayable:
         return_button=0,
         escape_button: Optional[int] = None,
     ):
+        assert isinstance(buttons, SequenceProtocol)
         return pg_display.message_box(
             title,
             message,

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+
 from abc import ABC
-from typing import Iterable, Optional, Tuple, Union
+from typing import Iterable, Optional, Sequence, Tuple, Union
 
 from pygame.display import Info
 from pygame.surface import Surface
 
 from cvp.pgc.literals import ViewKind
 from cvp.pgc.surface._property import SurfacePropertyInterface
-from cvp.pgc.types import ColorValue, Coordinate, RectValue, Sequence
+from cvp.pgc.types import ColorValue, Coordinate, RectValue, SequenceProtocol
 
 BlitSequence = Iterable[
     Union[
@@ -146,6 +147,7 @@ class Surfaceable(SurfacePropertyInterface, ABC):
         return self.surface.get_palette_at(index)
 
     def surface_set_palette(self, palette: Sequence[ColorValue]):
+        assert isinstance(palette, SequenceProtocol)
         return self.surface.set_palette(palette)
 
     def surface_set_palette_at(self, index: int, color: ColorValue):

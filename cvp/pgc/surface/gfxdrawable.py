@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC
+from typing import Sequence
 
 from pygame import gfxdraw as pg_gfx
 from pygame.surface import Surface
 
 from cvp.pgc.surface._property import SurfacePropertyInterface
-from cvp.pgc.types import ColorValue, RectValue, Sequence
+from cvp.pgc.types import ColorValue, RectValue, SequenceProtocol
 
 
 class GfxDrawable(SurfacePropertyInterface, ABC):
@@ -105,12 +106,15 @@ class GfxDrawable(SurfacePropertyInterface, ABC):
         return pg_gfx.filled_trigon(self.surface, x1, y1, x2, y2, x3, y3, color)
 
     def gfx_polygon(self, points: Sequence[Sequence[float]], color: ColorValue):
+        assert isinstance(points, SequenceProtocol)
         return pg_gfx.polygon(self.surface, points, color)
 
     def gfx_aapolygon(self, points: Sequence[Sequence[float]], color: ColorValue):
+        assert isinstance(points, SequenceProtocol)
         return pg_gfx.aapolygon(self.surface, points, color)
 
     def gfx_filled_polygon(self, points: Sequence[Sequence[float]], color: ColorValue):
+        assert isinstance(points, SequenceProtocol)
         return pg_gfx.filled_polygon(self.surface, points, color)
 
     def gfx_textured_polygon(
@@ -120,6 +124,7 @@ class GfxDrawable(SurfacePropertyInterface, ABC):
         tx: int,
         ty: int,
     ):
+        assert isinstance(points, SequenceProtocol)
         return pg_gfx.textured_polygon(self.surface, points, texture, tx, ty)
 
     def gfx_bezier(
@@ -128,4 +133,5 @@ class GfxDrawable(SurfacePropertyInterface, ABC):
         steps: int,
         color: ColorValue,
     ):
+        assert isinstance(points, SequenceProtocol)
         return pg_gfx.bezier(self.surface, points, steps, color)

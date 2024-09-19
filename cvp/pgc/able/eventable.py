@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Union
+from typing import Optional, Sequence, Union
 
 from pygame import event as pg_event
 from pygame.event import Event
 
-from cvp.pgc.types import Sequence
+from cvp.pgc.types import SequenceProtocol
 
 
 class Eventable:
@@ -19,6 +19,8 @@ class Eventable:
         pump=True,
         exclude: Optional[Union[int, Sequence[int]]] = None,
     ):
+        assert isinstance(event_type, (type(None), int, SequenceProtocol))
+        assert isinstance(exclude, (type(None), int, SequenceProtocol))
         return pg_event.get(event_type, pump, exclude)
 
     @staticmethod
@@ -31,10 +33,12 @@ class Eventable:
 
     @staticmethod
     def event_peek(event_type: Optional[Union[int, Sequence[int]]] = None, pump=True):
+        assert isinstance(event_type, (type(None), int, SequenceProtocol))
         return pg_event.peek(event_type, pump)
 
     @staticmethod
     def event_clear(event_type: Optional[Union[int, Sequence[int]]] = None):
+        assert isinstance(event_type, (type(None), int, SequenceProtocol))
         return pg_event.clear(event_type)
 
     @staticmethod
@@ -43,14 +47,17 @@ class Eventable:
 
     @staticmethod
     def event_set_blocked(event_type: Optional[Union[int, Sequence[int]]] = None):
+        assert isinstance(event_type, (type(None), int, SequenceProtocol))
         return pg_event.set_blocked(event_type)
 
     @staticmethod
     def event_set_allowed(event_type: Optional[Union[int, Sequence[int]]] = None):
+        assert isinstance(event_type, (type(None), int, SequenceProtocol))
         return pg_event.set_allowed(event_type)
 
     @staticmethod
     def event_get_blocked(event_type: Union[int, Sequence[int]]):
+        assert isinstance(event_type, (int, SequenceProtocol))
         return pg_event.get_blocked(event_type)
 
     @staticmethod

@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from os import PathLike
-from typing import IO, Callable, Tuple, TypeVar, Union
-
-from typing_extensions import Protocol
-from typing_extensions import SupportsIndex as SupportsIndex
+from typing import (
+    IO,
+    Callable,
+    Protocol,
+    SupportsIndex,
+    Tuple,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 AnyPath = Union[str, bytes, PathLike[str], PathLike[bytes]]
 FileArg = Union[AnyPath, IO[bytes], IO[str]]
@@ -12,18 +18,19 @@ FileArg = Union[AnyPath, IO[bytes], IO[str]]
 _T = TypeVar("_T", covariant=True)
 
 
-class Sequence(Protocol[_T]):
+@runtime_checkable
+class SequenceProtocol(Protocol[_T]):
     def __getitem__(self, __i: SupportsIndex) -> _T: ...
     def __len__(self) -> int: ...
 
 
-Coordinate = Sequence[float]
-IntCoordinate = Sequence[int]
+Coordinate = SequenceProtocol[float]
+IntCoordinate = SequenceProtocol[int]
 
 RGBAOutput = Tuple[int, int, int, int]
-ColorValue = Union[int, str, Sequence[int]]
+ColorValue = Union[int, str, SequenceProtocol[int]]
 
-_CanBeRect = Sequence[Union[float, Coordinate]]
+_CanBeRect = SequenceProtocol[Union[float, Coordinate]]
 
 
 class _HasRectAttribute(Protocol):

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC
-from typing import Union
+from typing import Sequence, Union
 
 from pygame import BufferProxy
 from pygame import image as pg_image
 
 from cvp.pgc.literals import FromStringFormat, ToStringFormat
 from cvp.pgc.surface._property import SurfacePropertyInterface
-from cvp.pgc.types import FileArg, Sequence
+from cvp.pgc.types import FileArg, SequenceProtocol
 
 
 class Imageable(SurfacePropertyInterface, ABC):
@@ -18,6 +18,7 @@ class Imageable(SurfacePropertyInterface, ABC):
 
     @staticmethod
     def image_load_sized_svg(file: FileArg, size: Sequence[float]):
+        assert isinstance(size, SequenceProtocol)
         return pg_image.load_sized_svg(file, size)
 
     def image_save(self, file: FileArg, namehint=""):
@@ -45,6 +46,7 @@ class Imageable(SurfacePropertyInterface, ABC):
         flipped=False,
         pitch=-1,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_image.fromstring(data, size, fmt, flipped, pitch)
 
     @staticmethod
@@ -55,6 +57,7 @@ class Imageable(SurfacePropertyInterface, ABC):
         flipped=False,
         pitch=-1,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_image.frombytes(data, size, fmt, flipped, pitch)
 
     @staticmethod
@@ -64,6 +67,7 @@ class Imageable(SurfacePropertyInterface, ABC):
         fmt: FromStringFormat,
         pitch=-1,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_image.frombuffer(data, size, fmt, pitch)
 
     @staticmethod

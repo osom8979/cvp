@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Sequence, Union
 
 from pygame import transform as pg_transform
 from pygame.surface import Surface
 
 from cvp.pgc.surface._property import SurfacePropertyInterface
-from cvp.pgc.types import ColorValue, RectValue, Sequence
+from cvp.pgc.types import ColorValue, RectValue, SequenceProtocol
 
 SmoothscaleBackendLiteral = Literal["GENERIC", "MMX", "SSE", "SSE2", "NEON"]
 
@@ -21,6 +21,7 @@ class Transformable(SurfacePropertyInterface, ABC):
         size: Sequence[float],
         dest_surface: Optional[Surface] = None,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_transform.scale(self.surface, size, dest_surface)
 
     def transform_scale_by(
@@ -28,6 +29,7 @@ class Transformable(SurfacePropertyInterface, ABC):
         factor: Union[float, Sequence[float]],
         dest_surface: Optional[Surface] = None,
     ):
+        assert isinstance(factor, float) or isinstance(factor, SequenceProtocol)
         return pg_transform.scale_by(self.surface, factor, dest_surface)
 
     def transform_rotate(self, angle: float):
@@ -44,6 +46,7 @@ class Transformable(SurfacePropertyInterface, ABC):
         size: Sequence[float],
         dest_surface: Optional[Surface] = None,
     ):
+        assert isinstance(size, SequenceProtocol)
         return pg_transform.smoothscale(self.surface, size, dest_surface)
 
     def transform_smoothscale_by(
@@ -51,6 +54,7 @@ class Transformable(SurfacePropertyInterface, ABC):
         factor: Union[float, Sequence[float]],
         dest_surface: Optional[Surface] = None,
     ):
+        assert isinstance(factor, float) or isinstance(factor, SequenceProtocol)
         return pg_transform.smoothscale_by(self.surface, factor, dest_surface)
 
     @staticmethod
@@ -99,6 +103,7 @@ class Transformable(SurfacePropertyInterface, ABC):
         dest_surface: Optional[Surface] = None,
         palette_colors: Union[bool, int] = 1,
     ):
+        assert isinstance(surfaces, SequenceProtocol)
         return pg_transform.average_surfaces(
             surfaces,
             dest_surface,

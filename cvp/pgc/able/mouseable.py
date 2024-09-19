@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import Literal
+from typing import Literal, Sequence
 
 from pygame import mouse as pg_mouse
 from pygame.cursors import Cursor
 from pygame.surface import Surface
 
-from cvp.pgc.types import Sequence
+from cvp.pgc.types import SequenceProtocol
 
 
 class Mouseable:
@@ -29,6 +29,7 @@ class Mouseable:
 
     @staticmethod
     def mouse_set_pos(pos: Sequence[float]):
+        assert isinstance(pos, SequenceProtocol)
         return pg_mouse.set_pos(pos)
 
     @staticmethod
@@ -62,10 +63,15 @@ class Mouseable:
         xor_masks: Sequence[int],
         and_masks: Sequence[int],
     ):
+        assert isinstance(size, SequenceProtocol)
+        assert isinstance(hotspot, SequenceProtocol)
+        assert isinstance(xor_masks, SequenceProtocol)
+        assert isinstance(and_masks, SequenceProtocol)
         return pg_mouse.set_cursor(size, hotspot, xor_masks, and_masks)
 
     @staticmethod
     def mouse_set_cursor_with_surface(hotspot: Sequence[int], surface: Surface):
+        assert isinstance(hotspot, SequenceProtocol)
         return pg_mouse.set_cursor(hotspot, surface)
 
     @staticmethod
