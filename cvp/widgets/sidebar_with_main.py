@@ -21,7 +21,7 @@ class SidebarWithMainInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def on_process_split(self) -> None:
+    def on_process_splitter(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -74,7 +74,7 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
             self.on_process_sidebar()
 
         imgui.same_line()
-        self.on_process_split()
+        self.on_process_splitter()
         imgui.same_line()
 
         with begin_child("## child_main", -1, -1):
@@ -85,7 +85,7 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
         pass
 
     @override
-    def on_process_split(self) -> None:
+    def on_process_splitter(self) -> None:
         split_result = self._vertical_splitter.do_process()
         if not split_result.changed:
             return
