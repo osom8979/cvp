@@ -8,14 +8,14 @@ import imgui
 from cvp.config.proxy import ValueProxy
 from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.context import Context
+from cvp.gui import button_ex
 from cvp.popups.open_file import OpenFilePopup
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.resources.download.runner import DownloadRunner
 from cvp.system.platform import SysMach, get_system_machine
 from cvp.types import override
-from cvp.widgets import button_ex
-from cvp.widgets.hoc.popup import Popup, PopupPropagator
-from cvp.widgets.hoc.tab import TabBar, TabItem
+from cvp.widgets.popup import Popup, PopupPropagator
+from cvp.widgets.tab import TabBar, TabItem
 
 
 class ExeItem(TabItem, PopupPropagator):

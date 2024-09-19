@@ -5,9 +5,9 @@ from typing import Final, Optional, Tuple
 
 import imgui
 
+from cvp.gui import drag_float2, slider_float
 from cvp.types import override
-from cvp.widgets import drag_float2, slider_float
-from cvp.widgets.hoc.widget import WidgetInterface
+from cvp.widgets.widget import WidgetInterface
 
 BUTTON_LEFT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
 BUTTON_MIDDLE: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE

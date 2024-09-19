@@ -5,7 +5,7 @@ from typing import Mapping, Optional
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets.hoc.manager import Manager, ManagerSectionT
+from cvp.widgets.manager import Manager, ManagerSectionT
 
 
 class SidebarWithMain(Manager[ManagerSectionT, None]):

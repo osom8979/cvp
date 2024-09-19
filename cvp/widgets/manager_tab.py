@@ -6,8 +6,8 @@ from typing import Optional
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets.hoc.manager import Manager, ManagerSectionT, MenuItemT
-from cvp.widgets.hoc.tab import TabBar, TabItem
+from cvp.widgets.manager import Manager, ManagerSectionT, MenuItemT
+from cvp.widgets.tab import TabBar, TabItem
 
 
 class ManagerTab(Manager[ManagerSectionT, MenuItemT], ABC):

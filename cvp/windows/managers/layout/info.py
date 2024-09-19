@@ -4,10 +4,10 @@ import imgui
 
 from cvp.config.sections.windows.layout import LayoutSection
 from cvp.context import Context
+from cvp.gui import button_ex, input_text_disabled, input_text_value, item_width
 from cvp.types import override
-from cvp.widgets import button_ex, input_text_disabled, input_text_value, item_width
-from cvp.widgets.hoc.tab import TabItem
-from cvp.widgets.hoc.window_mapper import WindowMapper
+from cvp.widgets.tab import TabItem
+from cvp.widgets.window_mapper import WindowMapper
 
 
 class LayoutInfoTab(TabItem[LayoutSection]):

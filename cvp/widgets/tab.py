@@ -7,7 +7,7 @@ import imgui
 
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets.hoc.widget import WidgetInterface
+from cvp.widgets.widget import WidgetInterface
 
 ItemT = TypeVar("ItemT")
 

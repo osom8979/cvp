@@ -8,7 +8,7 @@ from pygame.event import Event
 from cvp.pgc.constants.event_type import KEY_EVENTS
 from cvp.pgc.constants.keycode import Keycode
 from cvp.pgc.constants.keymod import Keymod
-from cvp.widgets.hoc.window import Window
+from cvp.widgets.window import Window
 
 
 class WindowMapper(OrderedDict[str, Window]):

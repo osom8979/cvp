@@ -7,11 +7,11 @@ import imgui
 from cvp.config.sections.windows.layout import LayoutSection
 from cvp.config.sections.windows.manager.layout import LayoutManagerSection
 from cvp.context import Context
+from cvp.gui import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.types import override
-from cvp.widgets import button_ex
-from cvp.widgets.hoc.manager_tab import ManagerTab
-from cvp.widgets.hoc.window_mapper import WindowMapper
+from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.managers.layout.info import LayoutInfoTab
 
 

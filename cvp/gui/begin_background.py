@@ -4,7 +4,6 @@ from typing import Final
 
 import imgui
 
-BACKGROUND_WINDOW_LABEL: Final[str] = "## Background"
 BACKGROUND_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION
     | imgui.WINDOW_NO_SAVED_SETTINGS
@@ -15,17 +14,18 @@ BACKGROUND_WINDOW_FLAGS: Final[int] = (
 )
 
 
-def begin_background(label=BACKGROUND_WINDOW_LABEL):
+def begin_background(label: str):
     viewport = imgui.get_main_viewport()
-    pos_x, pos_y = viewport.work_pos
-    size_x, size_y = viewport.work_size
-    imgui.set_next_window_position(pos_x, pos_y)
-    imgui.set_next_window_size(size_x, size_y)
+    wx, wy = viewport.work_pos
+    ww, wh = viewport.work_size
+    imgui.set_next_window_position(wx, wy)
+    imgui.set_next_window_size(ww, wh)
 
     imgui.push_style_var(imgui.STYLE_WINDOW_BORDERSIZE, 0.0)
     imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
-    imgui.begin(label, False, BACKGROUND_WINDOW_FLAGS)
+    result = imgui.begin(label, False, BACKGROUND_WINDOW_FLAGS)
     imgui.pop_style_var(2)
+    return result
 
 
 def end_background() -> None:

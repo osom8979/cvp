@@ -3,9 +3,9 @@
 import imgui
 
 from cvp.context import Context
+from cvp.gui.styles import Styles, style_colors
 from cvp.logging.logging import logger
 from cvp.types import override
-from cvp.widgets.styles import Styles, style_colors
 from cvp.windows.managers.preference._base import PreferenceWidget
 
 

@@ -6,9 +6,9 @@ import imgui
 
 from cvp.config.sections.windows.manager.labeling import LabelingManagerSection
 from cvp.context import Context
+from cvp.gui import get_window_draw_list
 from cvp.types import override
-from cvp.widgets import get_window_draw_list
-from cvp.widgets.hoc.sidebar_with_main import SidebarWithMain
+from cvp.widgets.sidebar_with_main import SidebarWithMain
 
 WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR

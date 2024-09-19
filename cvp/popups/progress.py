@@ -6,9 +6,9 @@ from typing import Any, Callable, Iterable, Mapping, Optional
 import imgui
 import pygame
 
+from cvp.gui import button_ex
 from cvp.types import override
-from cvp.widgets import button_ex
-from cvp.widgets.hoc.popup import Popup
+from cvp.widgets.popup import Popup
 
 
 class ProgressPopup(Popup[None]):

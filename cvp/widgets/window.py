@@ -10,6 +10,7 @@ from pygame.event import Event
 # noinspection PyProtectedMember
 from cvp.config.sections.windows._base import BaseWindowSection
 from cvp.context import Context
+from cvp.gui import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.pgc.able.eventable import Eventable
 from cvp.pgc.able.keyboardable import Keyboardable
@@ -20,9 +21,8 @@ from cvp.pgc.events.callbacks import EventCallbacks
 from cvp.pgc.events.event_map import EventWrapper, create_event_map
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets import set_window_min_size
-from cvp.widgets.hoc.popup import Popup
-from cvp.widgets.hoc.widget import WidgetInterface
+from cvp.widgets.popup import Popup
+from cvp.widgets.widget import WidgetInterface
 
 SectionT = TypeVar("SectionT", bound=BaseWindowSection)
 

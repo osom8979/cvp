@@ -8,9 +8,9 @@ from OpenGL import GL
 
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
+from cvp.gui import get_window_draw_list, menu_item_ex
 from cvp.types import override
-from cvp.widgets import get_window_draw_list, menu_item_ex
-from cvp.widgets.hoc.window import Window
+from cvp.widgets.window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR

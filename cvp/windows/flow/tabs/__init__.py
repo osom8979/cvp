@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from cvp.context import Context
-from cvp.widgets.hoc.tab import TabBar
+from cvp.widgets.tab import TabBar
 
 
 class Tabs(TabBar):

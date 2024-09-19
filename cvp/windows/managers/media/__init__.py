@@ -9,13 +9,13 @@ from cvp.config.sections.windows.manager.media import MediaManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.media import Mode as MediaSectionMode
 from cvp.context import Context
+from cvp.gui import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
-from cvp.widgets import button_ex
-from cvp.widgets.hoc.manager_tab import ManagerTab
-from cvp.widgets.hoc.window_mapper import WindowMapper
+from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.managers.media.info import MediaInfoTab
 from cvp.windows.managers.media.media import MediaWindow
 

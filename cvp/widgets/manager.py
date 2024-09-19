@@ -9,10 +9,10 @@ import imgui
 # noinspection PyProtectedMember
 from cvp.config.sections.windows.manager._base import BaseManagerSection
 from cvp.context import Context
+from cvp.gui import SplitterWithCursor, begin_child, text_centered
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets import SplitterWithCursor, begin_child, text_centered
-from cvp.widgets.hoc.window import Window
+from cvp.widgets.window import Window
 
 ManagerSectionT = TypeVar("ManagerSectionT", bound=BaseManagerSection)
 MenuItemT = TypeVar("MenuItemT")

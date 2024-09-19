@@ -8,16 +8,16 @@ from typing import Callable, List, Optional, Union
 import imgui
 import pygame
 
-from cvp.logging.logging import logger
-from cvp.types import override
-from cvp.variables import MIN_POPUP_OPEN_FILE_HEIGHT, MIN_POPUP_OPEN_FILE_WIDTH
-from cvp.widgets import (
+from cvp.gui import (
     begin_child,
     button_ex,
     footer_height_to_reserve,
     set_window_min_size,
 )
-from cvp.widgets.hoc.popup import Popup
+from cvp.logging.logging import logger
+from cvp.types import override
+from cvp.variables import MIN_POPUP_OPEN_FILE_HEIGHT, MIN_POPUP_OPEN_FILE_WIDTH
+from cvp.widgets.popup import Popup
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 DOUBLE_CLICK = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK

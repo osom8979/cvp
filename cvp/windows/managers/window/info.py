@@ -3,10 +3,10 @@
 import imgui
 
 from cvp.context import Context
+from cvp.gui import button_ex, checkbox, input_text_disabled
 from cvp.types import override
-from cvp.widgets import button_ex, checkbox, input_text_disabled
-from cvp.widgets.hoc.tab import TabItem
-from cvp.widgets.hoc.window import Window
+from cvp.widgets.tab import TabItem
+from cvp.widgets.window import Window
 
 
 class WindowInfoTab(TabItem[Window]):

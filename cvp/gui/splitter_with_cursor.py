@@ -6,7 +6,7 @@ from pygame import SYSTEM_CURSOR_SIZENS, SYSTEM_CURSOR_SIZEWE
 from pygame.cursors import Cursor
 from pygame.mouse import get_cursor, set_cursor
 
-from cvp.widgets.splitter import (
+from cvp.gui.splitter import (
     AVAILABLE_REGION_SIZE,
     DEFAULT_SPLITTER_SIZE,
     DEFAULT_SPLITTER_THICKNESS,

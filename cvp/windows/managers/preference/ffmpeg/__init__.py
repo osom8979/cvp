@@ -4,7 +4,7 @@ from typing import Sequence
 
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets.hoc.popup import Popup, PopupPropagator
+from cvp.widgets.popup import Popup, PopupPropagator
 from cvp.windows.managers.preference._base import PreferenceWidget
 from cvp.windows.managers.preference.ffmpeg.exe import ExeTabs
 

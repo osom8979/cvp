@@ -5,7 +5,7 @@ from typing import Final, NamedTuple, Tuple
 
 import imgui
 
-from cvp.widgets.draw_list import get_window_draw_list
+from cvp.gui.draw_list import get_window_draw_list
 
 AVAILABLE_REGION_SIZE: Final[float] = -1.0
 DEFAULT_SPLITTER_SIZE: Final[float] = 3.0

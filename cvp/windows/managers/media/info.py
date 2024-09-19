@@ -5,10 +5,10 @@ import imgui
 from cvp.config.sections.windows.media import MediaSection
 from cvp.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
+from cvp.gui import button_ex, input_text_disabled, input_text_value, item_width
 from cvp.logging.logging import logger
 from cvp.types import override
-from cvp.widgets import button_ex, input_text_disabled, input_text_value, item_width
-from cvp.widgets.hoc.tab import TabItem
+from cvp.widgets.tab import TabItem
 
 
 class MediaInfoTab(TabItem[MediaSection]):

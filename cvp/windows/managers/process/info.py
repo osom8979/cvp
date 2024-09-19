@@ -3,10 +3,10 @@
 import imgui
 
 from cvp.context import Context
+from cvp.gui import button_ex, input_text_disabled
 from cvp.process.process import Process
 from cvp.types import override
-from cvp.widgets import button_ex, input_text_disabled
-from cvp.widgets.hoc.tab import TabItem
+from cvp.widgets.tab import TabItem
 
 
 class ProcessInfoTab(TabItem[Process]):

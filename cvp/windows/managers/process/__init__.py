@@ -6,7 +6,7 @@ from cvp.config.sections.windows.manager.process import ProcessManagerSection
 from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
-from cvp.widgets.hoc.manager_tab import ManagerTab
+from cvp.widgets.manager_tab import ManagerTab
 from cvp.windows.managers.process.info import ProcessInfoTab
 from cvp.windows.managers.process.stream import ProcessStreamTab
 

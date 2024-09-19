@@ -6,23 +6,16 @@ import imgui
 
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
 from cvp.context import Context
+from cvp.gui import get_window_draw_list, menu_item_ex
 from cvp.types import override
-from cvp.widgets import get_window_draw_list, menu_item_ex
-from cvp.widgets.hoc.canvas_control import CanvasControl
-from cvp.widgets.hoc.sidebar_with_main import SidebarWithMain
+from cvp.widgets.canvas_control import CanvasControl
+from cvp.widgets.sidebar_with_main import SidebarWithMain
 from cvp.windows.flow.tabs import Tabs
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
-
-_BUTTON_MOUSE_BUTTON_LEFT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
-_BUTTON_MOUSE_BUTTON_MIDDLE: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
-_BUTTON_MOUSE_BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
-CANVAS_BUTTON_FLAGS: Final[int] = (
-    _BUTTON_MOUSE_BUTTON_LEFT | _BUTTON_MOUSE_BUTTON_MIDDLE | _BUTTON_MOUSE_BUTTON_RIGHT
-)
 
 
 class FlowWindow(SidebarWithMain[FlowManagerSection]):
@@ -59,11 +52,9 @@ class FlowWindow(SidebarWithMain[FlowManagerSection]):
 
     @staticmethod
     def begin_child_canvas() -> None:
-        imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         imgui.begin_child("## Canvas", 0, 0, border=True, flags=CANVAS_FLAGS)  # noqa
         imgui.pop_style_color()
-        imgui.pop_style_var()
 
     def on_canvas(self):
         cx, cy = imgui.get_cursor_screen_pos()

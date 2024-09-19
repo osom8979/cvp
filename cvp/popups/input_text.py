@@ -5,10 +5,10 @@ from typing import Callable, Optional
 import imgui
 import pygame
 
+from cvp.gui import button_ex, input_text_value, item_width
 from cvp.types import override
 from cvp.variables import MIN_POPUP_TEXT_INPUT_HEIGHT, MIN_POPUP_TEXT_INPUT_WIDTH
-from cvp.widgets import button_ex, input_text_value, item_width
-from cvp.widgets.hoc.popup import Popup
+from cvp.widgets.popup import Popup
 
 
 class InputTextPopup(Popup[str]):

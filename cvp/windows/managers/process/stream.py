@@ -5,10 +5,10 @@ from enum import StrEnum, auto, unique
 import imgui
 
 from cvp.context import Context
+from cvp.gui import begin_child, text_centered
 from cvp.process.process import Process
 from cvp.types import override
-from cvp.widgets import begin_child, text_centered
-from cvp.widgets.hoc.tab import TabItem
+from cvp.widgets.tab import TabItem
 
 
 @unique
