@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
+from typing import NamedTuple, Optional
 
 import imgui
 
 
-class MenuItemResult:
-    def __init__(self, result):
+class MenuItemResult(NamedTuple):
+    clicked: bool
+    state: bool
+
+    @classmethod
+    def from_raw(cls, result):
         assert isinstance(result, tuple)
-        assert 2 == len(result)
-        self.clicked = result[0]
-        self.state = result[1]
+        assert len(result) == 2
+        clicked = result[0]
+        state = result[1]
+        assert isinstance(clicked, bool)
+        assert isinstance(state, bool)
+        return cls(clicked, state)
 
     def __bool__(self):
         return self.clicked
@@ -22,4 +29,4 @@ def menu_item_ex(
     shortcut: Optional[str] = None,
     enabled=True,
 ):
-    return MenuItemResult(imgui.menu_item(label, shortcut, selected, enabled))
+    return MenuItemResult.from_raw(imgui.menu_item(label, shortcut, selected, enabled))

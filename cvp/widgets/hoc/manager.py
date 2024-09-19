@@ -104,11 +104,16 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
     @override
     def on_process(self) -> None:
         self._latest_menus = self.get_menus()
-        self.on_process_sidebar()
+
+        with begin_child("## SideChild", self.sidebar_width, border=False):
+            self.on_process_sidebar()
+
         imgui.same_line()
         self.on_process_splitter()
         imgui.same_line()
-        self.on_process_main()
+
+        with begin_child("## MainChild", -1, -1):
+            self.on_process_main()
 
     @override
     def query_menu_title(self, key: str, item: MenuItemT) -> str:
@@ -129,9 +134,8 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
     def on_process_sidebar(self) -> None:
         assert self._latest_menus is not None
 
-        with begin_child("## SideChild", self.sidebar_width, border=False):
-            self.on_process_sidebar_top()
-            self.on_process_sidebar_bottom()
+        self.on_process_sidebar_top()
+        self.on_process_sidebar_bottom()
 
     @override
     def on_process_sidebar_top(self) -> None:
@@ -166,12 +170,11 @@ class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
     def on_process_main(self) -> None:
         assert self._latest_menus is not None
 
-        with begin_child("## MainChild", -1, -1):
-            selected_menu = self._latest_menus.get(self.selected)
-            if selected_menu is not None:
-                self.on_menu(self.selected, selected_menu)
-            else:
-                text_centered("Please select a item")
+        selected_menu = self._latest_menus.get(self.selected)
+        if selected_menu is not None:
+            self.on_menu(self.selected, selected_menu)
+        else:
+            text_centered("Please select a item")
 
     @override
     def on_menu(self, key: str, item: MenuItemT) -> None:

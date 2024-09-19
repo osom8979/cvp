@@ -48,7 +48,7 @@ class PlayerApplication:
         self._layout_manager = LayoutManagerWindow(self._context, self._windows)
         self._media_manager = MediaManagerWindow(self._context, self._windows)
         self._overlay = OverlayWindow(self._context)
-        self._preference_manager = PreferenceManagerWindow(self._context)
+        self._pref_manager = PreferenceManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._stitching = StitchingWindow(self._context)
         self._window_manager = WindowManagerWindow(self._context, self._windows)
@@ -208,7 +208,7 @@ class PlayerApplication:
             self._layout_manager,
             self._media_manager,
             self._overlay,
-            self._preference_manager,
+            self._pref_manager,
             self._process_manager,
             self._stitching,
             self._window_manager,
@@ -265,7 +265,7 @@ class PlayerApplication:
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
             self._process_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
-            self._preference_manager.opened = True
+            self._pref_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_w]:
             self._window_manager.opened = True
 
@@ -309,12 +309,8 @@ class PlayerApplication:
 
         imgui.separator()
 
-        if imgui.menu_item(
-            "Preference",
-            "Ctrl+Alt+S",
-            self._preference_manager.opened,
-        )[0]:
-            self._preference_manager.opened = not self._preference_manager.opened
+        if imgui.menu_item("Preference", "Ctrl+Alt+S", self._pref_manager.opened)[0]:
+            self._pref_manager.opened = not self._pref_manager.opened
 
     def on_windows_menu(self) -> None:
         for key, win in self._windows.items():
