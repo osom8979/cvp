@@ -24,8 +24,8 @@ from cvp.variables import VERBOSE_LEVEL_2
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window_mapper import WindowMapper
 from cvp.widgets.styles import default_style_colors
+from cvp.windows.flow import FlowWindow
 from cvp.windows.labeling import LabelingWindow
-from cvp.windows.managers.flow import FlowManagerWindow
 from cvp.windows.managers.layout import LayoutManagerWindow
 from cvp.windows.managers.media import MediaManagerWindow
 from cvp.windows.managers.preference import PreferenceManagerWindow
@@ -43,8 +43,7 @@ class PlayerApplication:
         self._windows = WindowMapper()
         self._profiler = ProfileLogging(logger)
 
-        self._window_manager = WindowManagerWindow(self._context, self._windows)
-        self._flow_manager = FlowManagerWindow(self._context)
+        self._flow = FlowWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManagerWindow(self._context, self._windows)
         self._media_manager = MediaManagerWindow(self._context, self._windows)
@@ -52,6 +51,7 @@ class PlayerApplication:
         self._preference_manager = PreferenceManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._stitching = StitchingWindow(self._context)
+        self._window_manager = WindowManagerWindow(self._context, self._windows)
 
         self._confirm_quit = ConfirmPopup(
             title="Exit",
@@ -203,8 +203,7 @@ class PlayerApplication:
         GL.glClearColor(0, 0, 0, 1)
 
         self._windows.add_windows(
-            self._window_manager,
-            self._flow_manager,
+            self._flow,
             self._labeling_manager,
             self._layout_manager,
             self._media_manager,
@@ -212,6 +211,7 @@ class PlayerApplication:
             self._preference_manager,
             self._process_manager,
             self._stitching,
+            self._window_manager,
         )
 
     def on_exit(self) -> None:
@@ -259,7 +259,7 @@ class PlayerApplication:
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
             self._media_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
-            self._flow_manager.opened = True
+            self._flow.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_l]:
             self._layout_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
@@ -279,7 +279,10 @@ class PlayerApplication:
             self.on_main_menu()
             self.on_popups()
             self._windows.do_process()
-            self.on_demo_window()
+            if self.debug:
+                self.on_metrics_window()
+                self.on_style_editor_window()
+                self.on_demo_window()
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not
             # support fill() on OpenGL surfaces
@@ -295,8 +298,8 @@ class PlayerApplication:
     def on_managers_menu(self) -> None:
         if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
             self._media_manager.opened = not self._media_manager.opened
-        if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow_manager.opened)[0]:
-            self._flow_manager.opened = not self._flow_manager.opened
+        if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow.opened)[0]:
+            self._flow.opened = not self._flow.opened
         if imgui.menu_item("Layout", "Ctrl+Alt+L", self._layout_manager.opened)[0]:
             self._layout_manager.opened = not self._layout_manager.opened
         if imgui.menu_item("Process", "Ctrl+Alt+P", self._process_manager.opened)[0]:
@@ -317,10 +320,15 @@ class PlayerApplication:
         for key, win in self._windows.items():
             if imgui.menu_item(key, None, win.opened)[0]:
                 win.opened = not win.opened
+
         if self.debug:
             imgui.separator()
-            if imgui.menu_item("Demo", None, self.config.demo.opened)[0]:
-                self.config.demo.opened = not self.config.demo.opened
+            if imgui.menu_item("Metrics", None, self.config.developer.metrics)[0]:
+                self.config.developer.metrics = not self.config.developer.metrics
+            if imgui.menu_item("Style", None, self.config.developer.style)[0]:
+                self.config.developer.style = not self.config.developer.style
+            if imgui.menu_item("Demo", None, self.config.developer.demo)[0]:
+                self.config.developer.demo = not self.config.developer.demo
 
     def on_main_menu(self) -> None:
         with imgui.begin_main_menu_bar():
@@ -341,9 +349,28 @@ class PlayerApplication:
         if self._confirm_quit.do_process():
             self._context.quit()
 
+    def on_metrics_window(self) -> None:
+        if not self.config.developer.metrics:
+            return
+        if not imgui.show_metrics_window(True):
+            self.config.developer.metrics = False
+
+    def on_style_editor_window(self) -> None:
+        if not self.config.developer.style:
+            return
+        expanded, opened = imgui.begin("Style editor", True)
+        try:
+            if not opened:
+                self.config.developer.style = False
+                return
+            if not expanded:
+                return
+            imgui.show_style_editor()
+        finally:
+            imgui.end()
+
     def on_demo_window(self) -> None:
-        if not self.debug:
+        if not self.config.developer.demo:
             return
-        if not self.config.demo.opened:
-            return
-        imgui.show_test_window()
+        if not imgui.show_demo_window(True):
+            self.config.developer.demo = False

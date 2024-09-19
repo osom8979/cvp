@@ -4,35 +4,36 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.windows.flow import FlowSection
+from cvp.config.sections.windows.manager.flow import FlowManagerSection
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets import get_window_draw_list, menu_item_ex
-from cvp.widgets.hoc.window import Window
+from cvp.widgets import get_window_draw_list
+from cvp.widgets.hoc.sidebar_with_main import SidebarWithMain
 
 WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class FlowWindow(Window[FlowSection]):
-    def __init__(self, context: Context, section: FlowSection):
+class FlowWindow(SidebarWithMain[FlowManagerSection]):
+    def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=section,
+            section=context.config.flow_manager,
             title="Flow",
             closable=True,
-            flags=None,
-            modifiable_title=True,
         )
         self._clear_color = 0.5, 0.5, 0.5, 1.0
 
     @override
-    def on_process(self) -> None:
+    def on_process_sidebar(self):
+        pass
+
+    @override
+    def on_process_main(self) -> None:
         self.begin_child_canvas()
         try:
             self.on_canvas()
-            self.on_popup_menu()
         finally:
             imgui.end_child()
 
@@ -41,8 +42,7 @@ class FlowWindow(Window[FlowSection]):
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         canvas_flags = WINDOW_NO_MOVE | WINDOW_NO_SCROLLBAR | WINDOW_NO_RESIZE
-        space = imgui.get_style().item_spacing.y
-        imgui.begin_child("Canvas", 0, -space, border=True, flags=canvas_flags)  # noqa
+        imgui.begin_child("Canvas", 0, 0, border=True, flags=canvas_flags)  # noqa
         imgui.pop_style_color()
         imgui.pop_style_var()
 
@@ -53,14 +53,3 @@ class FlowWindow(Window[FlowSection]):
         draw_list = get_window_draw_list()
         filled_color = imgui.get_color_u32_rgba(*self._clear_color)
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
-
-    def on_popup_menu(self):
-        if not imgui.begin_popup_context_window().opened:
-            return
-
-        try:
-            imgui.separator()
-            if menu_item_ex("Close"):
-                self.opened = False
-        finally:
-            imgui.end_popup()

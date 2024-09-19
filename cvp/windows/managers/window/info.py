@@ -16,7 +16,7 @@ class WindowInfoTab(TabItem[Window]):
     @override
     def on_item(self, item: Window) -> None:
         imgui.text("Key:")
-        input_text_disabled("## Label", item.key)
+        input_text_disabled("## Key", item.key)
 
         imgui.text("Title:")
         input_text_disabled("## Title", item.title)

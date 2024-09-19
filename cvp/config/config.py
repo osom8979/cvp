@@ -16,7 +16,6 @@ from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
-from cvp.config.sections.windows.demo import DemoSection
 from cvp.config.sections.windows.flow import FlowSection
 from cvp.config.sections.windows.layout import LayoutSection
 from cvp.config.sections.windows.manager.flow import FlowManagerSection
@@ -51,7 +50,6 @@ class Config(BaseConfig):
         self._appearance = AppearanceSection(self)
         self._concurrency = ConcurrencySection(self)
         self._context = ContextSection(self)
-        self._demo = DemoSection(self)
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
         self._ffmpeg = FFmpegSection(self)
@@ -121,10 +119,6 @@ class Config(BaseConfig):
     @property
     def context(self):
         return self._context
-
-    @property
-    def demo(self):
-        return self._demo
 
     @property
     def developer(self):
