@@ -10,6 +10,9 @@ import pygame
 from OpenGL import GL
 from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
+from pygame import NOEVENT, NUMEVENTS
+from pygame.event import Event, event_name
+from pygame.key import ScancodeWrapper, get_pressed
 
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
@@ -17,6 +20,7 @@ from cvp.logging.logging import logger
 from cvp.logging.profile import ProfileLogging
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
+from cvp.variables import VERBOSE_LEVEL_2
 from cvp.widgets.fonts import add_jbm_font, add_ngc_font
 from cvp.widgets.hoc.window_mapper import WindowMapper
 from cvp.widgets.styles import default_style_colors
@@ -39,6 +43,7 @@ class PlayerApplication:
         self._windows = WindowMapper()
         self._profiler = ProfileLogging(logger)
 
+        self._window_manager = WindowManagerWindow(self._context, self._windows)
         self._flow_manager = FlowManagerWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManagerWindow(self._context, self._windows)
@@ -47,7 +52,6 @@ class PlayerApplication:
         self._preference_manager = PreferenceManagerWindow(self._context)
         self._process_manager = ProcessManagerWindow(self._context)
         self._stitching = StitchingWindow(self._context)
-        self._window_manager = WindowManagerWindow(self._context, self._windows)
 
         self._confirm_quit = ConfirmPopup(
             title="Exit",
@@ -199,6 +203,7 @@ class PlayerApplication:
         GL.glClearColor(0, 0, 0, 1)
 
         self._windows.add_windows(
+            self._window_manager,
             self._flow_manager,
             self._labeling_manager,
             self._layout_manager,
@@ -207,7 +212,6 @@ class PlayerApplication:
             self._preference_manager,
             self._process_manager,
             self._stitching,
-            self._window_manager,
         )
 
     def on_exit(self) -> None:
@@ -226,19 +230,32 @@ class PlayerApplication:
     def on_process(self) -> None:
         while not self._context.is_done():
             with self._profiler:
-                self.on_event()
+                for event in pygame.event.get():
+                    self.on_event(event)
+                self.on_keyboard_shortcut(get_pressed())
+                self.on_tick()
                 self.on_frame()
 
-    def on_event(self) -> None:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self._confirm_quit.show()
-            self._renderer.do_event(event)
+    def on_event(self, event: Event) -> None:
+        assert NOEVENT < event.type < NUMEVENTS
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
+        if self.debug and self.verbose >= VERBOSE_LEVEL_2:
+            name = event_name(event.type)
+            logger.debug(f"Received event(name={name}, dict={event.dict})")
+
+        consumed_event = self._windows.do_event(event)
+        if not consumed_event:
+            self.on_event_fallback(event)
+
+    def on_event_fallback(self, event: Event) -> None:
+        if event.type == pygame.QUIT:
             self._confirm_quit.show()
 
+        self._renderer.do_event(event)
+
+    def on_keyboard_shortcut(self, keys: ScancodeWrapper) -> None:
+        if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
+            self._confirm_quit.show()
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
             self._media_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
@@ -252,6 +269,7 @@ class PlayerApplication:
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_w]:
             self._window_manager.opened = True
 
+    def on_tick(self) -> None:
         self._renderer.do_tick()
 
     def on_frame(self) -> None:

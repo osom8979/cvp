@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 
 from abc import abstractmethod
-from typing import Any, Dict, Generic, Optional, Tuple, TypeVar
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
+from pygame.event import Event
 
 # noinspection PyProtectedMember
 from cvp.config.sections.windows._base import BaseWindowSection
 from cvp.context import Context
 from cvp.logging.logging import logger
+from cvp.pgc.able.eventable import Eventable
+from cvp.pgc.able.keyboardable import Keyboardable
+from cvp.pgc.able.mouseable import Mouseable
+from cvp.pgc.constants import Constants
+from cvp.pgc.constants.event_type import EventType
+from cvp.pgc.events.callbacks import EventCallbacks
+from cvp.pgc.events.event_map import EventWrapper, create_event_map
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets import set_window_min_size
@@ -51,6 +60,10 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
     @abstractmethod
+    def on_event(self, event: Event) -> Optional[bool]:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_before(self) -> None:
         raise NotImplementedError
 
@@ -63,9 +76,38 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
 
-class Window(Generic[SectionT], WindowInterface):
+@dataclass
+class WindowQuery:
+    x: float = 0.0
+    y: float = 0.0
+    w: float = 0.0
+    h: float = 0.0
+
+    def update(self):
+        self.x, self.y = imgui.get_window_position()
+        self.w, self.h = imgui.get_window_size()
+
+    @property
+    def position(self):
+        return self.x, self.y
+
+    @property
+    def size(self):
+        return self.w, self.h
+
+
+class Window(
+    Generic[SectionT],
+    WindowInterface,
+    EventCallbacks,
+    Eventable,
+    Keyboardable,
+    Mouseable,
+    Constants,
+):
     _context: Context
     _popups: Dict[str, Popup]
+    _events: Dict[int, EventWrapper]
 
     def __init__(
         self,
@@ -97,6 +139,8 @@ class Window(Generic[SectionT], WindowInterface):
 
         self._initialized = False
         self._popups = dict()
+        self._events = dict()
+        self._query = WindowQuery()
 
     def has_flag(self, flag: int) -> bool:
         return bool(self.flags & flag)
@@ -220,6 +264,10 @@ class Window(Generic[SectionT], WindowInterface):
         self._section.title = value
 
     @property
+    def query(self):
+        return self._query
+
+    @property
     @override
     def context(self):
         return self._context
@@ -260,6 +308,10 @@ class Window(Generic[SectionT], WindowInterface):
         pass
 
     @override
+    def on_event(self, event: Event) -> Optional[bool]:
+        pass
+
+    @override
     def on_before(self) -> None:
         pass
 
@@ -281,10 +333,21 @@ class Window(Generic[SectionT], WindowInterface):
     def unregister_popup(self, popup: Popup) -> None:
         self._popups.pop(popup.title)
 
+    def register_event_callback(
+        self,
+        event_type: EventType,
+        callback: Callable,
+    ) -> None:
+        self._events[event_type].append_callback(callback)
+
+    def update_event_map(self, obj: Any, cls: type) -> None:
+        self._events.update(create_event_map(obj, cls))
+
     def do_create(self) -> None:
         if self._initialized:
             raise ValueError("Already initialized")
 
+        self._events.update(create_event_map(self))
         self.on_create()
         self._initialized = True
 
@@ -293,7 +356,14 @@ class Window(Generic[SectionT], WindowInterface):
             raise ValueError("Not initialized")
 
         self.on_destroy()
+        self._events.clear()
         self._initialized = False
+
+    def do_event(self, event: Event) -> Optional[bool]:
+        if bool(self.on_event(event)):
+            return True
+
+        return self._events[event.type](event)
 
     def do_process(self) -> None:
         if not self._initialized:
@@ -306,6 +376,8 @@ class Window(Generic[SectionT], WindowInterface):
 
         expanded, opened = self.begin()
         try:
+            self._query.update()
+
             if imgui.is_window_appearing():
                 set_window_min_size(self._min_width, self._min_height)
 

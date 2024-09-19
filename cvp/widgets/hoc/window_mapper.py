@@ -3,6 +3,11 @@
 from collections import OrderedDict
 from typing import Optional
 
+from pygame.event import Event
+
+from cvp.pgc.constants.event_type import KEY_EVENTS
+from cvp.pgc.constants.keycode import Keycode
+from cvp.pgc.constants.keymod import Keymod
 from cvp.widgets.hoc.window import Window
 
 
@@ -39,14 +44,31 @@ class WindowMapper(OrderedDict[str, Window]):
         for window in windows:
             self.add_window(window, no_create=no_create)
 
+    def as_windows(self):
+        """
+        [IMPORTANT]
+        Do not change the iteration count as elem may be removed in `do_process()`.
+        This method creates a shallow copy of the `list` object.
+        """
+        return list(self.values())
+
+    def do_event(self, event: Event) -> bool:
+        if event.type in KEY_EVENTS:
+            event.key = Keycode(event.key)
+            event.mod = Keymod(event.mod)
+
+        for win in self.as_windows():
+            consumed_event = win.do_event(event)
+            if consumed_event:
+                return True
+
+        return False
+
     def do_destroy(self):
         while self:
             key, win = self.popitem(last=False)
             win.do_destroy()
 
     def do_process(self):
-        # [IMPORTANT]
-        # Do not change the iteration count as elem may be removed in `do_process()`.
-        # This method creates a shallow copy of the `list` object.
-        for win in list(self.values()):
+        for win in self.as_windows():
             win.do_process()

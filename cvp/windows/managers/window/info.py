@@ -33,37 +33,41 @@ class WindowInfoTab(TabItem[Window]):
         if button_ex("Hide", disabled=not item.opened):
             item.opened = False
 
-        # imgui.separator()
-        # imgui.text("Geometry:")
-        #
-        # imgui.push_id(item.label)
-        # try:
-        #     cx, cy = imgui.get_window_position()
-        #     cw, ch = imgui.get_window_size()
-        # finally:
-        #     imgui.pop_id()
-        #
-        # pos_result = imgui.drag_float2("Position", cx, cy)
-        # if pos_result[0]:
-        #     pos_value = pos_result[1]
-        #     x = pos_value[0]
-        #     y = pos_value[1]
-        #     imgui.push_id(item.label)
-        #     try:
-        #         imgui.set_window_size(x, y)
-        #     finally:
-        #         imgui.pop_id()
-        #
-        # size_result = imgui.drag_float2("Size", cw, ch)
-        # if size_result[0]:
-        #     size_value = size_result[1]
-        #     w = size_value[0]
-        #     h = size_value[1]
-        #     imgui.push_id(item.label)
-        #     try:
-        #         imgui.set_window_size(w, h)
-        #     finally:
-        #         imgui.pop_id()
+        imgui.separator()
+        imgui.text("Geometry:")
+
+        x, y = item.query.position
+        w, h = item.query.size
+
+        pos_result = imgui.drag_float2("Position", x, y)
+        if pos_result[0]:
+            pos_value = pos_result[1]
+            x = pos_value[0]
+            y = pos_value[1]
+            imgui.set_window_position_labeled(item.label, x, y, imgui.ALWAYS)
+
+        size_result = imgui.drag_float2("Size", w, h)
+        if size_result[0]:
+            size_value = size_result[1]
+            w = size_value[0]
+            h = size_value[1]
+            imgui.set_window_size_named(item.label, w, h, imgui.ALWAYS)
+
+        imgui.separator()
+        imgui.text("Fullscreen:")
+        if imgui.button("Work Area"):
+            viewport = imgui.get_main_viewport()
+            wx, wy = viewport.work_pos
+            ww, wh = viewport.work_size
+            imgui.set_window_position_labeled(item.label, wx, wy, imgui.ALWAYS)
+            imgui.set_window_size_named(item.label, ww, wh, imgui.ALWAYS)
+        imgui.same_line()
+        if imgui.button("Main Area"):
+            viewport = imgui.get_main_viewport()
+            mx, my = viewport.pos
+            mw, mh = viewport.size
+            imgui.set_window_position_labeled(item.label, mx, my, imgui.ALWAYS)
+            imgui.set_window_size_named(item.label, mw, mh, imgui.ALWAYS)
 
         imgui.separator()
         imgui.text("Options:")
