@@ -9,7 +9,7 @@ from cvp.config.sections.windows.manager.preference import PreferenceManagerSect
 from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.manager import Manager
-from cvp.widgets.popup import PopupPropagator
+from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.windows.managers.preference._base import PreferenceWidget
 from cvp.windows.managers.preference.appearance import AppearancePreference
 from cvp.windows.managers.preference.concurrency import ConcurrencyPreference

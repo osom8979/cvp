@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, Optional, Sequence, TypeVar
+from typing import Callable, Generic, Optional, TypeVar
 from uuid import uuid4
 
 import imgui
@@ -121,11 +121,4 @@ class Popup(Generic[ResultT], ABC):
 
     @abstractmethod
     def on_process(self) -> Optional[ResultT]:
-        raise NotImplementedError
-
-
-class PopupPropagator(ABC):
-    @property
-    @abstractmethod
-    def popups(self) -> Sequence[Popup]:
         raise NotImplementedError

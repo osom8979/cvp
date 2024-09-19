@@ -14,7 +14,8 @@ from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, Lin
 from cvp.resources.download.runner import DownloadRunner
 from cvp.system.platform import SysMach, get_system_machine
 from cvp.types import override
-from cvp.widgets.popup import Popup, PopupPropagator
+from cvp.widgets.popup import Popup
+from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.widgets.tab import TabBar, TabItem
 
 
