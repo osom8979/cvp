@@ -19,7 +19,6 @@ from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.gui.set_window_min_size import set_window_min_size
 from cvp.gui.slider_float import slider_float
 from cvp.gui.splitter import horizontal_splitter, vertical_splitter
-from cvp.gui.splitter_with_cursor import SplitterWithCursor
 from cvp.gui.styles import default_style_colors, style_colors
 from cvp.gui.text_centered import text_centered
 
@@ -45,7 +44,6 @@ __all__ = (
     "slider_float",
     "horizontal_splitter",
     "vertical_splitter",
-    "SplitterWithCursor",
     "default_style_colors",
     "style_colors",
     "text_centered",

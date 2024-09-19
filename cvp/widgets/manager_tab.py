@@ -3,18 +3,19 @@
 from abc import ABC
 from typing import Optional
 
+from cvp.config.sections.windows.manager import BaseManagerSectionT
 from cvp.context import Context
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-from cvp.widgets.manager import Manager, ManagerSectionT, MenuItemT
+from cvp.widgets.manager import Manager, MenuItemT
 from cvp.widgets.tab import TabBar, TabItem
 
 
-class ManagerTab(Manager[ManagerSectionT, MenuItemT], ABC):
+class ManagerTab(Manager[BaseManagerSectionT, MenuItemT], ABC):
     def __init__(
         self,
         context: Context,
-        section: ManagerSectionT,
+        section: BaseManagerSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,

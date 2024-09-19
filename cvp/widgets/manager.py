@@ -6,15 +6,14 @@ from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
 
-# noinspection PyProtectedMember
-from cvp.config.sections.windows.manager._base import BaseManagerSection
+from cvp.config.sections.windows.manager import BaseManagerSectionT
 from cvp.context import Context
-from cvp.gui import SplitterWithCursor, begin_child, text_centered
+from cvp.gui import begin_child, text_centered
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.widgets.window import Window
 
-ManagerSectionT = TypeVar("ManagerSectionT", bound=BaseManagerSection)
 MenuItemT = TypeVar("MenuItemT")
 
 
@@ -52,13 +51,13 @@ class ManagerInterface(Generic[MenuItemT], ABC):
         raise NotImplementedError
 
 
-class Manager(Window[ManagerSectionT], ManagerInterface[MenuItemT]):
+class Manager(Window[BaseManagerSectionT], ManagerInterface[MenuItemT]):
     _latest_menus: Optional[Mapping[str, MenuItemT]]
 
     def __init__(
         self,
         context: Context,
-        section: ManagerSectionT,
+        section: BaseManagerSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
