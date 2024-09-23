@@ -1,4 +1,5 @@
 *
 !fonts/
+!icons/
 !.gitignore
 !__init__.py
