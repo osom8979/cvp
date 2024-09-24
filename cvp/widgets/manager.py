@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from enum import StrEnum, auto, unique
+from enum import StrEnum, unique
 from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
@@ -18,9 +18,9 @@ MenuItemT = TypeVar("MenuItemT")
 
 @unique
 class MenuTitleKey(StrEnum):
-    title_ = auto()
-    label_ = auto()
-    name_ = auto()
+    title_ = "title"
+    label_ = "label"
+    name_ = "name"
 
 
 class ManagerInterface(Generic[MenuItemT], ABC):
