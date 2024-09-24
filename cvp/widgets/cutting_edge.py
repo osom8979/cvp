@@ -166,16 +166,16 @@ class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
 
     @override
     def on_process_sidebar_left(self) -> None:
-        raise NotImplementedError
+        pass
 
     @override
     def on_process_sidebar_right(self) -> None:
-        raise NotImplementedError
+        pass
 
     @override
     def on_process_main(self) -> None:
-        raise NotImplementedError
+        pass
 
     @override
     def on_process_bottom(self) -> None:
-        raise NotImplementedError
+        pass

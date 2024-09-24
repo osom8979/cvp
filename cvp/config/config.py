@@ -18,7 +18,6 @@ from cvp.config.sections.graphic import GraphicSection
 from cvp.config.sections.logging import LoggingSection
 from cvp.config.sections.windows.flow import FlowSection
 from cvp.config.sections.windows.layout import LayoutSection
-from cvp.config.sections.windows.manager.flow import FlowManagerSection
 from cvp.config.sections.windows.manager.labeling import LabelingManagerSection
 from cvp.config.sections.windows.manager.layout import LayoutManagerSection
 from cvp.config.sections.windows.manager.media import MediaManagerSection
@@ -53,7 +52,7 @@ class Config(BaseConfig):
         self._developer = DeveloperSection(self)
         self._display = DisplaySection(self)
         self._ffmpeg = FFmpegSection(self)
-        self._flow_manager = FlowManagerSection(self)
+        self._flow = FlowSection(self)
         self._font = FontSection(self)
         self._graphic = GraphicSection(self)
         self._labeling_manager = LabelingManagerSection(self)
@@ -66,12 +65,6 @@ class Config(BaseConfig):
         self._stitching_manager = StitchingManagerSection(self)
         self._window_manager = WindowManagerSection(self)
 
-    def add_flow_section(self, name: Optional[str] = None):
-        section = self._flow_prefix.join_section_name(name if name else str(uuid4()))
-        if self.has_section(section):
-            raise KeyError(f"Section '{section}' already exists")
-        return FlowSection(config=self, section=section)
-
     def add_layout_section(self, name: Optional[str] = None):
         section = self._layout_prefix.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
@@ -83,14 +76,6 @@ class Config(BaseConfig):
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
         return MediaSection(config=self, section=section)
-
-    @property
-    def flow_sections(self):
-        result = OrderedDict[str, FlowSection]()
-        for section in self._flow_prefix.sections():
-            key = self._flow_prefix.split_section_name(section)
-            result[key] = FlowSection(config=self, section=section)
-        return result
 
     @property
     def layout_sections(self):
@@ -133,8 +118,8 @@ class Config(BaseConfig):
         return self._ffmpeg
 
     @property
-    def flow_manager(self):
-        return self._flow_manager
+    def flow(self):
+        return self._flow
 
     @property
     def font(self):

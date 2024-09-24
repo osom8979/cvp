@@ -4,12 +4,12 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.windows.manager.flow import FlowManagerSection
+from cvp.config.sections.windows.flow import FlowSection
 from cvp.context import Context
 from cvp.gui import get_window_draw_list, menu_item_ex
 from cvp.types import override
 from cvp.widgets.canvas_control import CanvasControl
-from cvp.widgets.sidebar_with_main import SidebarWithMain
+from cvp.widgets.cutting_edge import CuttingEdge
 from cvp.windows.flow.tabs import Tabs
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -18,11 +18,11 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
 
 
-class FlowWindow(SidebarWithMain[FlowManagerSection]):
+class FlowWindow(CuttingEdge[FlowSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.flow_manager,
+            section=context.config.flow,
             title="Flow",
             closable=True,
         )
@@ -37,7 +37,7 @@ class FlowWindow(SidebarWithMain[FlowManagerSection]):
         self._enable_context_menu = True
 
     @override
-    def on_process_sidebar(self):
+    def on_process_sidebar_left(self):
         self._control.on_process()
         self._tabs.do_process()
 
