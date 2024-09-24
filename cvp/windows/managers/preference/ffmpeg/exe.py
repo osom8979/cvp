@@ -5,10 +5,10 @@ from typing import List, Optional, Sequence
 
 import imgui
 
-from cvp.config.proxy import ValueProxy
 from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.context import Context
 from cvp.gui import button_ex
+from cvp.patterns.proxy import ValueProxy
 from cvp.popups.open_file import OpenFilePopup
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.resources.download.runner import DownloadRunner
