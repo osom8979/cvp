@@ -52,9 +52,11 @@ class FlowWindow(SidebarWithMain[FlowManagerSection]):
 
     @staticmethod
     def begin_child_canvas() -> None:
+        imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         imgui.begin_child("## Canvas", 0, 0, border=True, flags=CANVAS_FLAGS)  # noqa
         imgui.pop_style_color()
+        imgui.pop_style_var()
 
     def on_canvas(self):
         cx, cy = imgui.get_cursor_screen_pos()
