@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
+from enum import StrEnum, auto, unique
 from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
@@ -13,6 +14,13 @@ from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.sidebar_with_main import SidebarWithMain
 
 MenuItemT = TypeVar("MenuItemT")
+
+
+@unique
+class MenuTitleKey(StrEnum):
+    title_ = auto()
+    label_ = auto()
+    name_ = auto()
 
 
 class ManagerInterface(Generic[MenuItemT], ABC):
@@ -73,17 +81,16 @@ class Manager(SidebarWithMain[BaseManagerSectionT], ManagerInterface[MenuItemT])
     def selected(self, value: str) -> None:
         self.section.selected = value
 
-    def update_menus(self) -> None:
-        self._latest_menus = self.get_menus()
-
     @property
     def latest_menus(self):
         return self._latest_menus
 
+    def update_menus(self) -> None:
+        self._latest_menus = self.get_menus()
+
     @override
-    def on_process(self) -> None:
+    def on_before(self) -> None:
         self.update_menus()
-        super().on_process()
 
     @override
     def get_menus(self) -> Mapping[str, MenuItemT]:
@@ -91,12 +98,12 @@ class Manager(SidebarWithMain[BaseManagerSectionT], ManagerInterface[MenuItemT])
 
     @override
     def query_menu_title(self, key: str, item: MenuItemT) -> str:
-        if hasattr(item, "title"):
-            return getattr(item, "title")
-        elif hasattr(item, "label"):
-            return getattr(item, "label")
-        elif hasattr(item, "name"):
-            return getattr(item, "name")
+        if hasattr(item, MenuTitleKey.title_):
+            return getattr(item, MenuTitleKey.title_)
+        elif hasattr(item, MenuTitleKey.label_):
+            return getattr(item, MenuTitleKey.label_)
+        elif hasattr(item, MenuTitleKey.name_):
+            return getattr(item, MenuTitleKey.name_)
         else:
             return str(item)
 

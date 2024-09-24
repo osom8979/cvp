@@ -21,15 +21,16 @@ class SidebarWithMainInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def on_process_splitter(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     def on_process_main(self) -> None:
         raise NotImplementedError
 
 
 class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
+    _sidebar_section: SidebarWidthProtocol
+    _min_sidebar_width: int
+    _sidebar_border: bool
+    _sidebar_splitter: SplitterWithCursor
+
     def __init__(
         self,
         context: Context,
@@ -41,6 +42,7 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
+        sidebar_border=False,
     ):
         super().__init__(
             context=context,
@@ -53,48 +55,55 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
             modifiable_title=modifiable_title,
         )
 
+        if not isinstance(section, SidebarWidthProtocol):
+            raise TypeError(
+                "The 'section' argument must be compatible "
+                f"with {SidebarWidthProtocol.__name__}"
+            )
+
+        self._sidebar_section = section
         self._min_sidebar_width = min_sidebar_width
-        self._vertical_splitter = SplitterWithCursor.from_vertical("## VSplitter")
+        self._sidebar_border = sidebar_border
+        self._sidebar_splitter = SplitterWithCursor.from_vertical("## VSplitter")
 
     @property
     def sidebar_width(self) -> int:
-        section = self.section
-        assert isinstance(section, SidebarWidthProtocol)
-        return section.sidebar_width
+        return self._sidebar_section.sidebar_width
 
     @sidebar_width.setter
     def sidebar_width(self, value: int) -> None:
-        section = self.section
-        assert isinstance(section, SidebarWidthProtocol)
-        section.sidebar_width = value
+        self._sidebar_section.sidebar_width = value
+
+    def do_process_splitter(self) -> None:
+        split_result = self._sidebar_splitter.do_process()
+        if not split_result.changed:
+            return
+
+        value = self.sidebar_width + floor(split_result.value)
+        if value < self._min_sidebar_width:
+            value = self._min_sidebar_width
+
+        self.sidebar_width = value
 
     @override
     def on_process(self) -> None:
-        with begin_child("## child_sidebar", self.sidebar_width, border=False):
+        with begin_child(
+            "## ChildSidebar",
+            self.sidebar_width,
+            border=self._sidebar_border,
+        ):
             self.on_process_sidebar()
 
         imgui.same_line()
-        self.on_process_splitter()
+        self.do_process_splitter()
         imgui.same_line()
 
-        with begin_child("## child_main", -1, -1):
+        with begin_child("## ChildMain"):
             self.on_process_main()
 
     @override
     def on_process_sidebar(self) -> None:
         pass
-
-    @override
-    def on_process_splitter(self) -> None:
-        split_result = self._vertical_splitter.do_process()
-        if not split_result.changed:
-            return
-
-        sidebar_width_value = self.sidebar_width + floor(split_result.value)
-        if sidebar_width_value < self._min_sidebar_width:
-            sidebar_width_value = self._min_sidebar_width
-
-        self.sidebar_width = sidebar_width_value
 
     @override
     def on_process_main(self) -> None:
