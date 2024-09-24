@@ -7,6 +7,8 @@ import imgui
 
 from cvp.gui.draw_list import get_window_draw_list
 
+DEFAULT_VERTICAL_SPLITTER_IDENTIFIER: Final[str] = "## VSplitter"
+DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER: Final[str] = "## HSplitter"
 AVAILABLE_REGION_SIZE: Final[float] = -1.0
 DEFAULT_SPLITTER_SIZE: Final[float] = 3.0
 DEFAULT_SPLITTER_THICKNESS: Final[float] = 2.0
@@ -91,7 +93,7 @@ def splitter(
 
 
 def vertical_splitter(
-    identifier: str,
+    identifier=DEFAULT_VERTICAL_SPLITTER_IDENTIFIER,
     width=DEFAULT_SPLITTER_SIZE,
     height=AVAILABLE_REGION_SIZE,
     flags=0,
@@ -108,7 +110,7 @@ def vertical_splitter(
 
 
 def horizontal_splitter(
-    identifier: str,
+    identifier=DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER,
     width=AVAILABLE_REGION_SIZE,
     height=DEFAULT_SPLITTER_SIZE,
     flags=0,

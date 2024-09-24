@@ -8,8 +8,10 @@ from pygame.mouse import get_cursor, set_cursor
 
 from cvp.gui.splitter import (
     AVAILABLE_REGION_SIZE,
+    DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER,
     DEFAULT_SPLITTER_SIZE,
     DEFAULT_SPLITTER_THICKNESS,
+    DEFAULT_VERTICAL_SPLITTER_IDENTIFIER,
     SplitterOrientation,
     splitter,
 )
@@ -17,6 +19,7 @@ from cvp.gui.splitter import (
 
 class SplitterWithCursor:
     _hovered_cursor: Optional[Cursor]
+    _prev_cursor: Optional[Cursor]
 
     def __init__(
         self,
@@ -24,6 +27,8 @@ class SplitterWithCursor:
         orientation: SplitterOrientation,
         width: float,
         height: float,
+        min_value: Optional[Union[float, int]] = None,
+        max_value: Optional[Union[float, int]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = None,
@@ -32,11 +37,13 @@ class SplitterWithCursor:
         self._orientation = orientation
         self._width = width
         self._height = height
+        self._min_value = min_value
+        self._max_value = max_value
         self._flags = flags
         self._thickness = thickness
 
         self._hovered_cursor = None
-        self._prev_cursor = Cursor()
+        self._prev_cursor = None
         self._prev_hovered = False
 
         if cursor is not None:
@@ -50,9 +57,11 @@ class SplitterWithCursor:
     @classmethod
     def from_vertical(
         cls,
-        identifier: str,
+        identifier=DEFAULT_VERTICAL_SPLITTER_IDENTIFIER,
         width=DEFAULT_SPLITTER_SIZE,
         height=AVAILABLE_REGION_SIZE,
+        min_value: Optional[Union[float, int]] = None,
+        max_value: Optional[Union[float, int]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZEWE,
@@ -62,6 +71,8 @@ class SplitterWithCursor:
             orientation=SplitterOrientation.vertical,
             width=width,
             height=height,
+            min_value=min_value,
+            max_value=max_value,
             flags=flags,
             thickness=thickness,
             cursor=cursor,
@@ -70,9 +81,11 @@ class SplitterWithCursor:
     @classmethod
     def from_horizontal(
         cls,
-        identifier: str,
+        identifier=DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER,
         width=AVAILABLE_REGION_SIZE,
         height=DEFAULT_SPLITTER_SIZE,
+        min_value: Optional[Union[float, int]] = None,
+        max_value: Optional[Union[float, int]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZENS,
@@ -82,13 +95,29 @@ class SplitterWithCursor:
             orientation=SplitterOrientation.horizontal,
             width=width,
             height=height,
+            min_value=min_value,
+            max_value=max_value,
             flags=flags,
             thickness=thickness,
             cursor=cursor,
         )
 
-    def do_process(self):
-        result = splitter(
+    def change_hovered_cursor(self) -> None:
+        if self._hovered_cursor is None:
+            return
+
+        self._prev_cursor = get_cursor()
+        set_cursor(self._hovered_cursor)
+
+    def change_prev_cursor(self) -> None:
+        if self._prev_cursor is None:
+            return
+
+        set_cursor(self._prev_cursor)
+        self._prev_cursor = None
+
+    def do_splitter(self):
+        return splitter(
             self._identifier,
             self._orientation,
             self._width,
@@ -97,14 +126,14 @@ class SplitterWithCursor:
             self._thickness,
         )
 
-        try:
-            if self._hovered_cursor is not None:
-                if not self._prev_hovered and result.hovered:
-                    self._prev_cursor = get_cursor()
-                    set_cursor(self._hovered_cursor)
-                    self._prev_hovered = True
-                elif self._prev_hovered and not result.hovered and not result.changed:
-                    set_cursor(self._prev_cursor)
-                    self._prev_hovered = False
-        finally:
-            return result
+    def do_process(self):
+        result = self.do_splitter()
+
+        if not self._prev_hovered and result.hovered:
+            self.change_hovered_cursor()
+            self._prev_hovered = True
+        elif self._prev_hovered and not result.hovered and not result.changed:
+            self.change_prev_cursor()
+            self._prev_hovered = False
+
+        return result
