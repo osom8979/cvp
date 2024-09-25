@@ -24,6 +24,7 @@ class SplitterResult(NamedTuple):
     changed: bool
     hovered: bool
     value: float
+    roi: Tuple[float, float, float, float]
 
     def __bool__(self) -> bool:
         return self.changed
@@ -78,6 +79,7 @@ def splitter(
 
     draw_list = get_window_draw_list()
     draw_list.add_line(begin[0], begin[1], end[0], end[1], stroke_color, thickness)
+    roi = begin[0], begin[1], end[0], end[1]
 
     if item_active:
         match orientation:
@@ -87,9 +89,9 @@ def splitter(
                 mouse_delta = imgui.get_io().mouse_delta.y
             case _:
                 assert False, "Inaccessible Section"
-        return SplitterResult(True, item_hovered, mouse_delta)
+        return SplitterResult(True, item_hovered, mouse_delta, roi)
     else:
-        return SplitterResult(False, item_hovered, 0)
+        return SplitterResult(False, item_hovered, 0, roi)
 
 
 def vertical_splitter(
