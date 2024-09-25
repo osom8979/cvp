@@ -6,7 +6,8 @@ from typing import Optional
 
 import imgui
 
-from cvp.config.sections.windows import BaseWindowSectionT, SidebarWidthProtocol
+from cvp.config.sections.protocols.sidebar import SupportsSidebarWidth
+from cvp.config.sections.windows import BaseWindowSectionT
 from cvp.context import Context
 from cvp.gui import begin_child
 from cvp.types import override
@@ -26,7 +27,7 @@ class SidebarWithMainInterface(ABC):
 
 
 class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
-    _sidebar_section: SidebarWidthProtocol
+    _sidebar_section: SupportsSidebarWidth
     _min_sidebar_width: int
     _sidebar_border: bool
     _sidebar_splitter: SplitterWithCursor
@@ -55,10 +56,10 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
             modifiable_title=modifiable_title,
         )
 
-        if not isinstance(section, SidebarWidthProtocol):
+        if not isinstance(section, SupportsSidebarWidth):
             raise TypeError(
                 "The 'section' argument must be compatible "
-                f"with {SidebarWidthProtocol.__name__}"
+                f"with {SupportsSidebarWidth.__name__}"
             )
 
         self._sidebar_section = section

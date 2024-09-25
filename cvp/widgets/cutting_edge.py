@@ -6,7 +6,8 @@ from typing import Optional
 
 import imgui
 
-from cvp.config.sections.windows import BaseWindowSectionT, CuttingEdgeProtocol
+from cvp.config.sections.protocols.cutting_edge import SupportsCuttingEdge
+from cvp.config.sections.windows import BaseWindowSectionT
 from cvp.context import Context
 from cvp.gui import begin_child
 from cvp.types import override
@@ -39,7 +40,7 @@ class CuttingEdgeInterface(ABC):
 
 
 class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
-    _cutting_edge_section: CuttingEdgeProtocol
+    _cutting_edge_section: SupportsCuttingEdge
     _min_split_width: int
     _min_split_height: int
     _left_splitter: SplitterWithCursor
@@ -70,10 +71,10 @@ class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
             modifiable_title=modifiable_title,
         )
 
-        if not isinstance(section, CuttingEdgeProtocol):
+        if not isinstance(section, SupportsCuttingEdge):
             raise TypeError(
                 "The 'section' argument must be compatible "
-                f"with {CuttingEdgeProtocol.__name__}"
+                f"with {SupportsCuttingEdge.__name__}"
             )
 
         self._cutting_edge_section = section
