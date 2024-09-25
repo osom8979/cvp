@@ -19,7 +19,6 @@ CHECKSUM_DELIMITER: Final[str] = ":"
 
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
 
-FLOW_SECTION_PREFIX: Final[str] = "flow."
 LAYOUT_SECTION_PREFIX: Final[str] = "layout."
 MEDIA_SECTION_PREFIX: Final[str] = "media."
 

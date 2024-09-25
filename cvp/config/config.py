@@ -27,11 +27,7 @@ from cvp.config.sections.windows.manager.stitching import StitchingManagerSectio
 from cvp.config.sections.windows.manager.window import WindowManagerSection
 from cvp.config.sections.windows.media import MediaSection
 from cvp.config.sections.windows.overlay import OverlaySection
-from cvp.variables import (
-    FLOW_SECTION_PREFIX,
-    LAYOUT_SECTION_PREFIX,
-    MEDIA_SECTION_PREFIX,
-)
+from cvp.variables import LAYOUT_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
 class Config(BaseConfig):
@@ -42,28 +38,33 @@ class Config(BaseConfig):
     ):
         super().__init__(filename=filename, cvp_home=cvp_home)
 
-        self._flow_prefix = SectionPrefix(self, prefix=FLOW_SECTION_PREFIX)
+        # Prefixes
         self._layout_prefix = SectionPrefix(self, prefix=LAYOUT_SECTION_PREFIX)
         self._media_prefix = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
 
-        self._appearance = AppearanceSection(self)
-        self._concurrency = ConcurrencySection(self)
-        self._context = ContextSection(self)
-        self._developer = DeveloperSection(self)
-        self._display = DisplaySection(self)
-        self._ffmpeg = FFmpegSection(self)
-        self._flow = FlowSection(self)
-        self._font = FontSection(self)
-        self._graphic = GraphicSection(self)
-        self._labeling_manager = LabelingManagerSection(self)
-        self._layout_manager = LayoutManagerSection(self)
-        self._logging = LoggingSection(self)
-        self._media_manager = MediaManagerSection(self)
-        self._overlay = OverlaySection(self)
-        self._preference_manager = PreferenceManagerSection(self)
-        self._process_manager = ProcessManagerSection(self)
-        self._stitching_manager = StitchingManagerSection(self)
-        self._window_manager = WindowManagerSection(self)
+        # Managers
+        self.preference_manager = PreferenceManagerSection(self)
+        self.process_manager = ProcessManagerSection(self)
+        self.stitching_manager = StitchingManagerSection(self)
+        self.window_manager = WindowManagerSection(self)
+        self.labeling_manager = LabelingManagerSection(self)
+        self.layout_manager = LayoutManagerSection(self)
+        self.media_manager = MediaManagerSection(self)
+
+        # Windows
+        self.flow = FlowSection(self)
+        self.overlay = OverlaySection(self)
+
+        # Common
+        self.appearance = AppearanceSection(self)
+        self.concurrency = ConcurrencySection(self)
+        self.context = ContextSection(self)
+        self.developer = DeveloperSection(self)
+        self.display = DisplaySection(self)
+        self.ffmpeg = FFmpegSection(self)
+        self.font = FontSection(self)
+        self.graphic = GraphicSection(self)
+        self.logging = LoggingSection(self)
 
     def add_layout_section(self, name: Optional[str] = None):
         section = self._layout_prefix.join_section_name(name if name else str(uuid4()))
@@ -94,81 +95,9 @@ class Config(BaseConfig):
         return result
 
     @property
-    def appearance(self):
-        return self._appearance
-
-    @property
-    def concurrency(self):
-        return self._concurrency
-
-    @property
-    def context(self):
-        return self._context
-
-    @property
-    def developer(self):
-        return self._developer
-
-    @property
-    def display(self):
-        return self._display
-
-    @property
-    def ffmpeg(self):
-        return self._ffmpeg
-
-    @property
-    def flow(self):
-        return self._flow
-
-    @property
-    def font(self):
-        return self._font
-
-    @property
-    def graphic(self):
-        return self._graphic
-
-    @property
-    def labeling_manager(self):
-        return self._labeling_manager
-
-    @property
-    def layout_manager(self):
-        return self._layout_manager
-
-    @property
-    def logging(self):
-        return self._logging
-
-    @property
-    def media_manager(self):
-        return self._media_manager
-
-    @property
-    def overlay(self):
-        return self._overlay
-
-    @property
-    def preference_manager(self):
-        return self._preference_manager
-
-    @property
-    def process_manager(self):
-        return self._process_manager
-
-    @property
-    def stitching_manager(self):
-        return self._stitching_manager
-
-    @property
-    def window_manager(self):
-        return self._window_manager
-
-    @property
     def debug(self):
-        return self._developer.debug
+        return self.developer.debug
 
     @property
     def verbose(self):
-        return self._developer.verbose
+        return self.developer.verbose
