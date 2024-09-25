@@ -17,6 +17,10 @@ key2 = 1
 """
 
 
+class _TestBaseSection(BaseSection):
+    pass
+
+
 class BaseTestCase(TestCase):
     def setUp(self):
         self.temp_dir = TemporaryDirectory()
@@ -33,6 +37,9 @@ class BaseTestCase(TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
         self.assertFalse(os.path.exists(self.temp_dir.name))
+
+    def test_auto_section_name(self):
+        self.assertEqual("_test_base", _TestBaseSection.auto_section_name())
 
     def test_default(self):
         config = BaseConfig()

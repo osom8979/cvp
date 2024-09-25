@@ -2,7 +2,6 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 from cvp.variables import MAX_PROCESS_WORKERS, MAX_THREAD_WORKERS
 
@@ -15,9 +14,6 @@ class _Keys(StrEnum):
 
 class ConcurrencySection(BaseSection):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="concurrency"):
-        super().__init__(config=config, section=section)
 
     @property
     def thread_workers(self) -> int:

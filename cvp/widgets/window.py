@@ -7,7 +7,8 @@ from typing import Any, Callable, Dict, Generic, Optional, Tuple
 import imgui
 from pygame.event import Event
 
-from cvp.config.sections.windows import BaseWindowSection, BaseWindowSectionT
+from cvp.config.sections import BaseSectionT
+from cvp.config.sections.mixins.window import WindowSectionMixin
 from cvp.context import Context
 from cvp.gui import set_window_min_size
 from cvp.logging.logging import logger
@@ -94,7 +95,7 @@ class WindowQuery:
 
 
 class Window(
-    Generic[BaseWindowSectionT],
+    Generic[BaseSectionT],
     WindowInterface,
     EventCallbacks,
     Eventable,
@@ -109,7 +110,7 @@ class Window(
     def __init__(
         self,
         context: Context,
-        section: BaseWindowSectionT,
+        section: BaseSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -117,15 +118,13 @@ class Window(
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
     ) -> None:
-        assert isinstance(context, Context)
-        assert isinstance(section, BaseWindowSection)
-
         self._context = context
         self._section = section
         self._title = title if title else type(self).__name__
 
-        if not self._section.has_title:
-            self._section.title = self._title
+        if isinstance(self._section, WindowSectionMixin):
+            if not self._section.has_title:
+                self._section.title = self._title
 
         self.closable = closable if closable else False
         self.flags = flags if flags else 0
@@ -229,7 +228,12 @@ class Window(
         self._set_flag(imgui.WINDOW_UNSAVED_DOCUMENT, value)
 
     @property
-    def section(self) -> BaseWindowSectionT:
+    def section(self) -> BaseSectionT:
+        return self._section
+
+    @property
+    def window_section(self) -> WindowSectionMixin:
+        assert isinstance(self._section, WindowSectionMixin)
         return self._section
 
     @property
@@ -238,16 +242,16 @@ class Window(
 
     @property
     def opened(self) -> bool:
-        return self._section.opened
+        return self.window_section.opened
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self._section.opened = value
+        self.window_section.opened = value
 
     @property
     def title(self) -> str:
         if self._modifiable_title:
-            return self._section.title
+            return self.window_section.title
         else:
             return self._title
 
@@ -258,7 +262,7 @@ class Window(
                 f"{repr(self)} "
                 "The title of a window that cannot be renamed should not be changed"
             )
-        self._section.title = value
+        self.window_section.title = value
 
     @property
     def query(self):

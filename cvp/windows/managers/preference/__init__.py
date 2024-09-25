@@ -5,7 +5,7 @@ from typing import Mapping
 
 import imgui
 
-from cvp.config.sections.windows.manager.preference import PreferenceManagerSection
+from cvp.config.sections.preference_manager import PreferenceManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.manager import Manager

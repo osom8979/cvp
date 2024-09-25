@@ -6,7 +6,8 @@ from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
 
-from cvp.config.sections.windows.manager import BaseManagerSectionT
+from cvp.config.sections import BaseSectionT
+from cvp.config.sections.mixins.selected import SelectedSectionMixin
 from cvp.context import Context
 from cvp.gui import text_centered
 from cvp.types import override
@@ -45,13 +46,13 @@ class ManagerInterface(Generic[MenuItemT], ABC):
         raise NotImplementedError
 
 
-class Manager(SidebarWithMain[BaseManagerSectionT], ManagerInterface[MenuItemT]):
+class Manager(SidebarWithMain[BaseSectionT], ManagerInterface[MenuItemT]):
     _latest_menus: Mapping[str, MenuItemT]
 
     def __init__(
         self,
         context: Context,
-        section: BaseManagerSectionT,
+        section: BaseSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -74,12 +75,17 @@ class Manager(SidebarWithMain[BaseManagerSectionT], ManagerInterface[MenuItemT])
         self._latest_menus = dict()
 
     @property
+    def selected_section(self) -> SelectedSectionMixin:
+        assert isinstance(self.section, SelectedSectionMixin)
+        return self.section
+
+    @property
     def selected(self) -> str:
-        return self.section.selected
+        return self.selected_section.selected
 
     @selected.setter
     def selected(self, value: str) -> None:
-        self.section.selected = value
+        self.selected_section.selected = value
 
     @property
     def latest_menus(self):

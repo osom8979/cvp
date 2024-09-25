@@ -2,8 +2,8 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.config._base import BaseConfig
-from cvp.config.sections.windows.manager._base import BaseManagerSection
+from cvp.config.sections._base import BaseSection
+from cvp.config.sections.mixins.manager import ManagerSectionMixin
 from cvp.variables import PROCESS_TEARDOWN_TIMEOUT
 
 
@@ -12,11 +12,8 @@ class _Keys(StrEnum):
     teardown_timeout = auto()
 
 
-class ProcessManagerSection(BaseManagerSection):
+class ProcessManagerSection(BaseSection, ManagerSectionMixin):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="process_manager"):
-        super().__init__(config=config, section=section)
 
     @property
     def teardown_timeout(self) -> float:

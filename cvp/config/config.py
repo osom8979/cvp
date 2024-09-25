@@ -13,20 +13,20 @@ from cvp.config.sections.context import ContextSection
 from cvp.config.sections.developer import DeveloperSection
 from cvp.config.sections.display import DisplaySection
 from cvp.config.sections.ffmpeg import FFmpegSection
+from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.graphic import GraphicSection
+from cvp.config.sections.labeling_manager import LabelingManagerSection
+from cvp.config.sections.layout import LayoutSection
+from cvp.config.sections.layout_manager import LayoutManagerSection
 from cvp.config.sections.logging import LoggingSection
-from cvp.config.sections.windows.flow import FlowSection
-from cvp.config.sections.windows.layout import LayoutSection
-from cvp.config.sections.windows.manager.labeling import LabelingManagerSection
-from cvp.config.sections.windows.manager.layout import LayoutManagerSection
-from cvp.config.sections.windows.manager.media import MediaManagerSection
-from cvp.config.sections.windows.manager.preference import PreferenceManagerSection
-from cvp.config.sections.windows.manager.process import ProcessManagerSection
-from cvp.config.sections.windows.manager.stitching import StitchingManagerSection
-from cvp.config.sections.windows.manager.window import WindowManagerSection
-from cvp.config.sections.windows.media import MediaSection
-from cvp.config.sections.windows.overlay import OverlaySection
+from cvp.config.sections.media_manager import MediaManagerSection
+from cvp.config.sections.media_window import MediaWindowSection
+from cvp.config.sections.overlay_window import OverlayWindowSection
+from cvp.config.sections.preference_manager import PreferenceManagerSection
+from cvp.config.sections.process_manager import ProcessManagerSection
+from cvp.config.sections.stitching_manager import StitchingManagerSection
+from cvp.config.sections.window_manager import WindowManagerSection
 from cvp.variables import LAYOUT_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
@@ -52,8 +52,8 @@ class Config(BaseConfig):
         self.media_manager = MediaManagerSection(self)
 
         # Windows
-        self.flow = FlowSection(self)
-        self.overlay = OverlaySection(self)
+        self.flow_window = FlowWindowSection(self)
+        self.overlay_window = OverlayWindowSection(self)
 
         # Common
         self.appearance = AppearanceSection(self)
@@ -76,7 +76,7 @@ class Config(BaseConfig):
         section = self._media_prefix.join_section_name(name if name else str(uuid4()))
         if self.has_section(section):
             raise KeyError(f"Section '{section}' already exists")
-        return MediaSection(config=self, section=section)
+        return MediaWindowSection(config=self, section=section)
 
     @property
     def layout_sections(self):
@@ -88,10 +88,10 @@ class Config(BaseConfig):
 
     @property
     def media_sections(self):
-        result = OrderedDict[str, MediaSection]()
+        result = OrderedDict[str, MediaWindowSection]()
         for section in self._media_prefix.sections():
             key = self._media_prefix.split_section_name(section)
-            result[key] = MediaSection(config=self, section=section)
+            result[key] = MediaWindowSection(config=self, section=section)
         return result
 
     @property

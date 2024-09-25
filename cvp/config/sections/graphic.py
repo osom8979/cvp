@@ -2,7 +2,6 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 
 
@@ -14,9 +13,6 @@ class _Keys(StrEnum):
 
 class GraphicSection(BaseSection):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="graphic"):
-        super().__init__(config=config, section=section)
 
     @property
     def has_force_egl(self) -> bool:

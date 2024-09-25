@@ -6,8 +6,8 @@ from typing import Optional
 
 import imgui
 
-from cvp.config.sections.protocols.cutting_edge import SupportsCuttingEdge
-from cvp.config.sections.windows import BaseWindowSectionT
+from cvp.config.sections import BaseSectionT
+from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin
 from cvp.context import Context
 from cvp.gui import begin_child
 from cvp.types import override
@@ -39,18 +39,11 @@ class CuttingEdgeInterface(ABC):
         raise NotImplementedError
 
 
-class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
-    _cutting_edge_section: SupportsCuttingEdge
-    _min_split_width: int
-    _min_split_height: int
-    _left_splitter: SplitterWithCursor
-    _right_splitter: SplitterWithCursor
-    _bottom_splitter: SplitterWithCursor
-
+class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
     def __init__(
         self,
         context: Context,
-        section: BaseWindowSectionT,
+        section: BaseSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -71,13 +64,6 @@ class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
             modifiable_title=modifiable_title,
         )
 
-        if not isinstance(section, SupportsCuttingEdge):
-            raise TypeError(
-                "The 'section' argument must be compatible "
-                f"with {SupportsCuttingEdge.__name__}"
-            )
-
-        self._cutting_edge_section = section
         self._min_split_width = min_sidebar_width
         self._min_split_height = min_sidebar_height
 
@@ -86,28 +72,33 @@ class CuttingEdge(Window[BaseWindowSectionT], CuttingEdgeInterface):
         self._bottom_splitter = SplitterWithCursor.from_horizontal("## HSplitterBottom")
 
     @property
-    def split_left(self) -> int:
-        return self._cutting_edge_section.split_left
+    def cutting_edge_section(self) -> CuttingEdgeSectionMixin:
+        assert isinstance(self.section, CuttingEdgeSectionMixin)
+        return self.section
+
+    @property
+    def split_left(self) -> float:
+        return self.cutting_edge_section.split_left
 
     @split_left.setter
-    def split_left(self, value: int) -> None:
-        self._cutting_edge_section.split_left = value
+    def split_left(self, value: float) -> None:
+        self.cutting_edge_section.split_left = value
 
     @property
-    def split_right(self) -> int:
-        return self._cutting_edge_section.split_right
+    def split_right(self) -> float:
+        return self.cutting_edge_section.split_right
 
     @split_right.setter
-    def split_right(self, value: int) -> None:
-        self._cutting_edge_section.split_right = value
+    def split_right(self, value: float) -> None:
+        self.cutting_edge_section.split_right = value
 
     @property
-    def split_bottom(self) -> int:
-        return self._cutting_edge_section.split_bottom
+    def split_bottom(self) -> float:
+        return self.cutting_edge_section.split_bottom
 
     @split_bottom.setter
-    def split_bottom(self, value: int) -> None:
-        self._cutting_edge_section.split_bottom = value
+    def split_bottom(self, value: float) -> None:
+        self.cutting_edge_section.split_bottom = value
 
     @override
     def on_process(self) -> None:

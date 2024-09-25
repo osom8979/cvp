@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from cvp.config._base import BaseConfig, ValueT
+from cvp.strings.case_converter import camelcase_to_snakecase
 
 
 class BaseSection:
-    def __init__(self, config: BaseConfig, section: str):
+    @classmethod
+    def auto_section_name(cls) -> str:
+        return camelcase_to_snakecase(cls.__name__.removesuffix("Section"))
+
+    def __init__(self, config: BaseConfig, section: Optional[str] = None):
         self._config = config
-        self._section = section
+        self._section = section if section else self.auto_section_name()
 
     @property
     def section(self) -> str:

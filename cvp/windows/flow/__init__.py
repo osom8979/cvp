@@ -4,7 +4,7 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.windows.flow import FlowSection
+from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
 from cvp.gui import get_window_draw_list, menu_item_ex
 from cvp.types import override
@@ -18,11 +18,11 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
 
 
-class FlowWindow(CuttingEdge[FlowSection]):
+class FlowWindow(CuttingEdge[FlowWindowSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.flow,
+            section=context.config.flow_window,
             title="Flow",
             closable=True,
         )

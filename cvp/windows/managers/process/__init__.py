@@ -2,7 +2,7 @@
 
 from typing import Mapping
 
-from cvp.config.sections.windows.manager.process import ProcessManagerSection
+from cvp.config.sections.process_manager import ProcessManagerSection
 from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override

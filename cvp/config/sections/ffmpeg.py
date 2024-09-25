@@ -2,7 +2,6 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 from cvp.patterns.proxy import ValueProxy
 from cvp.types import override
@@ -20,9 +19,6 @@ class _Keys(StrEnum):
 
 class FFmpegSection(BaseSection):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="ffmpeg"):
-        super().__init__(config=config, section=section)
 
     @property
     def has_ffmpeg(self) -> bool:

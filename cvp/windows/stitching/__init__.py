@@ -4,7 +4,7 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.windows.manager.stitching import StitchingManagerSection
+from cvp.config.sections.stitching_manager import StitchingManagerSection
 from cvp.context import Context
 from cvp.gui import get_window_draw_list
 from cvp.types import override

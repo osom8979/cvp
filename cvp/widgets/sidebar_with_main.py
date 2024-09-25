@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from math import floor
 from typing import Optional
 
 import imgui
 
-from cvp.config.sections.protocols.sidebar import SupportsSidebarWidth
-from cvp.config.sections.windows import BaseWindowSectionT
+from cvp.config.sections import BaseSectionT
+from cvp.config.sections.mixins.sidebar import SidebarWidthSectionMixin
 from cvp.context import Context
 from cvp.gui import begin_child
 from cvp.types import override
@@ -26,16 +25,11 @@ class SidebarWithMainInterface(ABC):
         raise NotImplementedError
 
 
-class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
-    _sidebar_section: SupportsSidebarWidth
-    _min_sidebar_width: int
-    _sidebar_border: bool
-    _sidebar_splitter: SplitterWithCursor
-
+class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
     def __init__(
         self,
         context: Context,
-        section: BaseWindowSectionT,
+        section: BaseSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -56,31 +50,29 @@ class SidebarWithMain(Window[BaseWindowSectionT], SidebarWithMainInterface):
             modifiable_title=modifiable_title,
         )
 
-        if not isinstance(section, SupportsSidebarWidth):
-            raise TypeError(
-                "The 'section' argument must be compatible "
-                f"with {SupportsSidebarWidth.__name__}"
-            )
-
-        self._sidebar_section = section
         self._min_sidebar_width = min_sidebar_width
         self._sidebar_border = sidebar_border
         self._sidebar_splitter = SplitterWithCursor.from_vertical("## VSplitter")
 
     @property
-    def sidebar_width(self) -> int:
-        return self._sidebar_section.sidebar_width
+    def sidebar_section(self) -> SidebarWidthSectionMixin:
+        assert isinstance(self.section, SidebarWidthSectionMixin)
+        return self.section
+
+    @property
+    def sidebar_width(self) -> float:
+        return self.sidebar_section.sidebar_width
 
     @sidebar_width.setter
-    def sidebar_width(self, value: int) -> None:
-        self._sidebar_section.sidebar_width = value
+    def sidebar_width(self, value: float) -> None:
+        self.sidebar_section.sidebar_width = value
 
     def do_process_splitter(self) -> None:
         split_result = self._sidebar_splitter.do_process()
         if not split_result.changed:
             return
 
-        value = self.sidebar_width + floor(split_result.value)
+        value = self.sidebar_width + split_result.value
         if value < self._min_sidebar_width:
             value = self._min_sidebar_width
 

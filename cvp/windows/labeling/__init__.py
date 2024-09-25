@@ -4,7 +4,7 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.windows.manager.labeling import LabelingManagerSection
+from cvp.config.sections.labeling_manager import LabelingManagerSection
 from cvp.context import Context
 from cvp.gui import get_window_draw_list
 from cvp.types import override

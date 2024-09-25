@@ -3,8 +3,8 @@
 from enum import StrEnum, auto, unique
 from typing import Tuple
 
-from cvp.config._base import BaseConfig
-from cvp.config.sections.windows._base import BaseWindowSection
+from cvp.config.sections._base import BaseSection
+from cvp.config.sections.mixins.window import WindowSectionMixin
 
 
 @unique
@@ -23,11 +23,8 @@ class _Keys(StrEnum):
     cmds = auto()
 
 
-class MediaSection(BaseWindowSection):
+class MediaWindowSection(BaseSection, WindowSectionMixin):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="media"):
-        super().__init__(config=config, section=section)
 
     @property
     def mode(self) -> Mode:

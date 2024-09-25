@@ -4,7 +4,7 @@ from typing import List
 
 import imgui
 
-from cvp.config.sections.windows.overlay import Anchor
+from cvp.config.sections.overlay_window import Anchor
 from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.types import override
@@ -15,7 +15,7 @@ class OverlayPreference(PreferenceWidget):
     _anchors: List[Anchor]
 
     def __init__(self, context: Context, label="Overlay"):
-        self._section = context.config.overlay
+        self._section = context.config.overlay_window
         self._label = label
 
         self._anchors = list(Anchor)

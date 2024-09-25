@@ -1,44 +1,37 @@
 # -*- coding: utf-8 -*-
 
-from abc import abstractmethod
 from enum import StrEnum, auto, unique
 
 from cvp.config.sections.mixins._base import SupportsBaseSection
 
 
 @unique
-class BaseWindowKeys(StrEnum):
+class Keys(StrEnum):
     opened = auto()
     title_ = "title"
 
 
-class WindowMixin(SupportsBaseSection):
+class WindowSectionMixin(SupportsBaseSection):
     @property
-    @abstractmethod
     def has_opened(self) -> bool:
-        return self.has(BaseWindowKeys.opened)
+        return self.has(Keys.opened)
 
     @property
-    @abstractmethod
     def opened(self) -> bool:
-        return self.get(BaseWindowKeys.opened, False)
+        return self.get(Keys.opened, False)
 
     @opened.setter
-    @abstractmethod
     def opened(self, value: bool) -> None:
-        self.set(BaseWindowKeys.opened, value)
+        self.set(Keys.opened, value)
 
     @property
-    @abstractmethod
     def has_title(self) -> bool:
-        return self.has(BaseWindowKeys.title_)
+        return self.has(Keys.title_)
 
     @property
-    @abstractmethod
     def title(self) -> str:
-        return self.get(BaseWindowKeys.title_, str())
+        return self.get(Keys.title_, str())
 
     @title.setter
-    @abstractmethod
     def title(self, value: str) -> None:
-        self.set(BaseWindowKeys.title_, value)
+        self.set(Keys.title_, value)

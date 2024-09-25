@@ -4,8 +4,8 @@ from typing import Mapping
 
 import imgui
 
-from cvp.config.sections.windows.layout import LayoutSection
-from cvp.config.sections.windows.manager.layout import LayoutManagerSection
+from cvp.config.sections.layout import LayoutSection
+from cvp.config.sections.layout_manager import LayoutManagerSection
 from cvp.context import Context
 from cvp.gui import button_ex
 from cvp.popups.confirm import ConfirmPopup

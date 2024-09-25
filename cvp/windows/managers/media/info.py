@@ -2,7 +2,7 @@
 
 import imgui
 
-from cvp.config.sections.windows.media import MediaSection
+from cvp.config.sections.media_window import MediaWindowSection
 from cvp.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.gui import button_ex, input_text_disabled, input_text_value, item_width
@@ -11,12 +11,12 @@ from cvp.types import override
 from cvp.widgets.tab import TabItem
 
 
-class MediaInfoTab(TabItem[MediaSection]):
+class MediaInfoTab(TabItem[MediaWindowSection]):
     def __init__(self, context: Context):
         super().__init__(context, "Info")
 
     @override
-    def on_item(self, item: MediaSection) -> None:
+    def on_item(self, item: MediaWindowSection) -> None:
         imgui.text("Section:")
         input_text_disabled("## Section", item.section)
 

@@ -2,7 +2,7 @@
 
 from typing import Mapping
 
-from cvp.config.sections.windows.manager.window import WindowManagerSection
+from cvp.config.sections.window_manager import WindowManagerSection
 from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab

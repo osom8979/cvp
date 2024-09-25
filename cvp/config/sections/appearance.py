@@ -2,7 +2,6 @@
 
 from enum import StrEnum, auto, unique
 
-from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 
 
@@ -13,9 +12,6 @@ class _Keys(StrEnum):
 
 class AppearanceSection(BaseSection):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="appearance"):
-        super().__init__(config=config, section=section)
 
     @property
     def theme(self) -> str:

@@ -3,8 +3,8 @@
 from enum import IntEnum, StrEnum, auto, unique
 from typing import Sequence
 
-from cvp.config._base import BaseConfig
-from cvp.config.sections.windows._base import BaseWindowSection
+from cvp.config.sections._base import BaseSection
+from cvp.config.sections.mixins.window import WindowSectionMixin
 
 
 @unique
@@ -27,11 +27,8 @@ class _Keys(StrEnum):
     error_color = auto()
 
 
-class OverlaySection(BaseWindowSection):
+class OverlayWindowSection(BaseSection, WindowSectionMixin):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="overlay"):
-        super().__init__(config=config, section=section)
 
     @property
     def anchor(self) -> Anchor:

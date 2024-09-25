@@ -5,7 +5,7 @@ from typing import Final, Sequence, Tuple
 
 import imgui
 
-from cvp.config.sections.windows.overlay import OverlaySection
+from cvp.config.sections.overlay_window import OverlayWindowSection
 from cvp.context import Context
 from cvp.gui import begin_popup_context_window, end_popup_context_window, menu_item_ex
 from cvp.system.usage import SystemUsage
@@ -22,11 +22,11 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 )
 
 
-class OverlayWindow(Window[OverlaySection]):
+class OverlayWindow(Window[OverlayWindowSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.overlay,
+            section=context.config.overlay_window,
             title="Overlay",
             closable=False,
             flags=OVERLAY_WINDOW_FLAGS,

@@ -3,7 +3,6 @@
 from enum import StrEnum, auto, unique
 from typing import Tuple
 
-from cvp.config._base import BaseConfig
 from cvp.config.sections._base import BaseSection
 
 
@@ -17,9 +16,6 @@ class _Keys(StrEnum):
 
 class DisplaySection(BaseSection):
     K = _Keys
-
-    def __init__(self, config: BaseConfig, section="display"):
-        super().__init__(config=config, section=section)
 
     @property
     def width(self) -> int:
