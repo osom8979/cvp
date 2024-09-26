@@ -4,8 +4,12 @@ from typing import Any, Dict, Final, Literal, Sequence, get_args
 
 from cvp.system.environ_keys import CVP_HOME
 
-CVP_LOGGER_NAME: Final[str] = "cvp"
+CVP_LOGGER_NAME: Final[str] = "cvp"  # Project root logger
+
 CVP_DOWNLOAD_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.download"
+CVP_EVENT_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.event"
+CVP_PROFILE_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.profile"
+CVP_WIDGETS_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.widgets"
 CVP_WORKER_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.worker"
 
 TimedRotatingWhenLiteral = Literal[
@@ -29,6 +33,23 @@ DEFAULT_STYLE: Final[LoggingStyleLiteral] = "%"
 SIMPLE_FORMAT: Final[str] = "{levelname[0]} {asctime} {name} {message}"
 SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
 SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
+
+
+def timed_rotating_file_handler_config(basename: str, backup_count=30):
+    return {
+        "class": "cvp.logging.handlers.file.TimedRotatingFileHandler",
+        "level": "DEBUG",
+        "formatter": "default",
+        "filename": f"${{{CVP_HOME}}}/logs/{basename}",
+        "when": "D",
+        "interval": 1,
+        "backupCount": backup_count,
+        "encoding": "utf-8",
+        "delay": False,
+        "utc": False,
+        "suffix": "%Y%m%d_%H%M%S.log",
+    }
+
 
 _simple_formatter = {
     "format": SIMPLE_FORMAT,
@@ -95,30 +116,35 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "formatter": "colored",
             "stream": "ext://sys.stdout",
         },
-        "timed_rotating_file_default": {
-            "class": "cvp.logging.handlers.file.TimedRotatingFileHandler",
-            "level": "DEBUG",
-            "formatter": "default",
-            "filename": f"${{{CVP_HOME}}}/logs/cvp_timed_rotating",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 10,
-            "encoding": "utf-8",
-            "delay": False,
-            "utc": False,
-            "suffix": "%Y%m%d_%H%M%S.log",
-        },
+        "cvp_file": timed_rotating_file_handler_config("cvp"),
+        "cvp_worker_file": timed_rotating_file_handler_config("cvp.worker"),
     },
     "loggers": {
         # root logger
         "": {
-            "handlers": ["stdout_colored", "timed_rotating_file_default"],
+            "handlers": ["stdout_colored", "cvp_file"],
             "level": "DEBUG",
         },
         "OpenGL": {"level": "DEBUG"},
         "httpcore": {"level": "DEBUG"},
         "httpx": {"level": "DEBUG"},
-        CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
         CVP_LOGGER_NAME: {"level": "DEBUG"},
+        CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
+        CVP_EVENT_LOGGER_NAME: {
+            "handlers": ["stdout_colored"],
+            "level": "DEBUG",
+            "propagate": 0,
+        },
+        CVP_PROFILE_LOGGER_NAME: {"level": "DEBUG"},
+        CVP_WIDGETS_LOGGER_NAME: {
+            "handlers": ["stdout_colored"],
+            "level": "INFO",
+            "propagate": 0,
+        },
+        CVP_WORKER_LOGGER_NAME: {
+            "handlers": ["stdout_colored", "cvp_worker_file"],
+            "level": "DEBUG",
+            "propagate": 0,
+        },
     },
 }

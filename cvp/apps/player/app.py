@@ -18,11 +18,10 @@ from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
 from cvp.gui.fonts import add_jbm_font, add_ngc_font
 from cvp.gui.styles import default_style_colors
-from cvp.logging.logging import logger
+from cvp.logging.logging import event_logger, logger, profile_logger
 from cvp.logging.profile import ProfileLogging
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
-from cvp.variables import VERBOSE_LEVEL_2
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.flow import FlowWindow
 from cvp.windows.labeling import LabelingWindow
@@ -41,7 +40,7 @@ class PlayerApplication:
     def __init__(self, context: Context):
         self._context = context
         self._windows = WindowMapper()
-        self._profiler = ProfileLogging(logger)
+        self._profiler = ProfileLogging(profile_logger)
 
         self._flow = FlowWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
@@ -238,10 +237,7 @@ class PlayerApplication:
 
     def on_event(self, event: Event) -> None:
         assert NOEVENT < event.type < NUMEVENTS
-
-        if self.debug and self.verbose >= VERBOSE_LEVEL_2:
-            name = event_name(event.type)
-            logger.debug(f"Received event(name={name}, dict={event.dict})")
+        event_logger.debug(f"Event {event_name(event.type)}: {event.dict}")
 
         consumed_event = self._windows.do_event(event)
         if not consumed_event:

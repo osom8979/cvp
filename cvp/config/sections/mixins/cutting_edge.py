@@ -20,7 +20,7 @@ class CuttingEdgeSectionMixin(SupportsBaseSection):
 
     @property
     def split_left(self) -> float:
-        return self.get(Keys.split_left, MIN_SIDEBAR_WIDTH)
+        return self.get(Keys.split_left, float(MIN_SIDEBAR_WIDTH))
 
     @split_left.setter
     def split_left(self, value: float) -> None:
@@ -32,7 +32,7 @@ class CuttingEdgeSectionMixin(SupportsBaseSection):
 
     @property
     def split_right(self) -> float:
-        return self.get(Keys.split_right, MIN_SIDEBAR_WIDTH)
+        return self.get(Keys.split_right, float(MIN_SIDEBAR_WIDTH))
 
     @split_right.setter
     def split_right(self, value: float) -> None:
@@ -44,7 +44,7 @@ class CuttingEdgeSectionMixin(SupportsBaseSection):
 
     @property
     def split_bottom(self) -> float:
-        return self.get(Keys.split_bottom, MIN_SIDEBAR_HEIGHT)
+        return self.get(Keys.split_bottom, float(MIN_SIDEBAR_HEIGHT))
 
     @split_bottom.setter
     def split_bottom(self, value: float) -> None:

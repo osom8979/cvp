@@ -22,7 +22,10 @@ from typing import Optional, Union
 
 from cvp.logging.defaults import (
     CVP_DOWNLOAD_LOGGER_NAME,
+    CVP_EVENT_LOGGER_NAME,
     CVP_LOGGER_NAME,
+    CVP_PROFILE_LOGGER_NAME,
+    CVP_WIDGETS_LOGGER_NAME,
     CVP_WORKER_LOGGER_NAME,
     DEFAULT_DATEFMT,
     DEFAULT_FORMAT,
@@ -36,7 +39,11 @@ from cvp.logging.defaults import (
 from cvp.system.environ_keys import CVP_HOME
 
 logger = getLogger(CVP_LOGGER_NAME)
+
 download_logger = getLogger(CVP_DOWNLOAD_LOGGER_NAME)
+event_logger = getLogger(CVP_EVENT_LOGGER_NAME)
+profile_logger = getLogger(CVP_PROFILE_LOGGER_NAME)
+widgets_logger = getLogger(CVP_WIDGETS_LOGGER_NAME)
 worker_logger = getLogger(CVP_WORKER_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"

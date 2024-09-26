@@ -6,6 +6,8 @@ from typing import Final
 VERBOSE_LEVEL_0: Final[int] = 0
 VERBOSE_LEVEL_1: Final[int] = 1
 VERBOSE_LEVEL_2: Final[int] = 2
+"""Logs all components for debugging.
+"""
 
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
 CVP_INI_FILENAME: Final[str] = "cvp.ini"
@@ -36,7 +38,9 @@ MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 
 MIN_SIDEBAR_WIDTH: Final[int] = 160
+MAX_SIDEBAR_WIDTH: Final[int] = 260
 MIN_SIDEBAR_HEIGHT: Final[int] = 160
+MAX_SIDEBAR_HEIGHT: Final[int] = 260
 
 MIN_POPUP_WIDTH: Final[int] = 120
 MIN_POPUP_HEIGHT: Final[int] = 50

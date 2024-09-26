@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from math import floor
 from typing import Optional
 
 import imgui
 
 from cvp.config.sections import BaseSectionT
-from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin
+from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin, Keys
 from cvp.context import Context
 from cvp.gui import begin_child
+from cvp.logging.logging import widgets_logger as logger
+from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (
+    MAX_SIDEBAR_HEIGHT,
+    MAX_SIDEBAR_WIDTH,
     MIN_SIDEBAR_HEIGHT,
     MIN_SIDEBAR_WIDTH,
     MIN_WINDOW_HEIGHT,
@@ -51,7 +54,9 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
+        max_sidebar_width=MAX_SIDEBAR_WIDTH,
         min_sidebar_height=MIN_SIDEBAR_HEIGHT,
+        max_sidebar_height=MAX_SIDEBAR_HEIGHT,
     ):
         super().__init__(
             context=context,
@@ -65,11 +70,32 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
         )
 
         self._min_split_width = min_sidebar_width
+        self._max_split_width = max_sidebar_width
         self._min_split_height = min_sidebar_height
+        self._max_split_height = max_sidebar_height
 
-        self._left_splitter = SplitterWithCursor.from_vertical("## VSplitterLeft")
-        self._right_splitter = SplitterWithCursor.from_vertical("## VSplitterRight")
-        self._bottom_splitter = SplitterWithCursor.from_horizontal("## HSplitterBottom")
+        self._split_left = PropertyProxy[float](section, Keys.split_left)
+        self._split_right = PropertyProxy[float](section, Keys.split_right)
+        self._split_bottom = PropertyProxy[float](section, Keys.split_bottom)
+
+        self._left_splitter = SplitterWithCursor.from_vertical(
+            "## VSplitterLeft",
+            value_proxy=self._split_left,
+            min_value=min_sidebar_width,
+            max_value=max_sidebar_width,
+        )
+        self._right_splitter = SplitterWithCursor.from_vertical(
+            "## VSplitterRight",
+            value_proxy=self._split_right,
+            min_value=min_sidebar_width,
+            max_value=max_sidebar_width,
+        )
+        self._bottom_splitter = SplitterWithCursor.from_horizontal(
+            "## HSplitterBottom",
+            value_proxy=self._split_bottom,
+            min_value=min_sidebar_height,
+            max_value=max_sidebar_height,
+        )
 
     @property
     def cutting_edge_section(self) -> CuttingEdgeSectionMixin:
@@ -106,55 +132,28 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
             self.on_process_sidebar_left()
 
         imgui.same_line()
-        self.do_split_left()
+        self._left_splitter.do_process()
+        if self.context.v2debug and self._left_splitter.moving:
+            logger.debug(repr(self._left_splitter))
         imgui.same_line()
 
         with begin_child("## ChildCenter", -1 * self.split_right):
             with begin_child("## ChildMain", 0.0, -1 * self.split_bottom):
                 self.on_process_main()
-            self.do_split_bottom()
+            self._bottom_splitter.do_process()
+            if self.context.v2debug and self._bottom_splitter.moving:
+                logger.debug(repr(self._bottom_splitter))
             with begin_child("## ChildBottom"):
                 self.on_process_bottom()
 
         imgui.same_line()
-        self.do_split_right()
+        self._right_splitter.do_process()
+        if self.context.v2debug and self._right_splitter.moving:
+            logger.debug(repr(self._right_splitter))
         imgui.same_line()
 
         with begin_child("## ChildSidebarRight"):
             self.on_process_sidebar_right()
-
-    def do_split_left(self) -> None:
-        split_result = self._left_splitter.do_process()
-        if not split_result.changed:
-            return
-
-        value = self.split_left + floor(split_result.value)
-        if value < self._min_split_width:
-            value = self._min_split_width
-
-        self.split_left = value
-
-    def do_split_right(self) -> None:
-        split_result = self._right_splitter.do_process()
-        if not split_result.changed:
-            return
-
-        value = self.split_right + floor(split_result.value)
-        if value < self._min_split_width:
-            value = self._min_split_width
-
-        self.split_right = value
-
-    def do_split_bottom(self) -> None:
-        split_result = self._bottom_splitter.do_process()
-        if not split_result.changed:
-            return
-
-        value = self.split_bottom + floor(split_result.value)
-        if value < self._min_split_width:
-            value = self._min_split_width
-
-        self.split_bottom = value
 
     @override
     def on_process_sidebar_left(self) -> None:

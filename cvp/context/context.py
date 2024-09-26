@@ -115,6 +115,18 @@ class Context:
     def verbose(self) -> int:
         return self._config.verbose
 
+    @property
+    def v0debug(self) -> bool:
+        return self._config.v0debug
+
+    @property
+    def v1debug(self) -> bool:
+        return self._config.v1debug
+
+    @property
+    def v2debug(self) -> bool:
+        return self._config.v2debug
+
     def quit(self) -> None:
         self._done.set()
 

@@ -31,8 +31,8 @@ class SplitterWithCursor:
         width: float,
         height: float,
         value_proxy: Optional[ValueProxy[float]] = None,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
+        min_value: Optional[Union[int, float]] = None,
+        max_value: Optional[Union[int, float]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = None,
@@ -42,14 +42,15 @@ class SplitterWithCursor:
         self._width = width
         self._height = height
         self._store = value_proxy
-        self._min_value = min_value
-        self._max_value = max_value
+        self._min_value = float(min_value) if min_value is not None else None
+        self._max_value = float(max_value) if max_value is not None else None
         self._flags = flags
         self._thickness = thickness
 
         self._hovered_cursor = None
         self._prev_cursor = None
         self._prev_hovered = False
+        self._moving = False
 
         self._pivot_value = 0.0
         self._delta_charger = 0.0
@@ -62,6 +63,15 @@ class SplitterWithCursor:
             else:
                 raise TypeError(f"Unsupported cursor type: {type(cursor).__name__}")
 
+    def __repr__(self):
+        return (
+            f"<{type(self).__name__} "
+            f"moving={self._moving} "
+            f"store={self._store.get() if self._store else None} "
+            f"pivot={self._pivot_value:.3f} "
+            f"delta={self._delta_charger:.3f}>"
+        )
+
     @classmethod
     def from_vertical(
         cls,
@@ -69,8 +79,8 @@ class SplitterWithCursor:
         width=DEFAULT_SPLITTER_SIZE,
         height=AVAILABLE_REGION_SIZE,
         value_proxy: Optional[ValueProxy[float]] = None,
-        min_value: Optional[Union[float, int]] = None,
-        max_value: Optional[Union[float, int]] = None,
+        min_value: Optional[Union[int, float]] = None,
+        max_value: Optional[Union[int, float]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZEWE,
@@ -95,8 +105,8 @@ class SplitterWithCursor:
         width=AVAILABLE_REGION_SIZE,
         height=DEFAULT_SPLITTER_SIZE,
         value_proxy: Optional[ValueProxy[float]] = None,
-        min_value: Optional[Union[float, int]] = None,
-        max_value: Optional[Union[float, int]] = None,
+        min_value: Optional[Union[int, float]] = None,
+        max_value: Optional[Union[int, float]] = None,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZENS,
@@ -113,6 +123,10 @@ class SplitterWithCursor:
             thickness=thickness,
             cursor=cursor,
         )
+
+    @property
+    def moving(self) -> bool:
+        return self._moving
 
     def get_mouse_value(self) -> float:
         match self._orientation:
@@ -137,15 +151,13 @@ class SplitterWithCursor:
         set_cursor(self._prev_cursor)
         self._prev_cursor = None
 
-    def on_start_moving(self):
-        self.change_hovered_cursor()
-        self._pivot_value = self._store.get()
+    def on_start_moving(self) -> None:
+        if self._store is not None:
+            self._pivot_value = self._store.get()
         self._delta_charger = 0.0
-        self._prev_hovered = True
 
-    def on_end_moving(self):
-        self.change_prev_cursor()
-        self._prev_hovered = False
+    def on_end_moving(self) -> None:
+        pass
 
     def next_store_value(self, result: SplitterResult) -> float:
         assert self._store is not None
@@ -158,7 +170,7 @@ class SplitterWithCursor:
                 return self._min_value
 
         if self._max_value is not None:
-            if value < self._max_value:
+            if value > self._max_value:
                 return self._max_value
 
         return value
@@ -176,9 +188,20 @@ class SplitterWithCursor:
     def do_process(self):
         result = self.do_splitter()
 
+        # Update cursor
         if not self._prev_hovered and result.hovered:
-            self.on_start_moving()
+            self.change_hovered_cursor()
+            self._prev_hovered = True
         elif self._prev_hovered and not result.hovered and not result.changed:
+            self.change_prev_cursor()
+            self._prev_hovered = False
+
+        # Update moving
+        if not self._moving and result.changed:
+            self._moving = True
+            self.on_start_moving()
+        elif self._moving and not result.changed:
+            self._moving = False
             self.on_end_moving()
 
         if result.changed:
