@@ -6,11 +6,17 @@ from typing import Optional
 import imgui
 
 from cvp.config.sections import BaseSectionT
-from cvp.config.sections.mixins.sidebar import SidebarWidthSectionMixin
+from cvp.config.sections.mixins.sidebar import Keys, SidebarWidthSectionMixin
 from cvp.context import Context
 from cvp.gui.begin_child import begin_child
+from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
-from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.variables import (
+    MAX_SIDEBAR_WIDTH,
+    MIN_SIDEBAR_WIDTH,
+    MIN_WINDOW_HEIGHT,
+    MIN_WINDOW_WIDTH,
+)
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.widgets.window import Window
 
@@ -37,6 +43,7 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
+        max_sidebar_width=MAX_SIDEBAR_WIDTH,
         sidebar_border=False,
     ):
         super().__init__(
@@ -50,9 +57,14 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
             modifiable_title=modifiable_title,
         )
 
-        self._min_sidebar_width = min_sidebar_width
         self._sidebar_border = sidebar_border
-        self._sidebar_splitter = SplitterWithCursor.from_vertical("## VSplitter")
+        self._sidebar_width = PropertyProxy[float](section, Keys.sidebar_width)
+        self._sidebar_splitter = SplitterWithCursor.from_vertical(
+            "## VSplitter",
+            value_proxy=self._sidebar_width,
+            min_value=min_sidebar_width,
+            max_value=max_sidebar_width,
+        )
 
     @property
     def sidebar_section(self) -> SidebarWidthSectionMixin:
@@ -67,17 +79,6 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
     def sidebar_width(self, value: float) -> None:
         self.sidebar_section.sidebar_width = value
 
-    def do_process_splitter(self) -> None:
-        split_result = self._sidebar_splitter.do_process()
-        if not split_result.changed:
-            return
-
-        value = self.sidebar_width + split_result.value
-        if value < self._min_sidebar_width:
-            value = self._min_sidebar_width
-
-        self.sidebar_width = value
-
     @override
     def on_process(self) -> None:
         with begin_child(
@@ -88,7 +89,7 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
             self.on_process_sidebar()
 
         imgui.same_line()
-        self.do_process_splitter()
+        self._sidebar_splitter.do_process()
         imgui.same_line()
 
         with begin_child("## ChildMain"):

@@ -6,6 +6,7 @@ import imgui
 
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
+from cvp.gui.begin_child import begin_child
 from cvp.gui.draw_list import get_window_draw_list
 from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.types import override
@@ -38,7 +39,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         self._enable_context_menu = True
 
     @override
-    def on_process_sidebar_left(self):
+    def on_process_sidebar_right(self):
         self._control.on_process()
         self._tabs.do_process()
 
@@ -55,9 +56,11 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
     def begin_child_canvas() -> None:
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
-        imgui.begin_child("## Canvas", 0, 0, border=True, flags=CANVAS_FLAGS)  # noqa
-        imgui.pop_style_color()
-        imgui.pop_style_var()
+        try:
+            return begin_child("## Canvas", border=True, flags=CANVAS_FLAGS)
+        finally:
+            imgui.pop_style_color()
+            imgui.pop_style_var()
 
     def on_canvas(self):
         cx, cy = imgui.get_cursor_screen_pos()
