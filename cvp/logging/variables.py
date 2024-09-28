@@ -35,7 +35,7 @@ SIMPLE_DATEFMT: Final[str] = "%Y%m%d %H%M%S"
 SIMPLE_STYLE: Final[LoggingStyleLiteral] = "{"
 
 
-def timed_rotating_file_handler_config(basename: str, backup_count=30):
+def _timed_rotating_file_handler_config(basename: str, backup_count=30):
     return {
         "class": "cvp.logging.handlers.file.TimedRotatingFileHandler",
         "level": "DEBUG",
@@ -116,8 +116,8 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "formatter": "colored",
             "stream": "ext://sys.stdout",
         },
-        "cvp_file": timed_rotating_file_handler_config("cvp"),
-        "cvp_worker_file": timed_rotating_file_handler_config("cvp.worker"),
+        "cvp_file": _timed_rotating_file_handler_config("cvp"),
+        "cvp_worker_file": _timed_rotating_file_handler_config("cvp.worker"),
     },
     "loggers": {
         # root logger
@@ -126,13 +126,14 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "level": "DEBUG",
         },
         "OpenGL": {"level": "DEBUG"},
+        "asyncio": {"level": "DEBUG"},
         "httpcore": {"level": "DEBUG"},
         "httpx": {"level": "DEBUG"},
         CVP_LOGGER_NAME: {"level": "DEBUG"},
         CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
         CVP_EVENT_LOGGER_NAME: {
             "handlers": ["stdout_colored"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": 0,
         },
         CVP_PROFILE_LOGGER_NAME: {"level": "DEBUG"},

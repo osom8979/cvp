@@ -20,7 +20,7 @@ from os import PathLike
 from sys import stdout
 from typing import Optional, Union
 
-from cvp.logging.defaults import (
+from cvp.logging.variables import (
     CVP_DOWNLOAD_LOGGER_NAME,
     CVP_EVENT_LOGGER_NAME,
     CVP_LOGGER_NAME,
