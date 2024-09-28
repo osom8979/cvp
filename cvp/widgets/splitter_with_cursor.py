@@ -33,6 +33,7 @@ class SplitterWithCursor:
         value_proxy: Optional[ValueProxy[float]] = None,
         min_value: Optional[Union[int, float]] = None,
         max_value: Optional[Union[int, float]] = None,
+        negative_delta=False,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = None,
@@ -44,6 +45,7 @@ class SplitterWithCursor:
         self._store = value_proxy
         self._min_value = float(min_value) if min_value is not None else None
         self._max_value = float(max_value) if max_value is not None else None
+        self._negative_delta = negative_delta
         self._flags = flags
         self._thickness = thickness
 
@@ -81,6 +83,7 @@ class SplitterWithCursor:
         value_proxy: Optional[ValueProxy[float]] = None,
         min_value: Optional[Union[int, float]] = None,
         max_value: Optional[Union[int, float]] = None,
+        negative_delta=False,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZEWE,
@@ -93,6 +96,7 @@ class SplitterWithCursor:
             value_proxy=value_proxy,
             min_value=min_value,
             max_value=max_value,
+            negative_delta=negative_delta,
             flags=flags,
             thickness=thickness,
             cursor=cursor,
@@ -107,6 +111,7 @@ class SplitterWithCursor:
         value_proxy: Optional[ValueProxy[float]] = None,
         min_value: Optional[Union[int, float]] = None,
         max_value: Optional[Union[int, float]] = None,
+        negative_delta=False,
         flags=0,
         thickness=DEFAULT_SPLITTER_THICKNESS,
         cursor: Optional[Union[Cursor, int]] = SYSTEM_CURSOR_SIZENS,
@@ -119,6 +124,7 @@ class SplitterWithCursor:
             value_proxy=value_proxy,
             min_value=min_value,
             max_value=max_value,
+            negative_delta=negative_delta,
             flags=flags,
             thickness=thickness,
             cursor=cursor,
@@ -163,7 +169,8 @@ class SplitterWithCursor:
         assert self._store is not None
         assert result.changed
 
-        value = self._pivot_value + self._delta_charger
+        delta = (-1 if self._negative_delta else 1) * self._delta_charger
+        value = self._pivot_value + delta
 
         if self._min_value is not None:
             if value < self._min_value:

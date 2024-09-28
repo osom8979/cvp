@@ -90,12 +90,14 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
             value_proxy=self._split_right,
             min_value=min_sidebar_width,
             max_value=max_sidebar_width,
+            negative_delta=True,
         )
         self._bottom_splitter = SplitterWithCursor.from_horizontal(
             "## HSplitterBottom",
             value_proxy=self._split_bottom,
             min_value=min_sidebar_height,
             max_value=max_sidebar_height,
+            negative_delta=True,
         )
 
     @property
