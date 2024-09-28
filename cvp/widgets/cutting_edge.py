@@ -8,7 +8,7 @@ import imgui
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin, Keys
 from cvp.context import Context
-from cvp.gui import begin_child
+from cvp.gui import begin_child, style_item_spacing
 from cvp.logging.logging import widgets_logger as logger
 from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
@@ -133,22 +133,29 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
 
         imgui.same_line()
         self._left_splitter.do_process()
-        if self.context.v2debug and self._left_splitter.moving:
+        if self._left_splitter.moving:
             logger.debug(repr(self._left_splitter))
-        imgui.same_line()
+
+        with style_item_spacing(-1, -1):
+            imgui.same_line()
 
         with begin_child("## ChildCenter", -1 * self.split_right):
-            with begin_child("## ChildMain", 0.0, -1 * self.split_bottom):
-                self.on_process_main()
+            with style_item_spacing(-1, -1):
+                with begin_child("## ChildMain", 0.0, -1 * self.split_bottom):
+                    self.on_process_main()
+
             self._bottom_splitter.do_process()
-            if self.context.v2debug and self._bottom_splitter.moving:
+            if self._bottom_splitter.moving:
                 logger.debug(repr(self._bottom_splitter))
+
             with begin_child("## ChildBottom"):
                 self.on_process_bottom()
 
-        imgui.same_line()
+        with style_item_spacing(-1, -1):
+            imgui.same_line()
+
         self._right_splitter.do_process()
-        if self.context.v2debug and self._right_splitter.moving:
+        if self._right_splitter.moving:
             logger.debug(repr(self._right_splitter))
         imgui.same_line()
 
