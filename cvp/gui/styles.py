@@ -33,7 +33,16 @@ def default_style_colors(style: Union[str, Styles], default=Styles.dark) -> None
 
 
 @contextmanager
-def style_item_spacing(x: int, y: int):
+def style_window_padding(x: float, y: float):
+    imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (x, y))
+    try:
+        yield
+    finally:
+        imgui.pop_style_var()
+
+
+@contextmanager
+def style_item_spacing(x: float, y: float):
     imgui.push_style_var(imgui.STYLE_ITEM_SPACING, (x, y))
     try:
         yield
