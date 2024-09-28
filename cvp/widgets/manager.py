@@ -9,7 +9,7 @@ import imgui
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.selected import SelectedSectionMixin
 from cvp.context import Context
-from cvp.gui import text_centered
+from cvp.gui.text_centered import text_centered
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.sidebar_with_main import SidebarWithMain

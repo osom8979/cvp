@@ -9,7 +9,7 @@ from cvp.config.sections.media_manager import MediaManagerSection
 from cvp.config.sections.media_window import MediaWindowSection
 from cvp.config.sections.media_window import Mode as MediaSectionMode
 from cvp.context import Context
-from cvp.gui import button_ex
+from cvp.gui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup

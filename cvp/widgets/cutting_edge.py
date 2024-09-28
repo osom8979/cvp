@@ -8,7 +8,8 @@ import imgui
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin, Keys
 from cvp.context import Context
-from cvp.gui import begin_child, style_item_spacing
+from cvp.gui.begin_child import begin_child
+from cvp.gui.styles import style_item_spacing
 from cvp.logging.logging import widgets_logger as logger
 from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override

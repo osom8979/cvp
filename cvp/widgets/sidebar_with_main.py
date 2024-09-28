@@ -8,7 +8,7 @@ import imgui
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.sidebar import SidebarWidthSectionMixin
 from cvp.context import Context
-from cvp.gui import begin_child
+from cvp.gui.begin_child import begin_child
 from cvp.types import override
 from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor

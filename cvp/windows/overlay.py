@@ -7,7 +7,11 @@ import imgui
 
 from cvp.config.sections.overlay_window import OverlayWindowSection
 from cvp.context import Context
-from cvp.gui import begin_popup_context_window, end_popup_context_window, menu_item_ex
+from cvp.gui.begin_popup_context_window import (
+    begin_popup_context_window,
+    end_popup_context_window,
+)
+from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.system.usage import SystemUsage
 from cvp.types import override
 from cvp.variables import VERBOSE_LEVEL_1 as VL1

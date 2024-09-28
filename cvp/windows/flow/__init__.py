@@ -6,7 +6,8 @@ import imgui
 
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
-from cvp.gui import get_window_draw_list, menu_item_ex
+from cvp.gui.draw_list import get_window_draw_list
+from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.types import override
 from cvp.widgets.canvas_control import CanvasControl
 from cvp.widgets.cutting_edge import CuttingEdge

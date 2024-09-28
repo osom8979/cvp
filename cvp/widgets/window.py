@@ -10,7 +10,7 @@ from pygame.event import Event
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.window import WindowSectionMixin
 from cvp.context import Context
-from cvp.gui import set_window_min_size
+from cvp.gui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.pgc.able.eventable import Eventable
 from cvp.pgc.able.keyboardable import Keyboardable
