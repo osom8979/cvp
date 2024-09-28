@@ -2,12 +2,14 @@
 
 from cvp.context import Context
 from cvp.widgets.tab import TabBar
+from cvp.windows.flow.left.nodes import NodesTab
 
 
-class Tabs(TabBar):
+class FlowLeftTabs(TabBar):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            identifier="## FlowTabs",
+            identifier="## FlowLeftTabs",
             flags=0,
         )
+        self.register(NodesTab(context))

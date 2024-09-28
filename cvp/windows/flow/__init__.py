@@ -12,7 +12,9 @@ from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.types import override
 from cvp.widgets.canvas_control import CanvasControl
 from cvp.widgets.cutting_edge import CuttingEdge
-from cvp.windows.flow.tabs import Tabs
+from cvp.windows.flow.bottom import FlowBottomTabs
+from cvp.windows.flow.left import FlowLeftTabs
+from cvp.windows.flow.right import FlowRightTabs
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
@@ -27,9 +29,14 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
             section=context.config.flow_window,
             title="Flow",
             closable=True,
+            flags=imgui.WINDOW_MENU_BAR,
         )
-        self._tabs = Tabs(context)
+
         self._control = CanvasControl()
+        self._left_tabs = FlowLeftTabs(context)
+        self._right_tabs = FlowRightTabs(context)
+        self._bottom_tabs = FlowBottomTabs(context)
+
         self._grid_step = 50.0
         self._draw_grid = True
         self._clear_color = 0.5, 0.5, 0.5, 1.0
@@ -39,9 +46,32 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         self._enable_context_menu = True
 
     @override
+    def on_process(self) -> None:
+        self.on_menus()
+        super().on_process()
+
+    def on_menus(self) -> None:
+        with imgui.begin_menu_bar() as menu_bar:
+            if not menu_bar.opened:
+                return
+
+            with imgui.begin_menu("File") as file_menu:
+                if file_menu.opened:
+                    if imgui.menu_item("Close")[0]:
+                        self.opened = False
+
+    @override
+    def on_process_sidebar_left(self):
+        self._left_tabs.do_process()
+
+    @override
     def on_process_sidebar_right(self):
         self._control.on_process()
-        self._tabs.do_process()
+        self._right_tabs.do_process()
+
+    @override
+    def on_process_bottom(self):
+        self._bottom_tabs.do_process()
 
     @override
     def on_process_main(self) -> None:
@@ -62,7 +92,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
             imgui.pop_style_color()
             imgui.pop_style_var()
 
-    def on_canvas(self):
+    def on_canvas(self) -> None:
         cx, cy = imgui.get_cursor_screen_pos()
         cw, ch = imgui.get_content_region_available()
         assert isinstance(cx, float)

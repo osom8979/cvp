@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
 
-class FlowChart:
+class FlowGraph:
     pass

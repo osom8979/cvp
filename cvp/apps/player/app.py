@@ -323,7 +323,10 @@ class PlayerApplication:
                 self.config.developer.demo = not self.config.developer.demo
 
     def on_main_menu(self) -> None:
-        with imgui.begin_main_menu_bar():
+        with imgui.begin_main_menu_bar() as main_menu_bar:
+            if not main_menu_bar.opened:
+                return
+
             menus = (
                 ("File", self.on_file_menu),
                 ("Managers", self.on_managers_menu),
@@ -331,11 +334,9 @@ class PlayerApplication:
             )
 
             for name, func in menus:
-                if imgui.begin_menu(name):
-                    try:
+                with imgui.begin_menu(name) as menu:
+                    if menu.opened:
                         func()
-                    finally:
-                        imgui.end_menu()
 
     def on_popups(self) -> None:
         if self._confirm_quit.do_process():
