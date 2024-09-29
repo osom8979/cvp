@@ -20,12 +20,21 @@ def get_fonts_dir() -> str:
     return os.path.join(get_assets_dir(), "fonts")
 
 
+@lru_cache
+def get_icons_dir() -> str:
+    return os.path.join(get_assets_dir(), "icons")
+
+
 def get_assets_path() -> Path:
     return Path(get_assets_dir())
 
 
 def get_fonts_path() -> Path:
     return Path(get_fonts_dir())
+
+
+def get_icons_path() -> Path:
+    return Path(get_icons_dir())
 
 
 @lru_cache
@@ -46,3 +55,8 @@ def get_ngc_font_path() -> str:
 @lru_cache
 def get_ngc_b_font_path() -> str:
     return os.path.join(get_fonts_dir(), "NanumGothicCoding-Bold.ttf")
+
+
+@lru_cache
+def get_default_icon_path() -> str:
+    return os.path.join(get_icons_dir(), "icon.png")

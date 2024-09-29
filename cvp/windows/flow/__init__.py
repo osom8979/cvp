@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
+from typing import Final, Optional
 
 import imgui
 
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
+from cvp.flow.graph import FlowGraph
 from cvp.gui.begin_child import begin_child
 from cvp.gui.draw_list import get_window_draw_list
 from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.gui.styles import style_item_spacing
+from cvp.gui.text_centered import text_centered
 from cvp.patterns.proxy import PropertyProxy
+from cvp.popups.confirm import ConfirmPopup
+from cvp.popups.input_text import InputTextPopup
+from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
 from cvp.variables import (
     CUTTING_EDGE_PADDING_HEIGHT,
@@ -26,9 +31,10 @@ from cvp.widgets.canvas_control import CanvasControl
 from cvp.widgets.cutting_edge import CuttingEdge
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.windows.flow.bottom import FlowBottomTabs
+from cvp.windows.flow.catalogs import Catalogs
+from cvp.windows.flow.drag_type import DRAG_NODE_TYPE
 from cvp.windows.flow.left import FlowLeftTabs
 from cvp.windows.flow.right import FlowRightTabs
-from cvp.windows.flow.tree import Tree
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
@@ -66,7 +72,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         )
 
         self._control = CanvasControl()
-        self._tree = Tree(context)
+        self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context)
         self._right_tabs = FlowRightTabs(context)
         self._bottom_tabs = FlowBottomTabs(context)
@@ -93,6 +99,29 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
             negative_delta=True,
         )
 
+        self._new_graph_popup = InputTextPopup(
+            title="New graph",
+            label="Please enter a graph name:",
+            ok="Create",
+            cancel="Cancel",
+            target=self.on_new_graph_popup,
+        )
+        self._open_graph_popup = OpenFilePopup(
+            title="Open graph file",
+            target=self.on_open_file_popup,
+        )
+        self._confirm_remove = ConfirmPopup(
+            title="Remove",
+            label="Are you sure you want to remove graph?",
+            ok="Remove",
+            cancel="No",
+            target=self.on_confirm_remove,
+        )
+
+        self.register_popup(self._new_graph_popup)
+        self.register_popup(self._open_graph_popup)
+        self.register_popup(self._confirm_remove)
+
     @property
     def split_tree(self) -> float:
         return self.section.split_tree
@@ -101,31 +130,76 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
     def split_tree(self, value: float) -> None:
         self.section.split_tree = value
 
+    @property
+    def current_graph(self):
+        return self._context.fm.current_graph
+
+    @current_graph.setter
+    def current_graph(self, value: Optional[FlowGraph]) -> None:
+        self._context.fm.current_graph = value
+
+    def on_new_graph_popup(self, name: str) -> None:
+        self.current_graph = self._context.fm.create_graphs(name)
+
+    def on_open_file_popup(self, file: str) -> None:
+        pass
+
+    def on_confirm_remove(self, value: bool) -> None:
+        pass
+
     @override
     def on_process(self) -> None:
-        self.on_menus()
+        self.on_menu()
         super().on_process()
 
-    def on_menus(self) -> None:
+    def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
             if not menu_bar.opened:
                 return
 
-            with imgui.begin_menu("File") as file_menu:
-                if file_menu.opened:
-                    if imgui.menu_item("Close")[0]:
-                        self.opened = False
+            menus = (("File", self.on_file_menu),)
+
+            for name, func in menus:
+                with imgui.begin_menu(name) as menu:
+                    if menu.opened:
+                        func()
+
+    def on_file_menu(self) -> None:
+        if imgui.menu_item("New graph")[0]:
+            self._new_graph_popup.show()
+        if imgui.menu_item("Open graph file")[0]:
+            self._open_graph_popup.show()
+        with imgui.begin_menu("Open recent") as recent_menu:
+            if recent_menu.opened:
+                if imgui.menu_item("graph1.yml")[0]:
+                    pass
+                if imgui.menu_item("graph2.yml")[0]:
+                    pass
+        if imgui.menu_item("Save")[0]:
+            pass
+        if imgui.menu_item("Save As..")[0]:
+            pass
+        if imgui.menu_item("Close graph")[0]:
+            self.current_graph = None
+        if imgui.menu_item("Exit")[0]:
+            self.opened = False
 
     @override
     def on_process_sidebar_left(self):
+        current_graph = self.current_graph
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
-            self._left_tabs.do_process()
+            if current_graph is None:
+                text_centered("Please select a graph")
+            else:
+                self._left_tabs.do_process(current_graph)
 
         with style_item_spacing(0, -1):
             self._tree_splitter.do_process()
 
         with begin_child("## ChildLeftBottom"):
-            self._tree.on_process()
+            with style_item_spacing(0, 0):
+                imgui.dummy(0, self.padding_height)
+            self._catalogs.on_process()
 
     @override
     def on_process_sidebar_right(self):
@@ -144,6 +218,13 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         self.begin_child_canvas()
         try:
             self.on_canvas()
+
+            with imgui.begin_drag_drop_target() as drag_drop_dst:
+                if drag_drop_dst.hovered:
+                    payload = imgui.accept_drag_drop_payload(DRAG_NODE_TYPE)
+                    if payload is not None:
+                        print("Received node data:", payload)
+
             self.on_popup_menu()
         finally:
             imgui.end_child()

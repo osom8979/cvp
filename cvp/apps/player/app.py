@@ -12,8 +12,10 @@ from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
 from pygame import NOEVENT, NUMEVENTS
 from pygame.event import Event, event_name
+from pygame.image import load as load_image
 from pygame.key import ScancodeWrapper, get_pressed
 
+from cvp.assets import get_default_icon_path
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
 from cvp.gui.fonts import add_jbm_font, add_ngc_font
@@ -147,6 +149,11 @@ class PlayerApplication:
             self._validate_accelerate_available()
 
         pygame.init()
+
+        icon_path = get_default_icon_path()
+        if os.path.isfile(icon_path):
+            icon_image = load_image(icon_path)
+            pygame.display.set_icon(icon_image)
 
         try:
             GL.glDeleteTextures(1, GL.glGenTextures(1))

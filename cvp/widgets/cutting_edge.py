@@ -131,6 +131,18 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
     def split_bottom(self, value: float) -> None:
         self.cutting_edge_section.split_bottom = value
 
+    @property
+    def padding_width(self) -> float:
+        return self._padding_width
+
+    @property
+    def padding_height(self) -> float:
+        return self._padding_height
+
+    @property
+    def padding(self) -> Tuple[float, float]:
+        return self._padding_width, self._padding_height
+
     @override
     def begin(self) -> Tuple[bool, bool]:
         with style_window_padding(0, 0):
