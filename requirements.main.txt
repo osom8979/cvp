@@ -13,6 +13,7 @@ psutil==6.0.0
 pygame-ce==2.4.1
 pystray==0.19.5
 python-dotenv==1.0.1
+type-serialize==1.3.0
 uvloop==0.20.0
 watchdog==5.0.0
 zeep==4.2.1
