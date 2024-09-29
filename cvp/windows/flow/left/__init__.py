@@ -2,7 +2,8 @@
 
 from cvp.context import Context
 from cvp.widgets.tab import TabBar
-from cvp.windows.flow.left.nodes import NodesTab
+from cvp.windows.flow.left.catalogs import CatalogsTab
+from cvp.windows.flow.left.graphs import GraphsTab
 
 
 class FlowLeftTabs(TabBar):
@@ -12,4 +13,5 @@ class FlowLeftTabs(TabBar):
             identifier="## FlowLeftTabs",
             flags=0,
         )
-        self.register(NodesTab(context))
+        self.register(GraphsTab(context))
+        self.register(CatalogsTab(context))

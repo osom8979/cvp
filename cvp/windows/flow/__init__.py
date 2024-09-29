@@ -9,12 +9,26 @@ from cvp.context import Context
 from cvp.gui.begin_child import begin_child
 from cvp.gui.draw_list import get_window_draw_list
 from cvp.gui.menu_item_ex import menu_item_ex
+from cvp.gui.styles import style_item_spacing
+from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
+from cvp.variables import (
+    CUTTING_EDGE_PADDING_HEIGHT,
+    CUTTING_EDGE_PADDING_WIDTH,
+    MAX_SIDEBAR_HEIGHT,
+    MAX_SIDEBAR_WIDTH,
+    MIN_SIDEBAR_HEIGHT,
+    MIN_SIDEBAR_WIDTH,
+    MIN_WINDOW_HEIGHT,
+    MIN_WINDOW_WIDTH,
+)
 from cvp.widgets.canvas_control import CanvasControl
 from cvp.widgets.cutting_edge import CuttingEdge
+from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.left import FlowLeftTabs
 from cvp.windows.flow.right import FlowRightTabs
+from cvp.windows.flow.tree import Tree
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
@@ -24,18 +38,41 @@ CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_R
 
 class FlowWindow(CuttingEdge[FlowWindowSection]):
     def __init__(self, context: Context):
+        min_width = MIN_WINDOW_WIDTH
+        min_height = MIN_WINDOW_HEIGHT
+        modifiable_title = False
+        min_sidebar_width = MIN_SIDEBAR_WIDTH
+        max_sidebar_width = MAX_SIDEBAR_WIDTH
+        min_sidebar_height = MIN_SIDEBAR_HEIGHT
+        max_sidebar_height = MAX_SIDEBAR_HEIGHT
+        padding_width = CUTTING_EDGE_PADDING_WIDTH
+        padding_height = CUTTING_EDGE_PADDING_HEIGHT
+
         super().__init__(
             context=context,
             section=context.config.flow_window,
             title="Flow",
             closable=True,
             flags=imgui.WINDOW_MENU_BAR,
+            min_width=min_width,
+            min_height=min_height,
+            modifiable_title=modifiable_title,
+            min_sidebar_width=min_sidebar_width,
+            max_sidebar_width=max_sidebar_width,
+            min_sidebar_height=min_sidebar_height,
+            max_sidebar_height=max_sidebar_height,
+            padding_width=padding_width,
+            padding_height=padding_height,
         )
 
         self._control = CanvasControl()
+        self._tree = Tree(context)
         self._left_tabs = FlowLeftTabs(context)
         self._right_tabs = FlowRightTabs(context)
         self._bottom_tabs = FlowBottomTabs(context)
+
+        self._graph_path = str()
+        self._node_path = str()
 
         self._grid_step = 50.0
         self._draw_grid = True
@@ -44,6 +81,25 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         self._grid_line_color = 0.8, 0.8, 0.8, 0.2
         self._background = None
         self._enable_context_menu = True
+
+        self._split_tree = PropertyProxy[float](
+            context.config.flow_window,
+            context.config.flow_window.K.split_tree,
+        )
+        self._tree_splitter = SplitterWithCursor.from_horizontal(
+            "## HSplitterTree",
+            value_proxy=self._split_tree,
+            min_value=min_sidebar_height,
+            negative_delta=True,
+        )
+
+    @property
+    def split_tree(self) -> float:
+        return self.section.split_tree
+
+    @split_tree.setter
+    def split_tree(self, value: float) -> None:
+        self.section.split_tree = value
 
     @override
     def on_process(self) -> None:
@@ -62,16 +118,26 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
 
     @override
     def on_process_sidebar_left(self):
-        self._left_tabs.do_process()
+        with begin_child("## ChildLeftTop", 0, -self.split_tree):
+            self._left_tabs.do_process()
+
+        with style_item_spacing(0, -1):
+            self._tree_splitter.do_process()
+
+        with begin_child("## ChildLeftBottom"):
+            self._tree.on_process()
 
     @override
     def on_process_sidebar_right(self):
+        imgui.text("Canvas controller:")
         self._control.on_process()
-        self._right_tabs.do_process()
+        imgui.spacing()
+
+        self._right_tabs.do_process(self._node_path)
 
     @override
     def on_process_bottom(self):
-        self._bottom_tabs.do_process()
+        self._bottom_tabs.do_process(self._graph_path)
 
     @override
     def on_process_main(self) -> None:

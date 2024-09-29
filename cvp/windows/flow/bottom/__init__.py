@@ -2,10 +2,11 @@
 
 from cvp.context import Context
 from cvp.widgets.tab import TabBar
+from cvp.windows.flow.bottom.history import HistoryTab
 from cvp.windows.flow.bottom.logs import LogsTab
 
 
-class FlowBottomTabs(TabBar):
+class FlowBottomTabs(TabBar[str]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
@@ -13,3 +14,4 @@ class FlowBottomTabs(TabBar):
             flags=0,
         )
         self.register(LogsTab(context))
+        self.register(HistoryTab(context))

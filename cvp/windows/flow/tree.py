@@ -2,13 +2,13 @@
 
 from cvp.context import Context
 from cvp.types import override
-from cvp.widgets.tab import TabItem
+from cvp.widgets.widget import WidgetInterface
 
 
-class NodesTab(TabItem):
+class Tree(WidgetInterface):
     def __init__(self, context: Context):
-        super().__init__(context, "Nodes")
+        self._context = context
 
     @override
-    def on_item(self, item) -> None:
+    def on_process(self) -> None:
         pass

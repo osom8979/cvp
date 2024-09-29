@@ -11,7 +11,6 @@ from cvp.context import Context
 from cvp.gui.begin_child import begin_child
 from cvp.gui.cursor import cursor_pos_y
 from cvp.gui.styles import style_item_spacing, style_window_padding
-from cvp.logging.logging import widgets_logger as logger
 from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (
@@ -154,26 +153,22 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
 
         with cursor_pos_y(top):
             self._left_splitter.do_process()
-            if self._left_splitter.moving:
-                logger.debug(repr(self._left_splitter))
 
         with style_item_spacing(-1, 0):
             imgui.same_line()
 
-        with begin_child("## ChildCenter", -1 * self.split_right - pw):
+        with begin_child("## ChildCenter", -self.split_right - pw):
             original_spacing = imgui.get_style().item_spacing
             with style_item_spacing(0, -1):
-                with begin_child("## ChildMain", 0.0, -1 * self.split_bottom):
+                with begin_child("## ChildMain", 0.0, -self.split_bottom):
                     with style_item_spacing(*original_spacing):
                         self.on_process_main()
 
             with style_item_spacing(0, -1):
                 self._bottom_splitter.do_process()
-                if self._bottom_splitter.moving:
-                    logger.debug(repr(self._bottom_splitter))
 
             imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + pw)
-            with begin_child("## ChildBottom", -1 * pw):
+            with begin_child("## ChildBottom", -pw):
                 with style_item_spacing(0, 0):
                     imgui.dummy(0, ph)
                 self.on_process_bottom()
@@ -183,13 +178,11 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
 
         with cursor_pos_y(top):
             self._right_splitter.do_process()
-            if self._right_splitter.moving:
-                logger.debug(repr(self._right_splitter))
 
         with style_item_spacing(pw, 0):
             imgui.same_line()
 
-        with begin_child("## ChildSidebarRight", -1 * pw):
+        with begin_child("## ChildSidebarRight", -pw):
             with style_item_spacing(0, 0):
                 imgui.dummy(0, ph)
             self.on_process_sidebar_right()

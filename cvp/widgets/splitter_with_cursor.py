@@ -17,6 +17,7 @@ from cvp.gui.splitter import (
     SplitterResult,
     splitter,
 )
+from cvp.logging.logging import widgets_logger as logger
 from cvp.patterns.proxy import ValueProxy
 
 
@@ -215,5 +216,8 @@ class SplitterWithCursor:
             self._delta_charger += result.value
             if self._store is not None:
                 self._store.set(self.next_store_value(result))
+
+        if self._moving:
+            logger.debug(repr(self))
 
         return result
