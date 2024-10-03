@@ -2,10 +2,10 @@
 
 from typing import Dict
 
-from cvp.flow.node import FlowNodeTemplate
+from cvp.flow.node import FlowNode
 
 
-class FlowCategory(Dict[str, FlowNodeTemplate]):
+class FlowCategory(Dict[str, FlowNode]):
     pass
 
 

@@ -14,5 +14,5 @@ class TreeTab(TabItem[FlowGraph]):
 
     @override
     def on_item(self, item: FlowGraph) -> None:
-        if imgui.tree_node(item.name, imgui.TREE_NODE_DEFAULT_OPEN):
+        if imgui.tree_node(item.class_name, imgui.TREE_NODE_DEFAULT_OPEN):
             imgui.tree_pop()

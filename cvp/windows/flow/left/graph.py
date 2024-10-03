@@ -21,4 +21,4 @@ class GraphTab(TabItem[FlowGraph]):
             return
 
         imgui.text("Name:")
-        input_text_disabled("## Name", item.name)
+        input_text_disabled("## Name", item.class_name)

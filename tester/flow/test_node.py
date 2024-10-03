@@ -1,31 +1,55 @@
 # -*- coding: utf-8 -*-
 
+from copy import copy, deepcopy
 from unittest import TestCase, main
 
 from type_serialize import deserialize, serialize
 
-from cvp.flow.node import FlowNodeTemplate
-from cvp.flow.pin import FlowPin, FlowStream, FlowType
+from cvp.flow.node import FlowNode
+from cvp.flow.pin import FlowPin
 
 
-class TemplateTestCase(TestCase):
+class NodeTestCase(TestCase):
     def test_serializable(self):
-        i = FlowPin("i", FlowType.data, FlowStream.input, "int", "right", "#000")
-        o = FlowPin("o", FlowType.flow, FlowStream.output, "float", "left", "#FFF")
-        template = FlowNodeTemplate("tmp", [i, o], "node", "#222")
-        obj = serialize(template)
-        result = deserialize(obj, FlowNodeTemplate)
-        self.assertEqual(template, result)
+        pin = FlowPin(
+            class_name="pin",
+            class_docs="unknown1",
+            class_action="data",
+            class_stream="output",
+            class_dtype="numpy.ndarray",
+            class_required=True,
+            class_icon="default",
+            class_color="#000",
+        )
+        node = FlowNode(
+            class_name="node",
+            class_docs="unknown2",
+            class_icon="default",
+            class_color="red",
+            class_pins=[pin],
+        )
+        obj = serialize(node)
+        result = deserialize(obj, FlowNode)
+        self.assertEqual(node, result)
 
-    def test_required_serializable(self):
-        template = FlowNodeTemplate("tmp")
-        obj = serialize(template)
-        self.assertIsInstance(obj, dict)
-        self.assertListEqual([], obj.pop("pins"))
-        self.assertEqual("", obj.pop("icon"))
-        self.assertEqual("", obj.pop("color"))
-        result = deserialize(obj, FlowNodeTemplate)
-        self.assertEqual(template, result)
+    def test_copy(self):
+        pin1 = FlowPin("A")
+        node1 = FlowNode("A", class_pins=[pin1])
+        node2 = copy(node1)
+        self.assertEqual(node1, node2)
+
+        node2.class_pins[0].class_name = "B"
+        self.assertEqual(node1, node2)
+
+    def test_deepcopy(self):
+        pin1 = FlowPin("A")
+        node1 = FlowNode("A", class_pins=[pin1])
+        node2 = deepcopy(node1)
+        self.assertEqual(node1, node2)
+
+        pin2 = FlowPin("B")
+        node2.class_pins[0] = pin2
+        self.assertNotEqual(node1, node2)
 
 
 if __name__ == "__main__":
