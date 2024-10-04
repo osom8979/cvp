@@ -18,10 +18,7 @@ def number2name(e: Type[IntEnum]) -> FrozenNumberToName:
     return MappingProxyType({int(x.value): str(x.name) for x in e})
 
 
-def normalize_name2number(
-    mapping: FrozenNameToNumber,
-    value: IntEnumLike,
-) -> int:
+def normalize_name2number(mapping: FrozenNameToNumber, value: IntEnumLike) -> int:
     if isinstance(value, IntEnum):
         return int(value.value)
     elif isinstance(value, str):
@@ -32,10 +29,7 @@ def normalize_name2number(
         raise TypeError(f"Unsupported value type: {type(value).__name__}")
 
 
-def normalize_number2name(
-    mapping: FrozenNumberToName,
-    value: IntEnumLike,
-) -> str:
+def normalize_number2name(mapping: FrozenNumberToName, value: IntEnumLike) -> str:
     if isinstance(value, IntEnum):
         return str(value.name)
     elif isinstance(value, str):

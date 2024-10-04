@@ -16,6 +16,7 @@ class FlowNodeKeys(StrEnum):
     class_icon = auto()
     class_color = auto()
     class_pins = auto()
+    class_tags = auto()
 
 
 class FlowNode:
@@ -28,12 +29,14 @@ class FlowNode:
         class_icon: Optional[str] = None,
         class_color: Optional[str] = None,
         class_pins: Optional[Iterable[FlowPin]] = None,
+        class_tags: Optional[Iterable[str]] = None,
     ):
         self.class_name = class_name if class_name else str()
         self.class_docs = class_docs if class_docs else str()
         self.class_icon = class_icon if class_icon else str()
         self.class_color = class_color if class_color else str()
         self.class_pins = list(class_pins if class_pins else ())
+        self.class_tags = list(class_tags if class_tags else ())
 
     def __repr__(self):
         return (
@@ -42,7 +45,8 @@ class FlowNode:
             f" class_docs='{self.class_docs}'"
             f" class_icon='{self.class_icon}'"
             f" class_color='{self.class_color}'"
-            f" class_pins={len(self.class_pins)}>"
+            f" class_pins={len(self.class_pins)}"
+            f" class_tags={len(self.class_tags)}>"
         )
 
     def __eq__(self, other) -> bool:
@@ -53,6 +57,7 @@ class FlowNode:
             and self.class_icon == other.class_icon
             and self.class_color == other.class_color
             and self.class_pins == other.class_pins
+            and self.class_tags == other.class_tags
         )
 
     def __copy__(self):
@@ -62,6 +67,7 @@ class FlowNode:
             class_icon=copy(self.class_icon),
             class_color=copy(self.class_color),
             class_pins=copy(self.class_pins),
+            class_tags=copy(self.class_tags),
         )
 
     def __deepcopy__(self, memo):
@@ -71,6 +77,7 @@ class FlowNode:
             class_icon=deepcopy(self.class_icon, memo),
             class_color=deepcopy(self.class_color, memo),
             class_pins=deepcopy(self.class_pins, memo),
+            class_tags=deepcopy(self.class_tags, memo),
         )
         assert isinstance(memo, dict)
         memo[id(self)] = result
@@ -85,8 +92,13 @@ class FlowNode:
 
         serialized_class_pins = serialize(self.class_pins)
         assert isinstance(serialized_class_pins, list)
-        assert all(isinstance(node, dict) for node in serialized_class_pins)
+        assert all(isinstance(pin, dict) for pin in serialized_class_pins)
         result[self.Keys.class_pins] = serialized_class_pins
+
+        serialized_class_tags = serialize(self.class_tags)
+        assert isinstance(serialized_class_tags, list)
+        assert all(isinstance(tag, str) for tag in serialized_class_tags)
+        result[self.Keys.class_tags] = serialized_class_tags
 
         return result
 
@@ -103,3 +115,7 @@ class FlowNode:
         )
         assert isinstance(self.class_pins, list)
         assert all(isinstance(pin, FlowPin) for pin in self.class_pins)
+
+        self.class_tags = deserialize(data.get(self.Keys.class_tags, list()), List[str])
+        assert isinstance(self.class_tags, list)
+        assert all(isinstance(tag, str) for tag in self.class_tags)
