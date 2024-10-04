@@ -4,6 +4,14 @@ from inspect import getmembers, isroutine
 from typing import Any, Iterable, List, Mapping, Tuple
 
 
+def is_dunder(name: str) -> bool:
+    return name.startswith("__") and name.endswith("__")
+
+
+def is_sunder(name: str) -> bool:
+    return not is_dunder(name) and name.startswith("_") and name.endswith("_")
+
+
 def is_private_member(name: str) -> bool:
     return name.startswith("_")
 
