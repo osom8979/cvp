@@ -18,6 +18,7 @@ class FlowPinKeys(StrEnum):
     class_stream = auto()
     class_dtype = auto()
     class_required = auto()
+    class_exported = auto()
     class_icon = auto()
     class_color = auto()
 
@@ -33,6 +34,7 @@ class FlowPin:
         class_stream: Optional[Union[FlowStream, str, int]] = _DEFAULT_STREAM,
         class_dtype: Optional[str] = None,
         class_required=False,
+        class_exported=False,
         class_icon: Optional[str] = None,
         class_color: Optional[str] = None,
     ):
@@ -42,6 +44,7 @@ class FlowPin:
         self.class_stream = normalize_stream_value(class_stream)
         self.class_dtype = class_dtype if class_dtype else str()
         self.class_required = class_required
+        self.class_exported = class_exported
         self.class_icon = class_icon if class_icon else str()
         self.class_color = class_color if class_color else str()
 
@@ -54,6 +57,7 @@ class FlowPin:
             f" class_stream={FlowStream(self.class_stream).name}"
             f" class_dtype='{self.class_dtype}'"
             f" class_required={self.class_required}"
+            f" class_exported={self.class_exported}"
             f" class_icon='{self.class_icon}'"
             f" class_color='{self.class_color}'>"
         )
@@ -67,6 +71,7 @@ class FlowPin:
             and self.class_stream == other.class_stream
             and self.class_dtype == other.class_dtype
             and self.class_required == other.class_required
+            and self.class_exported == other.class_exported
             and self.class_icon == other.class_icon
             and self.class_color == other.class_color
         )
@@ -79,6 +84,7 @@ class FlowPin:
             class_stream=copy(self.class_stream),
             class_dtype=copy(self.class_dtype),
             class_required=copy(self.class_required),
+            class_exported=copy(self.class_exported),
             class_icon=copy(self.class_icon),
             class_color=copy(self.class_color),
         )
@@ -91,6 +97,7 @@ class FlowPin:
             class_stream=deepcopy(self.class_stream, memo),
             class_dtype=deepcopy(self.class_dtype, memo),
             class_required=deepcopy(self.class_required, memo),
+            class_exported=deepcopy(self.class_exported, memo),
             class_icon=deepcopy(self.class_icon, memo),
             class_color=deepcopy(self.class_color, memo),
         )
@@ -106,6 +113,7 @@ class FlowPin:
         result[self.Keys.class_stream] = int(self.class_stream)
         result[self.Keys.class_dtype] = str(self.class_dtype)
         result[self.Keys.class_required] = bool(self.class_required)
+        result[self.Keys.class_exported] = bool(self.class_exported)
         result[self.Keys.class_icon] = str(self.class_icon)
         result[self.Keys.class_color] = str(self.class_color)
         return result
@@ -118,5 +126,6 @@ class FlowPin:
         self.class_stream = int(data.get(self.Keys.class_stream, _DEFAULT_STREAM))
         self.class_dtype = str(data.get(self.Keys.class_dtype, str()))
         self.class_required = bool(data.get(self.Keys.class_required, False))
+        self.class_exported = bool(data.get(self.Keys.class_exported, False))
         self.class_icon = str(data.get(self.Keys.class_icon, str()))
         self.class_color = str(data.get(self.Keys.class_color, str()))
