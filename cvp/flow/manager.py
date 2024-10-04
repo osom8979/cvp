@@ -8,12 +8,11 @@ from cvp.flow.graph import FlowGraph
 
 
 class FlowManager:
-    catalogs: OrderedDict[str, FlowCatalog]
     graphs: OrderedDict[str, FlowGraph]
     current_graph: Optional[FlowGraph]
 
     def __init__(self):
-        self.catalogs = OrderedDict()
+        self.catalog = FlowCatalog.from_builtins()
         self.graphs = OrderedDict()
         self.current_graph = None
 

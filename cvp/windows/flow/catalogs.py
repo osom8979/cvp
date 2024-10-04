@@ -14,6 +14,12 @@ class Catalogs(WidgetInterface):
         self._cat1 = True
         self._cat2 = True
 
+    def update_catalog(self):
+        categories = list()
+        for key, node in self._context.fm.catalog.items():
+            pass
+        return categories
+
     @override
     def on_process(self) -> None:
         imgui.text("Catalogs:")
