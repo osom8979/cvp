@@ -1,38 +1,48 @@
 # -*- coding: utf-8 -*-
 
+from dataclasses import dataclass
+
 import imgui
 
 from cvp.context import Context
+from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE as _DRAG_TYPE
 from cvp.types import override
 from cvp.widgets.widget import WidgetInterface
-from cvp.windows.flow.drag_type import DRAG_NODE_TYPE
+
+
+@dataclass
+class ModuleExtraData:
+    visible: bool = True
 
 
 class Catalogs(WidgetInterface):
     def __init__(self, context: Context):
         self._context = context
-        self._cat1 = True
-        self._cat2 = True
-
-    def update_catalog(self):
-        categories = list()
-        for key, node in self._context.fm.catalog.items():
-            pass
-        return categories
 
     @override
     def on_process(self) -> None:
         imgui.text("Catalogs:")
 
-        expanded, visible = imgui.collapsing_header("Cat1", self._cat1)
-        if expanded:
-            imgui.button("Node")
+        for module_path, nodes in self._context.fm.catalog.items():
+            module_name = module_path.split(".")[-1]
+            imgui.push_id(module_path)
+            try:
+                expanded, visible = imgui.collapsing_header(module_name)
+                if imgui.is_item_hovered():
+                    with imgui.begin_tooltip():
+                        imgui.text(module_path)
 
-            with imgui.begin_drag_drop_source() as drag_drop_src:
-                if drag_drop_src.dragging:
-                    imgui.set_drag_drop_payload(DRAG_NODE_TYPE, b"payload")
-                    imgui.button("Dragged Node")
+                if expanded:
+                    imgui.set_cursor_pos_x(imgui.get_tree_node_to_label_spacing())
 
-        expanded, visible = imgui.collapsing_header("Cat2", self._cat2)
-        if expanded:
-            imgui.text("Now you see me!")
+                    for node_name, node in nodes.items():
+                        node_path = module_path + "." + node.class_name
+                        node_data = node_path.encode()
+
+                        imgui.selectable(node_name)
+                        with imgui.begin_drag_drop_source() as drag_drop_src:
+                            if drag_drop_src.dragging:
+                                imgui.set_drag_drop_payload(_DRAG_TYPE, node_data)
+                                imgui.text(node_name)
+            finally:
+                imgui.pop_id()

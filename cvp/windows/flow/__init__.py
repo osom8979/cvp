@@ -8,6 +8,7 @@ from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
 from cvp.flow.graph import FlowGraph
 from cvp.gui.begin_child import begin_child
+from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE
 from cvp.gui.draw_list import get_window_draw_list
 from cvp.gui.menu_item_ex import menu_item_ex
 from cvp.gui.styles import style_item_spacing
@@ -32,7 +33,6 @@ from cvp.widgets.cutting_edge import CuttingEdge
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
-from cvp.windows.flow.drag_type import DRAG_NODE_TYPE
 from cvp.windows.flow.left import FlowLeftTabs
 from cvp.windows.flow.right import FlowRightTabs
 
@@ -221,7 +221,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
 
             with imgui.begin_drag_drop_target() as drag_drop_dst:
                 if drag_drop_dst.hovered:
-                    payload = imgui.accept_drag_drop_payload(DRAG_NODE_TYPE)
+                    payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                     if payload is not None:
                         print("Received node data:", payload)
 
