@@ -1,18 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass
-
 import imgui
 
 from cvp.context import Context
+from cvp.flow.path import PATH_SEPARATOR
 from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE as _DRAG_TYPE
 from cvp.types import override
 from cvp.widgets.widget import WidgetInterface
-
-
-@dataclass
-class ModuleExtraData:
-    visible: bool = True
 
 
 class Catalogs(WidgetInterface):
@@ -24,7 +18,7 @@ class Catalogs(WidgetInterface):
         imgui.text("Catalogs:")
 
         for module_path, nodes in self._context.fm.catalog.items():
-            module_name = module_path.split(".")[-1]
+            module_name = module_path.split(PATH_SEPARATOR)[-1]
             imgui.push_id(module_path)
             try:
                 expanded, visible = imgui.collapsing_header(module_name)
@@ -36,12 +30,13 @@ class Catalogs(WidgetInterface):
                     imgui.set_cursor_pos_x(imgui.get_tree_node_to_label_spacing())
 
                     for node_name, node in nodes.items():
-                        node_path = module_path + "." + node.class_name
-                        node_data = node_path.encode()
-
                         imgui.selectable(node_name)
                         with imgui.begin_drag_drop_source() as drag_drop_src:
                             if drag_drop_src.dragging:
+                                node_name = node.class_name
+                                node_path = module_path + PATH_SEPARATOR + node_name
+                                node_data = node_path.encode()
+
                                 imgui.set_drag_drop_payload(_DRAG_TYPE, node_data)
                                 imgui.text(node_name)
             finally:
