@@ -23,7 +23,7 @@ class FlowGraphKeys(StrEnum):
 
 
 class FlowGraph:
-    Keys = FlowGraphKeys
+    __keys__ = FlowGraphKeys
 
     def __init__(
         self,
@@ -88,39 +88,39 @@ class FlowGraph:
 
     def __serialize__(self):
         result = dict()
-        result[self.Keys.class_name] = str(self.class_name)
-        result[self.Keys.class_docs] = str(self.class_docs)
-        result[self.Keys.class_icon] = str(self.class_icon)
-        result[self.Keys.class_color] = str(self.class_color)
+        result[self.__keys__.class_name] = str(self.class_name)
+        result[self.__keys__.class_docs] = str(self.class_docs)
+        result[self.__keys__.class_icon] = str(self.class_icon)
+        result[self.__keys__.class_color] = str(self.class_color)
 
         serialized_class_nodes = serialize(self.class_nodes)
         assert isinstance(serialized_class_nodes, list)
         assert all(isinstance(node, dict) for node in serialized_class_nodes)
-        result[self.Keys.class_nodes] = serialized_class_nodes
+        result[self.__keys__.class_nodes] = serialized_class_nodes
 
         serialized_class_arcs = serialize(self.class_arcs)
         assert isinstance(serialized_class_arcs, list)
         assert all(isinstance(node, dict) for node in serialized_class_arcs)
-        result[self.Keys.class_arcs] = serialized_class_arcs
+        result[self.__keys__.class_arcs] = serialized_class_arcs
 
         return result
 
     def __deserialize__(self, data):
         assert isinstance(data, dict)
-        self.class_name = str(data.get(self.Keys.class_name, str()))
-        self.class_docs = str(data.get(self.Keys.class_docs, str()))
-        self.class_icon = str(data.get(self.Keys.class_icon, str()))
-        self.class_color = str(data.get(self.Keys.class_color, str()))
+        self.class_name = str(data.get(self.__keys__.class_name, str()))
+        self.class_docs = str(data.get(self.__keys__.class_docs, str()))
+        self.class_icon = str(data.get(self.__keys__.class_icon, str()))
+        self.class_color = str(data.get(self.__keys__.class_color, str()))
 
         self.class_nodes = deserialize(
-            data.get(self.Keys.class_nodes, list()),
+            data.get(self.__keys__.class_nodes, list()),
             List[FlowNode],
         )
         assert isinstance(self.class_nodes, list)
         assert all(isinstance(node, FlowNode) for node in self.class_nodes)
 
         self.class_arcs = deserialize(
-            data.get(self.Keys.class_arcs, list()),
+            data.get(self.__keys__.class_arcs, list()),
             List[FlowArc],
         )
         assert isinstance(self.class_arcs, list)

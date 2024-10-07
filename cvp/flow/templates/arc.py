@@ -14,7 +14,7 @@ class FlowArcKeys(StrEnum):
 
 
 class FlowArc:
-    Keys = FlowArcKeys
+    __keys__ = FlowArcKeys
 
     def __init__(
         self,
@@ -67,15 +67,15 @@ class FlowArc:
 
     def __serialize__(self):
         result = dict()
-        result[self.Keys.class_name] = str(self.class_name)
-        result[self.Keys.class_docs] = str(self.class_docs)
-        result[self.Keys.class_icon] = str(self.class_icon)
-        result[self.Keys.class_color] = str(self.class_color)
+        result[self.__keys__.class_name] = str(self.class_name)
+        result[self.__keys__.class_docs] = str(self.class_docs)
+        result[self.__keys__.class_icon] = str(self.class_icon)
+        result[self.__keys__.class_color] = str(self.class_color)
         return result
 
     def __deserialize__(self, data):
         assert isinstance(data, dict)
-        self.class_name = str(data.get(self.Keys.class_name, str()))
-        self.class_docs = str(data.get(self.Keys.class_docs, str()))
-        self.class_icon = str(data.get(self.Keys.class_icon, str()))
-        self.class_color = str(data.get(self.Keys.class_color, str()))
+        self.class_name = str(data.get(self.__keys__.class_name, str()))
+        self.class_docs = str(data.get(self.__keys__.class_docs, str()))
+        self.class_icon = str(data.get(self.__keys__.class_icon, str()))
+        self.class_color = str(data.get(self.__keys__.class_color, str()))

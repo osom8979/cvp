@@ -20,7 +20,7 @@ class FlowNodeKeys(StrEnum):
 
 
 class FlowNode:
-    Keys = FlowNodeKeys
+    __keys__ = FlowNodeKeys
 
     def __init__(
         self,
@@ -85,37 +85,40 @@ class FlowNode:
 
     def __serialize__(self):
         result = dict()
-        result[self.Keys.class_name] = str(self.class_name)
-        result[self.Keys.class_docs] = str(self.class_docs)
-        result[self.Keys.class_icon] = str(self.class_icon)
-        result[self.Keys.class_color] = str(self.class_color)
+        result[self.__keys__.class_name] = str(self.class_name)
+        result[self.__keys__.class_docs] = str(self.class_docs)
+        result[self.__keys__.class_icon] = str(self.class_icon)
+        result[self.__keys__.class_color] = str(self.class_color)
 
         serialized_class_pins = serialize(self.class_pins)
         assert isinstance(serialized_class_pins, list)
         assert all(isinstance(pin, dict) for pin in serialized_class_pins)
-        result[self.Keys.class_pins] = serialized_class_pins
+        result[self.__keys__.class_pins] = serialized_class_pins
 
         serialized_class_tags = serialize(self.class_tags)
         assert isinstance(serialized_class_tags, list)
         assert all(isinstance(tag, str) for tag in serialized_class_tags)
-        result[self.Keys.class_tags] = serialized_class_tags
+        result[self.__keys__.class_tags] = serialized_class_tags
 
         return result
 
     def __deserialize__(self, data):
         assert isinstance(data, dict)
-        self.class_name = str(data.get(self.Keys.class_name, str()))
-        self.class_docs = str(data.get(self.Keys.class_docs, str()))
-        self.class_icon = str(data.get(self.Keys.class_icon, str()))
-        self.class_color = str(data.get(self.Keys.class_color, str()))
+        self.class_name = str(data.get(self.__keys__.class_name, str()))
+        self.class_docs = str(data.get(self.__keys__.class_docs, str()))
+        self.class_icon = str(data.get(self.__keys__.class_icon, str()))
+        self.class_color = str(data.get(self.__keys__.class_color, str()))
 
         self.class_pins = deserialize(
-            data.get(self.Keys.class_pins, list()),
+            data.get(self.__keys__.class_pins, list()),
             List[FlowPin],
         )
         assert isinstance(self.class_pins, list)
         assert all(isinstance(pin, FlowPin) for pin in self.class_pins)
 
-        self.class_tags = deserialize(data.get(self.Keys.class_tags, list()), List[str])
+        self.class_tags = deserialize(
+            data.get(self.__keys__.class_tags, list()),
+            List[str],
+        )
         assert isinstance(self.class_tags, list)
         assert all(isinstance(tag, str) for tag in self.class_tags)

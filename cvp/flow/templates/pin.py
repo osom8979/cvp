@@ -24,7 +24,7 @@ class FlowPinKeys(StrEnum):
 
 
 class FlowPin:
-    Keys = FlowPinKeys
+    __keys__ = FlowPinKeys
 
     def __init__(
         self,
@@ -107,25 +107,25 @@ class FlowPin:
 
     def __serialize__(self):
         result = dict()
-        result[self.Keys.class_name] = str(self.class_name)
-        result[self.Keys.class_docs] = str(self.class_docs)
-        result[self.Keys.class_action] = int(self.class_action)
-        result[self.Keys.class_stream] = int(self.class_stream)
-        result[self.Keys.class_dtype] = str(self.class_dtype)
-        result[self.Keys.class_required] = bool(self.class_required)
-        result[self.Keys.class_exported] = bool(self.class_exported)
-        result[self.Keys.class_icon] = str(self.class_icon)
-        result[self.Keys.class_color] = str(self.class_color)
+        result[self.__keys__.class_name] = str(self.class_name)
+        result[self.__keys__.class_docs] = str(self.class_docs)
+        result[self.__keys__.class_action] = int(self.class_action)
+        result[self.__keys__.class_stream] = int(self.class_stream)
+        result[self.__keys__.class_dtype] = str(self.class_dtype)
+        result[self.__keys__.class_required] = bool(self.class_required)
+        result[self.__keys__.class_exported] = bool(self.class_exported)
+        result[self.__keys__.class_icon] = str(self.class_icon)
+        result[self.__keys__.class_color] = str(self.class_color)
         return result
 
     def __deserialize__(self, data):
         assert isinstance(data, dict)
-        self.class_name = str(data.get(self.Keys.class_name, str()))
-        self.class_docs = str(data.get(self.Keys.class_docs, str()))
-        self.class_action = int(data.get(self.Keys.class_action, _DEFAULT_ACTION))
-        self.class_stream = int(data.get(self.Keys.class_stream, _DEFAULT_STREAM))
-        self.class_dtype = str(data.get(self.Keys.class_dtype, str()))
-        self.class_required = bool(data.get(self.Keys.class_required, False))
-        self.class_exported = bool(data.get(self.Keys.class_exported, False))
-        self.class_icon = str(data.get(self.Keys.class_icon, str()))
-        self.class_color = str(data.get(self.Keys.class_color, str()))
+        self.class_name = str(data.get(self.__keys__.class_name, str()))
+        self.class_docs = str(data.get(self.__keys__.class_docs, str()))
+        self.class_action = int(data.get(self.__keys__.class_action, _DEFAULT_ACTION))
+        self.class_stream = int(data.get(self.__keys__.class_stream, _DEFAULT_STREAM))
+        self.class_dtype = str(data.get(self.__keys__.class_dtype, str()))
+        self.class_required = bool(data.get(self.__keys__.class_required, False))
+        self.class_exported = bool(data.get(self.__keys__.class_exported, False))
+        self.class_icon = str(data.get(self.__keys__.class_icon, str()))
+        self.class_color = str(data.get(self.__keys__.class_color, str()))
