@@ -73,10 +73,12 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
 
     @property
     def sidebar_width(self) -> float:
-        return self.sidebar_section.sidebar_width
+        value = self.sidebar_section.sidebar_width
+        return self._sidebar_splitter.normalize_value(value)
 
     @sidebar_width.setter
     def sidebar_width(self, value: float) -> None:
+        value = self._sidebar_splitter.normalize_value(value)
         self.sidebar_section.sidebar_width = value
 
     @override

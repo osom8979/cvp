@@ -68,11 +68,12 @@ class SplitterWithCursor:
 
     def __repr__(self):
         return (
-            f"<{type(self).__name__} "
-            f"moving={self._moving} "
-            f"store={self._store.get() if self._store else None} "
-            f"pivot={self._pivot_value:.3f} "
-            f"delta={self._delta_charger:.3f}>"
+            f"<{type(self).__name__}"
+            f" moving={self._moving}"
+            f" store={self._store.get() if self._store else None}"
+            f" pivot={self._pivot_value:.3f}"
+            f" delta={self._delta_charger:.3f}"
+            ">"
         )
 
     @classmethod
@@ -135,6 +136,14 @@ class SplitterWithCursor:
     def moving(self) -> bool:
         return self._moving
 
+    @property
+    def min_value(self):
+        return self._min_value
+
+    @property
+    def max_value(self):
+        return self._max_value
+
     def get_mouse_value(self) -> float:
         match self._orientation:
             case SplitterOrientation.vertical:
@@ -166,13 +175,7 @@ class SplitterWithCursor:
     def on_end_moving(self) -> None:
         pass
 
-    def next_store_value(self, result: SplitterResult) -> float:
-        assert self._store is not None
-        assert result.changed
-
-        delta = (-1 if self._negative_delta else 1) * self._delta_charger
-        value = self._pivot_value + delta
-
+    def normalize_value(self, value: float):
         if self._min_value is not None:
             if value < self._min_value:
                 return self._min_value
@@ -182,6 +185,14 @@ class SplitterWithCursor:
                 return self._max_value
 
         return value
+
+    def next_store_value(self, result: SplitterResult) -> float:
+        assert self._store is not None
+        assert result.changed
+
+        delta = (-1 if self._negative_delta else 1) * self._delta_charger
+        value = self._pivot_value + delta
+        return self.normalize_value(value)
 
     def do_splitter(self):
         return splitter(

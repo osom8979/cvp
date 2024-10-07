@@ -11,7 +11,12 @@ from cvp.config.sections.mixins.selected import SelectedSectionMixin
 from cvp.context import Context
 from cvp.gui.text_centered import text_centered
 from cvp.types import override
-from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.variables import (
+    MAX_SIDEBAR_WIDTH,
+    MIN_SIDEBAR_WIDTH,
+    MIN_WINDOW_HEIGHT,
+    MIN_WINDOW_WIDTH,
+)
 from cvp.widgets.sidebar_with_main import SidebarWithMain
 
 MenuItemT = TypeVar("MenuItemT")
@@ -60,6 +65,7 @@ class Manager(SidebarWithMain[BaseSectionT], ManagerInterface[MenuItemT]):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
+        max_sidebar_width=MAX_SIDEBAR_WIDTH,
     ):
         super().__init__(
             context=context,
@@ -71,6 +77,7 @@ class Manager(SidebarWithMain[BaseSectionT], ManagerInterface[MenuItemT]):
             min_height=min_height,
             modifiable_title=modifiable_title,
             min_sidebar_width=min_sidebar_width,
+            max_sidebar_width=max_sidebar_width,
         )
         self._latest_menus = dict()
 

@@ -6,7 +6,12 @@ from typing import Optional
 from cvp.config.sections import BaseSectionT
 from cvp.context import Context
 from cvp.types import override
-from cvp.variables import MIN_SIDEBAR_WIDTH, MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
+from cvp.variables import (
+    MAX_SIDEBAR_WIDTH,
+    MIN_SIDEBAR_WIDTH,
+    MIN_WINDOW_HEIGHT,
+    MIN_WINDOW_WIDTH,
+)
 from cvp.widgets.manager import Manager, MenuItemT
 from cvp.widgets.tab import TabBar, TabItem
 
@@ -23,6 +28,7 @@ class ManagerTab(Manager[BaseSectionT, MenuItemT], ABC):
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
         min_sidebar_width=MIN_SIDEBAR_WIDTH,
+        max_sidebar_width=MAX_SIDEBAR_WIDTH,
         tabs_identifier: Optional[str] = None,
         tabs_flags=0,
     ):
@@ -36,6 +42,7 @@ class ManagerTab(Manager[BaseSectionT, MenuItemT], ABC):
             min_height=min_height,
             modifiable_title=modifiable_title,
             min_sidebar_width=min_sidebar_width,
+            max_sidebar_width=max_sidebar_width,
         )
         self._tabs = TabBar[MenuItemT](
             context=context,
