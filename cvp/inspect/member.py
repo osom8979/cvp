@@ -5,10 +5,12 @@ from typing import Any, Iterable, List, Mapping, Tuple
 
 
 def is_dunder(name: str) -> bool:
+    """Double underscore"""
     return name.startswith("__") and name.endswith("__")
 
 
 def is_sunder(name: str) -> bool:
+    """Single underscore"""
     return not is_dunder(name) and name.startswith("_") and name.endswith("_")
 
 

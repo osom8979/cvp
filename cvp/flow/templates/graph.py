@@ -8,8 +8,8 @@ from typing import Iterable, List, Optional
 from type_serialize import deserialize, serialize
 from yaml import dump, full_load
 
-from cvp.flow.arc import FlowArc
-from cvp.flow.node import FlowNode
+from cvp.flow.templates.arc import FlowArc
+from cvp.flow.templates.node import FlowNode
 
 
 @unique

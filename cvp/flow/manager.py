@@ -4,7 +4,7 @@ from collections import OrderedDict
 from typing import Optional
 
 from cvp.flow.catalog import FlowCatalog
-from cvp.flow.graph import FlowGraph
+from cvp.flow.templates.graph import FlowGraph
 
 
 class FlowManager:

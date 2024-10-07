@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.context import Context
-from cvp.flow.graph import FlowGraph
+from cvp.flow.templates.graph import FlowGraph
 from cvp.gui.input_text_disabled import input_text_disabled
 from cvp.gui.text_centered import text_centered
 from cvp.types import override

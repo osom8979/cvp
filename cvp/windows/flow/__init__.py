@@ -6,7 +6,7 @@ import imgui
 
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
-from cvp.flow.graph import FlowGraph
+from cvp.flow.templates.graph import FlowGraph
 from cvp.gui.begin_child import begin_child
 from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE
 from cvp.gui.draw_list import get_window_draw_list

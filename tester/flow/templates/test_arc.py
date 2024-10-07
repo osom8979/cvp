@@ -5,32 +5,28 @@ from unittest import TestCase, main
 
 from type_serialize import deserialize, serialize
 
-from cvp.flow.pin import FlowPin
+from cvp.flow.templates.arc import FlowArc
 
 
-class PinTestCase(TestCase):
+class ArcTestCase(TestCase):
     def test_serializable(self):
-        pin = FlowPin(
+        arc = FlowArc(
             class_name="test",
             class_docs="unknown",
-            class_action="data",
-            class_stream="output",
-            class_dtype="numpy.ndarray",
-            class_required=True,
             class_icon="default",
             class_color="#000",
         )
-        obj = serialize(pin)
-        result = deserialize(obj, FlowPin)
-        self.assertEqual(pin, result)
+        obj = serialize(arc)
+        result = deserialize(obj, FlowArc)
+        self.assertEqual(arc, result)
 
     def test_copy(self):
-        pin1 = FlowPin("A")
+        pin1 = FlowArc("A")
         pin2 = copy(pin1)
         self.assertEqual(pin1, pin2)
 
     def test_deepcopy(self):
-        pin1 = FlowPin("A")
+        pin1 = FlowArc("A")
         pin2 = deepcopy(pin1)
         self.assertEqual(pin1, pin2)
 

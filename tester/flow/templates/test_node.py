@@ -5,8 +5,8 @@ from unittest import TestCase, main
 
 from type_serialize import deserialize, serialize
 
-from cvp.flow.node import FlowNode
-from cvp.flow.pin import FlowPin
+from cvp.flow.templates.node import FlowNode
+from cvp.flow.templates.pin import FlowPin
 
 
 class NodeTestCase(TestCase):

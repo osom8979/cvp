@@ -6,7 +6,7 @@ from typing import Iterable, List, Optional
 
 from type_serialize import deserialize, serialize
 
-from cvp.flow.pin import FlowPin
+from cvp.flow.templates.pin import FlowPin
 
 
 @unique
