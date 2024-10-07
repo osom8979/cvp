@@ -12,7 +12,7 @@ from cvp.popups.confirm import ConfirmPopup
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
-from cvp.windows.managers.layout.info import LayoutInfoTab
+from cvp.windows.layout.info import LayoutInfoTab
 
 
 class LayoutManagerWindow(ManagerTab[LayoutManagerSection, LayoutSection]):

@@ -27,13 +27,13 @@ from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.flow import FlowWindow
 from cvp.windows.labeling import LabelingWindow
-from cvp.windows.managers.layout import LayoutManagerWindow
-from cvp.windows.managers.media import MediaManagerWindow
-from cvp.windows.managers.preference import PreferenceManagerWindow
-from cvp.windows.managers.process import ProcessManagerWindow
-from cvp.windows.managers.window import WindowManagerWindow
+from cvp.windows.layout import LayoutManagerWindow
+from cvp.windows.media import MediaManagerWindow
 from cvp.windows.overlay import OverlayWindow
+from cvp.windows.preference import PreferenceManagerWindow
+from cvp.windows.process import ProcessManagerWindow
 from cvp.windows.stitching import StitchingWindow
+from cvp.windows.window import WindowManagerWindow
 
 
 class PlayerApplication:

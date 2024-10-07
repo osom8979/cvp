@@ -6,8 +6,8 @@ from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.popup import Popup
 from cvp.widgets.popup_propagator import PopupPropagator
-from cvp.windows.managers.preference._base import PreferenceWidget
-from cvp.windows.managers.preference.ffmpeg.exe import ExeTabs
+from cvp.windows.preference._base import PreferenceWidget
+from cvp.windows.preference.ffmpeg.exe import ExeTabs
 
 
 class FFmpegPreference(PopupPropagator, PreferenceWidget):

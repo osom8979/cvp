@@ -8,7 +8,7 @@ from cvp.config.sections.overlay_window import Anchor
 from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.types import override
-from cvp.windows.managers.preference._base import PreferenceWidget
+from cvp.windows.preference._base import PreferenceWidget
 
 
 class OverlayPreference(PreferenceWidget):

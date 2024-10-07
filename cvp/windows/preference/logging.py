@@ -17,7 +17,7 @@ from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
 from cvp.widgets.popup import Popup
 from cvp.widgets.popup_propagator import PopupPropagator
-from cvp.windows.managers.preference._base import PreferenceWidget
+from cvp.windows.preference._base import PreferenceWidget
 
 
 class LoggingPreference(PopupPropagator, PreferenceWidget):

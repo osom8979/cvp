@@ -7,8 +7,8 @@ from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
-from cvp.windows.managers.process.info import ProcessInfoTab
-from cvp.windows.managers.process.stream import ProcessStreamTab
+from cvp.windows.process.info import ProcessInfoTab
+from cvp.windows.process.stream import ProcessStreamTab
 
 
 class ProcessManagerWindow(ManagerTab[ProcessManagerSection, Process]):

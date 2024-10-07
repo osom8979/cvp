@@ -10,13 +10,13 @@ from cvp.context import Context
 from cvp.types import override
 from cvp.widgets.manager import Manager
 from cvp.widgets.popup_propagator import PopupPropagator
-from cvp.windows.managers.preference._base import PreferenceWidget
-from cvp.windows.managers.preference.appearance import AppearancePreference
-from cvp.windows.managers.preference.concurrency import ConcurrencyPreference
-from cvp.windows.managers.preference.developer import DeveloperPreference
-from cvp.windows.managers.preference.ffmpeg import FFmpegPreference
-from cvp.windows.managers.preference.logging import LoggingPreference
-from cvp.windows.managers.preference.overlay import OverlayPreference
+from cvp.windows.preference._base import PreferenceWidget
+from cvp.windows.preference.appearance import AppearancePreference
+from cvp.windows.preference.concurrency import ConcurrencyPreference
+from cvp.windows.preference.developer import DeveloperPreference
+from cvp.windows.preference.ffmpeg import FFmpegPreference
+from cvp.windows.preference.logging import LoggingPreference
+from cvp.windows.preference.overlay import OverlayPreference
 
 
 class PreferenceManagerWindow(Manager[PreferenceManagerSection, PreferenceWidget]):

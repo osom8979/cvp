@@ -16,8 +16,8 @@ from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
-from cvp.windows.managers.media.info import MediaInfoTab
-from cvp.windows.managers.media.media import MediaWindow
+from cvp.windows.media.info import MediaInfoTab
+from cvp.windows.media.media import MediaWindow
 
 
 class MediaManagerWindow(ManagerTab[MediaManagerSection, MediaWindowSection]):

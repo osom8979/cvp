@@ -8,7 +8,7 @@ from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window import Window
 from cvp.widgets.window_mapper import WindowMapper
-from cvp.windows.managers.window.info import WindowInfoTab
+from cvp.windows.window.info import WindowInfoTab
 
 
 class WindowManagerWindow(ManagerTab[WindowManagerSection, Window]):
