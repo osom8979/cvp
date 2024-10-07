@@ -6,12 +6,11 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 import imgui
-
 import pygame
-from cvp.gui.begin_child import begin_child
-from cvp.gui.button_ex import button_ex
-from cvp.gui.footer_height_to_reserve import footer_height_to_reserve
-from cvp.gui.set_window_min_size import set_window_min_size
+from cvp.imgui.begin_child import begin_child
+from cvp.imgui.button_ex import button_ex
+from cvp.imgui.footer_height_to_reserve import footer_height_to_reserve
+from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.variables import MIN_POPUP_OPEN_FILE_HEIGHT, MIN_POPUP_OPEN_FILE_WIDTH

@@ -4,13 +4,12 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 
 import imgui
-
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin, Keys
 from cvp.context import Context
-from cvp.gui.begin_child import begin_child
-from cvp.gui.cursor import cursor_pos_y
-from cvp.gui.styles import style_item_spacing, style_window_padding
+from cvp.imgui.begin_child import begin_child
+from cvp.imgui.cursor import cursor_pos_y
+from cvp.imgui.styles import style_item_spacing, style_window_padding
 from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (

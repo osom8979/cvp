@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.context import Context
-from cvp.gui.button_ex import button_ex
-from cvp.gui.checkbox import checkbox
-from cvp.gui.input_text_disabled import input_text_disabled
+from cvp.imgui.button_ex import button_ex
+from cvp.imgui.checkbox import checkbox
+from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 from cvp.widgets.window import Window

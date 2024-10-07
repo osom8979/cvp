@@ -3,11 +3,10 @@
 from typing import Callable, Optional
 
 import imgui
-
 import pygame
-from cvp.gui.button_ex import button_ex
-from cvp.gui.input_text_value import input_text_value
-from cvp.gui.item_width import item_width
+from cvp.imgui.button_ex import button_ex
+from cvp.imgui.input_text_value import input_text_value
+from cvp.imgui.item_width import item_width
 from cvp.types import override
 from cvp.variables import MIN_POPUP_TEXT_INPUT_HEIGHT, MIN_POPUP_TEXT_INPUT_WIDTH
 from cvp.widgets.popup import Popup

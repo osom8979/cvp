@@ -3,15 +3,14 @@
 from typing import Final
 
 import imgui
-
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
-from cvp.gui.begin_child import begin_child
-from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE
-from cvp.gui.draw_list import get_window_draw_list
-from cvp.gui.menu_item_ex import menu_item_ex
-from cvp.gui.styles import style_item_spacing
-from cvp.gui.text_centered import text_centered
+from cvp.imgui.begin_child import begin_child
+from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE
+from cvp.imgui.draw_list import get_window_draw_list
+from cvp.imgui.menu_item_ex import menu_item_ex
+from cvp.imgui.styles import style_item_spacing
+from cvp.imgui.text_centered import text_centered
 from cvp.patterns.proxy import PropertyProxy
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup

@@ -3,8 +3,7 @@
 from typing import Optional, Union
 
 import imgui
-
-from cvp.gui.splitter import (
+from cvp.imgui.splitter import (
     AVAILABLE_REGION_SIZE,
     DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER,
     DEFAULT_SPLITTER_SIZE,

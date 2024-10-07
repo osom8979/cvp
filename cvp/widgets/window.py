@@ -5,11 +5,10 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Tuple
 
 import imgui
-
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.window import WindowSectionMixin
 from cvp.context import Context
-from cvp.gui.set_window_min_size import set_window_min_size
+from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.pygame.able.eventable import Eventable
 from cvp.pygame.able.keyboardable import Keyboardable

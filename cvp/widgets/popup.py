@@ -5,8 +5,7 @@ from typing import Callable, Generic, Optional, TypeVar
 from uuid import uuid4
 
 import imgui
-
-from cvp.gui.set_window_min_size import set_window_min_size
+from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.variables import MIN_POPUP_HEIGHT, MIN_POPUP_WIDTH
 
 ResultT = TypeVar("ResultT")

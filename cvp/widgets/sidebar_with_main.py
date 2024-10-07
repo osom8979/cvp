@@ -4,11 +4,10 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import imgui
-
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.sidebar import Keys, SidebarWidthSectionMixin
 from cvp.context import Context
-from cvp.gui.begin_child import begin_child
+from cvp.imgui.begin_child import begin_child
 from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (

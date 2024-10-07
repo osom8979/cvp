@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.context import Context
 from cvp.logging.logging import logger
 from cvp.types import override

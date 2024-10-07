@@ -3,11 +3,10 @@
 from typing import Mapping
 
 import imgui
-
 from cvp.config.sections.layout import LayoutSection
 from cvp.config.sections.layout_manager import LayoutManagerSection
 from cvp.context import Context
-from cvp.gui.button_ex import button_ex
+from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab

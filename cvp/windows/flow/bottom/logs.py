@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.context import Context
-from cvp.gui.begin_child import begin_child
+from cvp.imgui.begin_child import begin_child
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 

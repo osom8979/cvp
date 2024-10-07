@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.context import Context
 from cvp.flow.path import PATH_SEPARATOR
-from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE as _DRAG_TYPE
+from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE as _DRAG_TYPE
 from cvp.types import override
 from cvp.widgets.widget import WidgetInterface
 

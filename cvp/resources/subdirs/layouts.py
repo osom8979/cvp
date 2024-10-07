@@ -4,7 +4,6 @@ from os import PathLike, remove
 from typing import Union
 
 import imgui
-
 from cvp.system.path import PathFlavour
 
 

@@ -3,7 +3,6 @@
 from typing import List
 
 import imgui
-
 from cvp.config.sections.overlay_window import Anchor
 from cvp.context import Context
 from cvp.logging.logging import logger

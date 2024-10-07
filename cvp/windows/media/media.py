@@ -3,13 +3,13 @@
 from ctypes import addressof, c_void_p, create_string_buffer, memmove
 from typing import Final, Tuple
 
-import imgui
 from OpenGL import GL
 
+import imgui
 from cvp.config.sections.media_window import MediaWindowSection
 from cvp.context import Context
-from cvp.gui.draw_list import get_window_draw_list
-from cvp.gui.menu_item_ex import menu_item_ex
+from cvp.imgui.draw_list import get_window_draw_list
+from cvp.imgui.menu_item_ex import menu_item_ex
 from cvp.types import override
 from cvp.widgets.window import Window
 

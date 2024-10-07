@@ -5,17 +5,17 @@ from io import StringIO
 from typing import Tuple
 from warnings import catch_warnings
 
-import imgui
 from OpenGL import GL
 from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
 
+import imgui
 import pygame
 from cvp.assets import get_default_icon_path
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
-from cvp.gui.fonts import add_jbm_font, add_ngc_font
-from cvp.gui.styles import default_style_colors
+from cvp.imgui.fonts import add_jbm_font, add_ngc_font
+from cvp.imgui.styles import default_style_colors
 from cvp.logging.logging import event_logger, logger, profile_logger
 from cvp.logging.profile import ProfileLogging
 from cvp.popups.confirm import ConfirmPopup

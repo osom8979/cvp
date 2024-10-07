@@ -4,7 +4,6 @@ import os
 from typing import List
 
 import imgui
-
 from cvp.assets import get_jbm_nl_nfm_r_font_path, get_mdi_font_path, get_ngc_font_path
 from cvp.variables import FONT_RANGES_EXTENSION
 

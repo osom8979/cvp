@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.context import Context
 from cvp.flow.instances.graph import Graph
-from cvp.gui.input_text_disabled import input_text_disabled
-from cvp.gui.text_centered import text_centered
+from cvp.imgui.input_text_disabled import input_text_disabled
+from cvp.imgui.text_centered import text_centered
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 

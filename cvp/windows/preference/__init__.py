@@ -4,7 +4,6 @@ from collections import OrderedDict
 from typing import Mapping
 
 import imgui
-
 from cvp.config.sections.preference_manager import PreferenceManagerSection
 from cvp.context import Context
 from cvp.types import override

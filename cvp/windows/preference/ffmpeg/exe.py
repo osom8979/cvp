@@ -4,10 +4,9 @@ from shutil import which
 from typing import List, Optional, Sequence
 
 import imgui
-
 from cvp.config.sections.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.context import Context
-from cvp.gui.button_ex import button_ex
+from cvp.imgui.button_ex import button_ex
 from cvp.patterns.proxy import ValueProxy
 from cvp.popups.open_file import OpenFilePopup
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap

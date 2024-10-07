@@ -3,10 +3,9 @@
 from typing import Final
 
 import imgui
-
 from cvp.config.sections.labeling_manager import LabelingManagerSection
 from cvp.context import Context
-from cvp.gui.draw_list import get_window_draw_list
+from cvp.imgui.draw_list import get_window_draw_list
 from cvp.types import override
 from cvp.widgets.sidebar_with_main import SidebarWithMain
 

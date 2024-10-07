@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-
 from cvp.config.sections.media_window import MediaWindowSection
 from cvp.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
-from cvp.gui.button_ex import button_ex
-from cvp.gui.input_text_disabled import input_text_disabled
-from cvp.gui.input_text_value import input_text_value
-from cvp.gui.item_width import item_width
+from cvp.imgui.button_ex import button_ex
+from cvp.imgui.input_text_disabled import input_text_disabled
+from cvp.imgui.input_text_value import input_text_value
+from cvp.imgui.item_width import item_width
 from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.tab import TabItem

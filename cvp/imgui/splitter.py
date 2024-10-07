@@ -4,8 +4,7 @@ from enum import Enum, auto, unique
 from typing import Final, NamedTuple, Tuple
 
 import imgui
-
-from cvp.gui.draw_list import get_window_draw_list
+from cvp.imgui.draw_list import get_window_draw_list
 
 DEFAULT_VERTICAL_SPLITTER_IDENTIFIER: Final[str] = "## VSplitter"
 DEFAULT_HORIZONTAL_SPLITTER_IDENTIFIER: Final[str] = "## HSplitter"

@@ -4,9 +4,8 @@ from math import fmod
 from typing import Final, Optional, Tuple
 
 import imgui
-
-from cvp.gui.drag_float import drag_float2
-from cvp.gui.slider_float import slider_float
+from cvp.imgui.drag_float import drag_float2
+from cvp.imgui.slider_float import slider_float
 from cvp.types import override
 from cvp.widgets.widget import WidgetInterface
 
