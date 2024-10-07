@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional
+from typing import Final
 
 import imgui
 
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.context import Context
-from cvp.flow.templates.graph import FlowGraph
 from cvp.gui.begin_child import begin_child
 from cvp.gui.drag_type import DRAG_FLOW_NODE_TYPE
 from cvp.gui.draw_list import get_window_draw_list
@@ -132,14 +131,13 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
 
     @property
     def current_graph(self):
-        return self._context.fm.current_graph
+        return self._context.fm.current
 
-    @current_graph.setter
-    def current_graph(self, value: Optional[FlowGraph]) -> None:
-        self._context.fm.current_graph = value
+    def clear_current_graph(self) -> None:
+        self._context.fm.deselect()
 
     def on_new_graph_popup(self, name: str) -> None:
-        self.current_graph = self._context.fm.create_graphs(name)
+        self._context.fm.create_graphs(name, select=True)
 
     def on_open_file_popup(self, file: str) -> None:
         pass
@@ -180,13 +178,13 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         if imgui.menu_item("Save As..")[0]:
             pass
         if imgui.menu_item("Close graph")[0]:
-            self.current_graph = None
+            self._context.fm.deselect()
         if imgui.menu_item("Exit")[0]:
             self.opened = False
 
     @override
     def on_process_sidebar_left(self):
-        current_graph = self.current_graph
+        current_graph = self._context.fm.current
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
             if current_graph is None:
                 text_centered("Please select a graph")

@@ -3,22 +3,22 @@
 import imgui
 
 from cvp.context import Context
-from cvp.flow.templates.graph import FlowGraph
+from cvp.flow.instances.graph import Graph
 from cvp.gui.input_text_disabled import input_text_disabled
 from cvp.gui.text_centered import text_centered
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
 
-class GraphTab(TabItem[FlowGraph]):
+class GraphTab(TabItem[Graph]):
     def __init__(self, context: Context):
         super().__init__(context, "Graph")
 
     @override
-    def on_item(self, item: FlowGraph) -> None:
+    def on_item(self, item: Graph) -> None:
         if item is None:
             text_centered("Please select a graph")
             return
 
         imgui.text("Name:")
-        input_text_disabled("## Name", item.class_name)
+        input_text_disabled("## Name", item.name)

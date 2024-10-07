@@ -16,13 +16,15 @@ def remove_suffix_separators(path: str) -> str:
 
 @unique
 class FlowPathPrefixes(StrEnum):
-    node = "@"
     graph = "#"
-    pin = "*"
+    node = "@"
+    pin = "+"
     arc = "~"
 
-    node_instance = "$"
     graph_instance = "%"
+    node_instance = "$"
+    pin_instance = "*"
+    arc_instance = "="
 
     reference = "&"
 

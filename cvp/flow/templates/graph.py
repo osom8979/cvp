@@ -2,11 +2,9 @@
 
 from copy import copy, deepcopy
 from enum import StrEnum, auto, unique
-from os import PathLike
 from typing import Iterable, List, Optional
 
 from type_serialize import deserialize, serialize
-from yaml import dump, full_load
 
 from cvp.flow.templates.arc import FlowArc
 from cvp.flow.templates.node import FlowNode
@@ -49,7 +47,8 @@ class FlowGraph:
             f" class_icon='{self.class_icon}'"
             f" class_color='{self.class_color}'"
             f" class_nodes={len(self.class_nodes)}"
-            f" class_arcs={len(self.class_arcs)}>"
+            f" class_arcs={len(self.class_arcs)}"
+            ">"
         )
 
     def __eq__(self, other) -> bool:
@@ -125,17 +124,3 @@ class FlowGraph:
         )
         assert isinstance(self.class_arcs, list)
         assert all(isinstance(node, FlowArc) for node in self.class_arcs)
-
-    def dumps_yaml(self, encoding="utf-8") -> bytes:
-        return dump(self.__serialize__()).encode(encoding)
-
-    def loads_yaml(self, data: bytes) -> None:
-        self.__deserialize__(full_load(data))
-
-    def read_yaml(self, file: PathLike[str]) -> None:
-        with open(file, "rb") as f:
-            self.loads_yaml(f.read())
-
-    def write_yaml(self, file: PathLike[str]) -> None:
-        with open(file, "wb") as f:
-            f.write(self.dumps_yaml())

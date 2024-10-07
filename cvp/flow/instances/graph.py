@@ -2,7 +2,10 @@
 
 from copy import copy, deepcopy
 from enum import StrEnum, auto, unique
+from os import PathLike
 from typing import Optional
+
+from yaml import dump, full_load
 
 from cvp.flow.templates.graph import FlowGraph
 
@@ -65,3 +68,17 @@ class Graph:
         assert isinstance(data, dict)
         self.name = str(data.get(self.__keys__.name_, str()))
         self.template = str(data.get(self.__keys__.template, str()))
+
+    def dumps_yaml(self, encoding="utf-8") -> bytes:
+        return dump(self.__serialize__()).encode(encoding)
+
+    def loads_yaml(self, data: bytes) -> None:
+        self.__deserialize__(full_load(data))
+
+    def write_yaml(self, file: PathLike[str], encoding="utf-8") -> None:
+        with open(file, "wb") as f:
+            f.write(self.dumps_yaml(encoding))
+
+    def read_yaml(self, file: PathLike[str]) -> None:
+        with open(file, "rb") as f:
+            self.loads_yaml(f.read())

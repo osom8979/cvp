@@ -46,7 +46,8 @@ class FlowNode:
             f" class_icon='{self.class_icon}'"
             f" class_color='{self.class_color}'"
             f" class_pins={len(self.class_pins)}"
-            f" class_tags={len(self.class_tags)}>"
+            f" class_tags={len(self.class_tags)}"
+            ">"
         )
 
     def __eq__(self, other) -> bool:

@@ -59,7 +59,8 @@ class FlowPin:
             f" class_required={self.class_required}"
             f" class_exported={self.class_exported}"
             f" class_icon='{self.class_icon}'"
-            f" class_color='{self.class_color}'>"
+            f" class_color='{self.class_color}'"
+            ">"
         )
 
     def __eq__(self, other) -> bool:

@@ -34,7 +34,8 @@ class FlowArc:
             f" class_name='{self.class_name}'"
             f" class_docs='{self.class_docs}'"
             f" class_icon='{self.class_icon}'"
-            f" class_color='{self.class_color}'>"
+            f" class_color='{self.class_color}'"
+            ">"
         )
 
     def __eq__(self, other) -> bool:
