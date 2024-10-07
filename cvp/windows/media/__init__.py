@@ -19,7 +19,7 @@ from cvp.windows.media.info import MediaInfoTab
 from cvp.windows.media.media import MediaWindow
 
 
-class MediaManagerWindow(ManagerTab[MediaManagerSection, MediaWindowSection]):
+class MediaManager(ManagerTab[MediaManagerSection, MediaWindowSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

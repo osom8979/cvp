@@ -11,7 +11,7 @@ from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.window.info import WindowInfoTab
 
 
-class WindowManagerWindow(ManagerTab[WindowManagerSection, Window]):
+class WindowManager(ManagerTab[WindowManagerSection, Window]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

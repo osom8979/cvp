@@ -11,7 +11,7 @@ from cvp.windows.process.info import ProcessInfoTab
 from cvp.windows.process.stream import ProcessStreamTab
 
 
-class ProcessManagerWindow(ManagerTab[ProcessManagerSection, Process]):
+class ProcessManager(ManagerTab[ProcessManagerSection, Process]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

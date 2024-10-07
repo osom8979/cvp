@@ -23,13 +23,13 @@ from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.flow import FlowWindow
 from cvp.windows.labeling import LabelingWindow
-from cvp.windows.layout import LayoutManagerWindow
-from cvp.windows.media import MediaManagerWindow
+from cvp.windows.layout import LayoutManager
+from cvp.windows.media import MediaManager
 from cvp.windows.overlay import OverlayWindow
-from cvp.windows.preference import PreferenceManagerWindow
-from cvp.windows.process import ProcessManagerWindow
+from cvp.windows.preference import PreferenceManager
+from cvp.windows.process import ProcessManager
 from cvp.windows.stitching import StitchingWindow
-from cvp.windows.window import WindowManagerWindow
+from cvp.windows.window import WindowManager
 from pygame import NOEVENT, NUMEVENTS
 from pygame.event import Event, event_name
 from pygame.image import load as load_image
@@ -46,13 +46,13 @@ class PlayerApplication:
 
         self._flow = FlowWindow(self._context)
         self._labeling_manager = LabelingWindow(self._context)
-        self._layout_manager = LayoutManagerWindow(self._context, self._windows)
-        self._media_manager = MediaManagerWindow(self._context, self._windows)
+        self._layout_manager = LayoutManager(self._context, self._windows)
+        self._media_manager = MediaManager(self._context, self._windows)
         self._overlay = OverlayWindow(self._context)
-        self._pref_manager = PreferenceManagerWindow(self._context)
-        self._process_manager = ProcessManagerWindow(self._context)
+        self._pref_manager = PreferenceManager(self._context)
+        self._process_manager = ProcessManager(self._context)
         self._stitching = StitchingWindow(self._context)
-        self._window_manager = WindowManagerWindow(self._context, self._windows)
+        self._window_manager = WindowManager(self._context, self._windows)
 
         self._confirm_quit = ConfirmPopup(
             title="Exit",

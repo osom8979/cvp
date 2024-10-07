@@ -14,7 +14,7 @@ from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.layout.info import LayoutInfoTab
 
 
-class LayoutManagerWindow(ManagerTab[LayoutManagerSection, LayoutSection]):
+class LayoutManager(ManagerTab[LayoutManagerSection, LayoutSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

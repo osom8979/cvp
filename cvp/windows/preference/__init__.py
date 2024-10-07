@@ -18,7 +18,7 @@ from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
 
 
-class PreferenceManagerWindow(Manager[PreferenceManagerSection, PreferenceWidget]):
+class PreferenceManager(Manager[PreferenceManagerSection, PreferenceWidget]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
