@@ -3,8 +3,8 @@
 from typing import Callable, Optional
 
 import imgui
-import pygame
 
+import pygame
 from cvp.gui.button_ex import button_ex
 from cvp.types import override
 from cvp.variables import MIN_POPUP_CONFIRM_HEIGHT, MIN_POPUP_CONFIRM_WIDTH

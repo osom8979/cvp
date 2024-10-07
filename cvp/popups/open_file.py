@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 import imgui
-import pygame
 
+import pygame
 from cvp.gui.begin_child import begin_child
 from cvp.gui.button_ex import button_ex
 from cvp.gui.footer_height_to_reserve import footer_height_to_reserve

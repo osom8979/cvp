@@ -3,8 +3,8 @@
 from typing import Callable, Optional
 
 import imgui
-import pygame
 
+import pygame
 from cvp.gui.button_ex import button_ex
 from cvp.gui.input_text_value import input_text_value
 from cvp.gui.item_width import item_width

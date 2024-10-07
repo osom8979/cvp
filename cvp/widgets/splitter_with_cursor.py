@@ -3,9 +3,6 @@
 from typing import Optional, Union
 
 import imgui
-from pygame import SYSTEM_CURSOR_SIZENS, SYSTEM_CURSOR_SIZEWE
-from pygame.cursors import Cursor
-from pygame.mouse import get_cursor, set_cursor
 
 from cvp.gui.splitter import (
     AVAILABLE_REGION_SIZE,
@@ -19,6 +16,9 @@ from cvp.gui.splitter import (
 )
 from cvp.logging.logging import widgets_logger as logger
 from cvp.patterns.proxy import ValueProxy
+from pygame import SYSTEM_CURSOR_SIZENS, SYSTEM_CURSOR_SIZEWE
+from pygame.cursors import Cursor
+from pygame.mouse import get_cursor, set_cursor
 
 
 class SplitterWithCursor:

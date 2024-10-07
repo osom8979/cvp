@@ -6,15 +6,11 @@ from typing import Tuple
 from warnings import catch_warnings
 
 import imgui
-import pygame
 from OpenGL import GL
 from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
-from pygame import NOEVENT, NUMEVENTS
-from pygame.event import Event, event_name
-from pygame.image import load as load_image
-from pygame.key import ScancodeWrapper, get_pressed
 
+import pygame
 from cvp.assets import get_default_icon_path
 from cvp.context import Context
 from cvp.context.autofixer import AutoFixer
@@ -34,6 +30,10 @@ from cvp.windows.preference import PreferenceManagerWindow
 from cvp.windows.process import ProcessManagerWindow
 from cvp.windows.stitching import StitchingWindow
 from cvp.windows.window import WindowManagerWindow
+from pygame import NOEVENT, NUMEVENTS
+from pygame.event import Event, event_name
+from pygame.image import load as load_image
+from pygame.key import ScancodeWrapper, get_pressed
 
 
 class PlayerApplication:

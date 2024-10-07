@@ -3,7 +3,7 @@
 from argparse import Namespace
 
 from cvp.context import Context
-from cvp.pgc.environ import hide_pygame_prompt
+from cvp.pygame.environ import hide_pygame_prompt
 
 
 def player_main(args: Namespace) -> None:

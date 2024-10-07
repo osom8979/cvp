@@ -4,8 +4,8 @@ from threading import Thread
 from typing import Any, Callable, Iterable, Mapping, Optional
 
 import imgui
-import pygame
 
+import pygame
 from cvp.gui.button_ex import button_ex
 from cvp.types import override
 from cvp.widgets.popup import Popup

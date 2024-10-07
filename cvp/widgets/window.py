@@ -5,24 +5,24 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Tuple
 
 import imgui
-from pygame.event import Event
 
 from cvp.config.sections import BaseSectionT
 from cvp.config.sections.mixins.window import WindowSectionMixin
 from cvp.context import Context
 from cvp.gui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
-from cvp.pgc.able.eventable import Eventable
-from cvp.pgc.able.keyboardable import Keyboardable
-from cvp.pgc.able.mouseable import Mouseable
-from cvp.pgc.constants import Constants
-from cvp.pgc.constants.event_type import EventType
-from cvp.pgc.events.callbacks import EventCallbacks
-from cvp.pgc.events.event_map import EventWrapper, create_event_map
+from cvp.pygame.able.eventable import Eventable
+from cvp.pygame.able.keyboardable import Keyboardable
+from cvp.pygame.able.mouseable import Mouseable
+from cvp.pygame.constants import Constants
+from cvp.pygame.constants.event_type import EventType
+from cvp.pygame.events.callbacks import EventCallbacks
+from cvp.pygame.events.event_map import EventWrapper, create_event_map
 from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.popup import Popup
 from cvp.widgets.widget import WidgetInterface
+from pygame.event import Event
 
 
 class WindowInterface(WidgetInterface):

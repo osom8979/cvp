@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+
+from typing import Sequence
+
+from cvp.pygame.transforms._base import TransformBase
+from cvp.pygame.types import SequenceProtocol
+from cvp.types import override
+from pygame.surface import Surface
+from pygame.transform import scale
+
+
+class ScaleTransform(TransformBase):
+    def __init__(self, size: Sequence[float]):
+        self.size = size
+
+    @override
+    def transform(self, source: Surface) -> Surface:
+        assert isinstance(self.size, SequenceProtocol)
+        return scale(source, self.size)
