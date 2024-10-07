@@ -4,7 +4,7 @@ from typing import Mapping
 
 import imgui
 from cvp.config.sections.layout import LayoutSection
-from cvp.config.sections.layout_manager import LayoutManagerSection
+from cvp.config.sections.layouts import LayoutsSection
 from cvp.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -14,7 +14,7 @@ from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.layout.info import LayoutInfoTab
 
 
-class LayoutManager(ManagerTab[LayoutManagerSection, LayoutSection]):
+class LayoutManager(ManagerTab[LayoutsSection, LayoutSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

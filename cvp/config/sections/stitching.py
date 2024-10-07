@@ -11,5 +11,5 @@ class _Keys(StrEnum):
     pass
 
 
-class StitchingManagerSection(BaseSection, ManagerSectionMixin):
+class StitchingSection(BaseSection, ManagerSectionMixin):
     K = _Keys

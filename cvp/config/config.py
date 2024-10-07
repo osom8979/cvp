@@ -16,17 +16,17 @@ from cvp.config.sections.ffmpeg import FFmpegSection
 from cvp.config.sections.flow_window import FlowWindowSection
 from cvp.config.sections.font import FontSection
 from cvp.config.sections.graphic import GraphicSection
-from cvp.config.sections.labeling_manager import LabelingManagerSection
+from cvp.config.sections.labeling import LabelingSection
 from cvp.config.sections.layout import LayoutSection
-from cvp.config.sections.layout_manager import LayoutManagerSection
+from cvp.config.sections.layouts import LayoutsSection
 from cvp.config.sections.logging import LoggingSection
-from cvp.config.sections.media_manager import MediaManagerSection
 from cvp.config.sections.media_window import MediaWindowSection
+from cvp.config.sections.medias import MediasSection
 from cvp.config.sections.overlay_window import OverlayWindowSection
-from cvp.config.sections.preference_manager import PreferenceManagerSection
-from cvp.config.sections.process_manager import ProcessManagerSection
-from cvp.config.sections.stitching_manager import StitchingManagerSection
-from cvp.config.sections.window_manager import WindowManagerSection
+from cvp.config.sections.preference import PreferenceSection
+from cvp.config.sections.process import ProcessSection
+from cvp.config.sections.stitching import StitchingSection
+from cvp.config.sections.window import WindowSection
 from cvp.variables import LAYOUT_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
@@ -43,13 +43,13 @@ class Config(BaseConfig):
         self._media_prefix = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
 
         # Managers
-        self.preference_manager = PreferenceManagerSection(self)
-        self.process_manager = ProcessManagerSection(self)
-        self.stitching_manager = StitchingManagerSection(self)
-        self.window_manager = WindowManagerSection(self)
-        self.labeling_manager = LabelingManagerSection(self)
-        self.layout_manager = LayoutManagerSection(self)
-        self.media_manager = MediaManagerSection(self)
+        self.preference_manager = PreferenceSection(self)
+        self.process_manager = ProcessSection(self)
+        self.stitching_manager = StitchingSection(self)
+        self.window_manager = WindowSection(self)
+        self.labeling_manager = LabelingSection(self)
+        self.layout_manager = LayoutsSection(self)
+        self.media_manager = MediasSection(self)
 
         # Windows
         self.flow_window = FlowWindowSection(self)

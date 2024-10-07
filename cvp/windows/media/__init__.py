@@ -4,9 +4,9 @@ import os
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.media_manager import MediaManagerSection
 from cvp.config.sections.media_window import MediaWindowSection
 from cvp.config.sections.media_window import Mode as MediaSectionMode
+from cvp.config.sections.medias import MediasSection
 from cvp.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -19,7 +19,7 @@ from cvp.windows.media.info import MediaInfoTab
 from cvp.windows.media.media import MediaWindow
 
 
-class MediaManager(ManagerTab[MediaManagerSection, MediaWindowSection]):
+class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

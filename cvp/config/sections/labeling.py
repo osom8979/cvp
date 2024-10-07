@@ -11,5 +11,5 @@ class _Keys(StrEnum):
     pass
 
 
-class WindowManagerSection(BaseSection, ManagerSectionMixin):
+class LabelingSection(BaseSection, ManagerSectionMixin):
     K = _Keys

@@ -11,5 +11,5 @@ class _Keys(StrEnum):
     pass
 
 
-class MediaManagerSection(BaseSection, ManagerSectionMixin):
+class WindowSection(BaseSection, ManagerSectionMixin):
     K = _Keys

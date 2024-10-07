@@ -11,5 +11,5 @@ class _Keys(StrEnum):
     pass
 
 
-class PreferenceManagerSection(BaseSection, ManagerSectionMixin):
+class MediasSection(BaseSection, ManagerSectionMixin):
     K = _Keys

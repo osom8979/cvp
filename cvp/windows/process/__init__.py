@@ -2,7 +2,7 @@
 
 from typing import Mapping
 
-from cvp.config.sections.process_manager import ProcessManagerSection
+from cvp.config.sections.process import ProcessSection
 from cvp.context import Context
 from cvp.process.process import Process
 from cvp.types import override
@@ -11,7 +11,7 @@ from cvp.windows.process.info import ProcessInfoTab
 from cvp.windows.process.stream import ProcessStreamTab
 
 
-class ProcessManager(ManagerTab[ProcessManagerSection, Process]):
+class ProcessManager(ManagerTab[ProcessSection, Process]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

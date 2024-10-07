@@ -12,7 +12,7 @@ class _Keys(StrEnum):
     teardown_timeout = auto()
 
 
-class ProcessManagerSection(BaseSection, ManagerSectionMixin):
+class ProcessSection(BaseSection, ManagerSectionMixin):
     K = _Keys
 
     @property

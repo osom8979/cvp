@@ -3,7 +3,7 @@
 from typing import Final
 
 import imgui
-from cvp.config.sections.stitching_manager import StitchingManagerSection
+from cvp.config.sections.stitching import StitchingSection
 from cvp.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.types import override
@@ -14,7 +14,7 @@ WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class StitchingWindow(SidebarWithMain[StitchingManagerSection]):
+class StitchingWindow(SidebarWithMain[StitchingSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

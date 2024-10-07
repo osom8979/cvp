@@ -3,7 +3,7 @@
 from typing import Final
 
 import imgui
-from cvp.config.sections.labeling_manager import LabelingManagerSection
+from cvp.config.sections.labeling import LabelingSection
 from cvp.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.types import override
@@ -14,7 +14,7 @@ WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class LabelingWindow(SidebarWithMain[LabelingManagerSection]):
+class LabelingWindow(SidebarWithMain[LabelingSection]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
