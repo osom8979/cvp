@@ -3,12 +3,6 @@
 from pathlib import Path
 from typing import Final
 
-VERBOSE_LEVEL_0: Final[int] = 0
-VERBOSE_LEVEL_1: Final[int] = 1
-VERBOSE_LEVEL_2: Final[int] = 2
-"""Logs all components for debugging.
-"""
-
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
 CVP_INI_FILENAME: Final[str] = "cvp.ini"
 GUI_INI_FILENAME: Final[str] = "gui.ini"

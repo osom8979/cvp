@@ -27,13 +27,7 @@ from cvp.config.sections.preference_manager import PreferenceManagerSection
 from cvp.config.sections.process_manager import ProcessManagerSection
 from cvp.config.sections.stitching_manager import StitchingManagerSection
 from cvp.config.sections.window_manager import WindowManagerSection
-from cvp.variables import (
-    LAYOUT_SECTION_PREFIX,
-    MEDIA_SECTION_PREFIX,
-    VERBOSE_LEVEL_0,
-    VERBOSE_LEVEL_1,
-    VERBOSE_LEVEL_2,
-)
+from cvp.variables import LAYOUT_SECTION_PREFIX, MEDIA_SECTION_PREFIX
 
 
 class Config(BaseConfig):
@@ -107,15 +101,3 @@ class Config(BaseConfig):
     @property
     def verbose(self):
         return self.developer.verbose
-
-    @property
-    def v0debug(self) -> bool:
-        return self.debug and self.verbose >= VERBOSE_LEVEL_0
-
-    @property
-    def v1debug(self) -> bool:
-        return self.debug and self.verbose >= VERBOSE_LEVEL_1
-
-    @property
-    def v2debug(self) -> bool:
-        return self.debug and self.verbose >= VERBOSE_LEVEL_2
