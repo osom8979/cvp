@@ -329,12 +329,12 @@ class PlayerApplication:
 
         if self.debug:
             imgui.separator()
-            if imgui.menu_item("Metrics", None, self.config.developer.metrics)[0]:
-                self.config.developer.metrics = not self.config.developer.metrics
-            if imgui.menu_item("Style", None, self.config.developer.style)[0]:
-                self.config.developer.style = not self.config.developer.style
-            if imgui.menu_item("Demo", None, self.config.developer.demo)[0]:
-                self.config.developer.demo = not self.config.developer.demo
+            if imgui.menu_item("Metrics", None, self.config.developer.show_metrics)[0]:
+                self.config.developer.flip_show_metrics()
+            if imgui.menu_item("Style", None, self.config.developer.show_style)[0]:
+                self.config.developer.flip_show_style()
+            if imgui.menu_item("Demo", None, self.config.developer.show_demo)[0]:
+                self.config.developer.flip_show_demo()
 
     def on_main_menu(self) -> None:
         with imgui.begin_main_menu_bar() as main_menu_bar:
@@ -357,18 +357,18 @@ class PlayerApplication:
             self._context.quit()
 
     def on_metrics_window(self) -> None:
-        if not self.config.developer.metrics:
+        if not self.config.developer.show_metrics:
             return
         if not imgui.show_metrics_window(True):
-            self.config.developer.metrics = False
+            self.config.developer.show_metrics = False
 
     def on_style_editor_window(self) -> None:
-        if not self.config.developer.style:
+        if not self.config.developer.show_style:
             return
         expanded, opened = imgui.begin("Style editor", True)
         try:
             if not opened:
-                self.config.developer.style = False
+                self.config.developer.show_style = False
                 return
             if not expanded:
                 return
@@ -377,7 +377,7 @@ class PlayerApplication:
             imgui.end()
 
     def on_demo_window(self) -> None:
-        if not self.config.developer.demo:
+        if not self.config.developer.show_demo:
             return
         if not imgui.show_demo_window(True):
-            self.config.developer.demo = False
+            self.config.developer.show_demo = False

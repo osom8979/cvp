@@ -7,13 +7,13 @@ from cvp.patterns.proxy import ValueProxy
 
 
 class SplitTreeProxy(ValueProxy[float]):
-    def __init__(self, section: FlowAuiConfig):
-        self._section = section
+    def __init__(self, config: FlowAuiConfig):
+        self._config = config
 
     @override
     def get(self) -> float:
-        return self._section.split_tree
+        return self._config.split_tree
 
     @override
     def set(self, value: float) -> None:
-        self._section.split_tree = value
+        self._config.split_tree = value

@@ -7,13 +7,13 @@ from cvp.patterns.proxy import ValueProxy
 
 
 class SidebarWidthProxy(ValueProxy[float]):
-    def __init__(self, sidebar: SidebarWindowConfig):
-        self._sidebar = sidebar
+    def __init__(self, config: SidebarWindowConfig):
+        self._config = config
 
     @override
     def get(self) -> float:
-        return self._sidebar.sidebar_width
+        return self._config.sidebar_width
 
     @override
     def set(self, value: float) -> None:
-        self._sidebar.sidebar_width = value
+        self._config.sidebar_width = value
