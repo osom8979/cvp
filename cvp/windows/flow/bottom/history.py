@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 

@@ -27,6 +27,7 @@ from cvp.system.environ_keys import PYOPENGL_USE_ACCELERATE, SDL_VIDEO_X11_FORCE
 class Context:
     def __init__(self, home: Optional[Union[str, PathLike[str]]] = None):
         self._home = HomeDir.from_path(home)
+        self._config = Config()
         self._done = Event()
 
         test_directory(self._home)
@@ -40,12 +41,13 @@ class Context:
             logger.info(f"Create home directory: '{str(self._home)}'")
             self._home.mkdir(parents=True, exist_ok=True)
 
-        self._config = Config(self._home.cvp_ini, self._home)
+        if not self._readonly and self._home.cvp_yml.is_file():
+            self._config.read_yaml(self._home.cvp_yml)
 
         if not self._readonly:
             if not self._home.logging_json.exists():
                 self.save_logging_config()
-            if not self._config.logging.has_config_path:
+            if not self._config.logging.config_path:
                 logging_config_path = str(self._home.logging_json)
                 self._config.logging.config_path = logging_config_path
                 logger.info(f"Initialize logging config file: '{logging_config_path}'")
@@ -70,12 +72,12 @@ class Context:
             process_workers=process_workers,
         )
 
-        if self.config.graphic.has_force_egl:
+        if self.config.graphic.force_egl is not None:
             force_egl = self.config.graphic.force_egl_environ
             os.environ[SDL_VIDEO_X11_FORCE_EGL] = force_egl
             logger.info(f"Update environ: {SDL_VIDEO_X11_FORCE_EGL}={force_egl}")
 
-        if self.config.graphic.has_use_accelerate:
+        if self.config.graphic.use_accelerate is not None:
             use_accelerate = self.config.graphic.use_accelerate_environ
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
@@ -143,7 +145,7 @@ class Context:
         )
 
     def teardown(self) -> None:
-        self._pm.teardown(self._config.process_manager.teardown_timeout)
+        self._pm.teardown(self._config.process.teardown_timeout)
 
     def validate_writable_home(self) -> None:
         if self._readonly:
@@ -164,9 +166,9 @@ class Context:
             )
 
     def save_config_unsafe(self) -> None:
-        config_path = str(self._home.cvp_ini)
-        logger.info(f"Save the config file: '{config_path}'")
-        self._config.write(config_path)
+        config_path = self._home.cvp_yml
+        logger.info(f"Save the config file: '{str(config_path)}'")
+        self._config.write_yaml(config_path)
 
     def save_config(self) -> None:
         try:

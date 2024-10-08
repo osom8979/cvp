@@ -4,8 +4,8 @@ from collections import OrderedDict
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.preference import PreferenceSection
-from cvp.context import Context
+from cvp.config.sections.preference import PreferenceConfig
+from cvp.context.context import Context
 from cvp.types import override
 from cvp.widgets.manager import Manager
 from cvp.widgets.popup_propagator import PopupPropagator
@@ -18,11 +18,11 @@ from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
 
 
-class PreferenceManager(Manager[PreferenceSection, PreferenceWidget]):
+class PreferenceManager(Manager[PreferenceConfig, PreferenceWidget]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.preference_manager,
+            section=context.config.preference,
             title="Preference",
             closable=True,
             flags=None,

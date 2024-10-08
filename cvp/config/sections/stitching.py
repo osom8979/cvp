@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from enum import StrEnum, unique
+from dataclasses import dataclass
 
-from cvp.config.sections._base import BaseSection
-from cvp.config.sections.mixins.manager import ManagerSectionMixin
+from cvp.config.sections.mixins.manager import ManagerMixin
 
 
-@unique
-class _Keys(StrEnum):
+@dataclass
+class StitchingConfig(ManagerMixin):
     pass
-
-
-class StitchingSection(BaseSection, ManagerSectionMixin):
-    K = _Keys

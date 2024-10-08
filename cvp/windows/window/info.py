@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.input_text_disabled import input_text_disabled

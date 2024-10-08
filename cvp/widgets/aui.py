@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional, Tuple, TypeVar
 
 import imgui
-from cvp.config.sections import BaseSectionT
-from cvp.config.sections.mixins.cutting_edge import CuttingEdgeSectionMixin, Keys
-from cvp.context import Context
+from cvp.config.sections.mixins.aui import AuiMixin
+from cvp.config.sections.proxies.aui import AuiBottomProxy, AuiLeftProxy, AuiRightProxy
+from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.styles import style_item_spacing, style_window_padding
-from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (
     CUTTING_EDGE_PADDING_HEIGHT,
@@ -25,8 +24,10 @@ from cvp.variables import (
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.widgets.window import Window
 
+AuiSectionT = TypeVar("AuiSectionT", bound=AuiMixin)
 
-class CuttingEdgeInterface(ABC):
+
+class AuiInterface(ABC):
     @abstractmethod
     def on_process_sidebar_left(self) -> None:
         raise NotImplementedError
@@ -44,11 +45,11 @@ class CuttingEdgeInterface(ABC):
         raise NotImplementedError
 
 
-class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
+class Aui(Window[AuiSectionT], AuiInterface):
     def __init__(
         self,
         context: Context,
-        section: BaseSectionT,
+        section: AuiSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -76,9 +77,9 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
         self._padding_width = padding_width
         self._padding_height = padding_height
 
-        self._split_left = PropertyProxy[float](section, Keys.split_left)
-        self._split_right = PropertyProxy[float](section, Keys.split_right)
-        self._split_bottom = PropertyProxy[float](section, Keys.split_bottom)
+        self._split_left = AuiLeftProxy(section)
+        self._split_right = AuiRightProxy(section)
+        self._split_bottom = AuiBottomProxy(section)
 
         self._left_splitter = SplitterWithCursor.from_vertical(
             "## VSplitterLeft",
@@ -102,9 +103,9 @@ class CuttingEdge(Window[BaseSectionT], CuttingEdgeInterface):
         )
 
     @property
-    def cutting_edge_section(self) -> CuttingEdgeSectionMixin:
-        assert isinstance(self.section, CuttingEdgeSectionMixin)
-        return self.section
+    def cutting_edge_section(self) -> AuiMixin:
+        assert isinstance(self.config, AuiMixin)
+        return self.config
 
     @property
     def split_left(self) -> float:

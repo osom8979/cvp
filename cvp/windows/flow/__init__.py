@@ -3,8 +3,9 @@
 from typing import Final
 
 import imgui
-from cvp.config.sections.flow_window import FlowWindowSection
-from cvp.context import Context
+from cvp.config.sections.flow import FlowConfig
+from cvp.config.sections.proxies.flow import SplitTreeProxy
+from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.draw_list import get_window_draw_list
@@ -26,8 +27,8 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
+from cvp.widgets.aui import Aui
 from cvp.widgets.canvas_control import CanvasControl
-from cvp.widgets.cutting_edge import CuttingEdge
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
@@ -40,7 +41,7 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
 
 
-class FlowWindow(CuttingEdge[FlowWindowSection]):
+class FlowWindow(Aui[FlowConfig]):
     def __init__(self, context: Context):
         min_width = MIN_WINDOW_WIDTH
         min_height = MIN_WINDOW_HEIGHT
@@ -54,7 +55,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
 
         super().__init__(
             context=context,
-            section=context.config.flow_window,
+            section=context.config.flow,
             title="Flow",
             closable=True,
             flags=imgui.WINDOW_MENU_BAR,
@@ -86,10 +87,7 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
         self._background = None
         self._enable_context_menu = True
 
-        self._split_tree = PropertyProxy[float](
-            context.config.flow_window,
-            context.config.flow_window.K.split_tree,
-        )
+        self._split_tree = SplitTreeProxy(context.config.flow)
         self._tree_splitter = SplitterWithCursor.from_horizontal(
             "## HSplitterTree",
             value_proxy=self._split_tree,
@@ -122,11 +120,11 @@ class FlowWindow(CuttingEdge[FlowWindowSection]):
 
     @property
     def split_tree(self) -> float:
-        return self.section.split_tree
+        return self.config.split_tree
 
     @split_tree.setter
     def split_tree(self, value: float) -> None:
-        self.section.split_tree = value
+        self.config.split_tree = value
 
     @property
     def current_graph(self):

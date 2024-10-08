@@ -2,7 +2,7 @@
 
 from argparse import Namespace
 
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.pygame.environ import hide_pygame_prompt
 
 

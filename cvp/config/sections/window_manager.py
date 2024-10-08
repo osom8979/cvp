@@ -6,5 +6,5 @@ from cvp.config.sections.mixins.manager import ManagerMixin
 
 
 @dataclass
-class LabelingConfig(ManagerMixin):
+class WindowManagerConfig(ManagerMixin):
     pass

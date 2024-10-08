@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.widgets.tab import TabBar
 from cvp.windows.flow.right.props import PropsTab
 

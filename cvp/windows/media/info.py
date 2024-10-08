@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import imgui
-from cvp.config.sections.media_window import MediaWindowSection
-from cvp.context import Context
+from cvp.config.sections.media import MediaSection
+from cvp.context.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_disabled import input_text_disabled
@@ -13,14 +13,14 @@ from cvp.types import override
 from cvp.widgets.tab import TabItem
 
 
-class MediaInfoTab(TabItem[MediaWindowSection]):
+class MediaInfoTab(TabItem[MediaSection]):
     def __init__(self, context: Context):
         super().__init__(context, "Info")
 
     @override
-    def on_item(self, item: MediaWindowSection) -> None:
+    def on_item(self, item: MediaSection) -> None:
         imgui.text("Section:")
-        input_text_disabled("## Section", item.section)
+        input_text_disabled("## Section", item.uuid)
 
         imgui.text("Title:")
         with item_width(-1):
@@ -30,9 +30,9 @@ class MediaInfoTab(TabItem[MediaWindowSection]):
         with item_width(-1):
             item.file = input_text_value("## File", item.file)
 
-        spawnable = self.context.pm.spawnable(item.section)
-        stoppable = self.context.pm.stoppable(item.section)
-        removable = self.context.pm.removable(item.section)
+        spawnable = self.context.pm.spawnable(item.uuid)
+        stoppable = self.context.pm.stoppable(item.uuid)
+        removable = self.context.pm.removable(item.uuid)
 
         imgui.separator()
         imgui.text("Frame:")
@@ -47,19 +47,19 @@ class MediaInfoTab(TabItem[MediaWindowSection]):
                 logger.error(e)
 
         imgui.separator()
-        status = self.context.pm.status(item.section)
+        status = self.context.pm.status(item.uuid)
         imgui.text(f"Process ({status})")
 
         if button_ex("Spawn", disabled=not spawnable):
             self.context.pm.spawn_ffmpeg_with_file(
-                key=item.section,
+                key=item.uuid,
                 file=item.file,
                 width=item.frame_width,
                 height=item.frame_height,
             )
         imgui.same_line()
         if button_ex("Stop", disabled=not stoppable):
-            self.context.pm.interrupt(item.section)
+            self.context.pm.interrupt(item.uuid)
         imgui.same_line()
         if button_ex("Remove", disabled=not removable):
-            self.context.pm.pop(item.section)
+            self.context.pm.pop(item.uuid)

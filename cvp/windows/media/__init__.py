@@ -4,10 +4,10 @@ import os
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.media_window import MediaWindowSection
-from cvp.config.sections.media_window import Mode as MediaSectionMode
-from cvp.config.sections.medias import MediasSection
-from cvp.context import Context
+from cvp.config.sections.media import MediaSection
+from cvp.config.sections.media import Mode as MediaSectionMode
+from cvp.config.sections.medias import MediasConfig
+from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
@@ -16,14 +16,13 @@ from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.media.info import MediaInfoTab
-from cvp.windows.media.media import MediaWindow
 
 
-class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
+class MediaManager(ManagerTab[MediasConfig, MediaSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.media_manager,
+            section=context.config.medias,
             title="Media Manager",
             closable=True,
             flags=None,
@@ -54,11 +53,12 @@ class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
         self.register_popup(self._open_url_popup)
         self.register_popup(self._confirm_remove)
 
-    def add_media_window(self, section: MediaWindowSection) -> None:
-        window = MediaWindow(self._context, section)
-        self._windows.add_window(window, window.key)
+    def add_media_window(self, section: MediaSection) -> None:
+        # window = MediaSection(self._context, section)
+        # self._windows.add_window(window, window.key)
+        pass  # TODO
 
-    def add_media_windows(self, *sections: MediaWindowSection) -> None:
+    def add_media_windows(self, *sections: MediaSection) -> None:
         for section in sections:
             self.add_media_window(section)
 
@@ -79,7 +79,8 @@ class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
 
     @override
     def on_create(self) -> None:
-        self.add_media_windows(*self.context.config.media_sections.values())
+        # self.add_media_windows(*self.context.config.media_sections.values())
+        pass  # TODO
 
     @override
     def on_process_sidebar_top(self) -> None:
@@ -94,7 +95,7 @@ class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
             self._confirm_remove.show()
 
     @override
-    def get_menus(self) -> Mapping[str, MediaWindowSection]:
+    def get_menus(self) -> Mapping[str, MediaSection]:
         return self._context.config.media_sections
 
     def on_open_file_popup(self, file: str) -> None:
@@ -110,4 +111,4 @@ class MediaManager(ManagerTab[MediasSection, MediaWindowSection]):
         selected_menu = self.latest_menus.get(self.selected)
         assert selected_menu is not None
 
-        self.close_media(selected_menu.section)
+        self.close_media(selected_menu.uuid)

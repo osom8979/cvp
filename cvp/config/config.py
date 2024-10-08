@@ -1,98 +1,53 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
+from dataclasses import dataclass, field
 from os import PathLike
-from typing import Optional, Union
-from uuid import uuid4
+from typing import Union
 
-from cvp.config._base import BaseConfig
-from cvp.config.prefix import SectionPrefix
-from cvp.config.sections.appearance import AppearanceSection
-from cvp.config.sections.concurrency import ConcurrencySection
-from cvp.config.sections.context import ContextSection
-from cvp.config.sections.developer import DeveloperSection
-from cvp.config.sections.display import DisplaySection
-from cvp.config.sections.ffmpeg import FFmpegSection
-from cvp.config.sections.flow_window import FlowWindowSection
-from cvp.config.sections.font import FontSection
-from cvp.config.sections.graphic import GraphicSection
-from cvp.config.sections.labeling import LabelingSection
-from cvp.config.sections.layout import LayoutSection
-from cvp.config.sections.layouts import LayoutsSection
-from cvp.config.sections.logging import LoggingSection
-from cvp.config.sections.media_window import MediaWindowSection
-from cvp.config.sections.medias import MediasSection
-from cvp.config.sections.overlay_window import OverlayWindowSection
-from cvp.config.sections.preference import PreferenceSection
-from cvp.config.sections.process import ProcessSection
-from cvp.config.sections.stitching import StitchingSection
-from cvp.config.sections.window import WindowSection
-from cvp.variables import LAYOUT_SECTION_PREFIX, MEDIA_SECTION_PREFIX
+from type_serialize import deserialize, serialize
+from yaml import dump, full_load
+
+from cvp.config.sections.appearance import AppearanceConfig
+from cvp.config.sections.concurrency import ConcurrencyConfig
+from cvp.config.sections.context import ContextConfig
+from cvp.config.sections.developer import DeveloperConfig
+from cvp.config.sections.display import DisplayConfig
+from cvp.config.sections.ffmpeg import FFmpegConfig
+from cvp.config.sections.flow import FlowConfig
+from cvp.config.sections.font import FontConfig
+from cvp.config.sections.graphic import GraphicConfig
+from cvp.config.sections.labeling import LabelingConfig
+from cvp.config.sections.layouts import LayoutsConfig
+from cvp.config.sections.logging import LoggingConfig
+from cvp.config.sections.medias import MediasConfig
+from cvp.config.sections.overlay import OverlayConfig
+from cvp.config.sections.preference import PreferenceConfig
+from cvp.config.sections.process import ProcessConfig
+from cvp.config.sections.stitching import StitchingConfig
+from cvp.config.sections.window_manager import WindowManagerConfig
+from cvp.inspect.member import get_public_instance_attributes
 
 
-class Config(BaseConfig):
-    def __init__(
-        self,
-        filename: Optional[Union[str, PathLike[str]]] = None,
-        cvp_home: Optional[Union[str, PathLike[str]]] = None,
-    ):
-        super().__init__(filename=filename, cvp_home=cvp_home)
-
-        # Prefixes
-        self._layout_prefix = SectionPrefix(self, prefix=LAYOUT_SECTION_PREFIX)
-        self._media_prefix = SectionPrefix(self, prefix=MEDIA_SECTION_PREFIX)
-
-        # Managers
-        self.preference_manager = PreferenceSection(self)
-        self.process_manager = ProcessSection(self)
-        self.stitching_manager = StitchingSection(self)
-        self.window_manager = WindowSection(self)
-        self.labeling_manager = LabelingSection(self)
-        self.layout_manager = LayoutsSection(self)
-        self.media_manager = MediasSection(self)
-
-        # Windows
-        self.flow_window = FlowWindowSection(self)
-        self.overlay_window = OverlayWindowSection(self)
-
-        # Common
-        self.appearance = AppearanceSection(self)
-        self.concurrency = ConcurrencySection(self)
-        self.context = ContextSection(self)
-        self.developer = DeveloperSection(self)
-        self.display = DisplaySection(self)
-        self.ffmpeg = FFmpegSection(self)
-        self.font = FontSection(self)
-        self.graphic = GraphicSection(self)
-        self.logging = LoggingSection(self)
-
-    def add_layout_section(self, name: Optional[str] = None):
-        section = self._layout_prefix.join_section_name(name if name else str(uuid4()))
-        if self.has_section(section):
-            raise KeyError(f"Section '{section}' already exists")
-        return LayoutSection(config=self, section=section)
-
-    def add_media_section(self, name: Optional[str] = None):
-        section = self._media_prefix.join_section_name(name if name else str(uuid4()))
-        if self.has_section(section):
-            raise KeyError(f"Section '{section}' already exists")
-        return MediaWindowSection(config=self, section=section)
-
-    @property
-    def layout_sections(self):
-        result = OrderedDict[str, LayoutSection]()
-        for section in self._layout_prefix.sections():
-            key = self._layout_prefix.split_section_name(section)
-            result[key] = LayoutSection(config=self, section=section)
-        return result
-
-    @property
-    def media_sections(self):
-        result = OrderedDict[str, MediaWindowSection]()
-        for section in self._media_prefix.sections():
-            key = self._media_prefix.split_section_name(section)
-            result[key] = MediaWindowSection(config=self, section=section)
-        return result
+@dataclass
+class Config:
+    appearance: AppearanceConfig = field(default_factory=AppearanceConfig)
+    concurrency: ConcurrencyConfig = field(default_factory=ConcurrencyConfig)
+    context: ContextConfig = field(default_factory=ContextConfig)
+    developer: DeveloperConfig = field(default_factory=DeveloperConfig)
+    display: DisplayConfig = field(default_factory=DisplayConfig)
+    ffmpeg: FFmpegConfig = field(default_factory=FFmpegConfig)
+    flow: FlowConfig = field(default_factory=FlowConfig)
+    font: FontConfig = field(default_factory=FontConfig)
+    graphic: GraphicConfig = field(default_factory=GraphicConfig)
+    labeling: LabelingConfig = field(default_factory=LabelingConfig)
+    layouts: LayoutsConfig = field(default_factory=LayoutsConfig)
+    logging: LoggingConfig = field(default_factory=LoggingConfig)
+    medias: MediasConfig = field(default_factory=MediasConfig)
+    overlay: OverlayConfig = field(default_factory=OverlayConfig)
+    preference: PreferenceConfig = field(default_factory=PreferenceConfig)
+    process: ProcessConfig = field(default_factory=ProcessConfig)
+    stitching: StitchingConfig = field(default_factory=StitchingConfig)
+    window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
 
     @property
     def debug(self):
@@ -101,3 +56,23 @@ class Config(BaseConfig):
     @property
     def verbose(self):
         return self.developer.verbose
+
+    def dumps_yaml(self, encoding="utf-8") -> bytes:
+        return dump(serialize(self)).encode(encoding)
+
+    def loads_yaml(self, data: bytes) -> None:
+        result = deserialize(full_load(data), type(self))
+        assert isinstance(result, type(self))
+        attrs = get_public_instance_attributes(self)
+        for key, _ in attrs:
+            value = getattr(result, key, None)
+            if value is not None:
+                setattr(self, key, value)
+
+    def write_yaml(self, file: Union[str, PathLike[str]], encoding="utf-8") -> None:
+        with open(file, "wb") as f:
+            f.write(self.dumps_yaml(encoding))
+
+    def read_yaml(self, file: Union[str, PathLike[str]]) -> None:
+        with open(file, "rb") as f:
+            self.loads_yaml(f.read())

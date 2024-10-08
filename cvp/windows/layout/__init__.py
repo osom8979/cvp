@@ -3,22 +3,21 @@
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.layout import LayoutSection
-from cvp.config.sections.layouts import LayoutsSection
-from cvp.context import Context
+from cvp.config.sections.layouts import LayoutsConfig
+from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
-from cvp.windows.layout.info import LayoutInfoTab
+from cvp.windows.layout.info import LayoutInfoTab, LayoutSection
 
 
-class LayoutManager(ManagerTab[LayoutsSection, LayoutSection]):
+class LayoutManager(ManagerTab[LayoutsConfig, LayoutSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.layout_manager,
+            section=context.config.layouts,
             title="Layout Manager",
             closable=True,
             flags=None,
@@ -45,7 +44,8 @@ class LayoutManager(ManagerTab[LayoutsSection, LayoutSection]):
 
     @override
     def get_menus(self) -> Mapping[str, LayoutSection]:
-        return self._context.config.layout_sections
+        # return self._context.config.layout_sections
+        return dict()  # TODO
 
     @override
     def on_process_sidebar_top(self) -> None:
@@ -63,4 +63,4 @@ class LayoutManager(ManagerTab[LayoutsSection, LayoutSection]):
         selected_menu = self.latest_menus.get(self.selected)
         assert selected_menu is not None
 
-        self.remove_layout(selected_menu.section)
+        self.remove_layout(selected_menu.uuid)

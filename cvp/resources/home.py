@@ -12,7 +12,7 @@ from cvp.resources.subdirs.processes import ProcessesDir
 from cvp.resources.subdirs.temp import TempDir
 from cvp.system.path import PathFlavour
 from cvp.variables import (
-    CVP_INI_FILENAME,
+    CVP_YML_FILENAME,
     DEFAULT_CVP_HOME_PATH,
     GUI_INI_FILENAME,
     LOGGING_JSON_FILENAME,
@@ -46,7 +46,7 @@ class HomeDir(PathFlavour):
                 if not dir_path.is_dir():
                     dir_path.mkdir(parents=False, exist_ok=True)
 
-        self.cvp_ini = self.as_path() / CVP_INI_FILENAME
+        self.cvp_yml = self.as_path() / CVP_YML_FILENAME
         self.gui_ini = self.as_path() / GUI_INI_FILENAME
         self.logging_json = self.as_path() / LOGGING_JSON_FILENAME
 

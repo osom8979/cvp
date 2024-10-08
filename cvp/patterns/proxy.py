@@ -10,10 +10,6 @@ ValueT = TypeVar("ValueT")
 
 class ValueProxy(Generic[ValueT], ABC):
     @abstractmethod
-    def has(self) -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
     def get(self) -> ValueT:
         raise NotImplementedError
 
@@ -26,10 +22,6 @@ class PropertyProxy(ValueProxy[ValueT]):
     def __init__(self, obj: Any, key: str):
         self._obj = obj
         self._key = key
-
-    @override
-    def has(self) -> bool:
-        return hasattr(self._obj, self._key)
 
     @override
     def get(self) -> ValueT:

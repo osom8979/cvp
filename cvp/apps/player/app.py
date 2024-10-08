@@ -2,7 +2,7 @@
 
 import os
 from io import StringIO
-from typing import Tuple
+from typing import Optional, Tuple
 from warnings import catch_warnings
 
 from OpenGL import GL
@@ -12,8 +12,9 @@ from OpenGL.error import Error
 import imgui
 import pygame
 from cvp.assets import get_default_icon_path
-from cvp.context import Context
+from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProxy
 from cvp.context.autofixer import AutoFixer
+from cvp.context.context import Context
 from cvp.imgui.fonts import add_jbm_font, add_ngc_font
 from cvp.imgui.styles import default_style_colors
 from cvp.logging.logging import event_logger, logger, profile_logger
@@ -98,11 +99,12 @@ class PlayerApplication:
             return common_flags | pygame.RESIZABLE
 
     def _raise_force_egl_error(self, error: Error) -> None:
-        fixer = AutoFixer[bool, Error](
-            self._context,
-            self.config.graphic,
-            self.config.graphic.K.force_egl,
-            True,
+        fixer = AutoFixer[Optional[bool], Error](
+            context=self._context,
+            path=f"{type(self.config.graphic).__name__}.force_egl",
+            proxy=ForceEglProxy(self.config.graphic),
+            not_exists_value=None,
+            update_value=True,
         )
         fixer.run(error)
 
@@ -124,11 +126,12 @@ class PlayerApplication:
         # 'numpy.dtype size changed, may indicate binary incompatibility.
         # Expected 96 from C header, got 88 from PyObject', 1,
         # <OpenGL.platform.baseplatform.glGenTextures object at 0x7b0a5ec96800>
-        fixer = AutoFixer[bool, ValueError](
-            self._context,
-            self.config.graphic,
-            self.config.graphic.K.use_accelerate,
-            False,
+        fixer = AutoFixer[Optional[bool], ValueError](
+            context=self._context,
+            path=f"{type(self.config.graphic).__name__}.use_accelerate",
+            proxy=UseAccelerateProxy(self.config.graphic),
+            not_exists_value=None,
+            update_value=False,
         )
         fixer.run(error)
 

@@ -4,7 +4,7 @@ from collections import OrderedDict
 from typing import Generic, Optional, TypeVar
 
 import imgui
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.types import override
 from cvp.widgets.widget import WidgetInterface
 

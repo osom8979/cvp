@@ -3,8 +3,7 @@
 from abc import ABC
 from typing import Optional
 
-from cvp.config.sections import BaseSectionT
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.types import override
 from cvp.variables import (
     MAX_SIDEBAR_WIDTH,
@@ -13,14 +12,15 @@ from cvp.variables import (
     MIN_WINDOW_WIDTH,
 )
 from cvp.widgets.manager import Manager, MenuItemT
+from cvp.widgets.sidebar_with_main import SidebarWidthT
 from cvp.widgets.tab import TabBar, TabItem
 
 
-class ManagerTab(Manager[BaseSectionT, MenuItemT], ABC):
+class ManagerTab(Manager[SidebarWidthT, MenuItemT], ABC):
     def __init__(
         self,
         context: Context,
-        section: BaseSectionT,
+        section: SidebarWidthT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,

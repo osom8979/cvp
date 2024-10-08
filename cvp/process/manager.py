@@ -3,7 +3,7 @@
 from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, Optional, ParamSpec, TypeVar
 
-from cvp.config.sections.ffmpeg import FFmpegSection
+from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.logging.logging import logger
 from cvp.process.helper.ffmpeg import FFmpegProcessHelper
 from cvp.process.mapper import ProcessMapper
@@ -19,7 +19,7 @@ SubmitCallable = Callable[SubmitParamT, SubmitResultT]
 class ProcessManager:
     def __init__(
         self,
-        section: FFmpegSection,
+        section: FFmpegConfig,
         home: HomeDir,
         thread_workers=MAX_THREAD_WORKERS,
         thread_name_prefix=THREAD_POOL_PREFIX,

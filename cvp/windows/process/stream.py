@@ -3,7 +3,7 @@
 from enum import StrEnum, auto, unique
 
 import imgui
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.text_centered import text_centered
 from cvp.process.process import Process

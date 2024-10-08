@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, TypeVar
 
 import imgui
-from cvp.config.sections import BaseSectionT
-from cvp.config.sections.mixins.sidebar import Keys, SidebarWidthSectionMixin
-from cvp.context import Context
+from cvp.config.sections.mixins.sidebar import SidebarMixin
+from cvp.config.sections.proxies.sidebar import SidebarWidthProxy
+from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.patterns.proxy import PropertyProxy
 from cvp.types import override
 from cvp.variables import (
     MAX_SIDEBAR_WIDTH,
@@ -18,6 +17,8 @@ from cvp.variables import (
 )
 from cvp.widgets.splitter_with_cursor import SplitterWithCursor
 from cvp.widgets.window import Window
+
+SidebarWidthT = TypeVar("SidebarWidthT", bound=SidebarMixin)
 
 
 class SidebarWithMainInterface(ABC):
@@ -30,11 +31,11 @@ class SidebarWithMainInterface(ABC):
         raise NotImplementedError
 
 
-class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
+class SidebarWithMain(Window[SidebarWidthT], SidebarWithMainInterface):
     def __init__(
         self,
         context: Context,
-        section: BaseSectionT,
+        section: SidebarWidthT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -57,7 +58,7 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
         )
 
         self._sidebar_border = sidebar_border
-        self._sidebar_width = PropertyProxy[float](section, Keys.sidebar_width)
+        self._sidebar_width = SidebarWidthProxy(section)
         self._sidebar_splitter = SplitterWithCursor.from_vertical(
             "## VSplitter",
             value_proxy=self._sidebar_width,
@@ -66,9 +67,9 @@ class SidebarWithMain(Window[BaseSectionT], SidebarWithMainInterface):
         )
 
     @property
-    def sidebar_section(self) -> SidebarWidthSectionMixin:
-        assert isinstance(self.section, SidebarWidthSectionMixin)
-        return self.section
+    def sidebar_section(self) -> SidebarMixin:
+        assert isinstance(self.config, SidebarMixin)
+        return self.config
 
     @property
     def sidebar_width(self) -> float:

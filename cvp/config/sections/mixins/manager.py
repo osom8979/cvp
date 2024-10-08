@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from cvp.config.sections.mixins.selected import SelectedSectionMixin
-from cvp.config.sections.mixins.sidebar import SidebarWidthSectionMixin
-from cvp.config.sections.mixins.window import WindowSectionMixin
+from dataclasses import dataclass
+
+from cvp.config.sections.mixins.selected import SelectedMixin
+from cvp.config.sections.mixins.sidebar import SidebarMixin
+from cvp.config.sections.mixins.window import WindowMixin
 
 
-class ManagerSectionMixin(
-    SelectedSectionMixin,
-    SidebarWidthSectionMixin,
-    WindowSectionMixin,
+@dataclass
+class ManagerMixin(
+    SelectedMixin,
+    SidebarMixin,
+    WindowMixin,
 ):
     pass

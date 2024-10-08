@@ -2,7 +2,7 @@
 
 from typing import Final, Mapping, Optional, Sequence, Tuple, Union
 
-from cvp.config.sections.ffmpeg import FFmpegSection
+from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.process.frame import FrameReaderProcess, FrameShape
 from cvp.process.stream import StreamBufferPair
 from cvp.resources.home import HomeDir
@@ -12,7 +12,7 @@ PIPE_STDOUT: Final[str] = "pipe:1"
 
 
 class FFmpegProcessHelper:
-    def __init__(self, section: FFmpegSection, home: HomeDir):
+    def __init__(self, section: FFmpegConfig, home: HomeDir):
         self._section = section
         self._home = home
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.flow.templates.graph import FlowGraph
 from cvp.widgets.tab import TabBar
 from cvp.windows.flow.left.graph import GraphTab

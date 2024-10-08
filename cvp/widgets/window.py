@@ -2,12 +2,11 @@
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generic, Optional, Tuple
+from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
-from cvp.config.sections import BaseSectionT
-from cvp.config.sections.mixins.window import WindowSectionMixin
-from cvp.context import Context
+from cvp.config.sections.mixins.window import WindowMixin
+from cvp.context.context import Context
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.pygame.able.eventable import Eventable
@@ -73,6 +72,9 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
 
+WindowMixinT = TypeVar("WindowMixinT", bound=WindowMixin)
+
+
 @dataclass
 class WindowQuery:
     x: float = 0.0
@@ -94,7 +96,7 @@ class WindowQuery:
 
 
 class Window(
-    Generic[BaseSectionT],
+    Generic[WindowMixinT],
     WindowInterface,
     EventCallbacks,
     Eventable,
@@ -109,7 +111,7 @@ class Window(
     def __init__(
         self,
         context: Context,
-        section: BaseSectionT,
+        section: WindowMixinT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -118,12 +120,11 @@ class Window(
         modifiable_title=False,
     ) -> None:
         self._context = context
-        self._section = section
+        self._config = section
         self._title = title if title else type(self).__name__
 
-        if isinstance(self._section, WindowSectionMixin):
-            if not self._section.has_title:
-                self._section.title = self._title
+        if self._config.title:
+            self._config.title = self._title
 
         self.closable = closable if closable else False
         self.flags = flags if flags else 0
@@ -227,13 +228,13 @@ class Window(
         self._set_flag(imgui.WINDOW_UNSAVED_DOCUMENT, value)
 
     @property
-    def section(self) -> BaseSectionT:
-        return self._section
+    def config(self):
+        return self._config
 
     @property
-    def window_section(self) -> WindowSectionMixin:
-        assert isinstance(self._section, WindowSectionMixin)
-        return self._section
+    def window_section(self) -> WindowMixin:
+        assert isinstance(self._config, WindowMixin)
+        return self._config
 
     @property
     def initialized(self) -> bool:
@@ -275,7 +276,7 @@ class Window(
     @property
     @override
     def key(self):
-        return self.section.section
+        return self.config.uuid
 
     @property
     @override

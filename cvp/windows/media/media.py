@@ -6,8 +6,8 @@ from typing import Final, Tuple
 from OpenGL import GL
 
 import imgui
-from cvp.config.sections.media_window import MediaWindowSection
-from cvp.context import Context
+from cvp.config.sections.media import MediaSection
+from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item_ex
 from cvp.types import override
@@ -18,8 +18,8 @@ _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class MediaWindow(Window[MediaWindowSection]):
-    def __init__(self, context: Context, section: MediaWindowSection):
+class MediaWindow(Window[MediaSection]):
+    def __init__(self, context: Context, section: MediaSection):
         super().__init__(
             context=context,
             section=section,
@@ -96,7 +96,7 @@ class MediaWindow(Window[MediaWindowSection]):
         if not self._texture:
             return
 
-        process = self.context.pm.get(self.section.section)
+        process = self.context.pm.get(self.config.uuid)
         if process is None:
             return
 

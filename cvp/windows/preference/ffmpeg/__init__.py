@@ -2,7 +2,7 @@
 
 from typing import Sequence
 
-from cvp.context import Context
+from cvp.context.context import Context
 from cvp.types import override
 from cvp.widgets.popup import Popup
 from cvp.widgets.popup_propagator import PopupPropagator
