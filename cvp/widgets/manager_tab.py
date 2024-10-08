@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC
 from typing import Optional
 
 from cvp.context.context import Context
@@ -11,16 +10,15 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
-from cvp.widgets.manager import Manager, MenuItemT
-from cvp.widgets.sidebar_with_main import SidebarWidthT
+from cvp.widgets.manager import Manager, ManagerWindowConfigT, MenuItemT
 from cvp.widgets.tab import TabBar, TabItem
 
 
-class ManagerTab(Manager[SidebarWidthT, MenuItemT], ABC):
+class ManagerTab(Manager[ManagerWindowConfigT, MenuItemT]):
     def __init__(
         self,
         context: Context,
-        section: SidebarWidthT,
+        section: ManagerWindowConfigT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,

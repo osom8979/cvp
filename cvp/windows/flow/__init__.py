@@ -3,7 +3,7 @@
 from typing import Final
 
 import imgui
-from cvp.config.sections.flow import FlowConfig
+from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
@@ -12,14 +12,13 @@ from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item_ex
 from cvp.imgui.styles import style_item_spacing
 from cvp.imgui.text_centered import text_centered
-from cvp.patterns.proxy import PropertyProxy
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.types import override
 from cvp.variables import (
-    CUTTING_EDGE_PADDING_HEIGHT,
-    CUTTING_EDGE_PADDING_WIDTH,
+    AUI_PADDING_HEIGHT,
+    AUI_PADDING_WIDTH,
     MAX_SIDEBAR_HEIGHT,
     MAX_SIDEBAR_WIDTH,
     MIN_SIDEBAR_HEIGHT,
@@ -27,9 +26,9 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
-from cvp.widgets.aui import Aui
+from cvp.widgets.aui import AuiWindow
 from cvp.widgets.canvas_control import CanvasControl
-from cvp.widgets.splitter_with_cursor import SplitterWithCursor
+from cvp.widgets.splitter import Splitter
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
 from cvp.windows.flow.left import FlowLeftTabs
@@ -41,7 +40,7 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
 
 
-class FlowWindow(Aui[FlowConfig]):
+class FlowWindow(AuiWindow[FlowAuiConfig]):
     def __init__(self, context: Context):
         min_width = MIN_WINDOW_WIDTH
         min_height = MIN_WINDOW_HEIGHT
@@ -50,12 +49,12 @@ class FlowWindow(Aui[FlowConfig]):
         max_sidebar_width = MAX_SIDEBAR_WIDTH
         min_sidebar_height = MIN_SIDEBAR_HEIGHT
         max_sidebar_height = MAX_SIDEBAR_HEIGHT
-        padding_width = CUTTING_EDGE_PADDING_WIDTH
-        padding_height = CUTTING_EDGE_PADDING_HEIGHT
+        padding_width = AUI_PADDING_WIDTH
+        padding_height = AUI_PADDING_HEIGHT
 
         super().__init__(
             context=context,
-            section=context.config.flow,
+            section=context.config.flow_aui,
             title="Flow",
             closable=True,
             flags=imgui.WINDOW_MENU_BAR,
@@ -87,8 +86,8 @@ class FlowWindow(Aui[FlowConfig]):
         self._background = None
         self._enable_context_menu = True
 
-        self._split_tree = SplitTreeProxy(context.config.flow)
-        self._tree_splitter = SplitterWithCursor.from_horizontal(
+        self._split_tree = SplitTreeProxy(context.config.flow_aui)
+        self._tree_splitter = Splitter.from_horizontal(
             "## HSplitterTree",
             value_proxy=self._split_tree,
             min_value=min_sidebar_height,

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import IntEnum, unique
 from typing import Tuple
 
-from cvp.config.sections.mixins.window import WindowMixin
+from cvp.config.sections.bases.window import WindowConfig
 
 
 @unique
@@ -16,7 +16,7 @@ class Anchor(IntEnum):
 
 
 @dataclass
-class OverlayConfig(WindowMixin):
+class OverlayWindowConfig(WindowConfig):
     anchor: Anchor = Anchor.TopLeft
     padding: float = 10.0
     alpha: float = 0.2

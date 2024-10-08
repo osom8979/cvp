@@ -2,11 +2,10 @@
 
 from dataclasses import dataclass
 
-from cvp.config.sections.mixins.aui import AuiMixin
-from cvp.config.sections.mixins.window import WindowMixin
+from cvp.config.sections.bases.aui import AuiWindowConfig
 from cvp.variables import MIN_SIDEBAR_HEIGHT
 
 
 @dataclass
-class FlowConfig(AuiMixin, WindowMixin):
-    split_tree: float = float(MIN_SIDEBAR_HEIGHT)
+class FlowAuiConfig(AuiWindowConfig):
+    split_tree: float = MIN_SIDEBAR_HEIGHT

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
-from cvp.config.sections.mixins.window import WindowMixin
+from cvp.config.sections.bases.window import WindowConfig
 from cvp.context.context import Context
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
@@ -72,7 +72,7 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
 
-WindowMixinT = TypeVar("WindowMixinT", bound=WindowMixin)
+WindowMixinT = TypeVar("WindowMixinT", bound=WindowConfig)
 
 
 @dataclass
@@ -232,8 +232,8 @@ class Window(
         return self._config
 
     @property
-    def window_section(self) -> WindowMixin:
-        assert isinstance(self._config, WindowMixin)
+    def window_section(self) -> WindowConfig:
+        assert isinstance(self._config, WindowConfig)
         return self._config
 
     @property

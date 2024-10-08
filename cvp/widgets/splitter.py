@@ -20,7 +20,7 @@ from pygame.cursors import Cursor
 from pygame.mouse import get_cursor, set_cursor
 
 
-class SplitterWithCursor:
+class Splitter:
     _hovered_cursor: Optional[Cursor]
     _prev_cursor: Optional[Cursor]
 

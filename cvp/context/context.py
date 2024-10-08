@@ -145,7 +145,7 @@ class Context:
         )
 
     def teardown(self) -> None:
-        self._pm.teardown(self._config.process.teardown_timeout)
+        self._pm.teardown(self._config.process_manager.teardown_timeout)
 
     def validate_writable_home(self) -> None:
         if self._readonly:

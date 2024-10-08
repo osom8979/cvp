@@ -2,7 +2,9 @@
 
 from dataclasses import dataclass
 
+from cvp.config.sections.bases.window import WindowConfig
+
 
 @dataclass
-class SidebarMixin:
+class SidebarWindowConfig(WindowConfig):
     sidebar_width: float = 0.0

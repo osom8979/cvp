@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-from cvp.config.sections.mixins.manager import ManagerMixin
+from cvp.config.sections.bases.aui import AuiWindowConfig
 
 
 @dataclass
-class LabelingConfig(ManagerMixin):
+class LabelingAuiConfig(AuiWindowConfig):
     pass

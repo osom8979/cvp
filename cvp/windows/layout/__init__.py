@@ -3,7 +3,7 @@
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.layouts import LayoutsConfig
+from cvp.config.sections.layout import LayoutManagerConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -13,11 +13,11 @@ from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.layout.info import LayoutInfoTab, LayoutSection
 
 
-class LayoutManager(ManagerTab[LayoutsConfig, LayoutSection]):
+class LayoutManager(ManagerTab[LayoutManagerConfig, LayoutSection]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.layouts,
+            section=context.config.layout_manager,
             title="Layout Manager",
             closable=True,
             flags=None,

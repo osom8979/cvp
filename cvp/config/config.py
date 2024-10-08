@@ -13,41 +13,43 @@ from cvp.config.sections.context import ContextConfig
 from cvp.config.sections.developer import DeveloperConfig
 from cvp.config.sections.display import DisplayConfig
 from cvp.config.sections.ffmpeg import FFmpegConfig
-from cvp.config.sections.flow import FlowConfig
+from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.font import FontConfig
 from cvp.config.sections.graphic import GraphicConfig
-from cvp.config.sections.labeling import LabelingConfig
-from cvp.config.sections.layouts import LayoutsConfig
+from cvp.config.sections.labeling import LabelingAuiConfig
+from cvp.config.sections.layout import LayoutManagerConfig
 from cvp.config.sections.logging import LoggingConfig
-from cvp.config.sections.medias import MediasConfig
-from cvp.config.sections.overlay import OverlayConfig
-from cvp.config.sections.preference import PreferenceConfig
-from cvp.config.sections.process import ProcessConfig
-from cvp.config.sections.stitching import StitchingConfig
-from cvp.config.sections.window_manager import WindowManagerConfig
+from cvp.config.sections.media import MediaManagerConfig
+from cvp.config.sections.overlay import OverlayWindowConfig
+from cvp.config.sections.preference import PreferenceManagerConfig
+from cvp.config.sections.process import ProcessManagerConfig
+from cvp.config.sections.stitching import StitchingAuiConfig
+from cvp.config.sections.window import WindowManagerConfig
 from cvp.inspect.member import get_public_instance_attributes
 
 
 @dataclass
 class Config:
+    # fmt: off
     appearance: AppearanceConfig = field(default_factory=AppearanceConfig)
     concurrency: ConcurrencyConfig = field(default_factory=ConcurrencyConfig)
     context: ContextConfig = field(default_factory=ContextConfig)
     developer: DeveloperConfig = field(default_factory=DeveloperConfig)
     display: DisplayConfig = field(default_factory=DisplayConfig)
     ffmpeg: FFmpegConfig = field(default_factory=FFmpegConfig)
-    flow: FlowConfig = field(default_factory=FlowConfig)
+    flow_aui: FlowAuiConfig = field(default_factory=FlowAuiConfig)
     font: FontConfig = field(default_factory=FontConfig)
     graphic: GraphicConfig = field(default_factory=GraphicConfig)
-    labeling: LabelingConfig = field(default_factory=LabelingConfig)
-    layouts: LayoutsConfig = field(default_factory=LayoutsConfig)
+    labeling_aui: LabelingAuiConfig = field(default_factory=LabelingAuiConfig)
+    layout_manager: LayoutManagerConfig = field(default_factory=LayoutManagerConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
-    medias: MediasConfig = field(default_factory=MediasConfig)
-    overlay: OverlayConfig = field(default_factory=OverlayConfig)
-    preference: PreferenceConfig = field(default_factory=PreferenceConfig)
-    process: ProcessConfig = field(default_factory=ProcessConfig)
-    stitching: StitchingConfig = field(default_factory=StitchingConfig)
+    media_manager: MediaManagerConfig = field(default_factory=MediaManagerConfig)
+    overlay_window: OverlayWindowConfig = field(default_factory=OverlayWindowConfig)
+    preference_manager: PreferenceManagerConfig = field(default_factory=PreferenceManagerConfig)  # noqa: E501
+    process_manager: ProcessManagerConfig = field(default_factory=ProcessManagerConfig)
+    stitching_aui: StitchingAuiConfig = field(default_factory=StitchingAuiConfig)
     window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
+    # fmt: on
 
     @property
     def debug(self):

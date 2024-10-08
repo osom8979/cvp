@@ -3,30 +3,26 @@
 from typing import Final
 
 import imgui
-from cvp.config.sections.stitching import StitchingConfig
+from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.types import override
-from cvp.widgets.sidebar_with_main import SidebarWithMain
+from cvp.widgets.aui import AuiWindow
 
 WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class StitchingWindow(SidebarWithMain[StitchingConfig]):
+class StitchingWindow(AuiWindow[StitchingAuiConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.stitching,
+            section=context.config.stitching_aui,
             title="Stitching",
             closable=True,
         )
         self._clear_color = 0.5, 0.5, 0.5, 1.0
-
-    @override
-    def on_process_sidebar(self):
-        pass
 
     @override
     def on_process_main(self) -> None:

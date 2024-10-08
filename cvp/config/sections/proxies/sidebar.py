@@ -2,12 +2,12 @@
 
 from overrides import override
 
-from cvp.config.sections.mixins.sidebar import SidebarMixin
+from cvp.config.sections.bases.sidebar import SidebarWindowConfig
 from cvp.patterns.proxy import ValueProxy
 
 
 class SidebarWidthProxy(ValueProxy[float]):
-    def __init__(self, sidebar: SidebarMixin):
+    def __init__(self, sidebar: SidebarWindowConfig):
         self._sidebar = sidebar
 
     @override

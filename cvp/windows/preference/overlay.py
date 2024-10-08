@@ -14,7 +14,7 @@ class OverlayPreference(PreferenceWidget):
     _anchors: List[Anchor]
 
     def __init__(self, context: Context, label="Overlay"):
-        self._section = context.config.overlay
+        self._section = context.config.overlay_window
         self._label = label
 
         self._anchors = list(Anchor)

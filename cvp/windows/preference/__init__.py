@@ -4,7 +4,7 @@ from collections import OrderedDict
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.preference import PreferenceConfig
+from cvp.config.sections.preference import PreferenceManagerConfig
 from cvp.context.context import Context
 from cvp.types import override
 from cvp.widgets.manager import Manager
@@ -18,11 +18,11 @@ from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
 
 
-class PreferenceManager(Manager[PreferenceConfig, PreferenceWidget]):
+class PreferenceManager(Manager[PreferenceManagerConfig, PreferenceWidget]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.preference,
+            section=context.config.preference_manager,
             title="Preference",
             closable=True,
             flags=None,

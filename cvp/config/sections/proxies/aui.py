@@ -2,12 +2,12 @@
 
 from overrides import override
 
-from cvp.config.sections.mixins.aui import AuiMixin
+from cvp.config.sections.bases.aui import AuiWindowConfig
 from cvp.patterns.proxy import ValueProxy
 
 
 class AuiLeftProxy(ValueProxy[float]):
-    def __init__(self, aui: AuiMixin):
+    def __init__(self, aui: AuiWindowConfig):
         self._aui = aui
 
     @override
@@ -20,7 +20,7 @@ class AuiLeftProxy(ValueProxy[float]):
 
 
 class AuiRightProxy(ValueProxy[float]):
-    def __init__(self, aui: AuiMixin):
+    def __init__(self, aui: AuiWindowConfig):
         self._aui = aui
 
     @override
@@ -33,7 +33,7 @@ class AuiRightProxy(ValueProxy[float]):
 
 
 class AuiBottomProxy(ValueProxy[float]):
-    def __init__(self, aui: AuiMixin):
+    def __init__(self, aui: AuiWindowConfig):
         self._aui = aui
 
     @override

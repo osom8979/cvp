@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum, auto, unique
 from typing import Tuple
 
-from cvp.config.sections.mixins.window import WindowMixin
+from cvp.config.sections.bases.manager import ManagerWindowConfig
+from cvp.config.sections.bases.window import WindowConfig
 
 
 @unique
@@ -15,12 +16,12 @@ class Mode(StrEnum):
 
 
 @dataclass
-class MediaSection(WindowMixin):
+class MediaWindowConfig(WindowConfig):
     mode: Mode = Mode.file
-    file: str = ""
+    file: str = field(default_factory=str)
+    cmds: str = field(default_factory=str)
     frame_width: int = 0
     frame_height: int = 0
-    cmds: str = ""
 
     def set_file_mode(self) -> None:
         self.mode = Mode.file
@@ -39,3 +40,8 @@ class MediaSection(WindowMixin):
     def frame_size(self, value: Tuple[int, int]) -> None:
         self.frame_width = value[0]
         self.frame_height = value[1]
+
+
+@dataclass
+class MediaManagerConfig(ManagerWindowConfig):
+    pass

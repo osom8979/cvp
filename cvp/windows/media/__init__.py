@@ -4,9 +4,8 @@ import os
 from typing import Mapping
 
 import imgui
-from cvp.config.sections.media import MediaSection
+from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
 from cvp.config.sections.media import Mode as MediaSectionMode
-from cvp.config.sections.medias import MediasConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -18,11 +17,11 @@ from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.media.info import MediaInfoTab
 
 
-class MediaManager(ManagerTab[MediasConfig, MediaSection]):
+class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.medias,
+            section=context.config.media_manager,
             title="Media Manager",
             closable=True,
             flags=None,
@@ -53,12 +52,12 @@ class MediaManager(ManagerTab[MediasConfig, MediaSection]):
         self.register_popup(self._open_url_popup)
         self.register_popup(self._confirm_remove)
 
-    def add_media_window(self, section: MediaSection) -> None:
+    def add_media_window(self, section: MediaWindowConfig) -> None:
         # window = MediaSection(self._context, section)
         # self._windows.add_window(window, window.key)
         pass  # TODO
 
-    def add_media_windows(self, *sections: MediaSection) -> None:
+    def add_media_windows(self, *sections: MediaWindowConfig) -> None:
         for section in sections:
             self.add_media_window(section)
 
@@ -95,7 +94,7 @@ class MediaManager(ManagerTab[MediasConfig, MediaSection]):
             self._confirm_remove.show()
 
     @override
-    def get_menus(self) -> Mapping[str, MediaSection]:
+    def get_menus(self) -> Mapping[str, MediaWindowConfig]:
         return self._context.config.media_sections
 
     def on_open_file_popup(self, file: str) -> None:

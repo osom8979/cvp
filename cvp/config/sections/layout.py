@@ -6,5 +6,5 @@ from cvp.config.sections.bases.manager import ManagerWindowConfig
 
 
 @dataclass
-class PreferenceManagerConfig(ManagerWindowConfig):
+class LayoutManagerConfig(ManagerWindowConfig):
     pass

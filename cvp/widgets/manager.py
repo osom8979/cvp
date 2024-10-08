@@ -5,7 +5,7 @@ from enum import StrEnum, unique
 from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
-from cvp.config.sections.mixins.selected import SelectedMixin
+from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.text_centered import text_centered
 from cvp.types import override
@@ -15,8 +15,9 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
-from cvp.widgets.sidebar_with_main import SidebarWidthT, SidebarWithMain
+from cvp.widgets.sidebar import SidebarWindow
 
+ManagerWindowConfigT = TypeVar("ManagerWindowConfigT", bound=ManagerWindowConfig)
 MenuItemT = TypeVar("MenuItemT")
 
 
@@ -49,13 +50,13 @@ class ManagerInterface(Generic[MenuItemT], ABC):
         raise NotImplementedError
 
 
-class Manager(SidebarWithMain[SidebarWidthT], ManagerInterface[MenuItemT]):
+class Manager(SidebarWindow[ManagerWindowConfigT], ManagerInterface[MenuItemT]):
     _latest_menus: Mapping[str, MenuItemT]
 
     def __init__(
         self,
         context: Context,
-        section: SidebarWidthT,
+        section: ManagerWindowConfigT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -80,17 +81,12 @@ class Manager(SidebarWithMain[SidebarWidthT], ManagerInterface[MenuItemT]):
         self._latest_menus = dict()
 
     @property
-    def selected_section(self) -> SelectedMixin:
-        assert isinstance(self.config, SelectedMixin)
-        return self.config
-
-    @property
     def selected(self) -> str:
-        return self.selected_section.selected
+        return self.config.selected
 
     @selected.setter
     def selected(self, value: str) -> None:
-        self.selected_section.selected = value
+        self.config.selected = value
 
     @property
     def latest_menus(self):

@@ -4,7 +4,7 @@ from math import floor
 from typing import Final, Sequence, Tuple
 
 import imgui
-from cvp.config.sections.overlay import OverlayConfig
+from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_popup_context_window import (
     begin_popup_context_window,
@@ -24,11 +24,11 @@ OVERLAY_WINDOW_FLAGS: Final[int] = (
 )
 
 
-class OverlayWindow(Window[OverlayConfig]):
+class OverlayWindow(Window[OverlayWindowConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.overlay,
+            section=context.config.overlay_window,
             title="Overlay",
             closable=False,
             flags=OVERLAY_WINDOW_FLAGS,

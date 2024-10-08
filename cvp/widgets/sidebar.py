@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, TypeVar
 
 import imgui
-from cvp.config.sections.mixins.sidebar import SidebarMixin
+from cvp.config.sections.bases.sidebar import SidebarWindowConfig
 from cvp.config.sections.proxies.sidebar import SidebarWidthProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
@@ -15,13 +15,13 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
-from cvp.widgets.splitter_with_cursor import SplitterWithCursor
+from cvp.widgets.splitter import Splitter
 from cvp.widgets.window import Window
 
-SidebarWidthT = TypeVar("SidebarWidthT", bound=SidebarMixin)
+SidebarWidthT = TypeVar("SidebarWidthT", bound=SidebarWindowConfig)
 
 
-class SidebarWithMainInterface(ABC):
+class SidebarWindowInterface(ABC):
     @abstractmethod
     def on_process_sidebar(self) -> None:
         raise NotImplementedError
@@ -31,7 +31,7 @@ class SidebarWithMainInterface(ABC):
         raise NotImplementedError
 
 
-class SidebarWithMain(Window[SidebarWidthT], SidebarWithMainInterface):
+class SidebarWindow(Window[SidebarWidthT], SidebarWindowInterface):
     def __init__(
         self,
         context: Context,
@@ -59,7 +59,7 @@ class SidebarWithMain(Window[SidebarWidthT], SidebarWithMainInterface):
 
         self._sidebar_border = sidebar_border
         self._sidebar_width = SidebarWidthProxy(section)
-        self._sidebar_splitter = SplitterWithCursor.from_vertical(
+        self._sidebar_splitter = Splitter.from_vertical(
             "## VSplitter",
             value_proxy=self._sidebar_width,
             min_value=min_sidebar_width,
@@ -67,19 +67,14 @@ class SidebarWithMain(Window[SidebarWidthT], SidebarWithMainInterface):
         )
 
     @property
-    def sidebar_section(self) -> SidebarMixin:
-        assert isinstance(self.config, SidebarMixin)
-        return self.config
-
-    @property
     def sidebar_width(self) -> float:
-        value = self.sidebar_section.sidebar_width
+        value = self.config.sidebar_width
         return self._sidebar_splitter.normalize_value(value)
 
     @sidebar_width.setter
     def sidebar_width(self, value: float) -> None:
         value = self._sidebar_splitter.normalize_value(value)
-        self.sidebar_section.sidebar_width = value
+        self.config.sidebar_width = value
 
     @override
     def on_process(self) -> None:

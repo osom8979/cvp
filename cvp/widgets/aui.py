@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple, TypeVar
 
 import imgui
-from cvp.config.sections.mixins.aui import AuiMixin
+from cvp.config.sections.bases.aui import AuiWindowConfig
 from cvp.config.sections.proxies.aui import AuiBottomProxy, AuiLeftProxy, AuiRightProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
@@ -12,8 +12,8 @@ from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.styles import style_item_spacing, style_window_padding
 from cvp.types import override
 from cvp.variables import (
-    CUTTING_EDGE_PADDING_HEIGHT,
-    CUTTING_EDGE_PADDING_WIDTH,
+    AUI_PADDING_HEIGHT,
+    AUI_PADDING_WIDTH,
     MAX_SIDEBAR_HEIGHT,
     MAX_SIDEBAR_WIDTH,
     MIN_SIDEBAR_HEIGHT,
@@ -21,10 +21,10 @@ from cvp.variables import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
 )
-from cvp.widgets.splitter_with_cursor import SplitterWithCursor
+from cvp.widgets.splitter import Splitter
 from cvp.widgets.window import Window
 
-AuiSectionT = TypeVar("AuiSectionT", bound=AuiMixin)
+AuiSectionT = TypeVar("AuiSectionT", bound=AuiWindowConfig)
 
 
 class AuiInterface(ABC):
@@ -45,7 +45,7 @@ class AuiInterface(ABC):
         raise NotImplementedError
 
 
-class Aui(Window[AuiSectionT], AuiInterface):
+class AuiWindow(Window[AuiSectionT], AuiInterface):
     def __init__(
         self,
         context: Context,
@@ -60,8 +60,8 @@ class Aui(Window[AuiSectionT], AuiInterface):
         max_sidebar_width=MAX_SIDEBAR_WIDTH,
         min_sidebar_height=MIN_SIDEBAR_HEIGHT,
         max_sidebar_height=MAX_SIDEBAR_HEIGHT,
-        padding_width=CUTTING_EDGE_PADDING_WIDTH,
-        padding_height=CUTTING_EDGE_PADDING_HEIGHT,
+        padding_width=AUI_PADDING_WIDTH,
+        padding_height=AUI_PADDING_HEIGHT,
     ):
         super().__init__(
             context=context,
@@ -81,20 +81,20 @@ class Aui(Window[AuiSectionT], AuiInterface):
         self._split_right = AuiRightProxy(section)
         self._split_bottom = AuiBottomProxy(section)
 
-        self._left_splitter = SplitterWithCursor.from_vertical(
+        self._left_splitter = Splitter.from_vertical(
             "## VSplitterLeft",
             value_proxy=self._split_left,
             min_value=min_sidebar_width,
             max_value=max_sidebar_width,
         )
-        self._right_splitter = SplitterWithCursor.from_vertical(
+        self._right_splitter = Splitter.from_vertical(
             "## VSplitterRight",
             value_proxy=self._split_right,
             min_value=min_sidebar_width,
             max_value=max_sidebar_width,
             negative_delta=True,
         )
-        self._bottom_splitter = SplitterWithCursor.from_horizontal(
+        self._bottom_splitter = Splitter.from_horizontal(
             "## HSplitterBottom",
             value_proxy=self._split_bottom,
             min_value=min_sidebar_height,
@@ -103,33 +103,34 @@ class Aui(Window[AuiSectionT], AuiInterface):
         )
 
     @property
-    def cutting_edge_section(self) -> AuiMixin:
-        assert isinstance(self.config, AuiMixin)
-        return self.config
-
-    @property
     def split_left(self) -> float:
-        return self.cutting_edge_section.split_left
+        value = self.config.split_left
+        return self._left_splitter.normalize_value(value)
 
     @split_left.setter
     def split_left(self, value: float) -> None:
-        self.cutting_edge_section.split_left = value
+        value = self._left_splitter.normalize_value(value)
+        self.config.split_left = value
 
     @property
     def split_right(self) -> float:
-        return self.cutting_edge_section.split_right
+        value = self.config.split_right
+        return self._right_splitter.normalize_value(value)
 
     @split_right.setter
     def split_right(self, value: float) -> None:
-        self.cutting_edge_section.split_right = value
+        value = self._right_splitter.normalize_value(value)
+        self.config.split_right = value
 
     @property
     def split_bottom(self) -> float:
-        return self.cutting_edge_section.split_bottom
+        value = self.config.split_bottom
+        return self._bottom_splitter.normalize_value(value)
 
     @split_bottom.setter
     def split_bottom(self, value: float) -> None:
-        self.cutting_edge_section.split_bottom = value
+        value = self._bottom_splitter.normalize_value(value)
+        self.config.split_bottom = value
 
     @property
     def padding_width(self) -> float:
