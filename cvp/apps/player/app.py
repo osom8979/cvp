@@ -101,7 +101,7 @@ class PlayerApplication:
     def _raise_force_egl_error(self, error: Error) -> None:
         fixer = AutoFixer[Optional[bool], Error](
             context=self._context,
-            path=f"{type(self.config.graphic).__name__}.force_egl",
+            path="graphic.force_egl",
             proxy=ForceEglProxy(self.config.graphic),
             not_exists_value=None,
             update_value=True,
@@ -128,7 +128,7 @@ class PlayerApplication:
         # <OpenGL.platform.baseplatform.glGenTextures object at 0x7b0a5ec96800>
         fixer = AutoFixer[Optional[bool], ValueError](
             context=self._context,
-            path=f"{type(self.config.graphic).__name__}.use_accelerate",
+            path="graphic.use_accelerate",
             proxy=UseAccelerateProxy(self.config.graphic),
             not_exists_value=None,
             update_value=False,

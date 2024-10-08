@@ -34,7 +34,7 @@ class AutoFixer(Generic[ValueT, ErrorT]):
     def run(self, error: ErrorT) -> None:
         logger.warning(
             f"Please modify the value of '{self._path}' to {self._update_value}"
-            f" section of the '{str(self._context.home.cvp_yml)}' file and try again."
+            f" of the '{str(self._context.home.cvp_yml)}' file and try again."
         )
 
         if (
