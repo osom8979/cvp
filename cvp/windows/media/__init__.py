@@ -15,6 +15,7 @@ from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.media.info import MediaInfoTab
+from cvp.windows.media.media import MediaWindow
 
 
 class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
@@ -52,34 +53,32 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
         self.register_popup(self._open_url_popup)
         self.register_popup(self._confirm_remove)
 
-    def add_media_window(self, section: MediaWindowConfig) -> None:
-        # window = MediaSection(self._context, section)
-        # self._windows.add_window(window, window.key)
-        pass  # TODO
+    def add_media_window(self, config: MediaWindowConfig) -> None:
+        window = MediaWindow(self.context, config)
+        self._windows.add_window(window, window.key)
 
-    def add_media_windows(self, *sections: MediaWindowConfig) -> None:
-        for section in sections:
-            self.add_media_window(section)
+    def add_media_windows(self, *configs: MediaWindowConfig) -> None:
+        for config in configs:
+            self.add_media_window(config)
 
     def open_media(self, file: str, mode: MediaSectionMode) -> None:
-        section = self.context.config.add_media_section()
-        section.opened = True
-        section.file = file
-        section.mode = mode
-        if mode == MediaSectionMode.file:
-            section.title = os.path.basename(file)
-        else:
-            section.title = file
-        self.add_media_window(section)
+        title = os.path.basename(file) if mode == MediaSectionMode.file else file
+        config = MediaWindowConfig(
+            title=title,
+            opened=True,
+            mode=mode,
+            file=file,
+        )
+        self.context.config.media_windows.append(config)
+        self.add_media_window(config)
 
     def close_media(self, key: str) -> None:
-        self._windows.pop_window(key)
-        self.context.config.remove_section(key)
+        self._windows[key].set_removable()
+        self.context.config.remove_media_window(key)
 
     @override
     def on_create(self) -> None:
-        # self.add_media_windows(*self.context.config.media_sections.values())
-        pass  # TODO
+        self.add_media_windows(*self.context.config.media_windows)
 
     @override
     def on_process_sidebar_top(self) -> None:
@@ -95,7 +94,7 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
 
     @override
     def get_menus(self) -> Mapping[str, MediaWindowConfig]:
-        return self._context.config.media_sections
+        return {mw.uuid: mw for mw in self._context.config.media_windows}
 
     def on_open_file_popup(self, file: str) -> None:
         self.open_media(file, MediaSectionMode.file)

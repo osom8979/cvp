@@ -11,16 +11,6 @@ from pygame.event import Event
 
 
 class WindowMapper(OrderedDict[str, Window]):
-    def pop_window(self, key: str, *, no_destroy=False):
-        if not self.__contains__(key):
-            raise KeyError(f"Window '{key}' not exists")
-
-        window = self.pop(key)
-        if not no_destroy:
-            window.do_destroy()
-
-        return window
-
     def add_window(
         self,
         window: Window,
@@ -71,3 +61,7 @@ class WindowMapper(OrderedDict[str, Window]):
     def do_process(self):
         for win in self.as_windows():
             win.do_process()
+
+    def do_next(self):
+        for key in list(key for key, win in self.items() if win.removable):
+            self.pop(key).do_destroy()

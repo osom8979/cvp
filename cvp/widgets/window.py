@@ -104,7 +104,6 @@ class Window(
     Mouseable,
     Constants,
 ):
-    _context: Context
     _popups: Dict[str, Popup]
     _events: Dict[int, EventWrapper]
 
@@ -123,7 +122,7 @@ class Window(
         self._config = section
         self._title = title if title else type(self).__name__
 
-        if self._config.title:
+        if not self._config.title:
             self._config.title = self._title
 
         self.closable = closable if closable else False
@@ -134,6 +133,7 @@ class Window(
         self._modifiable_title = modifiable_title
 
         self._initialized = False
+        self._removable = False
         self._popups = dict()
         self._events = dict()
         self._query = WindowQuery()
@@ -232,26 +232,33 @@ class Window(
         return self._config
 
     @property
-    def window_section(self) -> WindowConfig:
-        assert isinstance(self._config, WindowConfig)
-        return self._config
-
-    @property
     def initialized(self) -> bool:
         return self._initialized
 
     @property
+    def removable(self) -> bool:
+        return self._removable
+
+    def set_removable(self) -> None:
+        self._removable = True
+        logger.debug(
+            f"{repr(self)} "
+            "The 'removable' flag is enabled. "
+            "The destroy event is called just before the next loop execution."
+        )
+
+    @property
     def opened(self) -> bool:
-        return self.window_section.opened
+        return self._config.opened
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self.window_section.opened = value
+        self._config.opened = value
 
     @property
     def title(self) -> str:
         if self._modifiable_title:
-            return self.window_section.title
+            return self._config.title
         else:
             return self._title
 
@@ -262,7 +269,7 @@ class Window(
                 f"{repr(self)} "
                 "The title of a window that cannot be renamed should not be changed"
             )
-        self.window_section.title = value
+        self._config.title = value
 
     @property
     def query(self):
@@ -349,18 +356,34 @@ class Window(
             raise ValueError("Already initialized")
 
         self._events.update(create_event_map(self))
-        self.on_create()
+
+        try:
+            self.on_create()
+        except BaseException as e:
+            logger.error(f"{repr(self)} {e}")
+            raise e
+
         self._initialized = True
+        logger.info(f"{repr(self)} The constructor has been called")
 
     def do_destroy(self) -> None:
         if not self._initialized:
             raise ValueError("Not initialized")
 
-        self.on_destroy()
+        try:
+            self.on_destroy()
+        except BaseException as e:
+            logger.error(f"{repr(self)} {e}")
+            raise e
+
         self._events.clear()
         self._initialized = False
+        logger.info(f"{repr(self)} The destructor has been called")
 
     def do_event(self, event: Event) -> Optional[bool]:
+        if not self._initialized:
+            raise ValueError("Not initialized")
+
         if bool(self.on_event(event)):
             return True
 

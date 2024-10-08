@@ -244,6 +244,7 @@ class PlayerApplication:
                 self.on_keyboard_shortcut(get_pressed())
                 self.on_tick()
                 self.on_frame()
+                self.on_next()
 
     def on_event(self, event: Event) -> None:
         assert NOEVENT < event.type < NUMEVENTS
@@ -295,6 +296,9 @@ class PlayerApplication:
             imgui.render()
             self._renderer.render(imgui.get_draw_data())
             pygame.display.flip()
+
+    def on_next(self) -> None:
+        self._windows.do_next()
 
     def on_file_menu(self) -> None:
         # imgui.separator()
