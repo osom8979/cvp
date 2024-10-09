@@ -18,6 +18,7 @@ from cvp.widgets.manager import Manager
 
 ENTER_RETURNS: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 WSD_NAME_SCOPE_PREFIX_LEN: Final[int] = len(WSD_NAME_SCOPE_PREFIX)
+NAME_BUFFER_SIZE: Final[int] = 2048
 
 
 class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
@@ -104,10 +105,11 @@ class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
         imgui.separator()
 
         imgui.text("Name:")
-        with item_width(0):
+        with item_width(-1):
             changed_name, value_name = imgui.input_text(
                 "## Name",
                 item.name,
+                NAME_BUFFER_SIZE,
                 ENTER_RETURNS,
             )
             assert isinstance(changed_name, bool)
@@ -127,23 +129,38 @@ class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
         imgui.text("Metadata Version:")
         input_text_disabled("## MetadataVersion", str(item.metadata_version))
 
-        imgui.text("Scopes:")
-        for i, scope in enumerate(item.scopes):
-            imgui.bullet()
-            imgui.same_line()
-            input_text_disabled(f"## Scope[{i}]", scope)
-
         imgui.text("Types:")
-        for i, type_ in enumerate(item.types):
+        if item.types:
+            for i, type_ in enumerate(item.types):
+                imgui.bullet()
+                imgui.same_line()
+                input_text_disabled(f"## Type[{i}]", type_)
+        else:
             imgui.bullet()
             imgui.same_line()
-            input_text_disabled(f"## Type[{i}]", type_)
+            imgui.text("Empty types")
+
+        imgui.text("Scopes:")
+        if item.scopes:
+            for i, scope in enumerate(item.scopes):
+                imgui.bullet()
+                imgui.same_line()
+                input_text_disabled(f"## Scope[{i}]", scope)
+        else:
+            imgui.bullet()
+            imgui.same_line()
+            imgui.text("Empty scopes")
 
         imgui.text("XAddr:")
-        for i, xaddr in enumerate(item.xaddrs):
+        if item.xaddrs:
+            for i, xaddr in enumerate(item.xaddrs):
+                imgui.bullet()
+                imgui.same_line()
+                input_text_disabled(f"## XAddr[{i}]", xaddr)
+        else:
             imgui.bullet()
             imgui.same_line()
-            input_text_disabled(f"## XAddr[{i}]", xaddr)
+            imgui.text("Empty xaddrs")
 
     def on_confirm_remove(self, value: bool) -> None:
         if not value:
