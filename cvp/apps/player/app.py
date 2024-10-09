@@ -109,7 +109,7 @@ class PlayerApplication:
         fixer.run(error)
 
     def _validate_accelerate_available(self) -> None:
-        if not self.config.graphic.has_use_accelerate:
+        if self.config.graphic.use_accelerate is None:
             return
 
         use_accelerate = self.config.graphic.use_accelerate

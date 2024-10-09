@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 from typing import Mapping
 
 import imgui
 from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
-from cvp.config.sections.media import Mode as MediaSectionMode
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -61,21 +59,6 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
         for config in configs:
             self.add_media_window(config)
 
-    def open_media(self, file: str, mode: MediaSectionMode) -> None:
-        title = os.path.basename(file) if mode == MediaSectionMode.file else file
-        config = MediaWindowConfig(
-            title=title,
-            opened=True,
-            mode=mode,
-            file=file,
-        )
-        self.context.config.media_windows.append(config)
-        self.add_media_window(config)
-
-    def close_media(self, key: str) -> None:
-        self._windows[key].set_removable()
-        self.context.config.remove_media_window(key)
-
     @override
     def on_create(self) -> None:
         self.add_media_windows(*self.context.config.media_windows)
@@ -97,10 +80,14 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
         return {mw.uuid: mw for mw in self._context.config.media_windows}
 
     def on_open_file_popup(self, file: str) -> None:
-        self.open_media(file, MediaSectionMode.file)
+        context_config = self.context.config
+        config = context_config.create_media_file_window(file, opened=True, append=True)
+        self.add_media_window(config)
 
     def on_open_url_popup(self, url: str) -> None:
-        self.open_media(url, MediaSectionMode.url)
+        context_config = self.context.config
+        config = context_config.create_media_file_window(url, opened=True, append=True)
+        self.add_media_window(config)
 
     def on_confirm_remove(self, value: bool) -> None:
         if not value:
@@ -109,4 +96,6 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
         selected_menu = self.latest_menus.get(self.selected)
         assert selected_menu is not None
 
-        self.close_media(selected_menu.uuid)
+        uuid = selected_menu.uuid
+        self._windows[uuid].set_removable()
+        self.context.config.remove_media_window(uuid)
