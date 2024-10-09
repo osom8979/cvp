@@ -57,3 +57,5 @@ WSD_IPV4_MULTICAST_ADDRESS: Final[str] = "239.255.255.250"
 WSD_IPV6_MULTICAST_ADDRESS: Final[str] = "ff02::c"
 WSD_PORT_NUMBER: Final[int] = 3702
 WSD_TIMEOUT: Final[float] = 30.0
+WSD_NAME_SCOPE_PREFIX: Final[str] = "onvif://www.onvif.org/name/"
+WSD_NAME_DEFAULT: Final[str] = "New Device"

@@ -66,6 +66,7 @@ hvga
 hwaccels
 hwsurface
 imageable
+indentless
 infiles
 iscapture
 isync
@@ -171,6 +172,8 @@ wsxga
 wuxga
 wvga
 wxga
+xaddr
+xaddrs
 xerror
 yadif
 yuyv

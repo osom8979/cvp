@@ -3,10 +3,10 @@
 import os
 from dataclasses import dataclass, field
 from os import PathLike
-from typing import List, Union
+from typing import Final, List, Optional, Union
 
 from type_serialize import deserialize, serialize
-from yaml import dump, full_load
+from yaml import Dumper, dump, full_load
 
 from cvp.config.sections.appearance import AppearanceConfig
 from cvp.config.sections.concurrency import ConcurrencyConfig
@@ -30,6 +30,21 @@ from cvp.config.sections.window import WindowManagerConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
 from cvp.inspect.member import get_public_instance_attributes
 from cvp.itertools.find_index import find_index
+from cvp.types import override
+
+ROOT_INDENT: Final[int] = 0
+
+
+class ConfigDumper(Dumper):
+    @override
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow, False)
+
+    @override
+    def write_line_break(self, data: Optional[str] = None) -> None:
+        super().write_line_break(data)
+        if self.indent == ROOT_INDENT:
+            super().write_line_break(data)
 
 
 @dataclass
@@ -93,12 +108,6 @@ class Config:
             self.media_windows.append(config)
         return config
 
-    def create_wsd(self, uuid: str, name: str, *, append=False):
-        config = WsdConfig(uuid=uuid, name=name)
-        if append:
-            self.wsds.append(config)
-        return config
-
     def remove_layout(self, uuid: str):
         index = find_index(self.layouts, lambda layout: layout.uuid == uuid)
         if index < 0:
@@ -111,14 +120,14 @@ class Config:
             raise KeyError(f"Not found media window: '{uuid}'")
         return self.media_windows.pop(index)
 
-    def remove_wsd(self, uuid: str):
-        index = find_index(self.wsds, lambda wsd: wsd.uuid == uuid)
+    def remove_wsd(self, epr: str):
+        index = find_index(self.wsds, lambda wsd: wsd.epr == epr)
         if index < 0:
-            raise KeyError(f"Not found wsd: '{uuid}'")
+            raise KeyError(f"Not found wsd: '{epr}'")
         return self.wsds.pop(index)
 
     def dumps_yaml(self, encoding="utf-8") -> bytes:
-        return dump(serialize(self)).encode(encoding)
+        return dump(serialize(self), Dumper=ConfigDumper).encode(encoding)
 
     def loads_yaml(self, data: bytes) -> None:
         result = deserialize(full_load(data), type(self))

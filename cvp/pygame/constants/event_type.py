@@ -4,15 +4,8 @@ from enum import IntEnum, unique
 from typing import Final, Sequence
 
 from pygame import constants
-from pygame.event import custom_type
 
-BUTTON_CLICK_LEFT: Final[int] = custom_type()
-BUTTON_CLICK_MIDDLE: Final[int] = custom_type()
-BUTTON_CLICK_RIGHT: Final[int] = custom_type()
-BUTTON_CLICK_WHEEL_UP: Final[int] = custom_type()
-BUTTON_CLICK_WHEEL_DOWN: Final[int] = custom_type()
-BUTTON_CLICK_X1: Final[int] = custom_type()
-BUTTON_CLICK_X2: Final[int] = custom_type()
+from cvp.pygame.constants import event_custom
 
 
 @unique
@@ -91,13 +84,7 @@ class EventType(IntEnum):
     APP_DID_ENTER_FOREGROUND = constants.APP_DIDENTERFOREGROUND
 
     # [Custom Types]
-    EX_BUTTON_CLICK_LEFT = BUTTON_CLICK_LEFT
-    EX_BUTTON_CLICK_MIDDLE = BUTTON_CLICK_MIDDLE
-    EX_BUTTON_CLICK_RIGHT = BUTTON_CLICK_RIGHT
-    EX_BUTTON_CLICK_WHEEL_UP = BUTTON_CLICK_WHEEL_UP
-    EX_BUTTON_CLICK_WHEEL_DOWN = BUTTON_CLICK_WHEEL_DOWN
-    EX_BUTTON_CLICK_X1 = BUTTON_CLICK_X1
-    EX_BUTTON_CLICK_X2 = BUTTON_CLICK_X2
+    __CUSTOM_BEGIN__ = event_custom.CUSTOM_BEGIN
 
 
 KEY_EVENTS: Final[Sequence[EventType]] = (

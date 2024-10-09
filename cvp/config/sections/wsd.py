@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import StrEnum, auto, unique
-from uuid import uuid4
+from typing import List
 
 from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.variables import (
@@ -21,7 +21,13 @@ class WsdProtocol(StrEnum):
 
 @dataclass
 class WsdConfig:
-    uuid: str = field(default_factory=lambda: str(uuid4()))
+    epr: str = field(default_factory=str)
+    instance_id: int = -1
+    message_number: int = -1
+    metadata_version: int = -1
+    scopes: List[str] = field(default_factory=list)
+    types: List[str] = field(default_factory=list)
+    xaddrs: List[str] = field(default_factory=list)
     name: str = field(default_factory=str)
 
 
