@@ -19,10 +19,10 @@ _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
 class MediaWindow(Window[MediaWindowConfig]):
-    def __init__(self, context: Context, section: MediaWindowConfig):
+    def __init__(self, context: Context, window_config: MediaWindowConfig):
         super().__init__(
             context=context,
-            section=section,
+            window_config=window_config,
             title="Media",
             closable=True,
             flags=None,
@@ -96,7 +96,7 @@ class MediaWindow(Window[MediaWindowConfig]):
         if not self._texture:
             return
 
-        process = self.context.pm.get(self.config.uuid)
+        process = self.context.pm.get(self.window_config.uuid)
         if process is None:
             return
 

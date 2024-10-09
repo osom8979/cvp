@@ -20,7 +20,7 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.media_manager,
+            window_config=context.config.media_manager,
             title="Media Manager",
             closable=True,
             flags=None,

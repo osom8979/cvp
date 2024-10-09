@@ -28,7 +28,7 @@ class OverlayWindow(Window[OverlayWindowConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.overlay_window,
+            window_config=context.config.overlay_window,
             title="Overlay",
             closable=False,
             flags=OVERLAY_WINDOW_FLAGS,
@@ -37,11 +37,11 @@ class OverlayWindow(Window[OverlayWindowConfig]):
 
     @property
     def is_left_side(self):
-        return self.config.is_left_side
+        return self.window_config.is_left_side
 
     @property
     def is_top_side(self):
-        return self.config.is_top_side
+        return self.window_config.is_top_side
 
     @property
     def window_position(self) -> Tuple[float, float]:
@@ -50,7 +50,7 @@ class OverlayWindow(Window[OverlayWindowConfig]):
         work_size = viewport.work_size
         work_pos_x, work_pos_y = work_pos
         work_size_x, work_size_y = work_size
-        padding = self.config.padding
+        padding = self.window_config.padding
         x = work_pos_x + (padding if self.is_left_side else work_size_x - padding)
         y = work_pos_y + (padding if self.is_top_side else work_size_y - padding)
         return x, y
@@ -62,19 +62,19 @@ class OverlayWindow(Window[OverlayWindowConfig]):
         return x, y
 
     def get_framerate_color(self, framerate: float) -> Sequence[float]:
-        if framerate >= self.config.fps_warning_threshold:
-            return self.config.normal_color
-        elif framerate >= self.config.fps_error_threshold:
-            return self.config.warning_color
+        if framerate >= self.window_config.fps_warning_threshold:
+            return self.window_config.normal_color
+        elif framerate >= self.window_config.fps_error_threshold:
+            return self.window_config.warning_color
         else:
-            return self.config.error_color
+            return self.window_config.error_color
 
     @override
     def begin(self) -> Tuple[bool, bool]:
         pos_x, pos_y = self.window_position
         pivot_x, pivot_y = self.window_pivot
         imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
-        imgui.set_next_window_bg_alpha(self.config.alpha)
+        imgui.set_next_window_bg_alpha(self.window_config.alpha)
         return super().begin()
 
     @override
@@ -104,14 +104,14 @@ class OverlayWindow(Window[OverlayWindowConfig]):
                 end_popup_context_window()
 
     def on_popup_context_window(self) -> None:
-        if menu_item_ex("Top-Left", self.config.is_top_left):
-            self.config.set_top_left()
-        if menu_item_ex("Top-Right", self.config.is_top_right):
-            self.config.set_top_right()
-        if menu_item_ex("Bottom-Left", self.config.is_bottom_left):
-            self.config.set_bottom_left()
-        if menu_item_ex("Bottom-Right", self.config.is_bottom_right):
-            self.config.set_bottom_right()
+        if menu_item_ex("Top-Left", self.window_config.is_top_left):
+            self.window_config.set_top_left()
+        if menu_item_ex("Top-Right", self.window_config.is_top_right):
+            self.window_config.set_top_right()
+        if menu_item_ex("Bottom-Left", self.window_config.is_bottom_left):
+            self.window_config.set_bottom_left()
+        if menu_item_ex("Bottom-Right", self.window_config.is_bottom_right):
+            self.window_config.set_bottom_right()
 
         imgui.separator()
 

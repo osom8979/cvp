@@ -56,7 +56,7 @@ class Manager(SidebarWindow[ManagerWindowConfigT], ManagerInterface[MenuItemT]):
     def __init__(
         self,
         context: Context,
-        section: ManagerWindowConfigT,
+        window_config: ManagerWindowConfigT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -68,7 +68,7 @@ class Manager(SidebarWindow[ManagerWindowConfigT], ManagerInterface[MenuItemT]):
     ):
         super().__init__(
             context=context,
-            section=section,
+            window_config=window_config,
             title=title,
             closable=closable,
             flags=flags,
@@ -82,11 +82,11 @@ class Manager(SidebarWindow[ManagerWindowConfigT], ManagerInterface[MenuItemT]):
 
     @property
     def selected(self) -> str:
-        return self.config.selected
+        return self.window_config.selected
 
     @selected.setter
     def selected(self, value: str) -> None:
-        self.config.selected = value
+        self.window_config.selected = value
 
     @property
     def latest_menus(self):

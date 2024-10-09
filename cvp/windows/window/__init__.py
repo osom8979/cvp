@@ -15,7 +15,7 @@ class WindowManager(ManagerTab[WindowManagerConfig, Window]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.window_manager,
+            window_config=context.config.window_manager,
             title="Window Manager",
             closable=True,
             flags=None,

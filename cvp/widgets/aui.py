@@ -49,7 +49,7 @@ class AuiWindow(Window[AuiSectionT], AuiInterface):
     def __init__(
         self,
         context: Context,
-        section: AuiSectionT,
+        window_config: AuiSectionT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -65,7 +65,7 @@ class AuiWindow(Window[AuiSectionT], AuiInterface):
     ):
         super().__init__(
             context=context,
-            section=section,
+            window_config=window_config,
             title=title,
             closable=closable,
             flags=flags,
@@ -77,9 +77,9 @@ class AuiWindow(Window[AuiSectionT], AuiInterface):
         self._padding_width = padding_width
         self._padding_height = padding_height
 
-        self._split_left = AuiLeftProxy(section)
-        self._split_right = AuiRightProxy(section)
-        self._split_bottom = AuiBottomProxy(section)
+        self._split_left = AuiLeftProxy(window_config)
+        self._split_right = AuiRightProxy(window_config)
+        self._split_bottom = AuiBottomProxy(window_config)
 
         self._left_splitter = Splitter.from_vertical(
             "## VSplitterLeft",
@@ -104,33 +104,33 @@ class AuiWindow(Window[AuiSectionT], AuiInterface):
 
     @property
     def split_left(self) -> float:
-        value = self.config.split_left
+        value = self.window_config.split_left
         return self._left_splitter.normalize_value(value)
 
     @split_left.setter
     def split_left(self, value: float) -> None:
         value = self._left_splitter.normalize_value(value)
-        self.config.split_left = value
+        self.window_config.split_left = value
 
     @property
     def split_right(self) -> float:
-        value = self.config.split_right
+        value = self.window_config.split_right
         return self._right_splitter.normalize_value(value)
 
     @split_right.setter
     def split_right(self, value: float) -> None:
         value = self._right_splitter.normalize_value(value)
-        self.config.split_right = value
+        self.window_config.split_right = value
 
     @property
     def split_bottom(self) -> float:
-        value = self.config.split_bottom
+        value = self.window_config.split_bottom
         return self._bottom_splitter.normalize_value(value)
 
     @split_bottom.setter
     def split_bottom(self, value: float) -> None:
         value = self._bottom_splitter.normalize_value(value)
-        self.config.split_bottom = value
+        self.window_config.split_bottom = value
 
     @property
     def padding_width(self) -> float:

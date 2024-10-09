@@ -35,7 +35,7 @@ class SidebarWindow(Window[SidebarWidthT], SidebarWindowInterface):
     def __init__(
         self,
         context: Context,
-        section: SidebarWidthT,
+        window_config: SidebarWidthT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -48,7 +48,7 @@ class SidebarWindow(Window[SidebarWidthT], SidebarWindowInterface):
     ):
         super().__init__(
             context=context,
-            section=section,
+            window_config=window_config,
             title=title,
             closable=closable,
             flags=flags,
@@ -58,7 +58,7 @@ class SidebarWindow(Window[SidebarWidthT], SidebarWindowInterface):
         )
 
         self._sidebar_border = sidebar_border
-        self._sidebar_width = SidebarWidthProxy(section)
+        self._sidebar_width = SidebarWidthProxy(window_config)
         self._sidebar_splitter = Splitter.from_vertical(
             "## VSplitter",
             value_proxy=self._sidebar_width,
@@ -68,13 +68,13 @@ class SidebarWindow(Window[SidebarWidthT], SidebarWindowInterface):
 
     @property
     def sidebar_width(self) -> float:
-        value = self.config.sidebar_width
+        value = self.window_config.sidebar_width
         return self._sidebar_splitter.normalize_value(value)
 
     @sidebar_width.setter
     def sidebar_width(self, value: float) -> None:
         value = self._sidebar_splitter.normalize_value(value)
-        self.config.sidebar_width = value
+        self.window_config.sidebar_width = value
 
     @override
     def on_process(self) -> None:

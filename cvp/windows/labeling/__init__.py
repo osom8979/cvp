@@ -18,7 +18,7 @@ class LabelingWindow(AuiWindow[LabelingAuiConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.labeling_aui,
+            window_config=context.config.labeling_aui,
             title="Labeling",
             closable=True,
         )

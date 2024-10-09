@@ -54,7 +54,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
         super().__init__(
             context=context,
-            section=context.config.flow_aui,
+            window_config=context.config.flow_aui,
             title="Flow",
             closable=True,
             flags=imgui.WINDOW_MENU_BAR,
@@ -119,11 +119,11 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @property
     def split_tree(self) -> float:
-        return self.config.split_tree
+        return self.window_config.split_tree
 
     @split_tree.setter
     def split_tree(self, value: float) -> None:
-        self.config.split_tree = value
+        self.window_config.split_tree = value
 
     @property
     def current_graph(self):

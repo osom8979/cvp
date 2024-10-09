@@ -17,7 +17,7 @@ class LayoutManager(ManagerTab[LayoutManagerConfig, LayoutConfig]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
-            section=context.config.layout_manager,
+            window_config=context.config.layout_manager,
             title="Layout Manager",
             closable=True,
             flags=None,

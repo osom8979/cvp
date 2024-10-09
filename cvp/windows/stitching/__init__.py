@@ -18,7 +18,7 @@ class StitchingWindow(AuiWindow[StitchingAuiConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.stitching_aui,
+            window_config=context.config.stitching_aui,
             title="Stitching",
             closable=True,
         )

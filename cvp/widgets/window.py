@@ -72,7 +72,7 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
 
-WindowMixinT = TypeVar("WindowMixinT", bound=WindowConfig)
+WindowConfigT = TypeVar("WindowConfigT", bound=WindowConfig)
 
 
 @dataclass
@@ -96,7 +96,7 @@ class WindowQuery:
 
 
 class Window(
-    Generic[WindowMixinT],
+    Generic[WindowConfigT],
     WindowInterface,
     EventCallbacks,
     Eventable,
@@ -110,7 +110,7 @@ class Window(
     def __init__(
         self,
         context: Context,
-        section: WindowMixinT,
+        window_config: WindowConfigT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -119,11 +119,11 @@ class Window(
         modifiable_title=False,
     ) -> None:
         self._context = context
-        self._config = section
+        self._window_config = window_config
         self._title = title if title else type(self).__name__
 
-        if not self._config.title:
-            self._config.title = self._title
+        if not self._window_config.title:
+            self._window_config.title = self._title
 
         self.closable = closable if closable else False
         self.flags = flags if flags else 0
@@ -228,8 +228,8 @@ class Window(
         self._set_flag(imgui.WINDOW_UNSAVED_DOCUMENT, value)
 
     @property
-    def config(self):
-        return self._config
+    def window_config(self):
+        return self._window_config
 
     @property
     def initialized(self) -> bool:
@@ -249,16 +249,16 @@ class Window(
 
     @property
     def opened(self) -> bool:
-        return self._config.opened
+        return self._window_config.opened
 
     @opened.setter
     def opened(self, value: bool) -> None:
-        self._config.opened = value
+        self._window_config.opened = value
 
     @property
     def title(self) -> str:
         if self._modifiable_title:
-            return self._config.title
+            return self._window_config.title
         else:
             return self._title
 
@@ -269,7 +269,7 @@ class Window(
                 f"{repr(self)} "
                 "The title of a window that cannot be renamed should not be changed"
             )
-        self._config.title = value
+        self._window_config.title = value
 
     @property
     def query(self):
@@ -283,7 +283,7 @@ class Window(
     @property
     @override
     def key(self):
-        return self.config.uuid
+        return self.window_config.uuid
 
     @property
     @override

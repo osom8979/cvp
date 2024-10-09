@@ -22,7 +22,7 @@ class PreferenceManager(Manager[PreferenceManagerConfig, PreferenceWidget]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.preference_manager,
+            window_config=context.config.preference_manager,
             title="Preference",
             closable=True,
             flags=None,

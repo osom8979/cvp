@@ -15,7 +15,7 @@ class ProcessManager(ManagerTab[ProcessManagerConfig, Process]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
-            section=context.config.process_manager,
+            window_config=context.config.process_manager,
             title="Process Manager",
             closable=True,
             flags=None,

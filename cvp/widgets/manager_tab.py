@@ -18,7 +18,7 @@ class ManagerTab(Manager[ManagerWindowConfigT, MenuItemT]):
     def __init__(
         self,
         context: Context,
-        section: ManagerWindowConfigT,
+        window_config: ManagerWindowConfigT,
         title: Optional[str] = None,
         closable: Optional[bool] = None,
         flags: Optional[int] = None,
@@ -32,7 +32,7 @@ class ManagerTab(Manager[ManagerWindowConfigT, MenuItemT]):
     ):
         super().__init__(
             context=context,
-            section=section,
+            window_config=window_config,
             title=title,
             closable=closable,
             flags=flags,
