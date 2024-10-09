@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
 from typing import Mapping
 
 import imgui
@@ -26,7 +25,7 @@ class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
 
     @override
     def on_process_sidebar_top(self) -> None:
-        pass
+        imgui.button("Discovery")
 
     @override
     def on_menu(self, key: str, item: WsdConfig) -> None:
