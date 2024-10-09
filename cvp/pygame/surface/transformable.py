@@ -3,10 +3,11 @@
 from abc import ABC
 from typing import Literal, Optional, Sequence, Union
 
-from cvp.pygame.surface._property import SurfacePropertyInterface
-from cvp.pygame.types import ColorValue, RectValue, SequenceProtocol
 from pygame import transform as pg_transform
 from pygame.surface import Surface
+
+from cvp.pygame.surface._property import SurfacePropertyInterface
+from cvp.pygame.types import ColorValue, RectValue, SequenceProtocol
 
 SmoothscaleBackendLiteral = Literal["GENERIC", "MMX", "SSE", "SSE2", "NEON"]
 

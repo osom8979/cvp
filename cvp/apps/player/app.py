@@ -5,12 +5,16 @@ from io import StringIO
 from typing import Optional, Tuple
 from warnings import catch_warnings
 
+import imgui
+import pygame
 from OpenGL import GL
 from OpenGL.acceleratesupport import ACCELERATE_AVAILABLE
 from OpenGL.error import Error
+from pygame import NOEVENT, NUMEVENTS
+from pygame.event import Event, event_name
+from pygame.image import load as load_image
+from pygame.key import ScancodeWrapper, get_pressed
 
-import imgui
-import pygame
 from cvp.assets import get_default_icon_path
 from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProxy
 from cvp.context.autofixer import AutoFixer
@@ -32,10 +36,6 @@ from cvp.windows.process import ProcessManager
 from cvp.windows.stitching import StitchingWindow
 from cvp.windows.window import WindowManager
 from cvp.windows.wsd import WsdManager
-from pygame import NOEVENT, NUMEVENTS
-from pygame.event import Event, event_name
-from pygame.image import load as load_image
-from pygame.key import ScancodeWrapper, get_pressed
 
 
 class PlayerApplication:

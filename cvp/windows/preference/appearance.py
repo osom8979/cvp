@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import imgui
+
 from cvp.context.context import Context
 from cvp.imgui.styles import Styles, style_colors
 from cvp.logging.logging import logger

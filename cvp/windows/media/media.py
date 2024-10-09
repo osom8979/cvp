@@ -3,9 +3,9 @@
 from ctypes import addressof, c_void_p, create_string_buffer, memmove
 from typing import Final, Tuple
 
+import imgui
 from OpenGL import GL
 
-import imgui
 from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list

@@ -3,6 +3,7 @@
 from typing import Final
 
 import imgui
+
 from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list

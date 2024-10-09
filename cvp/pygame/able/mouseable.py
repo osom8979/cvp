@@ -2,10 +2,11 @@
 
 from typing import Literal, Sequence
 
-from cvp.pygame.types import SequenceProtocol
 from pygame import mouse as pg_mouse
 from pygame.cursors import Cursor
 from pygame.surface import Surface
+
+from cvp.pygame.types import SequenceProtocol
 
 
 class Mouseable:

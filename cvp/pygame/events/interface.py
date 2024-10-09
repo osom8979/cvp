@@ -3,11 +3,12 @@
 from abc import ABCMeta
 from typing import Optional, Tuple
 
+from pygame import constants
+
 from cvp.pygame.constants.button_type import ButtonType
 from cvp.pygame.constants.keycode import Keycode
 from cvp.pygame.constants.keymod import Keymod
 from cvp.pygame.events.abc import abstractevent
-from pygame import constants
 
 
 class EventInterface(metaclass=ABCMeta):

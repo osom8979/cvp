@@ -3,12 +3,13 @@
 from inspect import getmembers, isroutine, signature
 from typing import Any, Callable, Dict, List, Optional
 
+from pygame.event import Event
+from pygame.event import event_name as get_event_name
+
 from cvp.inspect.bind import force_bind
 from cvp.pygame.constants.event_type import EventType
 from cvp.pygame.events.attribute import get_event_type, has_event_type
 from cvp.pygame.events.interface import EventInterface
-from pygame.event import Event
-from pygame.event import event_name as get_event_name
 
 
 class EventCallable:

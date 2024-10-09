@@ -3,6 +3,7 @@
 from typing import Final
 
 import imgui
+
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context

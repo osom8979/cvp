@@ -5,6 +5,7 @@ from enum import StrEnum, unique
 from typing import Generic, Mapping, Optional, TypeVar
 
 import imgui
+
 from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.text_centered import text_centered

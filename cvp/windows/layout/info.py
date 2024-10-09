@@ -3,6 +3,7 @@
 from typing import Final
 
 import imgui
+
 from cvp.config.sections.layout import LayoutConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex

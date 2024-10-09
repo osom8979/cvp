@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from pygame.surface import Surface
+
 from cvp.pygame.transforms._interface import TransformInterface
 from cvp.types import override
-from pygame.surface import Surface
 
 
 class TransformBase(TransformInterface):

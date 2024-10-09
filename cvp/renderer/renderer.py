@@ -4,10 +4,11 @@ from typing import Callable, Dict
 
 import imgui
 import pygame
-from cvp.renderer.remapper import KeycodeRemapper
 from imgui.integrations.opengl import FixedPipelineRenderer
 from pygame.event import Event
 from pygame.time import get_ticks
+
+from cvp.renderer.remapper import KeycodeRemapper
 
 
 class PygameRenderer(FixedPipelineRenderer):

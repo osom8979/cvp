@@ -4,6 +4,7 @@ from math import floor
 from typing import Final, Sequence, Tuple
 
 import imgui
+
 from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_popup_context_window import (

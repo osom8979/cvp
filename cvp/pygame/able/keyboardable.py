@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from cvp.pygame.types import RectValue
 from pygame import key as pg_key
+
+from cvp.pygame.types import RectValue
 
 
 class Keyboardable:

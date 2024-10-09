@@ -3,11 +3,12 @@
 from abc import ABC
 from typing import Iterable, Optional, Sequence, Tuple, Union
 
+from pygame.display import Info
+from pygame.surface import Surface
+
 from cvp.pygame.literals import ViewKind
 from cvp.pygame.surface._property import SurfacePropertyInterface
 from cvp.pygame.types import ColorValue, Coordinate, RectValue, SequenceProtocol
-from pygame.display import Info
-from pygame.surface import Surface
 
 BlitSequence = Iterable[
     Union[

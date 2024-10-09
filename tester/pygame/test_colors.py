@@ -2,10 +2,11 @@
 
 from unittest import TestCase, main
 
+from pygame.color import Color
+
 from cvp.inspect.member import get_public_instance_attributes
 from cvp.pygame import colors
 from cvp.pygame.colors import color_to_hex_code
-from pygame.color import Color
 
 
 class ColorsTestCase(TestCase):

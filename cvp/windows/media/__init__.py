@@ -3,6 +3,7 @@
 from typing import Mapping
 
 import imgui
+
 from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex

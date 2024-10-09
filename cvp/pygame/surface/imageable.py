@@ -3,11 +3,12 @@
 from abc import ABC
 from typing import Sequence, Union
 
+from pygame import BufferProxy
+from pygame import image as pg_image
+
 from cvp.pygame.literals import FromStringFormat, ToStringFormat
 from cvp.pygame.surface._property import SurfacePropertyInterface
 from cvp.pygame.types import FileArg, SequenceProtocol
-from pygame import BufferProxy
-from pygame import image as pg_image
 
 
 class Imageable(SurfacePropertyInterface, ABC):

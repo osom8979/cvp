@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, TypeVar
 
 import imgui
+
 from cvp.config.sections.bases.sidebar import SidebarWindowConfig
 from cvp.config.sections.proxies.sidebar import SidebarWidthProxy
 from cvp.context.context import Context

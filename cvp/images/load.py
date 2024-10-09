@@ -5,7 +5,6 @@ from typing import Any, NamedTuple, Tuple, Union
 
 from numpy.typing import NDArray
 from OpenGL import GL
-
 from pygame import Surface, image
 
 

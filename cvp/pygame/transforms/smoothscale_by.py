@@ -2,11 +2,12 @@
 
 from typing import Sequence, Union
 
+from pygame.surface import Surface
+from pygame.transform import smoothscale_by
+
 from cvp.pygame.transforms._base import TransformBase
 from cvp.pygame.types import SequenceProtocol
 from cvp.types import override
-from pygame.surface import Surface
-from pygame.transform import smoothscale_by
 
 
 class SmoothscaleByTransform(TransformBase):

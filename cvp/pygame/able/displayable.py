@@ -2,11 +2,12 @@
 
 from typing import Literal, Optional, Sequence, Tuple, Union
 
-from cvp.pygame.types import Coordinate, RectValue, SequenceProtocol
 from pygame import display as pg_display
 from pygame.constants import FULLSCREEN
 from pygame.surface import Surface
 from pygame.window import Window
+
+from cvp.pygame.types import Coordinate, RectValue, SequenceProtocol
 
 
 class Displayable:

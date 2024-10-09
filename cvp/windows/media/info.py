@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import imgui
+
 from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size

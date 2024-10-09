@@ -3,10 +3,11 @@
 from abc import ABC
 from typing import Sequence
 
-from cvp.pygame.surface._property import SurfacePropertyInterface
-from cvp.pygame.types import ColorValue, RectValue, SequenceProtocol
 from pygame import gfxdraw as pg_gfx
 from pygame.surface import Surface
+
+from cvp.pygame.surface._property import SurfacePropertyInterface
+from cvp.pygame.types import ColorValue, RectValue, SequenceProtocol
 
 
 class GfxDrawable(SurfacePropertyInterface, ABC):

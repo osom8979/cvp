@@ -3,9 +3,10 @@
 from abc import ABC
 from typing import Sequence
 
+from pygame import draw as pg_draw
+
 from cvp.pygame.surface._property import SurfacePropertyInterface
 from cvp.pygame.types import ColorValue, Coordinate, RectValue, SequenceProtocol
-from pygame import draw as pg_draw
 
 
 class Drawable(SurfacePropertyInterface, ABC):

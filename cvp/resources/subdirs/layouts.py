@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Union
 
 import imgui
+
 from cvp.system.path import PathFlavour
 
 

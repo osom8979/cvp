@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
+from pygame.event import Event
+
 from cvp.config.sections.bases.window import WindowConfig
 from cvp.context.context import Context
 from cvp.imgui.set_window_min_size import set_window_min_size
@@ -20,7 +22,6 @@ from cvp.types import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.popup import Popup
 from cvp.widgets.widget import WidgetInterface
-from pygame.event import Event
 
 
 class WindowInterface(WidgetInterface):

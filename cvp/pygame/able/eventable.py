@@ -2,9 +2,10 @@
 
 from typing import Optional, Sequence, Union
 
-from cvp.pygame.types import SequenceProtocol
 from pygame import event as pg_event
 from pygame.event import Event
+
+from cvp.pygame.types import SequenceProtocol
 
 
 class Eventable:

@@ -4,6 +4,7 @@ import os
 from typing import Sequence
 
 import imgui
+
 from cvp.context.context import Context
 from cvp.logging.logging import (
     SEVERITIES,
