@@ -27,6 +27,7 @@ from cvp.config.sections.preference import PreferenceManagerConfig as PMConfig
 from cvp.config.sections.process import ProcessManagerConfig
 from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.config.sections.window import WindowManagerConfig
+from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
 from cvp.inspect.member import get_public_instance_attributes
 from cvp.itertools.find_index import find_index
 
@@ -53,6 +54,8 @@ class Config:
     process_manager: ProcessManagerConfig = field(default_factory=ProcessManagerConfig)
     stitching_aui: StitchingAuiConfig = field(default_factory=StitchingAuiConfig)
     window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
+    wsd_manager: WsdManagerConfig = field(default_factory=WsdManagerConfig)
+    wsds: List[WsdConfig] = field(default_factory=list)
 
     @property
     def debug(self):
@@ -90,6 +93,12 @@ class Config:
             self.media_windows.append(config)
         return config
 
+    def create_wsd(self, uuid: str, name: str, *, append=False):
+        config = WsdConfig(uuid=uuid, name=name)
+        if append:
+            self.wsds.append(config)
+        return config
+
     def remove_layout(self, uuid: str):
         index = find_index(self.layouts, lambda layout: layout.uuid == uuid)
         if index < 0:
@@ -101,6 +110,12 @@ class Config:
         if index < 0:
             raise KeyError(f"Not found media window: '{uuid}'")
         return self.media_windows.pop(index)
+
+    def remove_wsd(self, uuid: str):
+        index = find_index(self.wsds, lambda wsd: wsd.uuid == uuid)
+        if index < 0:
+            raise KeyError(f"Not found wsd: '{uuid}'")
+        return self.wsds.pop(index)
 
     def dumps_yaml(self, encoding="utf-8") -> bytes:
         return dump(serialize(self)).encode(encoding)

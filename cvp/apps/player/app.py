@@ -31,6 +31,7 @@ from cvp.windows.preference import PreferenceManager
 from cvp.windows.process import ProcessManager
 from cvp.windows.stitching import StitchingWindow
 from cvp.windows.window import WindowManager
+from cvp.windows.wsd import WsdManager
 from pygame import NOEVENT, NUMEVENTS
 from pygame.event import Event, event_name
 from pygame.image import load as load_image
@@ -54,6 +55,7 @@ class PlayerApplication:
         self._process_manager = ProcessManager(self._context)
         self._stitching = StitchingWindow(self._context)
         self._window_manager = WindowManager(self._context, self._windows)
+        self._wsd_manager = WsdManager(self._context)
 
         self._confirm_quit = ConfirmPopup(
             title="Exit",
@@ -221,6 +223,7 @@ class PlayerApplication:
             self._process_manager,
             self._stitching,
             self._window_manager,
+            self._wsd_manager,
         )
 
     def on_exit(self) -> None:
@@ -305,7 +308,7 @@ class PlayerApplication:
         if imgui.menu_item("Quit", "Ctrl+Q")[0]:
             self._confirm_quit.show()
 
-    def on_managers_menu(self) -> None:
+    def on_tools_menu(self) -> None:
         if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
             self._media_manager.opened = not self._media_manager.opened
         if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow.opened)[0]:
@@ -316,6 +319,8 @@ class PlayerApplication:
             self._process_manager.opened = not self._process_manager.opened
         if imgui.menu_item("Window", "Ctrl+Alt+W", self._window_manager.opened)[0]:
             self._window_manager.opened = not self._window_manager.opened
+        if imgui.menu_item("WsDiscovery", None, self._wsd_manager.opened)[0]:
+            self._wsd_manager.opened = not self._wsd_manager.opened
 
         imgui.separator()
 
@@ -343,7 +348,7 @@ class PlayerApplication:
 
             menus = (
                 ("File", self.on_file_menu),
-                ("Managers", self.on_managers_menu),
+                ("Tools", self.on_tools_menu),
                 ("Windows", self.on_windows_menu),
             )
 
