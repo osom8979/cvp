@@ -9,6 +9,7 @@ aapolygon
 aarch
 aatrigon
 abstractevent
+addrs
 akaze
 appendleft
 armv
@@ -35,6 +36,8 @@ deinterlace
 demuxer
 demuxers
 demuxing
+deviceio
+devicemgmt
 discardcorrupt
 dnow
 dnowext
@@ -156,6 +159,7 @@ sysreq
 systemable
 timename
 tvstd
+unicast
 uxga
 vcodec
 versionable

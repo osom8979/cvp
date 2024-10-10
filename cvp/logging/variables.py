@@ -8,9 +8,11 @@ CVP_LOGGER_NAME: Final[str] = "cvp"  # Project root logger
 
 CVP_DOWNLOAD_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.download"
 CVP_EVENT_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.event"
+CVP_ONVIF_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.onvif"
 CVP_PROFILE_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.profile"
 CVP_WIDGETS_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.widgets"
 CVP_WORKER_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.worker"
+CVP_WSDL_LOGGER_NAME: Final[str] = f"{CVP_LOGGER_NAME}.wsdl"
 
 TimedRotatingWhenLiteral = Literal[
     "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"

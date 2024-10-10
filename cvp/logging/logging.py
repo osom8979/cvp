@@ -24,9 +24,11 @@ from cvp.logging.variables import (
     CVP_DOWNLOAD_LOGGER_NAME,
     CVP_EVENT_LOGGER_NAME,
     CVP_LOGGER_NAME,
+    CVP_ONVIF_LOGGER_NAME,
     CVP_PROFILE_LOGGER_NAME,
     CVP_WIDGETS_LOGGER_NAME,
     CVP_WORKER_LOGGER_NAME,
+    CVP_WSDL_LOGGER_NAME,
     DEFAULT_DATEFMT,
     DEFAULT_FORMAT,
     DEFAULT_LOGGING_CONFIG,
@@ -42,9 +44,11 @@ logger = getLogger(CVP_LOGGER_NAME)
 
 download_logger = getLogger(CVP_DOWNLOAD_LOGGER_NAME)
 event_logger = getLogger(CVP_EVENT_LOGGER_NAME)
+onvif_logger = getLogger(CVP_ONVIF_LOGGER_NAME)
 profile_logger = getLogger(CVP_PROFILE_LOGGER_NAME)
 widgets_logger = getLogger(CVP_WIDGETS_LOGGER_NAME)
 worker_logger = getLogger(CVP_WORKER_LOGGER_NAME)
+wsdl_logger = getLogger(CVP_WSDL_LOGGER_NAME)
 
 SEVERITY_NAME_CRITICAL = "critical"
 SEVERITY_NAME_FATAL = "fatal"
