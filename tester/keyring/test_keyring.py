@@ -2,7 +2,7 @@
 
 import os
 from tempfile import TemporaryDirectory
-from unittest import TestCase, main
+from unittest import TestCase, main, skipIf
 
 from cvp.keyring.keyring import (
     KEYRING_PLAIN_TEXT,
@@ -11,6 +11,7 @@ from cvp.keyring.keyring import (
     get_keyring,
     get_password,
     is_file_backed,
+    is_valid_sagecipher,
     keyring_context,
     list_keyring_names,
     load_keyring,
@@ -34,30 +35,36 @@ class KeyringTestCase(TestCase):
             self.assertEqual(keyring, get_keyring())
         self.assertEqual(prev_backend, get_keyring())
 
-    def test_backends(self):
-        for backend_name in (KEYRING_PLAIN_TEXT, KEYRING_SAGECIPHER):
-            with TemporaryDirectory() as tmp:
-                self.assertTrue(os.path.isdir(tmp))
+    def _run_backend_unit_test(self, backend_name: str) -> None:
+        with TemporaryDirectory() as tmp:
+            self.assertTrue(os.path.isdir(tmp))
 
-                with keyring_context(backend_name) as backend:
-                    keyring_filepath = os.path.join(tmp, "keyring.cfg")
-                    self.assertFalse(os.path.exists(keyring_filepath))
+            with keyring_context(backend_name) as backend:
+                keyring_filepath = os.path.join(tmp, "keyring.cfg")
+                self.assertFalse(os.path.exists(keyring_filepath))
 
-                    self.assertTrue(is_file_backed(backend))
-                    set_file_path(backend, keyring_filepath)
-                    self.assertEqual(type(backend).file_path, keyring_filepath)
+                self.assertTrue(is_file_backed(backend))
+                set_file_path(backend, keyring_filepath)
+                self.assertEqual(type(backend).file_path, keyring_filepath)
 
-                    service = "test"
-                    username = "cvp"
-                    password = "pass"
+                service = "test"
+                username = "cvp"
+                password = "pass"
 
-                    self.assertIsNone(get_password(service, username))
-                    set_password(service, username, password)
-                    self.assertTrue(os.path.isfile(keyring_filepath))
+                self.assertIsNone(get_password(service, username))
+                set_password(service, username, password)
+                self.assertTrue(os.path.isfile(keyring_filepath))
 
-                    self.assertEqual(password, get_password(service, username))
-                    delete_password(service, username)
-                    self.assertIsNone(get_password(service, username))
+                self.assertEqual(password, get_password(service, username))
+                delete_password(service, username)
+                self.assertIsNone(get_password(service, username))
+
+    def test_plain_text(self):
+        self._run_backend_unit_test(KEYRING_PLAIN_TEXT)
+
+    @skipIf(not is_valid_sagecipher(), "sagecipher is not available")
+    def test_sagecipher(self):
+        self._run_backend_unit_test(KEYRING_SAGECIPHER)
 
 
 if __name__ == "__main__":

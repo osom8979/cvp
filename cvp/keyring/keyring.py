@@ -22,6 +22,12 @@ KEYRING_SECRET_SERVICE: Final[str] = "keyring.backends.SecretService.Keyring"
 KEYRING_WINDOWS: Final[str] = "keyring.backends.Windows.WinVaultKeyring"
 
 
+def is_valid_sagecipher() -> bool:
+    from paramiko import Agent
+
+    return bool(Agent().get_keys())
+
+
 def get_keyring_name(backend: KeyringBackend) -> str:
     return f"{type(backend).__module__}.{type(backend).__name__}"
 
