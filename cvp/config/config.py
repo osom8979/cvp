@@ -28,6 +28,7 @@ from cvp.config.sections.process import ProcessManagerConfig
 from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.config.sections.window import WindowManagerConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
+from cvp.config.sections.wsdl import WsdlConfig
 from cvp.inspect.member import get_public_instance_attributes
 from cvp.itertools.find_index import find_index
 from cvp.types import override
@@ -73,6 +74,7 @@ class Config:
     stitching_aui: StitchingAuiConfig = field(default_factory=StitchingAuiConfig)
     window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
     wsd_manager: WsdManagerConfig = field(default_factory=WsdManagerConfig)
+    wsdl: WsdlConfig = field(default_factory=WsdlConfig)
     wsds: List[WsdConfig] = field(default_factory=list)
 
     @property
