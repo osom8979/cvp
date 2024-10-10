@@ -9,7 +9,7 @@ from cvp.chrono.filename import short_datetime_name
 from cvp.system.path import PathFlavour
 
 
-class ProcessesDir(PathFlavour):
+class Processes(PathFlavour):
     def __init__(self, path: Union[str, PathLike[str]]):
         super().__init__(path)
         self.logfile_prefix = ""

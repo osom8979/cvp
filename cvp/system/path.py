@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from os import PathLike
 from pathlib import Path
+from typing import Union
 
 
 class PathFlavour(Path):
@@ -12,3 +14,7 @@ class PathFlavour(Path):
 
     def as_path(self):
         return Path(self)
+
+    @classmethod
+    def classname_subdir(cls, parent: Union[str, PathLike[str]]):
+        return cls(Path(parent) / cls.__name__.lower())

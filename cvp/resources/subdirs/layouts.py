@@ -9,7 +9,7 @@ import imgui
 from cvp.system.path import PathFlavour
 
 
-class LayoutsDir(PathFlavour):
+class Layouts(PathFlavour):
     def __init__(self, path: Union[str, PathLike[str]]):
         super().__init__(path)
 

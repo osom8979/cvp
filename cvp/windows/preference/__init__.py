@@ -15,6 +15,7 @@ from cvp.windows.preference.appearance import AppearancePreference
 from cvp.windows.preference.concurrency import ConcurrencyPreference
 from cvp.windows.preference.developer import DeveloperPreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
+from cvp.windows.preference.keyring import KeyringPreference
 from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
 
@@ -33,6 +34,7 @@ class PreferenceManager(Manager[PreferenceManagerConfig, PreferenceWidget]):
             AppearancePreference(context),
             FFmpegPreference(context),
             OverlayPreference(context),
+            KeyringPreference(context),
             LoggingPreference(context),
             ConcurrencyPreference(context),
             DeveloperPreference(context),

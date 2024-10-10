@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
 from typing import Final
 
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
@@ -8,9 +7,7 @@ CVP_YML_FILENAME: Final[str] = "cvp.yml"
 GUI_INI_FILENAME: Final[str] = "gui.ini"
 LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 
-DEFAULT_THEME: Final[str] = "Dark"
-
-DEFAULT_CVP_HOME_PATH: Final[str] = str(Path.home() / CVP_HOME_DIRNAME)
+DEFAULT_THEME: Final[str] = "dark"
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
 CHECKSUM_DELIMITER: Final[str] = ":"

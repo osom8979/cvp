@@ -16,6 +16,7 @@ from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.font import FontConfig
 from cvp.config.sections.graphic import GraphicConfig
+from cvp.config.sections.keyring import KeyringConfig
 from cvp.config.sections.labeling import LabelingAuiConfig
 from cvp.config.sections.layout import LayoutConfig, LayoutManagerConfig
 from cvp.config.sections.logging import LoggingConfig
@@ -57,6 +58,7 @@ class Config:
     flow_aui: FlowAuiConfig = field(default_factory=FlowAuiConfig)
     font: FontConfig = field(default_factory=FontConfig)
     graphic: GraphicConfig = field(default_factory=GraphicConfig)
+    keyring: KeyringConfig = field(default_factory=KeyringConfig)
     labeling_aui: LabelingAuiConfig = field(default_factory=LabelingAuiConfig)
     layout_manager: LayoutManagerConfig = field(default_factory=LayoutManagerConfig)
     layouts: List[LayoutConfig] = field(default_factory=list)

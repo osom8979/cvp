@@ -7,6 +7,7 @@ from os.path import isfile, join
 from typing import Final, List, Optional, Sequence
 
 from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
+from cvp.resources.home import HomeDir
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import (
     CVP_COLORED_LOGGING,
@@ -20,11 +21,7 @@ from cvp.system.environ_keys import (
     CVP_USE_UVLOOP,
     CVP_VERBOSE,
 )
-from cvp.variables import (
-    DEFAULT_CVP_HOME_PATH,
-    DEFAULT_LOGGING_STEP,
-    LOCAL_DOTENV_FILENAME,
-)
+from cvp.variables import DEFAULT_LOGGING_STEP, LOCAL_DOTENV_FILENAME
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -167,11 +164,12 @@ def default_argument_parser() -> ArgumentParser:
 
     add_dotenv_arguments(parser)
 
+    home_path = HomeDir.default_home_path()
     parser.add_argument(
         "--home",
         metavar="dir",
-        default=get_eval(CVP_HOME, DEFAULT_CVP_HOME_PATH),
-        help=f"{PROG}'s home directory (default: '{DEFAULT_CVP_HOME_PATH}')",
+        default=get_eval(CVP_HOME, home_path),
+        help=f"{PROG}'s home directory (default: '{home_path}')",
     )
     parser.add_argument(
         "--version",

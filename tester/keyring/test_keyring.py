@@ -10,9 +10,11 @@ from cvp.keyring.keyring import (
     delete_password,
     get_keyring,
     get_password,
+    is_file_backed,
     keyring_context,
     list_keyring_names,
     load_keyring,
+    set_file_path,
     set_keyring,
     set_password,
 )
@@ -41,7 +43,10 @@ class KeyringTestCase(TestCase):
                     keyring_filepath = os.path.join(tmp, "keyring.cfg")
                     self.assertFalse(os.path.exists(keyring_filepath))
 
-                    type(backend).file_path = keyring_filepath
+                    self.assertTrue(is_file_backed(backend))
+                    set_file_path(backend, keyring_filepath)
+                    self.assertEqual(type(backend).file_path, keyring_filepath)
+
                     service = "test"
                     username = "cvp"
                     password = "pass"
