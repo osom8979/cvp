@@ -11,7 +11,7 @@ from cvp.windows.preference._base import PreferenceWidget
 
 class AppearancePreference(PreferenceWidget):
     def __init__(self, context: Context, label="Appearance"):
-        self._section = context.config.appearance
+        self._config = context.config.appearance
         self._label = label
         self._styles = [str(s.name) for s in Styles]
 
@@ -22,16 +22,16 @@ class AppearancePreference(PreferenceWidget):
 
     @property
     def theme(self) -> str:
-        return self._section.theme
+        return self._config.theme
 
     @theme.setter
     def theme(self, value: str):
-        self._section.theme = value
+        self._config.theme = value
 
     @property
     def theme_index(self) -> int:
         try:
-            return self._styles.index(self._section.theme)
+            return self._styles.index(self._config.theme)
         except ValueError:
             return -1
 

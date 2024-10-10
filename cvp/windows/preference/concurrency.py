@@ -10,7 +10,7 @@ from cvp.windows.preference._base import PreferenceWidget
 
 class ConcurrencyPreference(PreferenceWidget):
     def __init__(self, context: Context, label="Concurrency"):
-        self._section = context.config.concurrency
+        self._config = context.config.concurrency
         self._label = label
         self._show_restart = False
 
@@ -21,19 +21,19 @@ class ConcurrencyPreference(PreferenceWidget):
 
     @property
     def thread_workers(self) -> int:
-        return self._section.thread_workers
+        return self._config.thread_workers
 
     @thread_workers.setter
     def thread_workers(self, value: int):
-        self._section.thread_workers = value
+        self._config.thread_workers = value
 
     @property
     def process_workers(self) -> int:
-        return self._section.process_workers
+        return self._config.process_workers
 
     @process_workers.setter
     def process_workers(self, value: int):
-        self._section.process_workers = value
+        self._config.process_workers = value
 
     @override
     def on_process(self) -> None:

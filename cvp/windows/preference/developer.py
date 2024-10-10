@@ -10,7 +10,7 @@ from cvp.windows.preference._base import PreferenceWidget
 
 class DeveloperPreference(PreferenceWidget):
     def __init__(self, context: Context, label="Developer"):
-        self._section = context.config.developer
+        self._config = context.config.developer
         self._label = label
 
     @property
@@ -20,19 +20,19 @@ class DeveloperPreference(PreferenceWidget):
 
     @property
     def debug(self) -> bool:
-        return self._section.debug
+        return self._config.debug
 
     @debug.setter
     def debug(self, value: bool):
-        self._section.debug = value
+        self._config.debug = value
 
     @property
     def verbose(self) -> int:
-        return self._section.verbose
+        return self._config.verbose
 
     @verbose.setter
     def verbose(self, value: int):
-        self._section.verbose = value
+        self._config.verbose = value
 
     @override
     def on_process(self) -> None:

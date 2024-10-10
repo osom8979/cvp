@@ -22,7 +22,7 @@ from cvp.windows.preference._base import PreferenceWidget
 
 class LoggingPreference(PopupPropagator, PreferenceWidget):
     def __init__(self, context: Context, label="Logging"):
-        self._section = context.config.logging
+        self._config = context.config.logging
         self._label = label
         self._severities = list(SEVERITIES)
         self._logging_browser = OpenFilePopup(
@@ -42,24 +42,24 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
 
     @property
     def config_path(self) -> str:
-        return self._section.config_path
+        return self._config.config_path
 
     @config_path.setter
     def config_path(self, value: str):
-        self._section.config_path = value
+        self._config.config_path = value
 
     @property
     def root_severity(self) -> str:
-        return self._section.root_severity
+        return self._config.root_severity
 
     @root_severity.setter
     def root_severity(self, value: str):
-        self._section.root_severity = value
+        self._config.root_severity = value
 
     @property
     def severity_index(self) -> int:
         try:
-            return self._severities.index(self._section.root_severity)
+            return self._severities.index(self._config.root_severity)
         except ValueError:
             return -1
 
@@ -105,4 +105,4 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
             level = convert_level_number(severity_value)
             set_root_level(level)
             logger.log(level, f"Changed root severity: {severity_value}")
-            self._section.root_severity = severity_value
+            self._config.root_severity = severity_value

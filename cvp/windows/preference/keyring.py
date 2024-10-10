@@ -11,7 +11,7 @@ from cvp.windows.preference._base import PreferenceWidget
 
 class KeyringPreference(PreferenceWidget):
     def __init__(self, context: Context, label="Keyring"):
-        self._section = context.config.keyring
+        self._config = context.config.keyring
         self._label = label
         self._backends = list_keyring_names()
 
@@ -22,16 +22,16 @@ class KeyringPreference(PreferenceWidget):
 
     @property
     def backend(self) -> str:
-        return self._section.backend
+        return self._config.backend
 
     @backend.setter
     def backend(self, value: str):
-        self._section.backend = value
+        self._config.backend = value
 
     @property
     def backend_index(self) -> int:
         try:
-            return self._backends.index(self._section.backend)
+            return self._backends.index(self._config.backend)
         except ValueError:
             return -1
 
