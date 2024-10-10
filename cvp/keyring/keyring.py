@@ -71,7 +71,15 @@ def set_password(service: str, username: str, password: str) -> None:
 
 
 def get_password(service: str, username: str) -> Optional[str]:
-    return keyring.get_password(service, username)
+    password = keyring.get_password(service, username)
+    if password is None:
+        return None
+    if isinstance(password, str):
+        return password
+    elif isinstance(password, bytes):
+        return str(password, encoding="utf-8")
+    else:
+        raise TypeError(f"Unsupported password type: {type(password).__name__}")
 
 
 def get_credential(service: str, username: str) -> Optional[Credential]:

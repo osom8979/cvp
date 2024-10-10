@@ -20,18 +20,6 @@ class WsdlPreference(PreferenceWidget):
 
     @override
     def on_process(self) -> None:
-        no_verify_result = imgui.checkbox("No SSL Verify", self._config.no_verify)
-        no_verify_changed = no_verify_result[0]
-        no_verify_value = no_verify_result[1]
-        assert isinstance(no_verify_changed, bool)
-        assert isinstance(no_verify_value, bool)
-        if no_verify_changed:
-            self._config.no_verify = no_verify_value
-            if no_verify_value:
-                logger.info("Disabling SSL certificate verification")
-            else:
-                logger.info("Enabling SSL certificate verification")
-
         no_cache_result = imgui.checkbox("No Cache File", self._config.no_cache)
         no_cache_changed = no_cache_result[0]
         no_cache_value = no_cache_result[1]

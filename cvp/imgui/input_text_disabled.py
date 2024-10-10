@@ -19,9 +19,7 @@ def input_text_disabled(
     text_color=DEFAULT_TEXT_COLOR,
     background_color=DEFAULT_BACKGROUND_COLOR,
 ) -> None:
-    imgui.push_item_width(-1)
     imgui.push_style_color(imgui.COLOR_FRAME_BACKGROUND, *background_color)
     imgui.push_style_color(imgui.COLOR_TEXT, *text_color)
     imgui.input_text(label, value, buffer_length, flags | _FORCE_READ_ONLY)
     imgui.pop_style_color(2)
-    imgui.pop_item_width()
