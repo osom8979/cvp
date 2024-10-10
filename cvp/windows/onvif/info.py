@@ -12,7 +12,7 @@ from cvp.types import override
 from cvp.widgets.tab import TabItem
 
 ENTER_RETURNS: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
-NAME_BUFFER_SIZE: Final[int] = 2048
+INPUT_BUFFER_SIZE: Final[int] = 2048
 
 
 class OnvifInfoTab(TabItem[OnvifConfig]):
@@ -29,10 +29,23 @@ class OnvifInfoTab(TabItem[OnvifConfig]):
             changed_name, value_name = imgui.input_text(
                 "## Name",
                 item.name,
-                NAME_BUFFER_SIZE,
+                INPUT_BUFFER_SIZE,
                 ENTER_RETURNS,
             )
             assert isinstance(changed_name, bool)
             assert isinstance(value_name, str)
             if changed_name:
                 item.name = value_name
+
+        imgui.text("Address:")
+        with item_width(-1):
+            changed_address, value_address = imgui.input_text(
+                "## Address",
+                item.address,
+                INPUT_BUFFER_SIZE,
+                ENTER_RETURNS,
+            )
+            assert isinstance(changed_address, bool)
+            assert isinstance(value_address, str)
+            if changed_address:
+                item.address = value_address

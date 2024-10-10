@@ -5,6 +5,7 @@ from typing import Final, Mapping
 import imgui
 from wsdiscovery import WSDiscovery
 
+from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
@@ -13,12 +14,14 @@ from cvp.imgui.item_width import item_width
 from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
 from cvp.types import override
-from cvp.variables import WSD_NAME_DEFAULT, WSD_NAME_SCOPE_PREFIX
+from cvp.variables import WSD_NAME_DEFAULT
 from cvp.widgets.manager import Manager
 
-ENTER_RETURNS: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
-WSD_NAME_SCOPE_PREFIX_LEN: Final[int] = len(WSD_NAME_SCOPE_PREFIX)
 NAME_BUFFER_SIZE: Final[int] = 2048
+ENTER_RETURNS: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
+
+WSD_NAME_SCOPE_PREFIX: Final[str] = "onvif://www.onvif.org/name/"
+WSD_NAME_SCOPE_PREFIX_LEN: Final[int] = len(WSD_NAME_SCOPE_PREFIX)
 
 
 class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
@@ -153,8 +156,16 @@ class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
 
         imgui.text("XAddr:")
         if item.xaddrs:
+            has_onvif_scope = item.has_onvif_scope()
             for i, xaddr in enumerate(item.xaddrs):
                 imgui.bullet()
+
+                if has_onvif_scope:
+                    imgui.same_line()
+                    if imgui.button(f"Use ONVIF## Use ONVIF[{i}]"):
+                        config = OnvifConfig(address=xaddr, name=item.name)
+                        self.context.config.onvifs.append(config)
+
                 imgui.same_line()
                 input_text_disabled(f"## XAddr[{i}]", xaddr)
         else:

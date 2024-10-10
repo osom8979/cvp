@@ -30,6 +30,14 @@ class WsdConfig:
     xaddrs: List[str] = field(default_factory=list)
     name: str = field(default_factory=str)
 
+    def has_onvif_scope(self) -> bool:
+        if not self.scopes:
+            return False
+        for scope in self.scopes:
+            if scope.startswith("onvif://"):
+                return True
+        return False
+
 
 @dataclass
 class WsdManagerConfig(ManagerWindowConfig):
