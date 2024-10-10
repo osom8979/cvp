@@ -5,6 +5,7 @@ from typing import Optional
 
 from cvp.flow.catalog import FlowCatalog
 from cvp.flow.instances.graph import Graph
+from cvp.flow.path import FlowPath
 
 
 class FlowManager:
@@ -47,5 +48,18 @@ class FlowManager:
             self._cursor = key
         return graph
 
+    def get_node(self, module_path: str, node_name: str):
+        return self._catalog[module_path][node_name]
+
+    def get_node_with_flow_path(self, flow_path: FlowPath):
+        module, node = flow_path.split()
+        return self.get_node(module, node)
+
+    def get_node_with_path(self, node_path: str):
+        return self.get_node_with_flow_path(FlowPath(node_path))
+
     def add_node(self, node_path: str) -> None:
-        pass
+        node = self.get_node_with_path(node_path)
+        if not self.current:
+            raise ValueError("Not exists flow graph")
+        self.current.add_node(node)

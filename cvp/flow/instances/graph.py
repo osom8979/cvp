@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from yaml import dump, full_load
 
+from cvp.flow.instances.node import Node
 from cvp.flow.templates.graph import FlowGraph
 
 
@@ -82,3 +83,6 @@ class Graph:
     def read_yaml(self, file: Union[str, PathLike[str]]) -> None:
         with open(file, "rb") as f:
             self.loads_yaml(f.read())
+
+    def add_node(self, node_path: Node) -> None:
+        pass
