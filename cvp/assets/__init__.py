@@ -25,6 +25,11 @@ def get_icons_dir() -> str:
     return os.path.join(get_assets_dir(), "icons")
 
 
+@lru_cache
+def get_wsdl_dir() -> str:
+    return os.path.join(get_assets_dir(), "wsdl")
+
+
 def get_assets_path() -> Path:
     return Path(get_assets_dir())
 
@@ -35,6 +40,10 @@ def get_fonts_path() -> Path:
 
 def get_icons_path() -> Path:
     return Path(get_icons_dir())
+
+
+def get_wsdl_path() -> Path:
+    return Path(get_wsdl_dir())
 
 
 @lru_cache

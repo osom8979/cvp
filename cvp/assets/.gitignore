@@ -1,5 +1,6 @@
 *
 !fonts/
 !icons/
+!wsdl/
 !.gitignore
 !__init__.py

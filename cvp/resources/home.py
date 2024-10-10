@@ -11,6 +11,7 @@ from cvp.resources.subdirs.layouts import Layouts
 from cvp.resources.subdirs.logs import Logs
 from cvp.resources.subdirs.processes import Processes
 from cvp.resources.subdirs.temp import Temp
+from cvp.resources.subdirs.wsdl import Wsdl
 from cvp.system.path import PathFlavour
 from cvp.variables import (
     CVP_HOME_DIRNAME,
@@ -31,6 +32,7 @@ class HomeDir(PathFlavour):
         self.logs = Logs.classname_subdir(self)
         self.processes = Processes.classname_subdir(self)
         self.temp = Temp.classname_subdir(self)
+        self.wsdl = Wsdl.classname_subdir(self)
 
         self._dirs = [
             self.bin,
@@ -40,6 +42,7 @@ class HomeDir(PathFlavour):
             self.logs,
             self.processes,
             self.temp,
+            self.wsdl,
         ]
 
         if os.access(self, os.W_OK):
@@ -54,6 +57,7 @@ class HomeDir(PathFlavour):
         self.logging_json = self.as_path() / LOGGING_JSON_FILENAME
 
         self.keyrings.update_default_filepath()
+        self.wsdl.copy_asset_files()
 
     @classmethod
     def from_path(cls, path: Optional[Union[str, PathLike[str]]] = None):
