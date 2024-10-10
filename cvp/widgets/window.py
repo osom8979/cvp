@@ -256,6 +256,9 @@ class Window(
     def opened(self, value: bool) -> None:
         self._window_config.opened = value
 
+    def flip_opened(self) -> None:
+        self._window_config.opened = not self._window_config.opened
+
     @property
     def title(self) -> str:
         if self._modifiable_title:

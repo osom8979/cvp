@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from dataclasses import dataclass, field
 from os import PathLike
 from typing import Final, List, Optional, Union
@@ -21,9 +20,9 @@ from cvp.config.sections.labeling import LabelingAuiConfig
 from cvp.config.sections.layout import LayoutConfig, LayoutManagerConfig
 from cvp.config.sections.logging import LoggingConfig
 from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
-from cvp.config.sections.media import Mode as MediaSectionMode
+from cvp.config.sections.onvif import OnvifConfig, OnvifManagerConfig
 from cvp.config.sections.overlay import OverlayWindowConfig
-from cvp.config.sections.preference import PreferenceManagerConfig as PMConfig
+from cvp.config.sections.preference import PreferenceManagerConfig as PrefManagerConfig
 from cvp.config.sections.process import ProcessManagerConfig
 from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.config.sections.window import WindowManagerConfig
@@ -64,8 +63,10 @@ class Config:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     media_manager: MediaManagerConfig = field(default_factory=MediaManagerConfig)
     media_windows: List[MediaWindowConfig] = field(default_factory=list)
+    onvif_manager: OnvifManagerConfig = field(default_factory=OnvifManagerConfig)
+    onvifs: List[OnvifConfig] = field(default_factory=list)
     overlay_window: OverlayWindowConfig = field(default_factory=OverlayWindowConfig)
-    preference_manager: PMConfig = field(default_factory=PMConfig)
+    preference_manager: PrefManagerConfig = field(default_factory=PrefManagerConfig)
     process_manager: ProcessManagerConfig = field(default_factory=ProcessManagerConfig)
     stitching_aui: StitchingAuiConfig = field(default_factory=StitchingAuiConfig)
     window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
@@ -80,34 +81,6 @@ class Config:
     def verbose(self):
         return self.developer.verbose
 
-    def create_layout(self, name: str, *, append=False):
-        config = LayoutConfig(name=name)
-        if append:
-            self.layouts.append(config)
-        return config
-
-    def create_media_file_window(self, file: str, *, opened=False, append=False):
-        config = MediaWindowConfig(
-            title=os.path.basename(file),
-            opened=opened,
-            mode=MediaSectionMode.file,
-            file=file,
-        )
-        if append:
-            self.media_windows.append(config)
-        return config
-
-    def create_media_url_window(self, url: str, *, opened=False, append=False):
-        config = MediaWindowConfig(
-            title=url,
-            opened=opened,
-            mode=MediaSectionMode.url,
-            file=url,
-        )
-        if append:
-            self.media_windows.append(config)
-        return config
-
     def remove_layout(self, uuid: str):
         index = find_index(self.layouts, lambda layout: layout.uuid == uuid)
         if index < 0:
@@ -119,6 +92,12 @@ class Config:
         if index < 0:
             raise KeyError(f"Not found media window: '{uuid}'")
         return self.media_windows.pop(index)
+
+    def remove_onvif(self, uuid: str):
+        index = find_index(self.onvifs, lambda onvif: onvif.uuid == uuid)
+        if index < 0:
+            raise KeyError(f"Not found onvif: '{uuid}'")
+        return self.onvifs.pop(index)
 
     def remove_wsd(self, epr: str):
         index = find_index(self.wsds, lambda wsd: wsd.epr == epr)

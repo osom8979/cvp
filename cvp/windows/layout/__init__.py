@@ -42,7 +42,8 @@ class LayoutManager(ManagerTab[LayoutManagerConfig, LayoutConfig]):
     @override
     def on_process_sidebar_top(self) -> None:
         if imgui.button("Add"):
-            self.context.config.create_layout("New Layout", append=True)
+            config = LayoutConfig(name="New Layout")
+            self.context.config.layouts.append(config)
         imgui.same_line()
         selected_menu = self.latest_menus.get(self.selected)
         if button_ex("Remove", disabled=selected_menu is None):

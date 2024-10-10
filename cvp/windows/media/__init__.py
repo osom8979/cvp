@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os
 from typing import Mapping
 
 import imgui
 
 from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
+from cvp.config.sections.media import Mode as MediaSectionMode
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
@@ -81,13 +83,23 @@ class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
         return {mw.uuid: mw for mw in self._context.config.media_windows}
 
     def on_open_file_popup(self, file: str) -> None:
-        context_config = self.context.config
-        config = context_config.create_media_file_window(file, opened=True, append=True)
+        config = MediaWindowConfig(
+            title=os.path.basename(file),
+            opened=True,
+            mode=MediaSectionMode.file,
+            file=file,
+        )
+        self.context.config.media_windows.append(config)
         self.add_media_window(config)
 
     def on_open_url_popup(self, url: str) -> None:
-        context_config = self.context.config
-        config = context_config.create_media_file_window(url, opened=True, append=True)
+        config = MediaWindowConfig(
+            title=url,
+            opened=True,
+            mode=MediaSectionMode.url,
+            file=url,
+        )
+        self.context.config.media_windows.append(config)
         self.add_media_window(config)
 
     def on_confirm_remove(self, value: bool) -> None:

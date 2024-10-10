@@ -30,6 +30,7 @@ from cvp.windows.flow import FlowWindow
 from cvp.windows.labeling import LabelingWindow
 from cvp.windows.layout import LayoutManager
 from cvp.windows.media import MediaManager
+from cvp.windows.onvif import OnvifManager
 from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceManager
 from cvp.windows.process import ProcessManager
@@ -50,6 +51,7 @@ class PlayerApplication:
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManager(self._context, self._windows)
         self._media_manager = MediaManager(self._context, self._windows)
+        self._onvif_manager = OnvifManager(self._context)
         self._overlay = OverlayWindow(self._context)
         self._pref_manager = PreferenceManager(self._context)
         self._process_manager = ProcessManager(self._context)
@@ -218,6 +220,7 @@ class PlayerApplication:
             self._labeling_manager,
             self._layout_manager,
             self._media_manager,
+            self._onvif_manager,
             self._overlay,
             self._pref_manager,
             self._process_manager,
@@ -310,17 +313,19 @@ class PlayerApplication:
 
     def on_tools_menu(self) -> None:
         if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
-            self._media_manager.opened = not self._media_manager.opened
+            self._media_manager.flip_opened()
+        if imgui.menu_item("ONVIF", None, self._onvif_manager.opened)[0]:
+            self._onvif_manager.flip_opened()
         if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow.opened)[0]:
-            self._flow.opened = not self._flow.opened
+            self._flow.flip_opened()
         if imgui.menu_item("Layout", "Ctrl+Alt+L", self._layout_manager.opened)[0]:
-            self._layout_manager.opened = not self._layout_manager.opened
+            self._layout_manager.flip_opened()
         if imgui.menu_item("Process", "Ctrl+Alt+P", self._process_manager.opened)[0]:
-            self._process_manager.opened = not self._process_manager.opened
+            self._process_manager.flip_opened()
         if imgui.menu_item("Window", "Ctrl+Alt+W", self._window_manager.opened)[0]:
-            self._window_manager.opened = not self._window_manager.opened
+            self._window_manager.flip_opened()
         if imgui.menu_item("WsDiscovery", None, self._wsd_manager.opened)[0]:
-            self._wsd_manager.opened = not self._wsd_manager.opened
+            self._wsd_manager.flip_opened()
 
         imgui.separator()
 
