@@ -46,3 +46,6 @@ class FlowManager:
         if select:
             self._cursor = key
         return graph
+
+    def add_node(self, node_path: str) -> None:
+        pass

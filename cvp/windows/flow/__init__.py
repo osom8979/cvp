@@ -214,11 +214,12 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         try:
             self.on_canvas()
 
-            with imgui.begin_drag_drop_target() as drag_drop_dst:
-                if drag_drop_dst.hovered:
+            with imgui.begin_drag_drop_target() as drag_drop_target:
+                if drag_drop_target.hovered:
                     payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                     if payload is not None:
-                        print("Received node data:", payload)
+                        node_path = str(payload, encoding="utf-8")
+                        self.context.fm.add_node(node_path)
 
             self.on_popup_menu()
         finally:

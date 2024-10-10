@@ -1,49 +1,36 @@
 # -*- coding: utf-8 -*-
 
-from enum import StrEnum, unique
-from typing import Final, Optional, Union
+from typing import Final, Optional, Tuple, Union
 
 PATH_SEPARATOR: Final[str] = "."
 PATH_ENCODING: Final[str] = "utf-8"
 
 
-def remove_suffix_separators(path: str) -> str:
-    if path.endswith(PATH_SEPARATOR):
-        return remove_suffix_separators(path[:-1])
-    else:
-        return path
-
-
-@unique
-class FlowPathPrefixes(StrEnum):
-    graph = "#"
-    node = "@"
-    pin = "+"
-    arc = "~"
-
-    graph_instance = "%"
-    node_instance = "$"
-    pin_instance = "*"
-    arc_instance = "="
-
-    reference = "&"
-
-
 class FlowPath:
-    Prefixes = FlowPathPrefixes
-
-    def __init__(self, path: str, *, prefix: Optional[FlowPathPrefixes] = None):
-        self._path = str(prefix) + path if prefix else path
-        self._data = self._path.encode(PATH_ENCODING)
+    def __init__(
+        self,
+        path: str,
+        *,
+        separator: Optional[str] = None,
+        encoding: Optional[str] = None,
+    ):
+        self._path = path
+        self._separator = separator if separator else PATH_SEPARATOR
+        self._encoding = encoding if encoding else PATH_ENCODING
 
     def __repr__(self):
-        return f"<{type(self).__name__} @{id(self)} path='{self._path}'>"
+        return (
+            f"<{type(self).__name__} @{id(self)}"
+            f" path='{self._path}'"
+            f" separator='{self._separator}'"
+            ">"
+        )
 
     def __str__(self):
         return self._path
 
     def __bytes__(self):
-        return self._data
+        return self._path.encode(PATH_ENCODING)
 
     def __format__(self, format_spec):
         return self._path
@@ -52,14 +39,33 @@ class FlowPath:
         return hash(self._path)
 
     def __eq__(self, other):
-        return isinstance(other, FlowPath) and self._path == other._path
+        if isinstance(other, FlowPath):
+            return self._path == other._path
+        elif isinstance(other, str):
+            return self._path == other
+        else:
+            return self._path == str(other)
 
     def normalize(self):
-        return type(self)(remove_suffix_separators(self._path))
+        return type(self)(self._path.removesuffix(self._separator))
 
     def join(self, path: Union["FlowPath", str]):
         return type(self)(
-            remove_suffix_separators(self._path)
-            + PATH_SEPARATOR
-            + remove_suffix_separators(str(path))
+            self._path.removesuffix(self._separator)
+            + self._separator
+            + str(path).removesuffix(self._separator)
         )
+
+    def split(self) -> Tuple[str, str]:
+        index = self._path.rfind(self._separator)
+        if index == -1:
+            return self._path, str()
+        else:
+            name_begin = index + 1
+            return self._path[:index], self._path[name_begin:]
+
+    def get_module_path(self) -> str:
+        return self.split()[0]
+
+    def get_node_name(self) -> str:
+        return self.split()[1]
