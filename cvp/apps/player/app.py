@@ -269,18 +269,8 @@ class PlayerApplication:
     def on_keyboard_shortcut(self, keys: ScancodeWrapper) -> None:
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:
             self._confirm_quit.show()
-        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_m]:
-            self._media_manager.opened = True
-        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_f]:
-            self._flow.opened = True
-        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_l]:
-            self._layout_manager.opened = True
-        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_p]:
-            self._process_manager.opened = True
         if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_s]:
             self._pref_manager.opened = True
-        if keys[pygame.K_LCTRL] and keys[pygame.K_LALT] and keys[pygame.K_w]:
-            self._window_manager.opened = True
 
     def on_tick(self) -> None:
         self._renderer.do_tick()
@@ -312,23 +302,39 @@ class PlayerApplication:
             self._confirm_quit.show()
 
     def on_tools_menu(self) -> None:
-        if imgui.menu_item("Media", "Ctrl+Alt+M", self._media_manager.opened)[0]:
+        imgui.menu_item("Computer Vision", None, False, False)
+        if imgui.menu_item("Flow", None, self._flow.opened)[0]:
+            self._flow.flip_opened()
+        if imgui.menu_item("Stitching", None, self._stitching.opened)[0]:
+            self._stitching.flip_opened()
+        if imgui.menu_item("Labeling", None, self._labeling_manager.opened)[0]:
+            self._labeling_manager.flip_opened()
+
+        imgui.separator()
+        imgui.menu_item("Network Device", None, False, False)
+
+        if imgui.menu_item("Media", None, self._media_manager.opened)[0]:
             self._media_manager.flip_opened()
         if imgui.menu_item("ONVIF", None, self._onvif_manager.opened)[0]:
             self._onvif_manager.flip_opened()
-        if imgui.menu_item("Flow", "Ctrl+Alt+F", self._flow.opened)[0]:
-            self._flow.flip_opened()
-        if imgui.menu_item("Layout", "Ctrl+Alt+L", self._layout_manager.opened)[0]:
-            self._layout_manager.flip_opened()
-        if imgui.menu_item("Process", "Ctrl+Alt+P", self._process_manager.opened)[0]:
-            self._process_manager.flip_opened()
-        if imgui.menu_item("Window", "Ctrl+Alt+W", self._window_manager.opened)[0]:
-            self._window_manager.flip_opened()
         if imgui.menu_item("WsDiscovery", None, self._wsd_manager.opened)[0]:
             self._wsd_manager.flip_opened()
 
         imgui.separator()
+        imgui.menu_item("Information", None, False, False)
 
+        if imgui.menu_item("Overlay", None, self._overlay.opened)[0]:
+            self._overlay.flip_opened()
+
+        imgui.separator()
+        imgui.menu_item("Management", None, False, False)
+
+        if imgui.menu_item("Layout", None, self._layout_manager.opened)[0]:
+            self._layout_manager.flip_opened()
+        if imgui.menu_item("Process", None, self._process_manager.opened)[0]:
+            self._process_manager.flip_opened()
+        if imgui.menu_item("Window", None, self._window_manager.opened)[0]:
+            self._window_manager.flip_opened()
         if imgui.menu_item("Preference", "Ctrl+Alt+S", self._pref_manager.opened)[0]:
             self._pref_manager.opened = not self._pref_manager.opened
 
