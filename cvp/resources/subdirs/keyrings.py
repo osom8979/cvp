@@ -1,38 +1,35 @@
 # -*- coding: utf-8 -*-
 
+from enum import StrEnum, auto, unique
 from os import PathLike
-from pathlib import Path
 from typing import Dict, Optional, Tuple, Union
 
 from cvp.keyring.keyring import (
-    KeyringBackend,
     delete_password,
-    get_all_keyring,
-    get_keyring_name,
     get_password,
-    is_file_backed,
-    set_file_path,
+    set_all_filepath,
     set_password,
 )
 from cvp.system.path import PathFlavour
+from cvp.variables import KEYRING_EXTENSION
+
+
+@unique
+class ServiceName(StrEnum):
+    onvif_password = auto()
 
 
 class Keyrings(PathFlavour):
     _password_cache: Dict[Tuple[str, str], str]
 
-    def __init__(self, path: Union[str, PathLike[str]]):
+    def __init__(self, path: Union[str, PathLike[str]], extension=KEYRING_EXTENSION):
         super().__init__(path)
-        self._onvif_password_service_name = "onvif_password"
+        self._onvif_password_service_name = ServiceName.onvif_password
         self._password_cache = dict()
-
-    def keyring_filepath(self, backend: KeyringBackend, extension=".cfg"):
-        filename = get_keyring_name(backend) + extension
-        return Path(self / filename)
+        self._extension = extension
 
     def update_default_filepath(self) -> None:
-        for backend in get_all_keyring():
-            if is_file_backed(backend):
-                set_file_path(backend, str(self.keyring_filepath(backend)))
+        set_all_filepath(self, extension=self._extension)
 
     def get_password(self, service: str, key: str, default=None) -> Optional[str]:
         cache_key = service, key

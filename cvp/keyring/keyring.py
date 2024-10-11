@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
 from contextlib import contextmanager
 from os import PathLike
-from typing import Final, Optional, Union
+from typing import Final, Optional, TypeGuard, Union
 
 import keyring
 from keyring import core
@@ -96,11 +97,25 @@ def delete_password(service: str, username: str) -> None:
     keyring.delete_password(service, username)
 
 
-def is_file_backed(backend: KeyringBackend) -> bool:
+def is_file_backed(backend: KeyringBackend) -> TypeGuard[FileBacked]:
     return isinstance(backend, FileBacked)
 
 
 def set_file_path(backend: KeyringBackend, path: Union[str, PathLike[str]]) -> None:
     if not isinstance(backend, FileBacked):
         raise TypeError(f"Invalid backend type: {type(backend).__name__}")
+
     type(backend).file_path = path
+
+
+def set_all_filepath(data_dir: Union[str, PathLike[str]], extension=".cfg") -> None:
+    if not os.path.isdir(data_dir):
+        raise NotADirectoryError(f"'{data_dir}' is not a directory")
+
+    for backend in get_all_keyring():
+        if not is_file_backed(backend):
+            continue
+
+        filename = get_keyring_name(backend) + extension
+        filepath = os.path.join(data_dir, filename)
+        set_file_path(backend, filepath)

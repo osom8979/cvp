@@ -13,6 +13,7 @@ CONFIG_VALUE_SEPARATOR: Final[str] = ","
 CHECKSUM_DELIMITER: Final[str] = ":"
 
 FONT_RANGES_EXTENSION: Final[str] = ".ranges"
+KEYRING_EXTENSION: Final[str] = ".cfg"
 
 LOCAL_DOTENV_FILENAME: Final[str] = ".env.local"
 
