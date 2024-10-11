@@ -109,9 +109,6 @@ def set_file_path(backend: KeyringBackend, path: Union[str, PathLike[str]]) -> N
 
 
 def set_all_filepath(data_dir: Union[str, PathLike[str]], extension=".cfg") -> None:
-    if not os.path.isdir(data_dir):
-        raise NotADirectoryError(f"'{data_dir}' is not a directory")
-
     for backend in get_all_keyring():
         if not is_file_backed(backend):
             continue

@@ -12,8 +12,8 @@ class PathTestCase(TestCase):
 
     def test_split(self):
         path = FlowPath("a.b.c.d")
-        self.assertEqual("a.b.c", path.get_module_path())
-        self.assertEqual("d", path.get_node_name())
+        self.assertEqual("a.b.c", path.get_module())
+        self.assertEqual("d", path.get_node())
 
     def test_join(self):
         path = FlowPath("a.b.c.")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional, Tuple, Union
+from typing import Final, NamedTuple, Optional, Union
 
 PATH_SEPARATOR: Final[str] = "."
 PATH_ENCODING: Final[str] = "utf-8"
@@ -56,16 +56,20 @@ class FlowPath:
             + str(path).removesuffix(self._separator)
         )
 
-    def split(self) -> Tuple[str, str]:
+    class SplitResult(NamedTuple):
+        module: str
+        node: str
+
+    def split(self) -> SplitResult:
         index = self._path.rfind(self._separator)
         if index == -1:
-            return self._path, str()
+            return self.SplitResult(self._path, str())
         else:
             name_begin = index + 1
-            return self._path[:index], self._path[name_begin:]
+            return self.SplitResult(self._path[:index], self._path[name_begin:])
 
-    def get_module_path(self) -> str:
-        return self.split()[0]
+    def get_module(self) -> str:
+        return self.split().module
 
-    def get_node_name(self) -> str:
-        return self.split()[1]
+    def get_node(self) -> str:
+        return self.split().node
