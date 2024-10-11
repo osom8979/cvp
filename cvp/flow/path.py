@@ -47,7 +47,11 @@ class FlowPath:
             return self._path == str(other)
 
     def normalize(self):
-        return type(self)(self._path.removesuffix(self._separator))
+        path = self._path
+        end_index = -len(self._separator)
+        while path.endswith(self._separator):
+            path = path[:end_index]
+        return type(self)(path)
 
     def join(self, path: Union["FlowPath", str]):
         return type(self)(
@@ -63,10 +67,12 @@ class FlowPath:
     def split(self) -> SplitResult:
         index = self._path.rfind(self._separator)
         if index == -1:
-            return self.SplitResult(self._path, str())
-        else:
-            name_begin = index + 1
-            return self.SplitResult(self._path[:index], self._path[name_begin:])
+            raise IndexError("The path cannot be split")
+
+        module = self._path[:index]
+        node_begin = index + 1
+        node = self._path[node_begin:]
+        return self.SplitResult(module, node)
 
     def get_module(self) -> str:
         return self.split().module
