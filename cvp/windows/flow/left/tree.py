@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.context.context import Context
-from cvp.flow.instances.graph import Graph
+from cvp.flow.datas import Graph
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 

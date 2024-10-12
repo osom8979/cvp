@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from cvp.flow.templates.node import FlowNode
-from cvp.flow.templates.pin import FlowPin
+from cvp.flow.datas import NodeTemplate, PinTemplate
 
 
-class ButtonEventNode(FlowNode):
+class ButtonEventNode(NodeTemplate):
     def __init__(self):
         super().__init__(
-            class_name=type(self).__name__,
-            class_docs="Button Event Node",
-            class_icon=None,
-            class_color=None,
-            class_pins=[FlowPin()],
-            class_tags=["event"],
+            name=type(self).__name__,
+            docs="Button Event Node",
+            icon=None,
+            color=None,
+            pins=[PinTemplate()],
+            tags=["event"],
         )

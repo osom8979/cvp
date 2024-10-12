@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 from cvp.resources.subdirs.bin import Bin
 from cvp.resources.subdirs.cache import Cache
+from cvp.resources.subdirs.flows import Flows
 from cvp.resources.subdirs.keyrings import Keyrings
 from cvp.resources.subdirs.layouts import Layouts
 from cvp.resources.subdirs.logs import Logs
@@ -27,6 +28,7 @@ class HomeDir(PathFlavour):
 
         self.bin = Bin.classname_subdir(self)
         self.cache = Cache.classname_subdir(self)
+        self.flows = Flows.classname_subdir(self)
         self.keyrings = Keyrings.classname_subdir(self)
         self.layouts = Layouts.classname_subdir(self)
         self.logs = Logs.classname_subdir(self)
@@ -37,6 +39,7 @@ class HomeDir(PathFlavour):
         self._dirs = [
             self.bin,
             self.cache,
+            self.flows,
             self.keyrings,
             self.layouts,
             self.logs,

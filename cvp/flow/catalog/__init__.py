@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from functools import lru_cache
-from typing import Dict
+from typing import Dict, Union
 
 from cvp.flow.catalog import events
-from cvp.flow.templates.node import FlowNode
+from cvp.flow.datas import NodeTemplate
+from cvp.flow.path import FlowPath
 from cvp.inspect.member import is_dunder, is_sunder
 
 
@@ -13,7 +14,7 @@ def builtin_catalog_submodules():
     return [events]
 
 
-class Nodes(Dict[str, FlowNode]):
+class Nodes(Dict[str, NodeTemplate]):
     pass
 
 
@@ -38,14 +39,24 @@ class FlowCatalog(Dict[str, Nodes]):
                 # Typing filters
                 if not isinstance(o, type):
                     continue
-                if not issubclass(o, FlowNode):
+                if not issubclass(o, NodeTemplate):
                     continue
 
                 node_name = o.__name__
-                # node_path = module_path + "." + node_name
-                # node_data = node_path.encode()
                 nodes[node_name] = o()
 
             result[module_path] = nodes
 
         return result
+
+    def get_node_template(self, path: Union[str, FlowPath]) -> NodeTemplate:
+        if not isinstance(path, FlowPath):
+            if not isinstance(path, str):
+                raise TypeError(f"Unsupported path type: {type(path).__name__}")
+            path = FlowPath(path)
+
+        assert isinstance(path, FlowPath)
+        split_result = path.split()
+        module_path = split_result.module
+        node_name = split_result.node
+        return self.__getitem__(module_path).__getitem__(node_name)

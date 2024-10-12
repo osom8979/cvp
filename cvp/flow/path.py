@@ -2,8 +2,18 @@
 
 from typing import Final, NamedTuple, Optional, Union
 
+from cvp.flow.datas import Prefix
+
 PATH_SEPARATOR: Final[str] = "."
 PATH_ENCODING: Final[str] = "utf-8"
+
+
+def inference_prefix(path: str) -> Prefix:
+    if path:
+        prefix = path[0]
+        if prefix in Prefix.__members__.values():
+            return Prefix(prefix)
+    return Prefix.none
 
 
 class FlowPath:
@@ -15,6 +25,7 @@ class FlowPath:
         encoding: Optional[str] = None,
     ):
         self._path = path
+        self._prefix = inference_prefix(path)
         self._separator = separator if separator else PATH_SEPARATOR
         self._encoding = encoding if encoding else PATH_ENCODING
 
@@ -25,6 +36,9 @@ class FlowPath:
             f" separator='{self._separator}'"
             ">"
         )
+
+    def __bool__(self):
+        return bool(self._path)
 
     def __str__(self):
         return self._path
@@ -46,18 +60,45 @@ class FlowPath:
         else:
             return self._path == str(other)
 
+    @property
+    def prefix(self):
+        return self._prefix
+
+    @property
+    def separator(self):
+        return self._separator
+
+    @property
+    def encoding(self):
+        return self._encoding
+
+    @property
+    def has_prefix(self):
+        return self._prefix != Prefix.none
+
+    @property
+    def is_relative(self):
+        if self.has_prefix:
+            return self._path.removeprefix(self._prefix).startswith(self._separator)
+        else:
+            return self._path.startswith(self._separator)
+
+    @property
+    def is_absolute(self):
+        return not self.is_relative
+
     def normalize(self):
         path = self._path
         end_index = -len(self._separator)
         while path.endswith(self._separator):
             path = path[:end_index]
-        return type(self)(path)
+        return type(self)(path, separator=self._separator, encoding=self._encoding)
 
     def join(self, path: Union["FlowPath", str]):
         return type(self)(
-            self._path.removesuffix(self._separator)
-            + self._separator
-            + str(path).removesuffix(self._separator)
+            str(self.normalize()) + self._separator + str(path),
+            separator=self._separator,
+            encoding=self._encoding,
         )
 
     class SplitResult(NamedTuple):

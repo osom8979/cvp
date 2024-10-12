@@ -128,13 +128,13 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @property
     def current_graph(self):
-        return self._context.fm.current
+        return self._context.fm.current_graph
 
     def clear_current_graph(self) -> None:
         self._context.fm.deselect()
 
     def on_new_graph_popup(self, name: str) -> None:
-        self._context.fm.create_graphs(name, select=True)
+        self._context.fm.create_graph(name, select=True)
 
     def on_open_file_popup(self, file: str) -> None:
         pass
@@ -181,7 +181,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process_sidebar_left(self):
-        current_graph = self._context.fm.current
+        current_graph = self._context.fm.current_graph
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
             if current_graph is None:
                 text_centered("Please select a graph")

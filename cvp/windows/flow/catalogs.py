@@ -29,11 +29,15 @@ class Catalogs(WidgetInterface):
                 if expanded:
                     imgui.set_cursor_pos_x(imgui.get_tree_node_to_label_spacing())
 
-                    for node_name, node in nodes.items():
+                    for node_name, node_template in nodes.items():
                         imgui.selectable(node_name)
+
+                        if not self._context.fm.cursored:
+                            continue
+
                         with imgui.begin_drag_drop_source() as drag_drop_src:
                             if drag_drop_src.dragging:
-                                node_name = node.class_name
+                                node_name = node_template.name
                                 node_path = module_path + PATH_SEPARATOR + node_name
                                 node_data = node_path.encode()
 

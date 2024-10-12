@@ -1,65 +1,95 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from typing import Optional
+from typing import Optional, Union
 
 from cvp.flow.catalog import FlowCatalog
-from cvp.flow.instances.graph import Graph
+from cvp.flow.datas import Graph, Node, Pin
 from cvp.flow.path import FlowPath
 
 
 class FlowManager:
-    def __init__(self):
+    def __init__(self, *, cursor: Optional[str] = None):
         self._catalog = FlowCatalog.from_builtins()
         self._graphs = OrderedDict[str, Graph]()
-        self._cursor = str()
+        self._cursor = cursor
 
     @property
     def catalog(self):
         return self._catalog
 
     @property
-    def current(self) -> Optional[Graph]:
-        return self._graphs.get(self._cursor)
+    def cursored(self):
+        return bool(self._cursor)
 
-    def keys(self):
-        return self._graphs.keys()
+    @property
+    def current_graph(self) -> Optional[Graph]:
+        if self._cursor is None:
+            return None
+        return self._graphs.get(self._cursor, None)
 
-    def values(self):
-        return self._graphs.values()
-
-    def items(self):
-        return self._graphs.items()
-
-    def select(self, key: str) -> None:
+    def select_graph(self, key: str) -> None:
         if key not in self._graphs:
             raise KeyError(f"Not exists flow graph: '{key}'")
         self._cursor = key
 
-    def deselect(self) -> None:
-        self._cursor = str()
+    def deselect_graph(self) -> None:
+        self._cursor = None
 
-    def create_graphs(self, key: str, select=False) -> Graph:
+    def create_graph(
+        self,
+        key: str,
+        *,
+        template: Optional[str] = None,
+        select=False,
+    ) -> Graph:
         if key in self._graphs:
             raise KeyError(f"Already created flow graph: '{key}'")
-        graph = Graph(key)
+        template = template if template else str()
+        assert isinstance(template, str)
+        graph = Graph(name=key)
         self._graphs[key] = graph
         if select:
             self._cursor = key
         return graph
 
-    def get_node(self, module_path: str, node_name: str):
-        return self._catalog[module_path][node_name]
+    def remove_graph(self, key: str) -> Graph:
+        if key == self._cursor:
+            raise KeyError(f"The selected graph cannot be removed: '{key}'")
+        if key in self._graphs:
+            raise KeyError(f"Not exists flow graph: '{key}'")
+        return self._graphs.pop(key)
 
-    def get_node_with_flow_path(self, flow_path: FlowPath):
-        module, node = flow_path.split()
-        return self.get_node(module, node)
+    def get_node_template(self, path: Union[str, FlowPath]):
+        return self._catalog.get_node_template(path)
 
-    def get_node_with_path(self, node_path: str):
-        return self.get_node_with_flow_path(FlowPath(node_path))
+    def add_node(self, path: Union[str, FlowPath]) -> None:
+        graph = self.current_graph
+        if graph is None:
+            raise LookupError("A graph must be selected")
 
-    def add_node(self, node_path: str) -> None:
-        node = self.get_node_with_path(node_path)
-        if not self.current:
-            raise ValueError("Not exists flow graph")
-        self.current.add_node(node)
+        node_template = self.get_node_template(path)
+        node_name = node_template.name
+        node_docs = node_template.docs
+        node_icon = node_template.icon
+        node_color = node_template.color
+        node_pins = list()
+        for pin_template in node_template.pins:
+            pin = Pin(
+                name=pin_template.name,
+                docs=pin_template.docs,
+                dtype=pin_template.dtype,
+                action=pin_template.action,
+                stream=pin_template.stream,
+                required=pin_template.required,
+            )
+            node_pins.append(pin)
+
+        node = Node(
+            name=node_name,
+            docs=node_docs,
+            icon=node_icon,
+            color=node_color,
+            pins=node_pins,
+        )
+        graph.nodes.append(node)
