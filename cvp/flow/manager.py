@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+from os import PathLike
 from typing import Optional, Union
+
+from type_serialize import deserialize, serialize
+from yaml import dump, full_load
 
 from cvp.flow.catalog import FlowCatalog
 from cvp.flow.datas import Graph, Node, Pin
 from cvp.flow.path import FlowPath
+from cvp.yaml.dumpers import IndentListDumper
 
 
 class FlowManager:
@@ -19,7 +24,7 @@ class FlowManager:
         return self._catalog
 
     @property
-    def cursored(self):
+    def has_cursor(self):
         return bool(self._cursor)
 
     @property
@@ -28,37 +33,84 @@ class FlowManager:
             return None
         return self._graphs.get(self._cursor, None)
 
-    def select_graph(self, key: str) -> None:
-        if key not in self._graphs:
-            raise KeyError(f"Not exists flow graph: '{key}'")
-        self._cursor = key
+    def select_graph(self, uuid: str) -> None:
+        if uuid not in self._graphs:
+            raise KeyError(f"Not exists flow graph: '{uuid}'")
+        self._cursor = uuid
+
+    def items(self):
+        return self._graphs.items()
+
+    def keys(self):
+        return self._graphs.keys()
+
+    def values(self):
+        return self._graphs.values()
 
     def deselect_graph(self) -> None:
         self._cursor = None
 
     def create_graph(
         self,
-        key: str,
+        name: str,
         *,
         template: Optional[str] = None,
+        append=False,
         select=False,
     ) -> Graph:
-        if key in self._graphs:
-            raise KeyError(f"Already created flow graph: '{key}'")
+        if not append and select:
+            raise ValueError("If you don't append a graph, you can't select it")
+
         template = template if template else str()
         assert isinstance(template, str)
-        graph = Graph(name=key)
-        self._graphs[key] = graph
+        graph = Graph(name=name)
+
+        if append:
+            assert graph.uuid
+            assert graph.uuid not in self._graphs
+            self._graphs[graph.uuid] = graph
+
         if select:
-            self._cursor = key
+            self._cursor = graph.uuid
+
         return graph
 
-    def remove_graph(self, key: str) -> Graph:
-        if key == self._cursor:
-            raise KeyError(f"The selected graph cannot be removed: '{key}'")
-        if key in self._graphs:
-            raise KeyError(f"Not exists flow graph: '{key}'")
-        return self._graphs.pop(key)
+    def remove_graph(self, uuid: str) -> Graph:
+        if uuid == self._cursor:
+            raise KeyError(f"The selected graph cannot be removed: '{uuid}'")
+        if uuid in self._graphs:
+            raise KeyError(f"Not exists flow graph: '{uuid}'")
+        return self._graphs.pop(uuid)
+
+    @staticmethod
+    def dumps_graph_yaml(graph: Graph, encoding="utf-8") -> bytes:
+        return dump(serialize(graph), Dumper=IndentListDumper).encode(encoding)
+
+    @staticmethod
+    def loads_graph_yaml(data: bytes) -> Graph:
+        result = deserialize(full_load(data), Graph)
+        assert isinstance(result, Graph)
+        return result
+
+    @staticmethod
+    def write_graph_yaml(
+        filepath: Union[str, PathLike[str]],
+        graph: Graph,
+        encoding="utf-8",
+    ) -> None:
+        with open(filepath, "wb") as f:
+            f.write(FlowManager.dumps_graph_yaml(graph, encoding=encoding))
+
+    @staticmethod
+    def read_graph_yaml(filepath: Union[str, PathLike[str]]) -> Graph:
+        with open(filepath, "rb") as f:
+            return FlowManager.loads_graph_yaml(f.read())
+
+    def update_graph_yaml(self, filepath: Union[str, PathLike[str]]) -> None:
+        graph = self.read_graph_yaml(filepath)
+        if not graph.uuid:
+            raise ValueError("The 'uuid' of the flow graph does not exist")
+        self._graphs[graph.uuid] = graph
 
     def get_node_template(self, path: Union[str, FlowPath]):
         return self._catalog.get_node_template(path)

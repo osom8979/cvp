@@ -14,5 +14,5 @@ class FlowLeftTabs(TabBar[GraphTemplate]):
             identifier="## FlowLeftTabs",
             flags=0,
         )
-        self.register(GraphTab(context))
         self.register(TreeTab(context))
+        self.register(GraphTab(context))

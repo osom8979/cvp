@@ -6,6 +6,13 @@ from overrides import override
 from yaml import Dumper
 
 
+class IndentListDumper(Dumper):
+    @override
+    def increase_indent(self, flow=False, indentless=False):
+        # Indent array elements.
+        return super().increase_indent(flow, False)
+
+
 class DefaultDumper(Dumper):
     _ROOT_INDENT: Final[int] = 0
 

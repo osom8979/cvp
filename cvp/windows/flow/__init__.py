@@ -131,10 +131,14 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         return self._context.fm.current_graph
 
     def clear_current_graph(self) -> None:
-        self._context.fm.deselect()
+        self._context.fm.deselect_graph()
 
     def on_new_graph_popup(self, name: str) -> None:
-        self._context.fm.create_graph(name, select=True)
+        graph = self._context.fm.create_graph(name, append=True, select=True)
+        filepath = self._context.home.flows.graph_filepath(graph.uuid)
+        if filepath.exists():
+            raise FileExistsError(f"Graph file already exists: '{str(filepath)}'")
+        self._context.fm.write_graph_yaml(filepath, graph)
 
     def on_open_file_popup(self, file: str) -> None:
         pass
@@ -162,20 +166,21 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_file_menu(self) -> None:
         if imgui.menu_item("New graph")[0]:
             self._new_graph_popup.show()
-        if imgui.menu_item("Open graph file")[0]:
-            self._open_graph_popup.show()
-        with imgui.begin_menu("Open recent") as recent_menu:
-            if recent_menu.opened:
-                if imgui.menu_item("graph1.yml")[0]:
-                    pass
-                if imgui.menu_item("graph2.yml")[0]:
-                    pass
-        if imgui.menu_item("Save")[0]:
-            pass
-        if imgui.menu_item("Save As..")[0]:
-            pass
+        # if imgui.menu_item("Open graph file")[0]:
+        #     self._open_graph_popup.show()
+        # with imgui.begin_menu("Open recent") as recent_menu:
+        #     if recent_menu.opened:
+        #         if imgui.menu_item("graph1.yml")[0]:
+        #             pass
+        #         if imgui.menu_item("graph2.yml")[0]:
+        #             pass
+        # if imgui.menu_item("Save")[0]:
+        #     pass
+        # if imgui.menu_item("Save As..")[0]:
+        #     pass
         if imgui.menu_item("Close graph")[0]:
-            self._context.fm.deselect()
+            self._context.fm.deselect_graph()
+        imgui.separator()
         if imgui.menu_item("Exit")[0]:
             self.opened = False
 
@@ -183,10 +188,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_process_sidebar_left(self):
         current_graph = self._context.fm.current_graph
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
-            if current_graph is None:
-                text_centered("Please select a graph")
-            else:
-                self._left_tabs.do_process(current_graph)
+            self._left_tabs.do_process(current_graph)
 
         with style_item_spacing(0, -1):
             self._tree_splitter.do_process()
@@ -210,6 +212,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process_main(self) -> None:
+        if not self._context.fm.has_cursor:
+            text_centered("Please select a graph")
+            return
+
         self.begin_child_canvas()
         try:
             self.on_canvas()

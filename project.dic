@@ -38,6 +38,8 @@ demuxers
 demuxing
 deviceio
 devicemgmt
+dirnames
+dirpath
 discardcorrupt
 dnow
 dnowext
