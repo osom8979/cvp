@@ -83,6 +83,7 @@ class Context:
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
         self._fm = FlowManager()
+        self.refresh_flow_graphs()
 
     @classmethod
     def from_namespace(cls, args: Namespace):
@@ -191,3 +192,7 @@ class Context:
             logger.error(e)
         else:
             self.save_logging_config_unsafe()
+
+    def refresh_flow_graphs(self):
+        for file in self._home.flows.find_graph_files():
+            self._fm.update_graph_yaml(file)
