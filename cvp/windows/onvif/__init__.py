@@ -11,6 +11,7 @@ from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.types import override
 from cvp.widgets.manager_tab import ManagerTab
+from cvp.windows.onvif.auth import OnvifAuthTab
 from cvp.windows.onvif.info import OnvifInfoTab
 
 
@@ -24,6 +25,7 @@ class OnvifManager(ManagerTab[OnvifManagerConfig, OnvifConfig]):
             flags=None,
         )
         self.register(OnvifInfoTab(context))
+        self.register(OnvifAuthTab(context))
 
         self._open_url_popup = InputTextPopup(
             title="Open network address",

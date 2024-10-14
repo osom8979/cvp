@@ -69,3 +69,7 @@ class HomeDir(PathFlavour):
     @classmethod
     def default_home_path(cls):
         return str(cls.home() / CVP_HOME_DIRNAME)
+
+    def initialize(self):
+        self.keyrings.update_default_filepath()
+        self.wsdl.copy_asset_files()
