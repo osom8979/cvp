@@ -233,11 +233,10 @@ class PlayerApplication:
         self._context.teardown()
         self._windows.do_destroy()
 
-        if not self._context.readonly:
-            self.config.display.fullscreen = pygame.display.is_fullscreen()
-            self.config.display.size = pygame.display.get_window_size()
-            self._context.save_config()
-            imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
+        self.config.display.fullscreen = pygame.display.is_fullscreen()
+        self.config.display.size = pygame.display.get_window_size()
+        self._context.save_config()
+        imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
 
         del self._renderer
         pygame.quit()

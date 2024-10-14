@@ -38,8 +38,7 @@ class AutoFixer(Generic[ValueT, ErrorT]):
         )
 
         if (
-            not self._context.readonly
-            and self._context.config.context.auto_fixer
+            self._context.config.context.auto_fixer
             and self._proxy.get() is self._not_exists_value
         ):
             try:

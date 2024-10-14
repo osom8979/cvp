@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
 from os import PathLike
-from typing import Optional, Union
+from typing import Union
 
 from cvp.resources.subdirs.bin import Bin
 from cvp.resources.subdirs.cache import Cache
@@ -52,19 +51,15 @@ class HomeDir(PathFlavour):
             self.wsdl,
         ]
 
-        if os.access(self, os.W_OK):
-            if not self.is_dir():
-                self.mkdir(parents=True, exist_ok=True)
-            for dir_path in self._dirs:
-                if not dir_path.is_dir():
-                    dir_path.mkdir(parents=False, exist_ok=True)
+        if not self.is_dir():
+            self.mkdir(parents=True, exist_ok=True)
 
-            self.keyrings.update_default_filepath()
-            self.wsdl.copy_asset_files()
+        for dir_path in self._dirs:
+            if not dir_path.is_dir():
+                dir_path.mkdir(parents=False, exist_ok=True)
 
-    @classmethod
-    def from_path(cls, path: Optional[Union[str, PathLike[str]]] = None):
-        return cls(path if path else cls.default_home_path())
+        self.keyrings.update_default_filepath()
+        self.wsdl.copy_asset_files()
 
     @classmethod
     def default_home_path(cls):

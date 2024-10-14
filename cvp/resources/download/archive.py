@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from os import PathLike
 from shutil import move, unpack_archive
 from ssl import SSLContext
 from tempfile import TemporaryDirectory
@@ -24,9 +25,9 @@ class DownloadArchive:
         self,
         url: Union[str, ParseResult],
         paths: Sequence[Union[Tuple[str, str], ExtractPair]],
-        extract_root: str,
-        cache_dir: str,
-        temp_dir: Optional[str] = None,
+        extract_root: Union[str, PathLike[str]],
+        cache_dir: Union[str, PathLike[str]],
+        temp_dir: Optional[Union[str, PathLike[str]]] = None,
         checksum: Optional[Union[str, Tuple[str, str], Checksum]] = None,
     ):
         if not paths:
@@ -72,9 +73,9 @@ class DownloadArchive:
     def from_link(
         cls,
         link: LinkInfo,
-        extract_root: str,
-        cache_dir: str,
-        temp_dir: Optional[str] = None,
+        extract_root: Union[str, PathLike[str]],
+        cache_dir: Union[str, PathLike[str]],
+        temp_dir: Optional[Union[str, PathLike[str]]] = None,
     ):
         return cls(
             url=link.url,

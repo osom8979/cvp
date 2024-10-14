@@ -6,7 +6,7 @@ from threading import Event
 from typing import Optional, Union
 
 from cvp.config.config import Config
-from cvp.filesystem.permission import test_directory, test_readable
+from cvp.filesystem.permission import test_directory, test_readable, test_writable
 from cvp.flow.manager import FlowManager
 from cvp.logging.logging import (
     convert_level_number,
@@ -24,32 +24,28 @@ from cvp.system.environ_keys import PYOPENGL_USE_ACCELERATE, SDL_VIDEO_X11_FORCE
 
 
 class Context:
-    def __init__(self, home: Optional[Union[str, PathLike[str]]] = None):
-        self._home = HomeDir.from_path(home)
+    def __init__(self, home: Union[str, PathLike[str]]):
+        test_directory(home)
+        test_readable(home)
+        test_writable(home)
+
+        self._home = HomeDir(home)
         self._config = Config()
         self._done = Event()
 
-        test_directory(self._home)
-        test_readable(self._home)
-
-        self._readonly = not os.access(self._home, os.W_OK)
-        if self._readonly:
-            logger.warning("Runs in read-only mode")
-
-        if not self._readonly and not self._home.exists():
+        if not self._home.exists():
             logger.info(f"Create home directory: '{str(self._home)}'")
             self._home.mkdir(parents=True, exist_ok=True)
 
-        if not self._readonly and self._home.cvp_yml.is_file():
+        if self._home.cvp_yml.is_file():
             self._config.read_yaml(self._home.cvp_yml)
 
-        if not self._readonly:
-            if not self._home.logging_json.exists():
-                self.save_logging_config()
-            if not self._config.logging.config_path:
-                logging_config_path = str(self._home.logging_json)
-                self._config.logging.config_path = logging_config_path
-                logger.info(f"Initialize logging config file: '{logging_config_path}'")
+        if not self._home.logging_json.exists():
+            self.save_logging_config()
+        if not self._config.logging.config_path:
+            logging_config_path = str(self._home.logging_json)
+            self._config.logging.config_path = logging_config_path
+            logger.info(f"Initialize logging config file: '{logging_config_path}'")
 
         logging_config_path = self._config.logging.config_path
         if os.path.isfile(logging_config_path):
@@ -83,10 +79,6 @@ class Context:
 
         self._flow_manager = FlowManager()
         self.refresh_flow_graphs()
-
-    @property
-    def readonly(self):
-        return self._readonly
 
     @property
     def home(self):
@@ -143,9 +135,6 @@ class Context:
         self._process_manager.teardown(self._config.process_manager.teardown_timeout)
 
     def validate_writable_home(self) -> None:
-        if self._readonly:
-            raise ValueError("Runs in read-only mode")
-
         if not self._home.is_dir():
             logger.debug(f"Create home directory: '{str(self._home)}'")
             self._home.mkdir(parents=True, exist_ok=True)
