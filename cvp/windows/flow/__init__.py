@@ -131,10 +131,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         return self._context.fm.current_graph
 
     def clear_current_graph(self) -> None:
-        self._context.fm.deselect_graph()
+        self._context.fm.close_graph()
 
     def on_new_graph_popup(self, name: str) -> None:
-        graph = self._context.fm.create_graph(name, append=True, select=True)
+        graph = self._context.fm.create_graph(name, append=True, open=True)
         filepath = self._context.home.flows.graph_filepath(graph.uuid)
         if filepath.exists():
             raise FileExistsError(f"Graph file already exists: '{str(filepath)}'")
@@ -156,7 +156,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             if not menu_bar.opened:
                 return
 
-            menus = (("File", self.on_file_menu),)
+            menus = (
+                ("File", self.on_file_menu),
+                ("Graph", self.on_graph_menu),
+            )
 
             for name, func in menus:
                 with imgui.begin_menu(name) as menu:
@@ -178,11 +181,19 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         #     pass
         # if imgui.menu_item("Save As..")[0]:
         #     pass
-        if imgui.menu_item("Close graph")[0]:
-            self._context.fm.deselect_graph()
+
+        imgui.separator()
+        has_cursor = self._context.fm.opened
+        if imgui.menu_item("Close graph", None, False, enabled=has_cursor)[0]:
+            self._context.fm.close_graph()
+
         imgui.separator()
         if imgui.menu_item("Exit")[0]:
             self.opened = False
+
+    def on_graph_menu(self) -> None:
+        if imgui.menu_item("Refresh graphs")[0]:
+            self._context.refresh_flow_graphs()
 
     @override
     def on_process_sidebar_left(self):
@@ -212,7 +223,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process_main(self) -> None:
-        if not self._context.fm.has_cursor:
+        if not self._context.fm.opened:
             text_centered("Please select a graph")
             return
 

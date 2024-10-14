@@ -65,7 +65,7 @@ class Context:
 
         thread_workers = self._config.concurrency.thread_workers
         process_workers = self._config.concurrency.process_workers
-        self._pm = ProcessManager(
+        self._process_manager = ProcessManager(
             self._config.ffmpeg,
             home=self._home,
             thread_workers=thread_workers,
@@ -82,7 +82,7 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
-        self._fm = FlowManager()
+        self._flow_manager = FlowManager()
         self.refresh_flow_graphs()
 
     @classmethod
@@ -104,11 +104,11 @@ class Context:
 
     @property
     def pm(self):
-        return self._pm
+        return self._process_manager
 
     @property
     def fm(self):
-        return self._fm
+        return self._flow_manager
 
     @property
     def debug(self) -> bool:
@@ -139,14 +139,14 @@ class Context:
         verify_checksum=True,
     ):
         return DownloadRunner(
-            executor=self._pm.thread_pool,
+            executor=self._process_manager.thread_pool,
             downloader=downloader,
             download_timeout=download_timeout,
             verify_checksum=verify_checksum,
         )
 
     def teardown(self) -> None:
-        self._pm.teardown(self._config.process_manager.teardown_timeout)
+        self._process_manager.teardown(self._config.process_manager.teardown_timeout)
 
     def validate_writable_home(self) -> None:
         if self._readonly:
@@ -195,4 +195,4 @@ class Context:
 
     def refresh_flow_graphs(self):
         for file in self._home.flows.find_graph_files():
-            self._fm.update_graph_yaml(file)
+            self._flow_manager.update_graph_yaml(file)

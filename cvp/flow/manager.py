@@ -24,8 +24,12 @@ class FlowManager:
         return self._catalog
 
     @property
-    def has_cursor(self):
+    def opened(self):
         return bool(self._cursor)
+
+    @property
+    def cursor(self):
+        return self._cursor
 
     @property
     def current_graph(self) -> Optional[Graph]:
@@ -33,10 +37,16 @@ class FlowManager:
             return None
         return self._graphs.get(self._cursor, None)
 
-    def select_graph(self, uuid: str) -> None:
+    def open_graph(self, uuid: str) -> None:
         if uuid not in self._graphs:
             raise KeyError(f"Not exists flow graph: '{uuid}'")
         self._cursor = uuid
+
+    def close_graph(self) -> None:
+        self._cursor = None
+
+    def __bool__(self):
+        return bool(self._graphs)
 
     def items(self):
         return self._graphs.items()
@@ -47,18 +57,16 @@ class FlowManager:
     def values(self):
         return self._graphs.values()
 
-    def deselect_graph(self) -> None:
-        self._cursor = None
-
+    # noinspection PyShadowingBuiltins
     def create_graph(
         self,
         name: str,
         *,
         template: Optional[str] = None,
         append=False,
-        select=False,
+        open=False,
     ) -> Graph:
-        if not append and select:
+        if not append and open:
             raise ValueError("If you don't append a graph, you can't select it")
 
         template = template if template else str()
@@ -70,7 +78,7 @@ class FlowManager:
             assert graph.uuid not in self._graphs
             self._graphs[graph.uuid] = graph
 
-        if select:
+        if open:
             self._cursor = graph.uuid
 
         return graph

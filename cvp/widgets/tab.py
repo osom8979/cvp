@@ -62,8 +62,13 @@ class TabItem(Generic[ItemT], WidgetInterface):
     def on_process(self) -> None:
         if self._item is not None:
             self.on_item(self._item)
+        else:
+            self.on_none()
 
     def on_item(self, item: ItemT) -> None:
+        pass
+
+    def on_none(self) -> None:
         pass
 
 

@@ -19,24 +19,25 @@ class Catalogs(WidgetInterface):
     def on_process(self) -> None:
         imgui.text("Catalogs:")
 
-        expanded, visible = imgui.collapsing_header("Graphs")
-        if imgui.is_item_hovered():
-            with imgui.begin_tooltip():
-                imgui.text("List of saved graphs")
+        if self._context.fm:
+            expanded, visible = imgui.collapsing_header("graphs")
+            if imgui.is_item_hovered():
+                with imgui.begin_tooltip():
+                    imgui.text("List of saved graphs")
 
-        if expanded:
-            with indent(imgui.get_tree_node_to_label_spacing()):
-                for uuid, graph in self._context.fm.items():
-                    imgui.selectable(f"{graph.name}##{graph.uuid}")
-                    if not self._context.fm.has_cursor:
-                        continue
+            if expanded:
+                with indent(imgui.get_tree_node_to_label_spacing()):
+                    for uuid, graph in self._context.fm.items():
+                        imgui.selectable(f"{graph.name}##{graph.uuid}")
+                        if not self._context.fm.opened:
+                            continue
 
-                    with imgui.begin_drag_drop_source() as drag_drop_src:
-                        if drag_drop_src.dragging:
-                            graph_uuid = graph.uuid.encode()
+                        with imgui.begin_drag_drop_source() as drag_drop_src:
+                            if drag_drop_src.dragging:
+                                graph_uuid = graph.uuid.encode()
 
-                            imgui.set_drag_drop_payload(DRAG_GRAPH, graph_uuid)
-                            imgui.text(graph.name)
+                                imgui.set_drag_drop_payload(DRAG_GRAPH, graph_uuid)
+                                imgui.text(graph.name)
 
         for module_path, nodes in self._context.fm.catalog.items():
             module_name = module_path.split(PATH_SEPARATOR)[-1]
@@ -52,7 +53,7 @@ class Catalogs(WidgetInterface):
                         for node_name, node_template in nodes.items():
                             imgui.selectable(node_name)
 
-                            if not self._context.fm.has_cursor:
+                            if not self._context.fm.opened:
                                 continue
 
                             with imgui.begin_drag_drop_source() as drag_drop_src:

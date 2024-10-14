@@ -4,6 +4,7 @@ import imgui
 
 from cvp.context.context import Context
 from cvp.flow.datas import Graph
+from cvp.imgui.text_centered import text_centered
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -21,3 +22,7 @@ class TreeTab(TabItem[Graph]):
                         imgui.text(pin.name)
                     imgui.tree_pop()
             imgui.tree_pop()
+
+    @override
+    def on_none(self) -> None:
+        text_centered("Please select a graph")

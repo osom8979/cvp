@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import imgui
-
 from cvp.context.context import Context
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.types import override
@@ -14,5 +12,26 @@ class PropsTab(TabItem[str]):
 
     @override
     def on_item(self, item: str) -> None:
-        imgui.text("Key:")
-        input_text_disabled("## Key", item)
+        if self.context.fm.opened:
+            if item:
+                self.on_item_cursor(item)
+            else:
+                self.on_graph_cursor()
+        else:
+            self.on_none()
+
+    @override
+    def on_none(self) -> None:
+        pass
+
+    def on_graph_cursor(self) -> None:
+        graph = self.context.fm.current_graph
+        assert graph is not None
+
+        input_text_disabled("UUID", graph.uuid)
+
+    def on_item_cursor(self, item: str) -> None:
+        graph = self.context.fm.current_graph
+        assert graph is not None
+
+        input_text_disabled("Key", item)

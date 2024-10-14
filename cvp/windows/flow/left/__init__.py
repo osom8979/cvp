@@ -3,7 +3,7 @@
 from cvp.context.context import Context
 from cvp.flow.datas import GraphTemplate
 from cvp.widgets.tab import TabBar
-from cvp.windows.flow.left.graph import GraphTab
+from cvp.windows.flow.left.graphs import GraphsTab
 from cvp.windows.flow.left.tree import TreeTab
 
 
@@ -15,4 +15,4 @@ class FlowLeftTabs(TabBar[GraphTemplate]):
             flags=0,
         )
         self.register(TreeTab(context))
-        self.register(GraphTab(context))
+        self.register(GraphsTab(context))
