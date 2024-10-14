@@ -19,7 +19,7 @@ SubmitCallable = Callable[SubmitParamT, SubmitResultT]
 class ProcessManager:
     def __init__(
         self,
-        section: FFmpegConfig,
+        config: FFmpegConfig,
         home: HomeDir,
         thread_workers=MAX_THREAD_WORKERS,
         thread_name_prefix=THREAD_POOL_PREFIX,
@@ -40,7 +40,7 @@ class ProcessManager:
         self._process_pool = ProcessPoolExecutor(max_workers=process_workers)
 
         self._processes = ProcessMapper[str, Process]()
-        self._ffmpeg = FFmpegProcessHelper(section=section, home=home)
+        self._ffmpeg = FFmpegProcessHelper(config=config, home=home)
 
     @property
     def thread_pool(self):

@@ -12,13 +12,13 @@ PIPE_STDOUT: Final[str] = "pipe:1"
 
 
 class FFmpegProcessHelper:
-    def __init__(self, section: FFmpegConfig, home: HomeDir):
-        self._section = section
+    def __init__(self, config: FFmpegConfig, home: HomeDir):
+        self._config = config
         self._home = home
 
     @property
     def ffmpeg(self) -> str:
-        return self._section.ffmpeg
+        return self._config.ffmpeg
 
     def _spawn(
         self,
@@ -35,9 +35,9 @@ class FFmpegProcessHelper:
         stream_buffers = StreamBufferPair(
             stdout=None,
             stderr=stderr_path,
-            encoding=self._section.logging_encoding,
-            maxsize=self._section.logging_maxsize,
-            newline_size=self._section.logging_newline_size,
+            encoding=self._config.logging_encoding,
+            maxsize=self._config.logging_maxsize,
+            newline_size=self._config.logging_newline_size,
         )
         assert stream_buffers.stderr is not None
         stderr_fileno = stream_buffers.stderr.writable_fileno()

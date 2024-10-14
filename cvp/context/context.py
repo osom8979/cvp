@@ -66,7 +66,7 @@ class Context:
         thread_workers = self._config.concurrency.thread_workers
         process_workers = self._config.concurrency.process_workers
         self._process_manager = ProcessManager(
-            self._config.ffmpeg,
+            config=self._config.ffmpeg,
             home=self._home,
             thread_workers=thread_workers,
             process_workers=process_workers,

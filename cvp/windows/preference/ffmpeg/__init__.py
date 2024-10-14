@@ -12,7 +12,7 @@ from cvp.windows.preference.ffmpeg.exe import ExeTabs
 
 class FFmpegPreference(PopupPropagator, PreferenceWidget):
     def __init__(self, context: Context, label="FFmpeg"):
-        self._section = context.config.ffmpeg
+        self._config = context.config.ffmpeg
         self._label = label
         self._tabs = ExeTabs(context)
 
