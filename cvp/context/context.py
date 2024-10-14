@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-from argparse import Namespace
 from os import PathLike
 from threading import Event
 from typing import Optional, Union
@@ -84,11 +83,6 @@ class Context:
 
         self._flow_manager = FlowManager()
         self.refresh_flow_graphs()
-
-    @classmethod
-    def from_namespace(cls, args: Namespace):
-        assert isinstance(args.home, str)
-        return cls(home=args.home)
 
     @property
     def readonly(self):
