@@ -3,11 +3,10 @@
 from argparse import REMAINDER, ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from functools import lru_cache
 from os import R_OK, access, getcwd
-from os.path import isfile, join
+from os.path import expanduser, isfile, join
 from typing import Final, List, Optional, Sequence
 
 from cvp.logging.logging import SEVERITIES, SEVERITY_NAME_INFO
-from cvp.resources.home import HomeDir
 from cvp.system.environ import get_typed_environ_value as get_eval
 from cvp.system.environ_keys import (
     CVP_COLORED_LOGGING,
@@ -21,7 +20,7 @@ from cvp.system.environ_keys import (
     CVP_USE_UVLOOP,
     CVP_VERBOSE,
 )
-from cvp.variables import DEFAULT_LOGGING_STEP, LOCAL_DOTENV_FILENAME
+from cvp.variables import CVP_HOME_DIRNAME, DEFAULT_LOGGING_STEP, LOCAL_DOTENV_FILENAME
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -53,6 +52,11 @@ def version() -> str:
     from cvp import __version__
 
     return __version__
+
+
+@lru_cache
+def cvp_home() -> str:
+    return join(expanduser("~"), CVP_HOME_DIRNAME)
 
 
 def add_dotenv_arguments(parser: ArgumentParser) -> None:
@@ -164,7 +168,7 @@ def default_argument_parser() -> ArgumentParser:
 
     add_dotenv_arguments(parser)
 
-    home_path = HomeDir.default_home_path()
+    home_path = cvp_home()
     parser.add_argument(
         "--home",
         metavar="dir",

@@ -25,17 +25,13 @@ from cvp.system.environ_keys import PYOPENGL_USE_ACCELERATE, SDL_VIDEO_X11_FORCE
 
 class Context:
     def __init__(self, home: Union[str, PathLike[str]]):
-        test_directory(home)
-        test_readable(home)
-        test_writable(home)
-
         self._home = HomeDir(home)
         self._config = Config()
         self._done = Event()
 
-        if not self._home.exists():
-            logger.info(f"Create home directory: '{str(self._home)}'")
-            self._home.mkdir(parents=True, exist_ok=True)
+        test_directory(self._home)
+        test_readable(self._home)
+        test_writable(self._home)
 
         if self._home.cvp_yml.is_file():
             self._config.read_yaml(self._home.cvp_yml)

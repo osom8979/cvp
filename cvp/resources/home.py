@@ -3,6 +3,7 @@
 from os import PathLike
 from typing import Union
 
+from cvp.logging.logging import logger
 from cvp.resources.subdirs.bin import Bin
 from cvp.resources.subdirs.cache import Cache
 from cvp.resources.subdirs.flows import Flows
@@ -13,12 +14,7 @@ from cvp.resources.subdirs.processes import Processes
 from cvp.resources.subdirs.temp import Temp
 from cvp.resources.subdirs.wsdl import Wsdl
 from cvp.system.path import PathFlavour
-from cvp.variables import (
-    CVP_HOME_DIRNAME,
-    CVP_YML_FILENAME,
-    GUI_INI_FILENAME,
-    LOGGING_JSON_FILENAME,
-)
+from cvp.variables import CVP_YML_FILENAME, GUI_INI_FILENAME, LOGGING_JSON_FILENAME
 
 
 class HomeDir(PathFlavour):
@@ -51,20 +47,17 @@ class HomeDir(PathFlavour):
             self.wsdl,
         ]
 
-        if not self.is_dir():
+        if not self.exists():
+            logger.info(f"Create home directory: '{str(self)}'")
             self.mkdir(parents=True, exist_ok=True)
 
         for dir_path in self._dirs:
-            if not dir_path.is_dir():
+            if not dir_path.exists():
+                logger.info(f"Create subdirectory: '{str(dir_path)}'")
                 dir_path.mkdir(parents=False, exist_ok=True)
 
+        logger.info("Update the default file location of keyrings")
         self.keyrings.update_default_filepath()
-        self.wsdl.copy_asset_files()
 
-    @classmethod
-    def default_home_path(cls):
-        return str(cls.home() / CVP_HOME_DIRNAME)
-
-    def initialize(self):
-        self.keyrings.update_default_filepath()
+        logger.info("Copy the WSDL files in the package assets")
         self.wsdl.copy_asset_files()
