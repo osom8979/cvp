@@ -11,6 +11,8 @@ from keyring.backend import KeyringBackend, get_all_keyring
 from keyring.credentials import Credential
 from keyrings.alt.file_base import FileBacked
 
+from cvp.logging.logging import logger
+
 KEYRING_CHAINER: Final[str] = "keyring.backends.chainer.ChainerBackend"
 KEYRING_ENCRYPTED: Final[str] = "keyrings.alt.file.EncryptedKeyring"
 KEYRING_FAIL: Final[str] = "keyring.backends.fail.Keyring"
@@ -95,6 +97,7 @@ def get_credential(service: str, username: str) -> Optional[Credential]:
 
 def delete_password(service: str, username: str) -> None:
     keyring.delete_password(service, username)
+    logger.info(f"Delete password: {service}.{username}")
 
 
 def is_file_backed(backend: KeyringBackend) -> TypeGuard[FileBacked]:

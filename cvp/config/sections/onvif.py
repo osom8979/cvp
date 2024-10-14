@@ -19,11 +19,12 @@ class OnvifConfig:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
     address: str = field(default_factory=str)
-    use_auth: bool = False
+    use_wsse: bool = False
     username: str = field(default_factory=str)
+    # 'password' is stored in the keyring.
     encode_digest: bool = False
     http_auth: Optional[HttpAuth] = None
-    no_verify: bool = False
+    ssl_verify: bool = False
 
 
 @dataclass
