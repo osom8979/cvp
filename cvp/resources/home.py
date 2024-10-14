@@ -26,6 +26,10 @@ class HomeDir(PathFlavour):
     def __init__(self, path: Union[str, PathLike[str]]):
         super().__init__(path)
 
+        self.cvp_yml = self.as_path() / CVP_YML_FILENAME
+        self.gui_ini = self.as_path() / GUI_INI_FILENAME
+        self.logging_json = self.as_path() / LOGGING_JSON_FILENAME
+
         self.bin = Bin.classname_subdir(self)
         self.cache = Cache.classname_subdir(self)
         self.flows = Flows.classname_subdir(self)
@@ -55,12 +59,8 @@ class HomeDir(PathFlavour):
                 if not dir_path.is_dir():
                     dir_path.mkdir(parents=False, exist_ok=True)
 
-        self.cvp_yml = self.as_path() / CVP_YML_FILENAME
-        self.gui_ini = self.as_path() / GUI_INI_FILENAME
-        self.logging_json = self.as_path() / LOGGING_JSON_FILENAME
-
-        self.keyrings.update_default_filepath()
-        self.wsdl.copy_asset_files()
+            self.keyrings.update_default_filepath()
+            self.wsdl.copy_asset_files()
 
     @classmethod
     def from_path(cls, path: Optional[Union[str, PathLike[str]]] = None):
