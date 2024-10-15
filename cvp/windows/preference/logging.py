@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from typing import Sequence
+from typing import Final, Sequence
 
 import imgui
 
@@ -18,6 +18,8 @@ from cvp.types import override
 from cvp.widgets.popup import Popup
 from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.windows.preference._base import PreferenceWidget
+
+NOT_FOUND_INDEX: Final[int] = -1
 
 
 class LoggingPreference(PopupPropagator, PreferenceWidget):
@@ -42,7 +44,7 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
 
     @property
     def config_path(self) -> str:
-        return self._config.config_path
+        return self._config.config_path if self._config.config_path else str()
 
     @config_path.setter
     def config_path(self, value: str):
@@ -50,7 +52,7 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
 
     @property
     def root_severity(self) -> str:
-        return self._config.root_severity
+        return self._config.root_severity if self._config.root_severity else str()
 
     @root_severity.setter
     def root_severity(self, value: str):
@@ -59,9 +61,9 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
     @property
     def severity_index(self) -> int:
         try:
-            return self._severities.index(self._config.root_severity)
+            return self._severities.index(self.root_severity)
         except ValueError:
-            return -1
+            return NOT_FOUND_INDEX
 
     def on_logging_file(self, file: str) -> None:
         self.config_path = file
@@ -105,4 +107,4 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
             level = convert_level_number(severity_value)
             set_root_level(level)
             logger.log(level, f"Changed root severity: {severity_value}")
-            self._config.root_severity = severity_value
+            self.root_severity = severity_value

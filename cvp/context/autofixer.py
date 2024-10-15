@@ -42,19 +42,12 @@ class AutoFixer(Generic[ValueT, ErrorT]):
             and self._proxy.get() is self._not_exists_value
         ):
             try:
-                self._context.validate_writable_home()
-            except BaseException as e1:
-                logger.error(e1)
+                self._proxy.set(self._update_value)
+                self._context.save_config()
+            except BaseException as e:
+                logger.error(e)
             else:
-                try:
-                    self._proxy.set(self._update_value)
-                    self._context.save_config_unsafe()
-                except BaseException as e2:
-                    logger.error(e2)
-                else:
-                    raise AutoFixerError[ValueT](
-                        self._path, self._update_value
-                    ) from error
+                raise AutoFixerError[ValueT](self._path, self._update_value) from error
 
         raise RuntimeError(
             f"An issue has occurred with the '{self._path}' features"

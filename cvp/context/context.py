@@ -37,29 +37,42 @@ class Context:
             self._config.read_yaml(self._home.cvp_yml)
 
         if not self._home.logging_json.exists():
-            self.save_logging_config()
-        if not self._config.logging.config_path:
-            logging_config_path = str(self._home.logging_json)
-            self._config.logging.config_path = logging_config_path
-            logger.info(f"Initialize logging config file: '{logging_config_path}'")
+            logging_path = str(self._home.logging_json)
+            logger.info(f"Save the default logging config file: '{logging_path}'")
+            logging_json_text = dumps_default_logging_config(cvp_home=self._home)
+            self._home.logging_json.write_text(logging_json_text)
+
+        if self._config.logging.config_path is None:
+            logging_path = str(self._home.logging_json)
+            logger.info(f"Initialize default logging config file: '{logging_path}'")
+            self._config.logging.config_path = logging_path
 
         logging_config_path = self._config.logging.config_path
+        assert isinstance(logging_config_path, str)
+
         if os.path.isfile(logging_config_path):
             loads_logging_config(logging_config_path)
             logger.info(f"Loads the logging config file: '{logging_config_path}'")
 
-        root_severity = self._config.logging.root_severity
-        if root_severity:
+        if self._config.logging.root_severity is not None:
+            root_severity = self._config.logging.root_severity
             level = convert_level_number(root_severity)
             set_root_level(level)
             logger.log(level, f"Changed root severity: {root_severity}")
 
         thread_workers = self._config.concurrency.thread_workers
+        thread_name_prefix = self._config.concurrency.thread_name_prefix
         process_workers = self._config.concurrency.process_workers
+        if thread_workers <= 0:
+            raise ValueError("Number of thread workers must be greater than zero")
+        if process_workers <= 0:
+            raise ValueError("Number of process workers must be greater than zero")
+
         self._process_manager = ProcessManager(
             config=self._config.ffmpeg,
             home=self._home,
             thread_workers=thread_workers,
+            thread_name_prefix=thread_name_prefix,
             process_workers=process_workers,
         )
 
@@ -130,47 +143,9 @@ class Context:
     def teardown(self) -> None:
         self._process_manager.teardown(self._config.process_manager.teardown_timeout)
 
-    def validate_writable_home(self) -> None:
-        if not self._home.is_dir():
-            logger.debug(f"Create home directory: '{str(self._home)}'")
-            self._home.mkdir(parents=True, exist_ok=True)
-
-            if not self._home.is_dir():
-                raise NotADirectoryError(
-                    f"Home is not a directory type: '{str(self._home)}'"
-                )
-
-        if not os.access(self._home, os.W_OK):
-            raise PermissionError(
-                f"No write permission in home directory: '{str(self._home)}'"
-            )
-
-    def save_config_unsafe(self) -> None:
-        config_path = self._home.cvp_yml
-        logger.info(f"Save the config file: '{str(config_path)}'")
-        self._config.write_yaml(config_path)
-
     def save_config(self) -> None:
-        try:
-            self.validate_writable_home()
-        except BaseException as e:
-            logger.error(e)
-        else:
-            self.save_config_unsafe()
-
-    def save_logging_config_unsafe(self) -> None:
-        logging_json = dumps_default_logging_config(cvp_home=self._home)
-        logging_config_path = str(self._home.logging_json)
-        logger.info(f"Save the default logging config file: '{logging_config_path}'")
-        self._home.logging_json.write_text(logging_json)
-
-    def save_logging_config(self) -> None:
-        try:
-            self.validate_writable_home()
-        except BaseException as e:
-            logger.error(e)
-        else:
-            self.save_logging_config_unsafe()
+        logger.info(f"Save the config file: '{str(self._home.cvp_yml)}'")
+        self._config.write_yaml(self._home.cvp_yml)
 
     def refresh_flow_graphs(self):
         for file in self._home.flows.find_graph_files():
