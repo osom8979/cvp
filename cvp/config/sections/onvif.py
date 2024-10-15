@@ -24,7 +24,15 @@ class OnvifConfig:
     # 'password' is stored in the keyring.
     encode_digest: bool = False
     http_auth: Optional[HttpAuth] = None
-    ssl_verify: bool = False
+    no_verify: bool = False
+
+    @property
+    def is_http_basic(self):
+        return self.http_auth == HttpAuth.basic
+
+    @property
+    def is_http_digest(self):
+        return self.http_auth == HttpAuth.digest
 
 
 @dataclass

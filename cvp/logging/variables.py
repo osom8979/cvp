@@ -131,6 +131,7 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
         "asyncio": {"level": "DEBUG"},
         "httpcore": {"level": "DEBUG"},
         "httpx": {"level": "DEBUG"},
+        "zeep": {"level": "DEBUG"},
         CVP_LOGGER_NAME: {"level": "DEBUG"},
         CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
         CVP_EVENT_LOGGER_NAME: {

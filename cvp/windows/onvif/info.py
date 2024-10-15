@@ -32,10 +32,10 @@ class OnvifInfoTab(TabItem[OnvifConfig]):
             INPUT_BUFFER_SIZE,
         )
 
-        ssl_verify = imgui.checkbox("No SSL Verify", item.ssl_verify)
+        ssl_verify = imgui.checkbox("No SSL Verify", item.no_verify)
         ssl_verify_changed = ssl_verify[0]
         ssl_verify_value = ssl_verify[1]
         assert isinstance(ssl_verify_changed, bool)
         assert isinstance(ssl_verify_value, bool)
         if ssl_verify_changed:
-            item.ssl_verify = ssl_verify_value
+            item.no_verify = ssl_verify_value
