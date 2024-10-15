@@ -54,7 +54,7 @@ class Context:
             loads_logging_config(logging_config_path)
             logger.info(f"Loads the logging config file: '{logging_config_path}'")
 
-        if self._config.logging.root_severity is not None:
+        if self._config.logging.root_severity:
             root_severity = self._config.logging.root_severity
             level = convert_level_number(root_severity)
             set_root_level(level)
