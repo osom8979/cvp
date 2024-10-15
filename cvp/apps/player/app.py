@@ -230,13 +230,15 @@ class PlayerApplication:
         )
 
     def on_exit(self) -> None:
-        self._context.teardown()
+        self._context.teardown_process_manager()
         self._windows.do_destroy()
 
         self.config.display.fullscreen = pygame.display.is_fullscreen()
         self.config.display.size = pygame.display.get_window_size()
         self._context.save_config()
         imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
+
+        self._context.save_all_graphs()
 
         del self._renderer
         pygame.quit()

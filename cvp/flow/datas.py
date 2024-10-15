@@ -115,6 +115,14 @@ class GraphTemplate:
 
 
 @dataclass
+class Canvas:
+    pan_x: float = 0.0
+    pan_y: float = 0.0
+    zoom: float = 1.0
+    alpha: float = 1.0
+
+
+@dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
@@ -123,3 +131,4 @@ class Graph:
     color: str = field(default_factory=str)
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
+    canvas: Canvas = field(default_factory=Canvas)

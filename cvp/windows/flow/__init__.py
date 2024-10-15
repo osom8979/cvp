@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
+from typing import Final, Optional
 
 import imgui
 
@@ -13,6 +13,7 @@ from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item_ex
 from cvp.imgui.styles import style_item_spacing
 from cvp.imgui.text_centered import text_centered
+from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -42,6 +43,8 @@ CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_R
 
 
 class FlowWindow(AuiWindow[FlowAuiConfig]):
+    _prev_cursor: Optional[str]
+
     def __init__(self, context: Context):
         min_width = MIN_WINDOW_WIDTH
         min_height = MIN_WINDOW_HEIGHT
@@ -76,6 +79,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._right_tabs = FlowRightTabs(context)
         self._bottom_tabs = FlowBottomTabs(context)
 
+        self._prev_cursor = None
         self._graph_path = str()
         self._node_path = str()
 
@@ -128,17 +132,14 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @property
     def current_graph(self):
-        return self._context.fm.current_graph
-
-    def clear_current_graph(self) -> None:
-        self._context.fm.close_graph()
+        return self.context.fm.current_graph
 
     def on_new_graph_popup(self, name: str) -> None:
-        graph = self._context.fm.create_graph(name, append=True, open=True)
-        filepath = self._context.home.flows.graph_filepath(graph.uuid)
+        graph = self.context.fm.create_graph(name, append=True, open=True)
+        filepath = self.context.home.flows.graph_filepath(graph.uuid)
         if filepath.exists():
             raise FileExistsError(f"Graph file already exists: '{str(filepath)}'")
-        self._context.fm.write_graph_yaml(filepath, graph)
+        self.context.fm.write_graph_yaml(filepath, graph)
 
     def on_open_file_popup(self, file: str) -> None:
         pass
@@ -148,8 +149,49 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process(self) -> None:
+        self.do_process_cursor_events()
         self.on_menu()
         super().on_process()
+
+    def do_process_cursor_events(self):
+        if self._prev_cursor == self.context.fm.cursor:
+            return
+
+        try:
+            if self._prev_cursor:
+                self.on_close_graph(self._prev_cursor)
+
+            if self.context.fm.cursor:
+                self.on_open_graph(self.context.fm.cursor)
+        finally:
+            self._prev_cursor = self.context.fm.cursor
+
+    def on_close_graph(self, uuid: str):
+        if self.context.debug:
+            logger.debug(f"{type(self).__name__}.on_close_graph('{uuid}')")
+
+        graph = self.context.fm.get(uuid)
+        if graph is None:
+            return
+
+        graph.canvas.pan_x = self._control.pan_x
+        graph.canvas.pan_y = self._control.pan_y
+        graph.canvas.zoom = self._control.zoom
+        graph.canvas.alpha = self._control.alpha
+        self.context.save_graph(graph)
+
+    def on_open_graph(self, uuid: str):
+        if self.context.debug:
+            logger.debug(f"{type(self).__name__}.on_open_graph('{uuid}')")
+
+        graph = self.context.fm.get(uuid)
+        if graph is None:
+            return
+
+        self._control.pan_x = graph.canvas.pan_x
+        self._control.pan_y = graph.canvas.pan_y
+        self._control.zoom = graph.canvas.zoom
+        self._control.alpha = graph.canvas.alpha
 
     def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
@@ -183,9 +225,9 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         #     pass
 
         imgui.separator()
-        has_cursor = self._context.fm.opened
+        has_cursor = self.context.fm.opened
         if imgui.menu_item("Close graph", None, False, enabled=has_cursor)[0]:
-            self._context.fm.close_graph()
+            self.context.fm.close_graph()
 
         imgui.separator()
         if imgui.menu_item("Exit")[0]:
@@ -193,13 +235,12 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     def on_graph_menu(self) -> None:
         if imgui.menu_item("Refresh graphs")[0]:
-            self._context.refresh_flow_graphs()
+            self.context.refresh_flow_graphs()
 
     @override
     def on_process_sidebar_left(self):
-        current_graph = self._context.fm.current_graph
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
-            self._left_tabs.do_process(current_graph)
+            self._left_tabs.do_process(self.current_graph)
 
         with style_item_spacing(0, -1):
             self._tree_splitter.do_process()
@@ -223,7 +264,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process_main(self) -> None:
-        if not self._context.fm.opened:
+        if not self.context.fm.opened:
             text_centered("Please select a graph")
             return
 

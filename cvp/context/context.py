@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from cvp.config.config import Config
 from cvp.filesystem.permission import test_directory, test_readable, test_writable
+from cvp.flow.datas import Graph
 from cvp.flow.manager import FlowManager
 from cvp.logging.logging import (
     convert_level_number,
@@ -63,10 +64,6 @@ class Context:
         thread_workers = self._config.concurrency.thread_workers
         thread_name_prefix = self._config.concurrency.thread_name_prefix
         process_workers = self._config.concurrency.process_workers
-        if thread_workers <= 0:
-            raise ValueError("Number of thread workers must be greater than zero")
-        if process_workers <= 0:
-            raise ValueError("Number of process workers must be greater than zero")
 
         self._process_manager = ProcessManager(
             config=self._config.ffmpeg,
@@ -140,12 +137,21 @@ class Context:
             verify_checksum=verify_checksum,
         )
 
-    def teardown(self) -> None:
+    def teardown_process_manager(self) -> None:
         self._process_manager.teardown(self._config.process_manager.teardown_timeout)
 
     def save_config(self) -> None:
-        logger.info(f"Save the config file: '{str(self._home.cvp_yml)}'")
         self._config.write_yaml(self._home.cvp_yml)
+        logger.info(f"Save the config file: '{str(self._home.cvp_yml)}'")
+
+    def save_graph(self, graph: Graph) -> None:
+        filepath = self._home.flows.graph_filepath(graph.uuid)
+        self._flow_manager.write_graph_yaml(filepath, graph)
+        logger.info(f"Save the graph file: '{str(filepath)}'")
+
+    def save_all_graphs(self) -> None:
+        for graph in self._flow_manager.values():
+            self.save_graph(graph)
 
     def refresh_flow_graphs(self):
         for file in self._home.flows.find_graph_files():

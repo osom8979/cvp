@@ -10,13 +10,14 @@ from yaml import dump, full_load
 from cvp.flow.catalog import FlowCatalog
 from cvp.flow.datas import Graph, Node, Pin
 from cvp.flow.path import FlowPath
+from cvp.strings.is_uuid import is_uuid4
 from cvp.yaml.dumpers import IndentListDumper
 
 
-class FlowManager:
+class FlowManager(OrderedDict[str, Graph]):
     def __init__(self, *, cursor: Optional[str] = None):
+        super().__init__()
         self._catalog = FlowCatalog.from_builtins()
-        self._graphs = OrderedDict[str, Graph]()
         self._cursor = cursor
 
     @property
@@ -35,27 +36,31 @@ class FlowManager:
     def current_graph(self) -> Optional[Graph]:
         if self._cursor is None:
             return None
-        return self._graphs.get(self._cursor, None)
+        return self.get(self._cursor, None)
 
     def open_graph(self, uuid: str) -> None:
-        if uuid not in self._graphs:
+        if uuid not in self:
             raise KeyError(f"Not exists flow graph: '{uuid}'")
+
+        if self._cursor:
+            raise ValueError("The graph is already opened")
+
+        assert self._cursor is None
         self._cursor = uuid
 
     def close_graph(self) -> None:
+        if not self._cursor:
+            raise ValueError("The graph is already closed")
+
+        assert isinstance(self._cursor, str)
         self._cursor = None
 
-    def __bool__(self):
-        return bool(self._graphs)
+    def open_graph_safely(self, uuid: str) -> None:
+        if self.opened:
+            self.close_graph()
 
-    def items(self):
-        return self._graphs.items()
-
-    def keys(self):
-        return self._graphs.keys()
-
-    def values(self):
-        return self._graphs.values()
+        assert not self.opened
+        self.open_graph(uuid)
 
     # noinspection PyShadowingBuiltins
     def create_graph(
@@ -72,11 +77,12 @@ class FlowManager:
         template = template if template else str()
         assert isinstance(template, str)
         graph = Graph(name=name)
+        assert is_uuid4(graph.uuid)
 
         if append:
             assert graph.uuid
-            assert graph.uuid not in self._graphs
-            self._graphs[graph.uuid] = graph
+            assert graph.uuid not in self
+            self[graph.uuid] = graph
 
         if open:
             self._cursor = graph.uuid
@@ -86,9 +92,9 @@ class FlowManager:
     def remove_graph(self, uuid: str) -> Graph:
         if uuid == self._cursor:
             raise KeyError(f"The selected graph cannot be removed: '{uuid}'")
-        if uuid in self._graphs:
+        if uuid in self:
             raise KeyError(f"Not exists flow graph: '{uuid}'")
-        return self._graphs.pop(uuid)
+        return self.pop(uuid)
 
     @staticmethod
     def dumps_graph_yaml(graph: Graph, encoding="utf-8") -> bytes:
@@ -118,7 +124,7 @@ class FlowManager:
         graph = self.read_graph_yaml(filepath)
         if not graph.uuid:
             raise ValueError("The 'uuid' of the flow graph does not exist")
-        self._graphs[graph.uuid] = graph
+        self[graph.uuid] = graph
 
     def get_node_template(self, path: Union[str, FlowPath]):
         return self._catalog.get_node_template(path)

@@ -23,7 +23,8 @@ class GraphsTab(TabItem[Graph]):
             imgui.bullet()
             imgui.same_line()
 
-            selected = current_uuid == uuid
-            if imgui.selectable(graph.name, selected, DOUBLE_CLICK):
+            label = f"{graph.name}##{uuid}"
+            selected = uuid == current_uuid
+            if imgui.selectable(label, selected, DOUBLE_CLICK)[0]:
                 if imgui.is_mouse_double_clicked(0):
-                    self.context.fm.open_graph(uuid)
+                    self.context.fm.open_graph_safely(uuid)
