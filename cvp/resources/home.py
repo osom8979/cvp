@@ -10,6 +10,7 @@ from cvp.resources.subdirs.flows import Flows
 from cvp.resources.subdirs.keyrings import Keyrings
 from cvp.resources.subdirs.layouts import Layouts
 from cvp.resources.subdirs.logs import Logs
+from cvp.resources.subdirs.onvifs import Onvifs
 from cvp.resources.subdirs.processes import Processes
 from cvp.resources.subdirs.temp import Temp
 from cvp.resources.subdirs.wsdl import Wsdl
@@ -31,6 +32,7 @@ class HomeDir(PathFlavour):
         self.keyrings = Keyrings.classname_subdir(self)
         self.layouts = Layouts.classname_subdir(self)
         self.logs = Logs.classname_subdir(self)
+        self.onvifs = Onvifs.classname_subdir(self)
         self.processes = Processes.classname_subdir(self)
         self.temp = Temp.classname_subdir(self)
         self.wsdl = Wsdl.classname_subdir(self)
@@ -42,6 +44,7 @@ class HomeDir(PathFlavour):
             self.keyrings,
             self.layouts,
             self.logs,
+            self.onvifs,
             self.processes,
             self.temp,
             self.wsdl,

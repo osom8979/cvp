@@ -1,44 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
-
-from cvp.config.sections.onvif import OnvifConfig
-from cvp.config.sections.wsdl import WsdlConfig
 from cvp.logging.logging import onvif_logger as logger
-from cvp.onvif.service import OnvifService
 from cvp.onvif.types import StreamType, TransportProtocol
 from cvp.onvif.variables import ONVIF_V10_SCHEMA_URL, PROFILE_TOKEN_MAX_LENGTH
-from cvp.resources.home import HomeDir
 from cvp.wsdl.declaration import WsdlDeclaration
-
-ONVIF_DECL_MEDIA = WsdlDeclaration(
-    declaration="http://www.onvif.org/ver10/media/wsdl",
-    http_sub="Media",
-    wsdl_file="media.wsdl",
-    subclass="Media",
-    binding_names=["MediaBinding"],
-)
+from cvp.wsdl.service import WsdlService
 
 
-class OnvifMedia(OnvifService):
+class OnvifMedia(WsdlService):
     """
     http://www.onvif.org/ver10/media/wsdl/media.wsdl
     """
 
-    def __init__(
-        self,
-        onvif_config: OnvifConfig,
-        wsdl_config: WsdlConfig,
-        home: HomeDir,
-        password: Optional[str] = None,
-    ):
-        super().__init__(
-            decl=ONVIF_DECL_MEDIA,
-            onvif_config=onvif_config,
-            wsdl_config=wsdl_config,
-            home=home,
-            password=password,
-        )
+    __wsdl_declaration__ = WsdlDeclaration(
+        declaration="http://www.onvif.org/ver10/media/wsdl",
+        http_sub="Media",
+        wsdl_file="media.wsdl",
+        subclass="Media",
+        binding_names=["MediaBinding"],
+    )
 
     def get_profiles(self):
         return self.service.GetProfiles()

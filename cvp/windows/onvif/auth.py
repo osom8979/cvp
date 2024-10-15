@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional
+from typing import Final
 
 import imgui
 
-from cvp.config.sections.onvif import HttpAuth, OnvifConfig
+from cvp.config.sections.onvif import HttpAuth, OnvifConfig, OnvifService
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
 from cvp.logging.logging import onvif_logger as logger
-from cvp.onvif.ver10.devicemgmt import OnvifDeviceManagement
+from cvp.onvif.service import make_wsdl_service_args
+from cvp.onvif.service.devicemgmt import OnvifDeviceManagement
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -24,28 +25,32 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
         self._show_password = False
         self._requesting = False
 
-    def get_services(self, onvif_config: OnvifConfig) -> None:
+    def get_services(self, item: OnvifConfig) -> None:
         if self._requesting:
             raise ValueError("Now requesting")
 
         self._requesting = True
-        password = self.keyrings.get_onvif_password(onvif_config.uuid, str())
-        self.context.pm.submit_thread(self._get_services_main, onvif_config, password)
+        self.context.pm.submit_thread(self._get_services_main, item)
 
-    def _get_services_main(
-        self,
-        onvif_config: OnvifConfig,
-        password: Optional[str] = None,
-    ) -> None:
+    def _get_services_main(self, item: OnvifConfig) -> None:
         try:
-            api = OnvifDeviceManagement(
-                onvif_config=onvif_config,
+            args = make_wsdl_service_args(
+                address=item.address,
+                onvif_config=item,
                 wsdl_config=self.context.config.wsdl,
                 home=self.context.home,
-                password=password,
             )
-            result = api.get_services()
-            logger.info(result)
+            response = OnvifDeviceManagement(**args).get_services()
+            services = list()
+            for service in response:
+                service_config = OnvifService()
+                service_config.namespace = service.Namespace
+                service_config.xaddr = service.XAddr
+                service_config.version_major = service.Version.Major
+                service_config.version_minor = service.Version.Minor
+                services.append(service_config)
+                logger.info(f"Add {service_config}")
+            item.services = services
         finally:
             self._requesting = False
 
