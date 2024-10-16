@@ -16,6 +16,7 @@ from cvp.logging.logging import (
     logger,
     set_root_level,
 )
+from cvp.patterns.state_watcher import StateWatcher
 from cvp.process.manager import ProcessManager
 from cvp.resources.download.archive import DownloadArchive
 from cvp.resources.download.links.tuples import LinkInfo
@@ -83,7 +84,9 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
+        self._watcher = StateWatcher()
         self._flow_manager = FlowManager()
+
         self.refresh_flow_graphs()
 
     @property
@@ -93,6 +96,10 @@ class Context:
     @property
     def config(self):
         return self._config
+
+    @property
+    def watcher(self):
+        return self._watcher
 
     @property
     def pm(self):
@@ -149,7 +156,7 @@ class Context:
         self._flow_manager.write_graph_yaml(filepath, graph)
         logger.info(f"Save the graph file: '{str(filepath)}'")
 
-    def save_all_graphs(self) -> None:
+    def save_graphs(self) -> None:
         for graph in self._flow_manager.values():
             self.save_graph(graph)
 

@@ -238,7 +238,7 @@ class PlayerApplication:
         self._context.save_config()
         imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
 
-        self._context.save_all_graphs()
+        self._context.save_graphs()
 
         del self._renderer
         pygame.quit()
