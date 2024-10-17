@@ -11,6 +11,9 @@ from cvp.config.sections.bases.window import WindowConfig
 from cvp.context.context import Context
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
+from cvp.msgs.callbacks import MsgCallbacks
+from cvp.msgs.msg import Msg, MsgTypeLike, get_msg_type_number
+from cvp.msgs.msg_map import MsgWrapper, create_msg_map
 from cvp.pygame.able.eventable import Eventable
 from cvp.pygame.able.keyboardable import Keyboardable
 from cvp.pygame.able.mouseable import Mouseable
@@ -61,6 +64,10 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
     @abstractmethod
+    def on_msg(self, msg: Msg) -> Optional[bool]:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_before(self) -> None:
         raise NotImplementedError
 
@@ -100,6 +107,7 @@ class Window(
     Generic[WindowConfigT],
     WindowInterface,
     EventCallbacks,
+    MsgCallbacks,
     Eventable,
     Keyboardable,
     Mouseable,
@@ -107,6 +115,7 @@ class Window(
 ):
     _popups: Dict[str, Popup]
     _events: Dict[int, EventWrapper]
+    _msgs: Dict[int, MsgWrapper]
 
     def __init__(
         self,
@@ -324,6 +333,10 @@ class Window(
         pass
 
     @override
+    def on_msg(self, msg: Msg) -> Optional[bool]:
+        pass
+
+    @override
     def on_before(self) -> None:
         pass
 
@@ -352,14 +365,21 @@ class Window(
     ) -> None:
         self._events[event_type].append_callback(callback)
 
+    def register_msg_callback(self, msg_type: MsgTypeLike, callback: Callable) -> None:
+        self._msgs[get_msg_type_number(msg_type)].append_callback(callback)
+
     def update_event_map(self, obj: Any, cls: type) -> None:
         self._events.update(create_event_map(obj, cls))
 
+    def update_msg_map(self, obj: Any, cls: type) -> None:
+        self._msgs.update(create_msg_map(obj, cls))
+
     def do_create(self) -> None:
         if self._initialized:
-            raise ValueError("Already initialized")
+            raise ValueError("Already initialized window instance")
 
         self._events.update(create_event_map(self))
+        self._msgs.update(create_msg_map(self))
 
         try:
             self.on_create()
@@ -372,7 +392,7 @@ class Window(
 
     def do_destroy(self) -> None:
         if not self._initialized:
-            raise ValueError("Not initialized")
+            raise ValueError("The window instance is not initialized")
 
         try:
             self.on_destroy()
@@ -386,16 +406,25 @@ class Window(
 
     def do_event(self, event: Event) -> Optional[bool]:
         if not self._initialized:
-            raise ValueError("Not initialized")
+            raise ValueError("The window instance is not initialized")
 
         if bool(self.on_event(event)):
             return True
 
         return self._events[event.type](event)
 
+    def do_msg(self, msg: Msg) -> Optional[bool]:
+        if not self._initialized:
+            raise ValueError("The window instance is not initialized")
+
+        if bool(self.on_msg(msg)):
+            return True
+
+        return self._msgs[get_msg_type_number(msg.type)](msg)
+
     def do_process(self) -> None:
         if not self._initialized:
-            raise ValueError("Not initialized")
+            raise ValueError("The window instance is not initialized")
 
         if not self.opened:
             return

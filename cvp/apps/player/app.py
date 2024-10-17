@@ -21,8 +21,9 @@ from cvp.context.autofixer import AutoFixer
 from cvp.context.context import Context
 from cvp.imgui.fonts import add_jbm_font, add_ngc_font
 from cvp.imgui.styles import default_style_colors
-from cvp.logging.logging import event_logger, logger, profile_logger
+from cvp.logging.logging import event_logger, logger, msg_logger, profile_logger
 from cvp.logging.profile import ProfileLogging
+from cvp.msgs.msg import Msg
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.window_mapper import WindowMapper
@@ -248,6 +249,10 @@ class PlayerApplication:
             with self._profiler:
                 for event in pygame.event.get():
                     self.on_event(event)
+
+                for msg in self._context.msgs.get():
+                    self.on_msg(msg)
+
                 self.on_keyboard_shortcut(get_pressed())
                 self.on_tick()
                 self.on_frame()
@@ -266,6 +271,17 @@ class PlayerApplication:
             self._confirm_quit.show()
 
         self._renderer.do_event(event)
+
+    def on_msg(self, msg: Msg) -> None:
+        assert NOEVENT < msg.type < NUMEVENTS
+        msg_logger.debug(f"Msg {msg.name}: {msg.data}")
+
+        consumed_msg = self._windows.do_msg(msg)
+        if not consumed_msg:
+            self.on_msg_fallback(msg)
+
+    def on_msg_fallback(self, msg: Msg) -> None:
+        pass
 
     def on_keyboard_shortcut(self, keys: ScancodeWrapper) -> None:
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:

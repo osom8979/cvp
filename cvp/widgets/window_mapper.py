@@ -5,6 +5,7 @@ from typing import Optional
 
 from pygame.event import Event
 
+from cvp.msgs.msg import Msg
 from cvp.pygame.constants.event_type import KEY_EVENTS
 from cvp.pygame.constants.keycode import Keycode
 from cvp.pygame.constants.keymod import Keymod
@@ -50,6 +51,14 @@ class WindowMapper(OrderedDict[str, Window]):
         for win in self.as_windows():
             consumed_event = win.do_event(event)
             if consumed_event:
+                return True
+
+        return False
+
+    def do_msg(self, msg: Msg) -> bool:
+        for win in self.as_windows():
+            consumed_msg = win.do_msg(msg)
+            if consumed_msg:
                 return True
 
         return False

@@ -16,6 +16,7 @@ from cvp.logging.logging import (
     logger,
     set_root_level,
 )
+from cvp.msgs.msg_queue import MsgQueue
 from cvp.patterns.state_watcher import StateWatcher
 from cvp.process.manager import ProcessManager
 from cvp.resources.download.archive import DownloadArchive
@@ -84,6 +85,7 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
+        self._msgs = MsgQueue()
         self._watcher = StateWatcher()
         self._flow_manager = FlowManager()
 
@@ -96,6 +98,10 @@ class Context:
     @property
     def config(self):
         return self._config
+
+    @property
+    def msgs(self):
+        return self._msgs
 
     @property
     def watcher(self):
