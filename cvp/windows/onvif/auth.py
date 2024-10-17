@@ -4,13 +4,11 @@ from typing import Final
 
 import imgui
 
-from cvp.config.sections.onvif import HttpAuth, OnvifConfig, OnvifService
+from cvp.config.sections.onvif import HttpAuth, OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
-from cvp.logging.logging import onvif_logger as logger
-from cvp.onvif.service import make_wsdl_service_args
-from cvp.onvif.service.devicemgmt import OnvifDeviceManagement
+from cvp.onvif.service import OnvifService
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -34,23 +32,8 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
 
     def _get_services_main(self, item: OnvifConfig) -> None:
         try:
-            args = make_wsdl_service_args(
-                address=item.address,
-                onvif_config=item,
-                wsdl_config=self.context.config.wsdl,
-                home=self.context.home,
-            )
-            response = OnvifDeviceManagement(**args).get_services()
-            services = list()
-            for service in response:
-                service_config = OnvifService()
-                service_config.namespace = service.Namespace
-                service_config.xaddr = service.XAddr
-                service_config.version_major = service.Version.Major
-                service_config.version_minor = service.Version.Minor
-                services.append(service_config)
-                logger.info(f"Add {service_config}")
-            item.services = services
+            service = OnvifService(item, self.context.config.wsdl, self.context.home)
+            service.update_services()
         finally:
             self._requesting = False
 
