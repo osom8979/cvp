@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="../../../ver20/util/onvif-wsdl-viewer.xsl"?>
 <!--
-Copyright (c) 2008-2021 by ONVIF: Open Network Video Interface Forum. All rights reserved.
+Copyright (c) 2008-2023 by ONVIF: Open Network Video Interface Forum. All rights reserved.
 
 Recipients of this document may copy, distribute, publish, or display this document so long as this copyright notice, license and disclaimer are retained with all copies of the document. No license is granted to modify this document.
 
@@ -10,7 +10,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 -->
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tds="http://www.onvif.org/ver10/device/wsdl" targetNamespace="http://www.onvif.org/ver10/device/wsdl">
 	<wsdl:types>
-		<xs:schema targetNamespace="http://www.onvif.org/ver10/device/wsdl" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:tds="http://www.onvif.org/ver10/device/wsdl" elementFormDefault="qualified" version="21.06">
+		<xs:schema targetNamespace="http://www.onvif.org/ver10/device/wsdl" xmlns:tt="http://www.onvif.org/ver10/schema" xmlns:tds="http://www.onvif.org/ver10/device/wsdl" elementFormDefault="qualified" version="23.12">
 			<xs:import namespace="http://www.onvif.org/ver10/schema" schemaLocation="../../../ver10/schema/onvif.xsd"/>
 			<!--===============================-->
 			<xs:element name="GetServices">
@@ -232,6 +232,11 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 						<xs:documentation>Indicates support for WS-Security REL token.</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="JsonWebToken" type="xs:boolean">
+					<xs:annotation>
+						<xs:documentation>Indicates support for JWT-based authentication with WS-Security Binary Security token.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 				<xs:attribute name="SupportedEAPMethods" type="tt:IntList">
 					<xs:annotation>
 						<xs:documentation>EAP Methods supported by the device. The int values refer to the <a href="http://www.iana.org/assignments/eap-numbers/eap-numbers.xhtml">IANA EAP Registry</a>.</xs:documentation>
@@ -260,6 +265,11 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				<xs:attribute name="MaxPasswordHistory" type="xs:int">
 					<xs:annotation>
                     				<xs:documentation>Maximum number of passwords that the device can remember for each user</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="HashingAlgorithms" type="tt:StringList">
+					<xs:annotation>
+                    				<xs:documentation>Supported hashing algorithms as part of HTTP and RTSP Digest authentication.Example: MD5,SHA-256</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:anyAttribute processContents="lax"/>
@@ -356,6 +366,11 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 						<xs:documentation>Indicates no support for user configuration.</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="Addons" type="tt:StringAttrList">
+					<xs:annotation>
+						<xs:documentation>List of supported Addons by the device.</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
 				<xs:anyAttribute processContents="lax"/>
 			</xs:complexType>
 			<!--===============================-->
@@ -376,7 +391,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 							<xs:documentation>Automatic adjustment of the deviation from the horizon also called pitch and roll.</xs:documentation>
 						</xs:annotation>
 					</xs:enumeration>
-    			</xs:restriction>
+				</xs:restriction>
 			</xs:simpleType>
 			<!--===============================-->
 			<xs:complexType name="MiscCapabilities">
@@ -2049,6 +2064,26 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				</xs:complexType>
 			</xs:element>
 			<!--===============================-->
+			<xs:element name="SetHashingAlgorithm">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Algorithm" type="tt:StringList">
+							<xs:annotation>
+								<xs:documentation>
+									Hashing algorithm(s) used in HTTP and RTSP Digest Authentication.
+								</xs:documentation>
+							</xs:annotation>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="SetHashingAlgorithmResponse">
+				<xs:complexType>
+					<xs:sequence>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<!--===============================-->
 			
 			<xs:complexType name="UserCredential">
 				<xs:sequence>
@@ -2062,6 +2097,11 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 							<xs:documentation> optional password</xs:documentation> 
 						</xs:annotation>
 					</xs:element>
+					<xs:element name="Token" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation> optional access token</xs:documentation>
+						</xs:annotation>
+					</xs:element>					
 					<xs:element name="Extension" minOccurs="0">
 						<xs:complexType>
 							<xs:sequence>
@@ -2094,6 +2134,16 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 							<xs:documentation>FTP protocol</xs:documentation>
 						</xs:annotation>
 					</xs:enumeration>
+					<xs:enumeration value="ObjectStorageS3">
+						<xs:annotation>
+							<xs:documentation>Amazon Simple Storage Service (S3) protocol (also used for S3 compatible object storages like MinIO)</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
+					<xs:enumeration value="ObjectStorageAzure">
+						<xs:annotation>
+							<xs:documentation>Microsoft Azure Blob Storage protocol</xs:documentation>
+						</xs:annotation>
+					</xs:enumeration>
 				</xs:restriction>
 			</xs:simpleType>
 			
@@ -2101,19 +2151,19 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 				<xs:sequence>
 					<xs:element name="LocalPath" type="xs:anyURI" minOccurs="0">
 						<xs:annotation>
-			  				<xs:documentation> local path </xs:documentation>
-			  			</xs:annotation>
+							<xs:documentation>Local path</xs:documentation>
+						</xs:annotation>
 					</xs:element>
 					<xs:element name="StorageUri" type="xs:anyURI" minOccurs="0">
-			  			<xs:annotation>
-			  				<xs:documentation> Storage server address </xs:documentation>
-			  			</xs:annotation>
-			  		</xs:element>
+						<xs:annotation>
+							<xs:documentation>Storage server address</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="User" type="tds:UserCredential"  minOccurs="0">
-			  			<xs:annotation>
-			  				<xs:documentation> User credential for the storage server </xs:documentation>
-			  			</xs:annotation>
-			  		</xs:element>
+						<xs:annotation>
+							<xs:documentation>User credential for the storage server</xs:documentation>
+						</xs:annotation>
+					</xs:element>
 					<xs:element name="Extension" minOccurs="0">
 						<xs:complexType>
 							<xs:sequence>
@@ -2121,10 +2171,21 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 							</xs:sequence>
 						</xs:complexType>
 					</xs:element>
+					<xs:element name="CertPathValidationPolicyID" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>The unique identifier of the certification path validation policy to be used for validating the server certificate as declared in the security service.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:sequence>
 				<xs:attribute name="type" type="xs:string" use="required">
 					<xs:annotation>
-						<xs:documentation>StorageType lists the acceptable values for type attribute </xs:documentation>
+						<xs:documentation>tds:StorageType lists the acceptable values for type attribute</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="Region" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>Optional region of the storage server</xs:documentation>
 					</xs:annotation>
 				</xs:attribute>
 				<xs:anyAttribute processContents="lax"/>
@@ -2221,6 +2282,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 					<xs:sequence/>
 				</xs:complexType>
 			</xs:element>	 		
+
 			<!--===============================-->
 			<xs:element name="GetGeoLocation">
 				<xs:complexType>
@@ -2835,8 +2897,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 	</wsdl:message>
 	<wsdl:message name="DeleteStorageConfigurationResponse">
 		<wsdl:part name="parameters" element="tds:DeleteStorageConfigurationResponse"/>
-	</wsdl:message>	
-	
+	</wsdl:message>
 	<wsdl:message name="GetGeoLocationRequest">
 		<wsdl:part name="parameters" element="tds:GetGeoLocation"/>
 	</wsdl:message>
@@ -2855,6 +2916,12 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 	<wsdl:message name="DeleteGeoLocationResponse">
 		<wsdl:part name="parameters" element="tds:DeleteGeoLocationResponse"/>
 	</wsdl:message>	
+	<wsdl:message name="SetHashingAlgorithmRequest">
+		<wsdl:part name="parameters" element="tds:SetHashingAlgorithm"/>
+	</wsdl:message>
+	<wsdl:message name="SetHashingAlgorithmResponse">
+		<wsdl:part name="parameters" element="tds:SetHashingAlgorithmResponse"/>
+	</wsdl:message>
 	
 	<wsdl:portType name="Device">
 		<wsdl:operation name="GetServices">
@@ -3467,12 +3534,19 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 			<wsdl:input message="tds:DeleteGeoLocationRequest"/>
 			<wsdl:output message="tds:DeleteGeoLocationResponse"/>
 		</wsdl:operation>
+		<wsdl:operation name="SetHashingAlgorithm">
+		<wsdl:documentation>
+				This operation sets the hashing algorithm(s) used in HTTP and RTSP Digest Authentication.
+			</wsdl:documentation>
+			<wsdl:input message="tds:SetHashingAlgorithmRequest"/>
+			<wsdl:output message="tds:SetHashingAlgorithmResponse"/>
+		</wsdl:operation>
 
 		<!--===============================-->
-		<wsdl:documentation> The definition and interfaces for the Security have been deprecated with release 16.12
+		<!--The definition and interfaces for the Security have been deprecated with release 16.12
 			The Security part was handed over to Security Configuration Service.
-			For backward compatibility the methods remains in the devicemgmt.wsdl file.
-		</wsdl:documentation>
+			For backward compatibility the methods remains in the devicemgmt.wsdl file.-->
+		
 		<wsdl:operation name="CreateCertificate">
 			<wsdl:input message="tds:CreateCertificateRequest"/>
 			<wsdl:output message="tds:CreateCertificateResponse"/>
@@ -3544,7 +3618,7 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 		<wsdl:operation name="DeleteDot1XConfiguration">
 			<wsdl:input message="tds:DeleteDot1XConfigurationRequest"/>
 			<wsdl:output message="tds:DeleteDot1XConfigurationResponse"/>
-		</wsdl:operation>
+		</wsdl:operation>		
 		<!--===============================-->
 
 	</wsdl:portType>
@@ -4427,6 +4501,15 @@ IN NO EVENT WILL THE CORPORATION OR ITS MEMBERS OR THEIR AFFILIATES BE LIABLE FO
 		</wsdl:operation>
 		<wsdl:operation name="DeleteGeoLocation">
 			<soap:operation soapAction="http://www.onvif.org/ver10/device/wsdl/DeleteGeoLocation"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="SetHashingAlgorithm">
+			<soap:operation soapAction="http://www.onvif.org/ver10/device/wsdl/SetHashingAlgorithm"/>
 			<wsdl:input>
 				<soap:body use="literal"/>
 			</wsdl:input>
