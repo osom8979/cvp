@@ -8,6 +8,7 @@ from cvp.config.sections.onvif import HttpAuth, OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
+from cvp.logging.logging import logger
 from cvp.onvif.service import OnvifService
 from cvp.types import override
 from cvp.widgets.tab import TabItem
@@ -34,6 +35,8 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
         try:
             service = OnvifService(item, self.context.config.wsdl, self.context.home)
             service.update_services()
+        except BaseException as e:
+            logger.error(e)
         finally:
             self._requesting = False
 

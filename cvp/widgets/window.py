@@ -146,6 +146,7 @@ class Window(
         self._removable = False
         self._popups = dict()
         self._events = dict()
+        self._msgs = dict()
         self._query = WindowQuery()
 
     def _has_flag(self, flag: int) -> bool:
