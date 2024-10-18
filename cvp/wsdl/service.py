@@ -43,8 +43,7 @@ def create_client_and_service(
         with_http_digest=with_http_digest,
         verify=not no_verify,
     )
-    binding_name = decl.get_service_binding_name()
-    service = client.create_service(binding_name, address)
+    service = client.create_service(decl.namespace_binding, address)
     return client, service
 
 
@@ -64,12 +63,13 @@ class WsdlService:
         use_digest=False,
         decl: Optional[WsdlDeclaration] = None,
     ):
-        decl = decl if decl is not None else self.__wsdl_declaration__
-        assert decl is not None
-        assert isinstance(decl, WsdlDeclaration)
+        self._address = address
+        self._decl = decl if decl is not None else self.__wsdl_declaration__
+        assert self._decl is not None
+        assert isinstance(self._decl, WsdlDeclaration)
 
         client, service = create_client_and_service(
-            decl=decl,
+            decl=self._decl,
             address=address,
             no_verify=no_verify,
             no_cache=no_cache,
@@ -85,9 +85,34 @@ class WsdlService:
         self._service = service
 
     @property
+    def address(self):
+        return self._address
+
+    @property
+    def declaration(self):
+        return self._decl
+
+    @property
+    def namespace(self):
+        return self._decl.namespace
+
+    @property
+    def binding(self):
+        return self._decl.binding
+
+    @property
     def client(self):
         return self._client
 
     @property
     def service(self):
         return self._service
+
+    def __repr__(self):
+        return (
+            f"<{type(self).__name__} @{id(self)}"
+            f" namespace='{self.namespace}'"
+            f" binding='{self.binding}'"
+            f" address='{self.address}'"
+            ">"
+        )

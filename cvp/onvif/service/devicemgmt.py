@@ -10,16 +10,10 @@ from cvp.wsdl.service import WsdlService
 
 
 class OnvifDeviceManagement(WsdlService):
-    """
-    http://www.onvif.org/ver10/device/wsdl/devicemgmt.wsdl
-    """
-
     __wsdl_declaration__ = WsdlDeclaration(
-        declaration="http://www.onvif.org/ver10/device/wsdl",
-        http_sub="device_service",
-        wsdl_file="devicemgmt.wsdl",
-        subclass="DeviceManagement",
-        binding_names=["DeviceBinding"],
+        namespace="http://www.onvif.org/ver10/device/wsdl",
+        wsdl="http://www.onvif.org/ver10/device/wsdl/devicemgmt.wsdl",
+        binding="DeviceBinding",
     )
 
     def get_capabilities(self):

@@ -6,9 +6,7 @@ from cvp.wsdl.service import WsdlService
 
 class OnvifPTZ(WsdlService):
     __wsdl_declaration__ = WsdlDeclaration(
-        declaration="http://www.onvif.org/ver20/ptz/wsdl",
-        http_sub="PTZ",
-        wsdl_file="ptz.wsdl",
-        subclass="PTZ",
-        binding_names=["PTZBinding"],
+        namespace="http://www.onvif.org/ver20/ptz/wsdl",
+        wsdl="http://www.onvif.org/ver20/ptz/wsdl/ptz.wsdl",
+        binding="PTZBinding",
     )

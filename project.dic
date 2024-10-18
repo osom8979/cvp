@@ -120,6 +120,7 @@ popens
 premul
 premult
 psnr
+pullpoint
 pythonpath
 qcif
 qntsc
@@ -162,6 +163,7 @@ sxga
 sysreq
 systemable
 timename
+tptz
 tvstd
 unicast
 uxga

@@ -6,9 +6,7 @@ from cvp.wsdl.service import WsdlService
 
 class OnvifImaging(WsdlService):
     __wsdl_declaration__ = WsdlDeclaration(
-        declaration="http://www.onvif.org/ver20/imaging/wsdl",
-        http_sub="Imaging",
-        wsdl_file="imaging.wsdl",
-        subclass="Imaging",
-        binding_names=["ImagingBinding"],
+        namespace="http://www.onvif.org/ver20/imaging/wsdl",
+        wsdl="http://www.onvif.org/ver20/imaging/wsdl/imaging.wsdl",
+        binding="ImagingBinding",
     )

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Optional, Union
+from typing import Optional
 
 from requests import Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -14,23 +14,13 @@ from cvp.wsdl.cache import ZeepFileCache
 class WsdlDeclaration:
     def __init__(
         self,
-        declaration: str,
-        http_sub: str,
-        wsdl_file: str,
-        subclass: str,
-        binding_names: Optional[List[str]] = None,
+        namespace: str,
+        wsdl: str,
+        binding: str,
     ):
-        self.declaration = declaration
-        self.http_sub = http_sub
-        self.wsdl_file = wsdl_file
-        self.subclass = subclass
-
-        # <wsdl:binding name="???" ...> ... </wsdl:binding>
-        self.binding_names = binding_names if binding_names else list()
-
-    @property
-    def wsdl_file_url(self) -> str:
-        return self.declaration + "/" + self.wsdl_file
+        self.namespace = namespace
+        self.wsdl = wsdl
+        self.binding = binding  # <wsdl:binding name="???" ...> ... </wsdl:binding>
 
     def create_client(
         self,
@@ -43,6 +33,7 @@ class WsdlDeclaration:
         cache = ZeepFileCache(cache_dir) if cache_dir else None
         session = Session()
         session.verify = verify
+
         if wsse:
             if with_http_basic and with_http_digest:
                 raise ValueError(
@@ -56,11 +47,18 @@ class WsdlDeclaration:
                 if not wsse.use_digest:
                     logger.warning("<UsernameToken> should be encoded as a digest.")
                 session.auth = HTTPDigestAuth(wsse.username, wsse.password)
-        transport = Transport(cache=cache, session=session)
-        return Client(wsdl=self.wsdl_file_url, wsse=wsse, transport=transport)
 
-    def get_service_binding_name(self, index_or_name: Union[str, int] = 0) -> str:
-        if isinstance(index_or_name, int):
-            return "{" + self.declaration + "}" + self.binding_names[index_or_name]
-        else:
-            return "{" + self.declaration + "}" + index_or_name
+        transport = Transport(cache=cache, session=session)
+        client = Client(wsdl=self.wsdl, wsse=wsse, transport=transport)
+        client.set_ns_prefix("tds", "http://www.onvif.org/ver10/device/wsdl")
+        client.set_ns_prefix("tev", "http://www.onvif.org/ver10/events/wsdl")
+        client.set_ns_prefix("timg", "http://www.onvif.org/ver20/imaging/wsdl")
+        client.set_ns_prefix("tmd", "http://www.onvif.org/ver10/deviceIO/wsdl")
+        client.set_ns_prefix("tptz", "http://www.onvif.org/ver20/ptz/wsdl")
+        client.set_ns_prefix("ttr", "http://www.onvif.org/ver10/media/wsdl")
+        client.set_ns_prefix("ter", "http://www.onvif.org/ver10/error")
+        return client
+
+    @property
+    def namespace_binding(self) -> str:
+        return "{" + self.namespace + "}" + self.binding

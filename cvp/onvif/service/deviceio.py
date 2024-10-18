@@ -6,8 +6,7 @@ from cvp.wsdl.service import WsdlService
 
 class OnvifDeviceIO(WsdlService):
     __wsdl_declaration__ = WsdlDeclaration(
-        declaration="http://www.onvif.org/ver10/deviceIO/wsdl",
-        http_sub="DeviceIO",
-        wsdl_file="deviceio.wsdl",
-        subclass="DeviceIO",
+        namespace="http://www.onvif.org/ver10/deviceIO/wsdl",
+        wsdl="http://www.onvif.org/ver10/deviceio.wsdl",
+        binding="DeviceIOBinding",
     )

@@ -8,16 +8,10 @@ from cvp.wsdl.service import WsdlService
 
 
 class OnvifMedia(WsdlService):
-    """
-    http://www.onvif.org/ver10/media/wsdl/media.wsdl
-    """
-
     __wsdl_declaration__ = WsdlDeclaration(
-        declaration="http://www.onvif.org/ver10/media/wsdl",
-        http_sub="Media",
-        wsdl_file="media.wsdl",
-        subclass="Media",
-        binding_names=["MediaBinding"],
+        namespace="http://www.onvif.org/ver10/media/wsdl",
+        wsdl="http://www.onvif.org/ver10/media/wsdl/media.wsdl",
+        binding="MediaBinding",
     )
 
     def get_profiles(self):

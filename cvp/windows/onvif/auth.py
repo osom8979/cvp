@@ -33,6 +33,8 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
         )
         services = service.update_services()
         logger.info(services)
+        wsdls = service.update_wsdl_services()
+        logger.info(f"Count: {len(wsdls)}, {wsdls}")
         return service
 
     @property
