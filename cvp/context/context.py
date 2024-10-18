@@ -6,6 +6,7 @@ from threading import Event
 from typing import Optional, ParamSpec, TypeVar, Union
 
 from cvp.config.config import Config
+from cvp.config.sections.onvif import OnvifConfig
 from cvp.filesystem.permission import test_directory, test_readable, test_writable
 from cvp.flow.datas import Graph
 from cvp.flow.manager import FlowManager
@@ -17,6 +18,8 @@ from cvp.logging.logging import (
     set_root_level,
 )
 from cvp.msgs.msg_queue import MsgQueue
+from cvp.onvif.manager import OnvifManager
+from cvp.onvif.service import OnvifService
 from cvp.process.manager import ProcessManager
 from cvp.resources.download.archive import DownloadArchive
 from cvp.resources.download.links.tuples import LinkInfo
@@ -87,9 +90,9 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
-        self._msgs = MsgQueue()
+        self._onvif_manager = OnvifManager()
+        self._msg_queue = MsgQueue()
         self._flow_manager = FlowManager()
-
         self.refresh_flow_graphs()
 
     @property
@@ -101,12 +104,16 @@ class Context:
         return self._config
 
     @property
-    def msgs(self):
-        return self._msgs
-
-    @property
     def pm(self):
         return self._process_manager
+
+    @property
+    def mq(self):
+        return self._msg_queue
+
+    @property
+    def om(self):
+        return self._onvif_manager
 
     @property
     def fm(self):
@@ -166,3 +173,13 @@ class Context:
     def refresh_flow_graphs(self):
         for file in self._home.flows.find_graph_files():
             self._flow_manager.update_graph_yaml(file)
+
+    def create_onvif_service(self, onvif_config: OnvifConfig, *, append=False):
+        service = OnvifService(
+            onvif_config,
+            self._config.wsdl,
+            self._home,
+        )
+        if append:
+            self._onvif_manager[onvif_config.uuid] = service
+        return service

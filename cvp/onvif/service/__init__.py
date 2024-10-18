@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, Optional, ParamSpec, Type, TypeVar
+from typing import Dict, List, Optional, ParamSpec, Type, TypeVar
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
@@ -159,7 +159,31 @@ class OnvifService:
         self._services = {service.Namespace: service for service in response}
         return self._services
 
-    def update_wsdl_services(self):
+    @property
+    def services(self):
+        return self._services
+
+    @property
+    def wsdls(self) -> List[WsdlService]:
+        result = (
+            self._devicemgmt,
+            self._analytics,
+            self._deviceio,
+            self._events,
+            self._imaging,
+            self._media,
+            self._notification,
+            self._ptz,
+            self._pullpoint,
+            self._receiver,
+            self._recording,
+            self._replay,
+            self._search,
+            self._subscription,
+        )
+        return [o for o in result if o is not None]
+
+    def update_wsdls(self) -> List[WsdlService]:
         wsdls = (
             self.devicemgmt,
             self.analytics,

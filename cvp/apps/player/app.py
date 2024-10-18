@@ -250,7 +250,7 @@ class PlayerApplication:
                 for event in pygame.event.get():
                     self.on_event(event)
 
-                for msg in self._context.msgs.get():
+                for msg in self._context.mq.get():
                     self.on_msg(msg)
 
                 self.on_keyboard_shortcut(get_pressed())

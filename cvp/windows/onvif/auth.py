@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from copy import deepcopy
 from typing import Final
 
 import imgui
@@ -10,7 +9,6 @@ from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
 from cvp.logging.logging import logger
-from cvp.onvif.service import OnvifService
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -23,18 +21,22 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
     def __init__(self, context: Context):
         super().__init__(context, "Auth")
         self._show_password = False
-        self._runner = self.context.pm.create_thread_runner(self.on_create_service)
+        self._create_runner = self.context.pm.create_thread_runner(
+            self.on_create_service,
+        )
 
     def on_create_service(self, item: OnvifConfig):
-        service = OnvifService(
-            deepcopy(item),
-            self.context.config.wsdl,
-            self.context.home,
-        )
+        service = self.context.create_onvif_service(item, append=True)
         services = service.update_services()
-        logger.info(services)
-        wsdls = service.update_wsdl_services()
-        logger.info(f"Count: {len(wsdls)}, {wsdls}")
+        for service in services.values():
+            ns = service.Namespace
+            addr = service.XAddr
+            major = service.Version.Major
+            minor = service.Version.Minor
+            logger.info(f"{ns} ({major}.{minor}) address: {addr}")
+        wsdls = service.update_wsdls()
+        for wsdl in wsdls:
+            logger.info(f"Update WSDL {type(wsdl).__name__}")
         return service
 
     @property
@@ -107,9 +109,34 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
             self.on_wsse_process(item)
 
         imgui.separator()
-        if button_ex("Get services", disabled=self._runner):
-            self._runner(item)
+        has_service = item.uuid in self.context.om
+        create_running = self._create_runner.running
+        disabled_create = has_service or create_running
+        disabled_clear = not has_service or create_running
 
-        if imgui.is_item_hovered():
-            with imgui.begin_tooltip():
-                imgui.text("Returns information about services on the device")
+        if button_ex("Create ONVIF", disabled=disabled_create):
+            assert not has_service
+            assert not create_running
+            self._create_runner(item)
+
+        imgui.same_line()
+        if button_ex("Clear ONVIF", disabled=disabled_clear):
+            assert has_service
+            assert not create_running
+            self.context.om.pop(item.uuid)
+
+        onvif = self.context.om.get(item.uuid)
+        if onvif is not None:
+            with imgui.begin_group():
+                imgui.text("ONVIF WSDL services:")
+                for service in onvif.services.values():
+                    ns = service.Namespace
+                    addr = service.XAddr
+                    major = service.Version.Major
+                    minor = service.Version.Minor
+                    imgui.bullet_text(f"{ns} ({major}.{minor}) address: {addr}")
+
+            with imgui.begin_group():
+                imgui.text("ONVIF WSDL services:")
+                for wsdl in onvif.wsdls:
+                    imgui.bullet_text(f"{type(wsdl).__name__} {wsdl.address}")
