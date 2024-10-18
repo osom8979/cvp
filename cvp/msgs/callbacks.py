@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
+from typing import Any, Optional
 
 from cvp.msgs.interface import MsgInterface
 from cvp.types import override
@@ -8,5 +8,10 @@ from cvp.types import override
 
 class MsgCallbacks(MsgInterface):
     @override
-    def on_msg_none(self, uuid: str) -> Optional[bool]:
+    def on_msg_none(
+        self,
+        uuid: str,
+        data: Any,
+        error: Optional[BaseException],
+    ) -> Optional[bool]:
         pass

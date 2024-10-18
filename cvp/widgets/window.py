@@ -12,8 +12,9 @@ from cvp.context.context import Context
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
 from cvp.msgs.callbacks import MsgCallbacks
-from cvp.msgs.msg import Msg, MsgTypeLike, get_msg_type_number
+from cvp.msgs.msg import Msg
 from cvp.msgs.msg_map import MsgWrapper, create_msg_map
+from cvp.msgs.msg_type import MsgTypeLike, get_msg_type_number
 from cvp.pygame.able.eventable import Eventable
 from cvp.pygame.able.keyboardable import Keyboardable
 from cvp.pygame.able.mouseable import Mouseable

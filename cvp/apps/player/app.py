@@ -273,8 +273,7 @@ class PlayerApplication:
         self._renderer.do_event(event)
 
     def on_msg(self, msg: Msg) -> None:
-        assert NOEVENT < msg.type < NUMEVENTS
-        msg_logger.debug(f"Msg {msg.name}: {msg.data}")
+        msg_logger.debug(f"Msg {msg.name} uuid={msg.uuid}, data={msg.data}")
 
         consumed_msg = self._windows.do_msg(msg)
         if not consumed_msg:

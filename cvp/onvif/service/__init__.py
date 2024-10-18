@@ -100,9 +100,10 @@ class OnvifService:
             include_capability,
         )
 
-    def update_services(self) -> None:
+    def update_services(self):
         response = self.get_services(include_capability=False)
         self._services = {service.Namespace: service for service in response}
+        return self._services
 
     def _create_wsdl(
         self,

@@ -3,7 +3,7 @@
 from concurrent.futures import Future, ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Callable, Optional, ParamSpec, TypeVar
 
-from cvp.concurrency.runnable import Runnable
+from cvp.concurrency.threading.runnable import ThreadRunnable
 from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.logging.logging import logger
 from cvp.process.helper.ffmpeg import FFmpegProcessHelper
@@ -70,12 +70,6 @@ class ProcessManager:
         **kwargs: SubmitParamT.kwargs,
     ) -> Future[SubmitResultT]:
         return self._process_pool.submit(fn, *args, **kwargs)
-
-    def create_thread_runnable(self, fn: Callable[SubmitParamT, SubmitResultT]):
-        return Runnable(self._thread_pool, fn)
-
-    def create_process_runnable(self, fn: Callable[SubmitParamT, SubmitResultT]):
-        return Runnable(self._process_pool, fn)
 
     def keys(self):
         return self._processes.keys()
@@ -155,3 +149,6 @@ class ProcessManager:
         process = self._ffmpeg.spawn_with_file(key, file, width, height)
         self._processes[key] = process
         return process
+
+    def create_thread_runner(self, callback: Callable[SubmitParamT, SubmitResultT]):
+        return ThreadRunnable[SubmitParamT, SubmitResultT](self._thread_pool, callback)

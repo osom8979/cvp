@@ -6,7 +6,8 @@ from typing import Any, Callable, Dict, List, Optional
 from cvp.inspect.bind import force_bind
 from cvp.msgs.attribute import get_msg_type, has_msg_type
 from cvp.msgs.interface import MsgInterface
-from cvp.msgs.msg import Msg, MsgType, get_msg_type_name
+from cvp.msgs.msg import Msg
+from cvp.msgs.msg_type import MsgType, get_msg_type_name
 
 
 class MsgCallable:

@@ -3,7 +3,7 @@
 import os
 from os import PathLike
 from threading import Event
-from typing import Optional, Union
+from typing import Optional, ParamSpec, TypeVar, Union
 
 from cvp.config.config import Config
 from cvp.filesystem.permission import test_directory, test_readable, test_writable
@@ -17,13 +17,15 @@ from cvp.logging.logging import (
     set_root_level,
 )
 from cvp.msgs.msg_queue import MsgQueue
-from cvp.patterns.state_watcher import StateWatcher
 from cvp.process.manager import ProcessManager
 from cvp.resources.download.archive import DownloadArchive
 from cvp.resources.download.links.tuples import LinkInfo
 from cvp.resources.download.runner import DownloadRunner
 from cvp.resources.home import HomeDir
 from cvp.system.environ_keys import PYOPENGL_USE_ACCELERATE, SDL_VIDEO_X11_FORCE_EGL
+
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
 
 
 class Context:
@@ -86,7 +88,6 @@ class Context:
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
         self._msgs = MsgQueue()
-        self._watcher = StateWatcher()
         self._flow_manager = FlowManager()
 
         self.refresh_flow_graphs()
@@ -102,10 +103,6 @@ class Context:
     @property
     def msgs(self):
         return self._msgs
-
-    @property
-    def watcher(self):
-        return self._watcher
 
     @property
     def pm(self):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
 from typing import Final
 
 import imgui
@@ -22,23 +23,17 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
     def __init__(self, context: Context):
         super().__init__(context, "Auth")
         self._show_password = False
-        self._requesting = False
+        self._runner = self.context.pm.create_thread_runner(self.on_create_service)
 
-    def get_services(self, item: OnvifConfig) -> None:
-        if self._requesting:
-            raise ValueError("Now requesting")
-
-        self._requesting = True
-        self.context.pm.submit_thread(self._get_services_main, item)
-
-    def _get_services_main(self, item: OnvifConfig) -> None:
-        try:
-            service = OnvifService(item, self.context.config.wsdl, self.context.home)
-            service.update_services()
-        except BaseException as e:
-            logger.error(e)
-        finally:
-            self._requesting = False
+    def on_create_service(self, item: OnvifConfig):
+        service = OnvifService(
+            deepcopy(item),
+            self.context.config.wsdl,
+            self.context.home,
+        )
+        services = service.update_services()
+        logger.info(services)
+        return service
 
     @property
     def keyrings(self):
@@ -110,8 +105,8 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
             self.on_wsse_process(item)
 
         imgui.separator()
-        if button_ex("Get services", disabled=self._requesting):
-            self.get_services(item)
+        if button_ex("Get services", disabled=self._runner):
+            self._runner(item)
 
         if imgui.is_item_hovered():
             with imgui.begin_tooltip():
