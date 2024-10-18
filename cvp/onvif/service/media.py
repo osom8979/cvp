@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from cvp.logging.logging import onvif_logger as logger
+from cvp.onvif.cache import use_response_cache
 from cvp.onvif.types import StreamType, TransportProtocol
 from cvp.onvif.variables import ONVIF_V10_SCHEMA_URL, PROFILE_TOKEN_MAX_LENGTH
 from cvp.wsdl.declaration import WsdlDeclaration
@@ -14,9 +15,11 @@ class OnvifMedia(WsdlService):
         binding="MediaBinding",
     )
 
+    @use_response_cache
     def get_profiles(self):
         return self.service.GetProfiles()
 
+    @use_response_cache
     def get_stream_uri(
         self,
         protocol: TransportProtocol,
@@ -34,6 +37,7 @@ class OnvifMedia(WsdlService):
         setup = schema.StreamSetup(Stream=str(stream), Transport=transport)
         return self.service.GetStreamUri(StreamSetup=setup, ProfileToken=profile_token)
 
+    @use_response_cache
     def get_snapshot_uri(self, profile_token: str):
         if not (0 <= len(profile_token) <= PROFILE_TOKEN_MAX_LENGTH):
             raise ValueError(f"Invalid profile token length: '{profile_token}'")
