@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
 from typing import Dict, List, Optional, ParamSpec, Type, TypeVar
+from urllib.parse import urlparse, urlunparse
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
@@ -110,7 +112,7 @@ class OnvifService:
             home,
             onvif_config.address,
         )
-        self._onvif_config = onvif_config
+        self._onvif_config = deepcopy(onvif_config)
         self._wsdl_config = wsdl_config
         self._home = home
 
@@ -127,6 +129,7 @@ class OnvifService:
         self._replay = None
         self._search = None
         self._subscription = None
+        self._services = dict()
 
         uuid = self._onvif_config.uuid
         binding = OnvifDeviceManagement.__wsdl_declaration__.binding
@@ -135,10 +138,24 @@ class OnvifService:
         if self._home.onvifs.has_onvif_object(uuid, binding, api):
             services = self._home.onvifs.read_onvif_object(uuid, binding, api)
             self._services = {service.Namespace: service for service in services}
-        else:
-            self._services = dict()
 
-    def clear(self):
+    @property
+    def onvif_config(self):
+        return self._onvif_config
+
+    def clear_services(self):
+        self._services = dict()
+
+    def update_services(self):
+        response = self.devicemgmt.get_services(include_capability=False)
+        self._services = {service.Namespace: service for service in response}
+        return self._services
+
+    @property
+    def services(self):
+        return self._services
+
+    def clear_wsdls(self):
         self._analytics = None
         self._deviceio = None
         self._events = None
@@ -152,16 +169,6 @@ class OnvifService:
         self._replay = None
         self._search = None
         self._subscription = None
-        self._services = dict()
-
-    def update_services(self):
-        response = self.devicemgmt.get_services(include_capability=False)
-        self._services = {service.Namespace: service for service in response}
-        return self._services
-
-    @property
-    def services(self):
-        return self._services
 
     @property
     def wsdls(self) -> List[WsdlService]:
@@ -200,7 +207,7 @@ class OnvifService:
             self.search,
             self.subscription,
         )
-        return list(filter(lambda x: x is not None, wsdls))
+        return [o for o in wsdls if o is not None]
 
     @property
     def devicemgmt(self):
@@ -212,12 +219,19 @@ class OnvifService:
         if service is None:
             return None
 
+        if self._onvif_config.same_host:
+            src_url = urlparse(self._onvif_config.address)
+            new_url = urlparse(service.XAddr)
+            address = str(urlunparse(new_url._replace(netloc=src_url.netloc)))
+        else:
+            address = service.XAddr
+
         return _create_wsdl_service(
             cls=cls,
             onvif_config=self._onvif_config,
             wsdl_config=self._wsdl_config,
             home=self._home,
-            address=service.XAddr,
+            address=address,
         )
 
     @property

@@ -39,3 +39,26 @@ class OnvifInfoTab(TabItem[OnvifConfig]):
         assert isinstance(ssl_verify_value, bool)
         if ssl_verify_changed:
             item.no_verify = ssl_verify_value
+
+        if imgui.is_item_hovered():
+            with imgui.begin_tooltip():
+                imgui.text(
+                    "Skip the certificate verification process."
+                    " This may be a temporary solution if you get a"
+                    " 'certificate verify failed' error."
+                )
+
+        same_host = imgui.checkbox("Same host", item.same_host)
+        same_host_changed = same_host[0]
+        same_host_value = same_host[1]
+        assert isinstance(same_host_changed, bool)
+        assert isinstance(same_host_value, bool)
+        if same_host_changed:
+            item.same_host = same_host_value
+
+        if imgui.is_item_hovered():
+            with imgui.begin_tooltip():
+                imgui.text(
+                    "Prevents WSDL addresses from being incorrect when accessing"
+                    " ONVIF devices in environments such as proxy or tunneling."
+                )

@@ -235,7 +235,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     def on_graph_menu(self) -> None:
         if imgui.menu_item("Refresh graphs")[0]:
-            self.context.refresh_flow_graphs()
+            self.context.fm.refresh_flow_graphs()
 
     @override
     def on_process_sidebar_left(self):

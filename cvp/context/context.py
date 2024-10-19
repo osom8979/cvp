@@ -6,7 +6,6 @@ from threading import Event
 from typing import Optional, ParamSpec, TypeVar, Union
 
 from cvp.config.config import Config
-from cvp.config.sections.onvif import OnvifConfig
 from cvp.filesystem.permission import test_directory, test_readable, test_writable
 from cvp.flow.datas import Graph
 from cvp.flow.manager import FlowManager
@@ -19,7 +18,6 @@ from cvp.logging.logging import (
 )
 from cvp.msgs.msg_queue import MsgQueue
 from cvp.onvif.manager import OnvifManager
-from cvp.onvif.service import OnvifService
 from cvp.process.manager import ProcessManager
 from cvp.resources.download.archive import DownloadArchive
 from cvp.resources.download.links.tuples import LinkInfo
@@ -90,10 +88,14 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
-        self._onvif_manager = OnvifManager()
+        self._onvif_manager = OnvifManager(
+            onvif_configs=self._config.onvifs,
+            wsdl_config=self._config.wsdl,
+            home=self._home,
+            update=True,
+        )
+        self._flow_manager = FlowManager(home=self._home, update=True)
         self._msg_queue = MsgQueue()
-        self._flow_manager = FlowManager()
-        self.refresh_flow_graphs()
 
     @property
     def home(self):
@@ -112,12 +114,12 @@ class Context:
         return self._msg_queue
 
     @property
-    def om(self):
-        return self._onvif_manager
-
-    @property
     def fm(self):
         return self._flow_manager
+
+    @property
+    def om(self):
+        return self._onvif_manager
 
     @property
     def debug(self) -> bool:
@@ -155,7 +157,8 @@ class Context:
         )
 
     def teardown_process_manager(self) -> None:
-        self._process_manager.teardown(self._config.process_manager.teardown_timeout)
+        timeout = self._config.process_manager.teardown_timeout
+        self._process_manager.teardown(timeout)
 
     def save_config(self) -> None:
         self._config.write_yaml(self._home.cvp_yml)
@@ -169,17 +172,3 @@ class Context:
     def save_graphs(self) -> None:
         for graph in self._flow_manager.values():
             self.save_graph(graph)
-
-    def refresh_flow_graphs(self):
-        for file in self._home.flows.find_graph_files():
-            self._flow_manager.update_graph_yaml(file)
-
-    def create_onvif_service(self, onvif_config: OnvifConfig, *, append=False):
-        service = OnvifService(
-            onvif_config,
-            self._config.wsdl,
-            self._home,
-        )
-        if append:
-            self._onvif_manager[onvif_config.uuid] = service
-        return service

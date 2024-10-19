@@ -6,9 +6,7 @@ import imgui
 
 from cvp.config.sections.onvif import HttpAuth, OnvifConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
-from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -21,29 +19,27 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
     def __init__(self, context: Context):
         super().__init__(context, "Auth")
         self._show_password = False
-        self._create_runner = self.context.pm.create_thread_runner(
-            self.on_create_service,
-        )
-
-    def on_create_service(self, item: OnvifConfig):
-        service = self.context.create_onvif_service(item, append=True)
-        services = service.update_services()
-        for service in services.values():
-            ns = service.Namespace
-            addr = service.XAddr
-            major = service.Version.Major
-            minor = service.Version.Minor
-            logger.info(f"{ns} ({major}.{minor}) address: {addr}")
-        wsdls = service.update_wsdls()
-        for wsdl in wsdls:
-            logger.info(f"Update WSDL {type(wsdl).__name__}")
-        return service
 
     @property
     def keyrings(self):
         return self.context.home.keyrings
 
-    def on_wsse_process(self, item: OnvifConfig) -> None:
+    @override
+    def on_item(self, item: OnvifConfig) -> None:
+        use_wsse = imgui.checkbox("Use WS-Security", item.use_wsse)
+        if imgui.is_item_hovered():
+            with imgui.begin_tooltip():
+                imgui.text("Use <wsse:UsernameToken> in <soap:Header>")
+        use_wsse_changed = use_wsse[0]
+        use_wsse_value = use_wsse[1]
+        assert isinstance(use_wsse_changed, bool)
+        assert isinstance(use_wsse_value, bool)
+        if use_wsse_changed:
+            item.use_wsse = use_wsse_value
+
+        if not item.use_wsse:
+            return
+
         item.username = input_text_value(
             "Username",
             item.username,
@@ -91,52 +87,3 @@ class OnvifAuthTab(TabItem[OnvifConfig]):
         imgui.same_line()
         if imgui.radio_button("Digest", item.http_auth == HttpAuth.digest):
             item.http_auth = HttpAuth.digest
-
-    @override
-    def on_item(self, item: OnvifConfig) -> None:
-        use_wsse = imgui.checkbox("Use WS-Security", item.use_wsse)
-        if imgui.is_item_hovered():
-            with imgui.begin_tooltip():
-                imgui.text("Use <wsse:UsernameToken> in <soap:Header>")
-        use_wsse_changed = use_wsse[0]
-        use_wsse_value = use_wsse[1]
-        assert isinstance(use_wsse_changed, bool)
-        assert isinstance(use_wsse_value, bool)
-        if use_wsse_changed:
-            item.use_wsse = use_wsse_value
-
-        if item.use_wsse:
-            self.on_wsse_process(item)
-
-        imgui.separator()
-        has_service = item.uuid in self.context.om
-        create_running = self._create_runner.running
-        disabled_create = has_service or create_running
-        disabled_clear = not has_service or create_running
-
-        if button_ex("Create ONVIF", disabled=disabled_create):
-            assert not has_service
-            assert not create_running
-            self._create_runner(item)
-
-        imgui.same_line()
-        if button_ex("Clear ONVIF", disabled=disabled_clear):
-            assert has_service
-            assert not create_running
-            self.context.om.pop(item.uuid)
-
-        onvif = self.context.om.get(item.uuid)
-        if onvif is not None:
-            with imgui.begin_group():
-                imgui.text("ONVIF WSDL services:")
-                for service in onvif.services.values():
-                    ns = service.Namespace
-                    addr = service.XAddr
-                    major = service.Version.Major
-                    minor = service.Version.Minor
-                    imgui.bullet_text(f"{ns} ({major}.{minor}) address: {addr}")
-
-            with imgui.begin_group():
-                imgui.text("ONVIF WSDL services:")
-                for wsdl in onvif.wsdls:
-                    imgui.bullet_text(f"{type(wsdl).__name__} {wsdl.address}")

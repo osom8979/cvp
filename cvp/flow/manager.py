@@ -10,15 +10,23 @@ from yaml import dump, full_load
 from cvp.flow.catalog import FlowCatalog
 from cvp.flow.datas import Graph, Node, Pin
 from cvp.flow.path import FlowPath
+from cvp.resources.home import HomeDir
 from cvp.strings.is_uuid import is_uuid4
 from cvp.yaml.dumpers import IndentListDumper
 
 
 class FlowManager(OrderedDict[str, Graph]):
-    def __init__(self, *, cursor: Optional[str] = None):
+    def __init__(self, home: HomeDir, *, cursor: Optional[str] = None, update=False):
         super().__init__()
         self._catalog = FlowCatalog.from_builtins()
+        self._home = home
         self._cursor = cursor
+        if update:
+            self.refresh_flow_graphs()
+
+    def refresh_flow_graphs(self):
+        for file in self._home.flows.find_graph_files():
+            self.update_graph_yaml(file)
 
     @property
     def catalog(self):

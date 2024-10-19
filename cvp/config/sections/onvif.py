@@ -25,6 +25,7 @@ class OnvifConfig:
     encode_digest: bool = False
     http_auth: Optional[HttpAuth] = None
     no_verify: bool = False
+    same_host: bool = False
 
     @property
     def is_http_basic(self):
