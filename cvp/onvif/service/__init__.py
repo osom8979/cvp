@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
-from typing import Dict, List, Optional, ParamSpec, Type, TypeVar
+from typing import Any, Dict, List, Optional, ParamSpec, Type, TypeVar
 from urllib.parse import urlparse, urlunparse
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
-from cvp.onvif.cache import has_response_use_cache_type, inject_response_cache
+from cvp.onvif.cache import has_onvif_api, inject_response_cache
 from cvp.onvif.service.analytics import OnvifAnalytics
 from cvp.onvif.service.deviceio import OnvifDeviceIO
 from cvp.onvif.service.devicemgmt import OnvifDeviceManagement
@@ -69,7 +69,7 @@ def _create_wsdl_service(
 
     for key in dir(service):
         attr = getattr(service, key)
-        if not has_response_use_cache_type(attr):
+        if not has_onvif_api(attr):
             continue
 
         injected_attr = inject_response_cache(
@@ -138,6 +138,22 @@ class OnvifService:
         if self._home.onvifs.has_onvif_object(uuid, binding, api):
             services = self._home.onvifs.read_onvif_object(uuid, binding, api)
             self._services = {service.Namespace: service for service in services}
+
+    @property
+    def uuid(self):
+        return self._onvif_config.uuid
+
+    def has_cache(self, binding: str, api: str) -> bool:
+        return self._home.onvifs.has_onvif_object(self.uuid, binding, api)
+
+    def read_cache(self, binding: str, api: str) -> Any:
+        return self._home.onvifs.read_onvif_object(self.uuid, binding, api)
+
+    def write_cache(self, binding: str, api: str, o: Any) -> int:
+        return self._home.onvifs.write_onvif_object(self.uuid, binding, api, o)
+
+    def remove_cache(self, binding: str, api: str) -> None:
+        self._home.onvifs.remove_onvif_object(self.uuid, binding, api)
 
     @property
     def onvif_config(self):

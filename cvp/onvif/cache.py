@@ -7,23 +7,23 @@ from cvp.config.sections.onvif import OnvifConfig
 from cvp.resources.home import HomeDir
 from cvp.wsdl.declaration import WsdlDeclaration
 
-USE_RESPONSE_CACHE_ATTR_NAME: Final[str] = "__use_response_cache__"
+ONVIF_API_ATTR_NAME: Final[str] = "__onvif_api__"
 
 
-def has_response_use_cache_type(func) -> bool:
-    return hasattr(func, USE_RESPONSE_CACHE_ATTR_NAME)
+def has_onvif_api(func) -> bool:
+    return hasattr(func, ONVIF_API_ATTR_NAME)
 
 
-def get_response_use_cache_type(func) -> bool:
-    return getattr(func, USE_RESPONSE_CACHE_ATTR_NAME, False)
+def get_onvif_api(func) -> bool:
+    return getattr(func, ONVIF_API_ATTR_NAME, False)
 
 
-def set_response_use_cache_type(func) -> None:
-    setattr(func, USE_RESPONSE_CACHE_ATTR_NAME, True)
+def set_onvif_api(func) -> None:
+    setattr(func, ONVIF_API_ATTR_NAME, True)
 
 
-def use_response_cache(func):
-    set_response_use_cache_type(func)
+def onvif_api(func):
+    set_onvif_api(func)
 
     @wraps(func)
     def _func_wrapper(*args, **kwargs):

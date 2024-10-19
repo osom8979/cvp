@@ -46,11 +46,9 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
         has_service = item.uuid in self.context.om
         update_running = self._update_runner.running
         has_error = bool(self._update_runner.error)
-        disabled_create = has_service or update_running
         disabled_clear = not has_service or update_running
 
-        if button_ex("Update ONVIF Service", disabled=disabled_create):
-            assert not has_service
+        if button_ex("Update ONVIF Service", disabled=update_running):
             assert not update_running
             self._update_runner(item)
 
@@ -62,7 +60,13 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
 
         if has_error:
             imgui.same_line()
-            imgui.text_colored(str(self._update_runner.error), *self._error_color)
+            imgui.text_colored(
+                type(self._update_runner.error).__name__,
+                *self._error_color,
+            )
+            if imgui.is_item_hovered():
+                with imgui.begin_tooltip():
+                    imgui.text(str(self._update_runner.error))
 
         onvif = self.context.om.get(item.uuid)
         if onvif is not None:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from os import PathLike
+from os import PathLike, remove
 from pathlib import Path
 from pickle import dumps, loads
 from typing import Any, Final, Union
@@ -39,3 +39,6 @@ class Onvifs(PathFlavour):
         json_path = self.onvif_object_path(uuid, binding, api)
         json_path.parent.mkdir(parents=True, exist_ok=True)
         return json_path.write_bytes(self.pickling(o))
+
+    def remove_onvif_object(self, uuid: str, binding: str, api: str) -> None:
+        return remove(self.onvif_object_path(uuid, binding, api))
