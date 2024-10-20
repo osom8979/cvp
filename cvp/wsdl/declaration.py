@@ -49,15 +49,7 @@ class WsdlDeclaration:
                 session.auth = HTTPDigestAuth(wsse.username, wsse.password)
 
         transport = Transport(cache=cache, session=session)
-        client = Client(wsdl=self.wsdl, wsse=wsse, transport=transport)
-        client.set_ns_prefix("tds", "http://www.onvif.org/ver10/device/wsdl")
-        client.set_ns_prefix("tev", "http://www.onvif.org/ver10/events/wsdl")
-        client.set_ns_prefix("timg", "http://www.onvif.org/ver20/imaging/wsdl")
-        client.set_ns_prefix("tmd", "http://www.onvif.org/ver10/deviceIO/wsdl")
-        client.set_ns_prefix("tptz", "http://www.onvif.org/ver20/ptz/wsdl")
-        client.set_ns_prefix("ttr", "http://www.onvif.org/ver10/media/wsdl")
-        client.set_ns_prefix("ter", "http://www.onvif.org/ver10/error")
-        return client
+        return Client(wsdl=self.wsdl, wsse=wsse, transport=transport)
 
     @property
     def namespace_binding(self) -> str:

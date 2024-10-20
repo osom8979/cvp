@@ -6,7 +6,7 @@ from urllib.parse import urlparse, urlunparse
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
-from cvp.onvif.cache import has_onvif_api, inject_response_cache
+from cvp.onvif.cache import get_onvif_api, has_onvif_api, inject_response_cache
 from cvp.onvif.service.analytics import OnvifAnalytics
 from cvp.onvif.service.deviceio import OnvifDeviceIO
 from cvp.onvif.service.devicemgmt import OnvifDeviceManagement
@@ -67,16 +67,27 @@ def _create_wsdl_service(
         decl=None,
     )
 
+    assert isinstance(service, WsdlService)
+    service.client.set_ns_prefix("tds", "http://www.onvif.org/ver10/device/wsdl")
+    service.client.set_ns_prefix("tev", "http://www.onvif.org/ver10/events/wsdl")
+    service.client.set_ns_prefix("timg", "http://www.onvif.org/ver20/imaging/wsdl")
+    service.client.set_ns_prefix("tmd", "http://www.onvif.org/ver10/deviceIO/wsdl")
+    service.client.set_ns_prefix("tptz", "http://www.onvif.org/ver20/ptz/wsdl")
+    service.client.set_ns_prefix("ttr", "http://www.onvif.org/ver10/media/wsdl")
+    service.client.set_ns_prefix("ter", "http://www.onvif.org/ver10/error")
+
     for key in dir(service):
         attr = getattr(service, key)
         if not has_onvif_api(attr):
             continue
 
+        api_name = get_onvif_api(attr)
         injected_attr = inject_response_cache(
             attr,
             home,
             onvif_config,
             cls.__wsdl_declaration__,
+            api_name,
         )
         setattr(service, key, injected_attr)
 

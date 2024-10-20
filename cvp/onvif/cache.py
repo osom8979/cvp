@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
-from typing import Final
+from typing import Final, Optional
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.resources.home import HomeDir
@@ -14,22 +14,25 @@ def has_onvif_api(func) -> bool:
     return hasattr(func, ONVIF_API_ATTR_NAME)
 
 
-def get_onvif_api(func) -> bool:
-    return getattr(func, ONVIF_API_ATTR_NAME, False)
+def get_onvif_api(func) -> Optional[str]:
+    return getattr(func, ONVIF_API_ATTR_NAME, None)
 
 
-def set_onvif_api(func) -> None:
-    setattr(func, ONVIF_API_ATTR_NAME, True)
+def set_onvif_api(func, operation: str) -> None:
+    setattr(func, ONVIF_API_ATTR_NAME, operation)
 
 
-def onvif_api(func):
-    set_onvif_api(func)
+def onvif_api(operation: Optional[str] = None):
+    def _param_wrapper(func):
+        set_onvif_api(func, operation)
 
-    @wraps(func)
-    def _func_wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
+        @wraps(func)
+        def _func_wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
 
-    return _func_wrapper
+        return _func_wrapper
+
+    return _param_wrapper
 
 
 def inject_response_cache(
@@ -37,12 +40,13 @@ def inject_response_cache(
     home: HomeDir,
     onvif_config: OnvifConfig,
     wsdl: WsdlDeclaration,
+    api_name: Optional[str] = None,
 ):
     @wraps(func)
     def _func_wrapper(*args, **kwargs):
         uuid = onvif_config.uuid
         binding = wsdl.binding
-        api = func.__name__
+        api = api_name if api_name else func.__name__
 
         if home.onvifs.has_onvif_object(uuid, binding, api):
             return home.onvifs.read_onvif_object(uuid, binding, api)

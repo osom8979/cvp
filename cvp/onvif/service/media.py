@@ -15,11 +15,11 @@ class OnvifMedia(WsdlService):
         binding="MediaBinding",
     )
 
-    @onvif_api
+    @onvif_api("GetProfiles")
     def get_profiles(self):
         return self.service.GetProfiles()
 
-    @onvif_api
+    @onvif_api("GetStreamUri")
     def get_stream_uri(
         self,
         protocol: TransportProtocol,
@@ -37,7 +37,7 @@ class OnvifMedia(WsdlService):
         setup = schema.StreamSetup(Stream=str(stream), Transport=transport)
         return self.service.GetStreamUri(StreamSetup=setup, ProfileToken=profile_token)
 
-    @onvif_api
+    @onvif_api("GetSnapshotUri")
     def get_snapshot_uri(self, profile_token: str):
         if not (0 <= len(profile_token) <= PROFILE_TOKEN_MAX_LENGTH):
             raise ValueError(f"Invalid profile token length: '{profile_token}'")
