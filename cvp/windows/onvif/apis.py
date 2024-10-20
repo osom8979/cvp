@@ -1,31 +1,34 @@
 # -*- coding: utf-8 -*-
 
-from inspect import signature
 from pprint import pformat
-from typing import Final
+from typing import Dict, Final, Tuple
 
 import imgui
+from zeep.proxy import OperationProxy
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.button_ex import button_ex
-from cvp.onvif.cache import has_onvif_api
 from cvp.types import override
 from cvp.widgets.tab import TabItem
+from cvp.widgets.wsdl_operation import WsdlOperationWidget
 
 NOT_FOUND_INDEX: Final[int] = -1
 
 
 class OnvifApisTab(TabItem[OnvifConfig]):
+    _widgets: Dict[Tuple[str, str, str], WsdlOperationWidget]
+
     def __init__(self, context: Context):
         super().__init__(context, "APIs")
         self._request_runner = self.context.pm.create_thread_runner(self.on_api_request)
         self._warning_color = 1.0, 1.0, 0.0, 1.0
         self._select_binding = str()
         self._select_api = str()
+        self._widgets = dict()
 
-    def on_api_request(self, item: OnvifConfig):
+    def on_api_request(self, item: OnvifConfig, operation: OperationProxy):
         pass
 
     @override
@@ -40,7 +43,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             return
 
         wsdls = onvif.wsdls
-        bindings = [wsdl.binding for wsdl in wsdls]
+        bindings = [wsdl.binding_name for wsdl in wsdls]
         if not bindings:
             warning_message = "There are no bindings to choose from."
             imgui.text_colored(warning_message, *self._warning_color)
@@ -68,20 +71,14 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             return
 
         service = wsdls[binding_index]
-        apis = dict()
-        for key in dir(service):
-            attr = getattr(service, key)
-            if not has_onvif_api(attr):
-                continue
-            sig = signature(attr)
-            apis[key] = sig
+        apis = service.operations
 
         if not apis:
             warning_message = "There are no APIs to choose from."
             imgui.text_colored(warning_message, *self._warning_color)
             return
 
-        list_box = imgui.begin_list_box("## API List", width=100, height=-1)
+        list_box = imgui.begin_list_box("## API List", width=0, height=-1)
         if list_box.opened:
             with list_box:
                 for key in apis.keys():
@@ -100,19 +97,21 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             imgui.separator()
 
             imgui.text("Parameters:")
-            sig = apis[self._select_api]
-            for key, param in sig.parameters.items():
-                kind = param.kind.name
-                default = param.default
-                anno = param.annotation
-                if param.annotation == sig.empty and default != sig.empty:
-                    anno = type(default)
-                imgui.text(f"{key} cls={anno.__name__} default={default} kind={kind}")
+            operation = apis[self._select_api]
+
+            widget_key = onvif.uuid, self._select_binding, self._select_api
+            if widget_key not in self._widgets:
+                widget = WsdlOperationWidget(operation)
+                self._widgets[widget_key] = widget
+            else:
+                widget = self._widgets[widget_key]
+
+            widget.on_process()
 
             has_cache = onvif.has_cache(self._select_binding, self._select_api)
 
             if button_ex("Request", disabled=self._request_runner):
-                self._request_runner(item)
+                self._request_runner(item, operation)
             imgui.same_line()
             if button_ex("Remove Cache", disabled=not has_cache):
                 onvif.remove_cache(self._select_binding, self._select_api)

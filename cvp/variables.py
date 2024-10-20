@@ -56,3 +56,5 @@ WSD_IPV6_MULTICAST_ADDRESS: Final[str] = "ff02::c"
 WSD_PORT_NUMBER: Final[int] = 3702
 WSD_TIMEOUT: Final[float] = 30.0
 WSD_NAME_DEFAULT: Final[str] = "New Device"
+
+ZEEP_ELEMENT_SEPARATOR: Final[str] = "."

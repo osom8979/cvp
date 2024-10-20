@@ -59,14 +59,10 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
             self.context.om.pop(item.uuid)
 
         if has_error:
-            imgui.same_line()
             imgui.text_colored(
                 type(self._update_runner.error).__name__,
                 *self._error_color,
             )
-            if imgui.is_item_hovered():
-                with imgui.begin_tooltip():
-                    imgui.text(str(self._update_runner.error))
 
         onvif = self.context.om.get(item.uuid)
         if onvif is not None:
@@ -102,6 +98,6 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
                         imgui.table_set_column_index(0)
                         imgui.text(type(wsdl).__name__)
                         imgui.table_set_column_index(1)
-                        imgui.text(wsdl.binding)
+                        imgui.text(wsdl.binding_name)
                         imgui.table_set_column_index(2)
                         imgui.text(wsdl.address)

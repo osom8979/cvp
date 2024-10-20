@@ -4,6 +4,8 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Callable, Generic, Optional, ParamSpec, TypeVar
 from weakref import ref
 
+from cvp.logging.logging import logger
+
 _P = ParamSpec("_P")
 _T = TypeVar("_T")
 
@@ -55,6 +57,7 @@ class ThreadRunnable(Generic[_P, _T]):
             return self._result
         except BaseException as e:
             self._error = e
+            logger.exception(e)
         finally:
             self._running = False
 

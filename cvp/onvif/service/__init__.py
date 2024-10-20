@@ -115,6 +115,7 @@ class OnvifService:
         self._onvif_config = deepcopy(onvif_config)
         self._wsdl_config = wsdl_config
         self._home = home
+        self._services = dict()
 
         self._analytics = None
         self._deviceio = None
@@ -129,7 +130,6 @@ class OnvifService:
         self._replay = None
         self._search = None
         self._subscription = None
-        self._services = dict()
 
         uuid = self._onvif_config.uuid
         binding = OnvifDeviceManagement.__wsdl_declaration__.binding
@@ -138,6 +138,20 @@ class OnvifService:
         if self._home.onvifs.has_onvif_object(uuid, binding, api):
             services = self._home.onvifs.read_onvif_object(uuid, binding, api)
             self._services = {service.Namespace: service for service in services}
+
+            self._analytics = self.create_wsdl(OnvifAnalytics, self._services)
+            self._deviceio = self.create_wsdl(OnvifDeviceIO, self._services)
+            self._events = self.create_wsdl(OnvifEvents, self._services)
+            self._imaging = self.create_wsdl(OnvifImaging, self._services)
+            self._media = self.create_wsdl(OnvifMedia, self._services)
+            self._notification = self.create_wsdl(OnvifNotification, self._services)
+            self._ptz = self.create_wsdl(OnvifPTZ, self._services)
+            self._pullpoint = self.create_wsdl(OnvifPullPoint, self._services)
+            self._receiver = self.create_wsdl(OnvifReceiver, self._services)
+            self._recording = self.create_wsdl(OnvifRecoding, self._services)
+            self._replay = self.create_wsdl(OnvifReplay, self._services)
+            self._search = self.create_wsdl(OnvifSearch, self._services)
+            self._subscription = self.create_wsdl(OnvifSubscription, self._services)
 
     @property
     def uuid(self):
@@ -229,9 +243,16 @@ class OnvifService:
     def devicemgmt(self):
         return self._devicemgmt
 
-    def create_wsdl(self, cls: Type[WsdlServiceT]) -> Optional[WsdlServiceT]:
+    def create_wsdl(
+        self,
+        cls: Type[WsdlServiceT],
+        services: Optional[Dict[str, Service]] = None,
+    ) -> Optional[WsdlServiceT]:
+        services = services if services else self._services
+        assert services is not None
+
         namespace = cls.__wsdl_declaration__.namespace
-        service = self._services.get(namespace)
+        service = services.get(namespace)
         if service is None:
             return None
 

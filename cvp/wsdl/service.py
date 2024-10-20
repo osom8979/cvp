@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from zeep import Client
-from zeep.proxy import ServiceProxy
+from zeep.proxy import OperationProxy, ServiceProxy
+from zeep.wsdl.definitions import Binding
 from zeep.wsse import UsernameToken
 
 from cvp.wsdl.declaration import WsdlDeclaration
@@ -97,7 +98,7 @@ class WsdlService:
         return self._decl.namespace
 
     @property
-    def binding(self):
+    def binding_name(self):
         return self._decl.binding
 
     @property
@@ -112,7 +113,17 @@ class WsdlService:
         return (
             f"<{type(self).__name__} @{id(self)}"
             f" namespace='{self.namespace}'"
-            f" binding='{self.binding}'"
+            f" binding='{self.binding_name}'"
             f" address='{self.address}'"
             ">"
         )
+
+    @property
+    def binding(self) -> Binding:
+        # noinspection PyProtectedMember
+        return self._service._binding
+
+    @property
+    def operations(self) -> Dict[str, OperationProxy]:
+        # noinspection PyProtectedMember
+        return self.binding._operations
