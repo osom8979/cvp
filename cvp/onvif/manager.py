@@ -5,11 +5,11 @@ from typing import List
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
-from cvp.onvif.service import OnvifService
+from cvp.onvif.client import OnvifClient
 from cvp.resources.home import HomeDir
 
 
-class OnvifManager(OrderedDict[str, OnvifService]):
+class OnvifManager(OrderedDict[str, OnvifClient]):
     def __init__(
         self,
         onvif_configs: List[OnvifConfig],
@@ -28,7 +28,7 @@ class OnvifManager(OrderedDict[str, OnvifService]):
                 self.create_onvif_service(onvif_config, append=True)
 
     def create_onvif_service(self, onvif_config: OnvifConfig, *, append=False):
-        service = OnvifService(
+        service = OnvifClient(
             onvif_config,
             self._wsdl_config,
             self._home,
@@ -37,7 +37,7 @@ class OnvifManager(OrderedDict[str, OnvifService]):
             self.__setitem__(onvif_config.uuid, service)
         return service
 
-    def sync(self, onvif_config: OnvifConfig) -> OnvifService:
+    def sync(self, onvif_config: OnvifConfig) -> OnvifClient:
         if self.__contains__(onvif_config.uuid):
             service = self.__getitem__(onvif_config.uuid)
             if service.onvif_config == onvif_config:
