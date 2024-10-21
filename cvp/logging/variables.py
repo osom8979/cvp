@@ -121,6 +121,7 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
         },
         "cvp_file": _timed_rotating_file_handler_config("cvp"),
         "cvp_worker_file": _timed_rotating_file_handler_config("cvp.worker"),
+        "zeep_file": _timed_rotating_file_handler_config("zeep"),
     },
     "loggers": {
         # root logger
@@ -132,7 +133,11 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
         "asyncio": {"level": "DEBUG"},
         "httpcore": {"level": "DEBUG"},
         "httpx": {"level": "DEBUG"},
-        "zeep": {"level": "DEBUG"},
+        "zeep": {
+            "handlers": ["zeep_file"],
+            "level": "DEBUG",
+            "propagate": 0,
+        },
         CVP_LOGGER_NAME: {"level": "DEBUG"},
         CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
         CVP_EVENT_LOGGER_NAME: {

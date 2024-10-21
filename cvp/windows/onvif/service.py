@@ -30,15 +30,16 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
         )
 
     def on_update_service(self, item: OnvifConfig):
-        onvif = self.context.om.sync(item)
-        for service in onvif.update_services().values():
+        onvif = self.context.om.get_synced_client(item, self.context.config.wsdl)
+
+        onvif.update_services()
+        for service in onvif.services.values():
             ns = service.Namespace
             addr = service.XAddr
             major = service.Version.Major
             minor = service.Version.Minor
             logger.info(f"{ns} ({major}.{minor}) address is '{addr}'")
-        for wsdl in onvif.update_wsdls():
-            logger.info(f"Update WSDL {type(wsdl).__name__}")
+
         return onvif
 
     @override
@@ -87,7 +88,6 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
             imgui.text("ONVIF WSDL services:")
             wsdl_table = imgui.begin_table("WsdlTable", 3, TABLE_FLAGS)
             if wsdl_table.opened:
-                imgui.table_setup_column("Class", imgui.TABLE_COLUMN_WIDTH_FIXED)
                 imgui.table_setup_column("Binding", imgui.TABLE_COLUMN_WIDTH_FIXED)
                 imgui.table_setup_column("Address", imgui.TABLE_COLUMN_WIDTH_STRETCH)
                 imgui.table_headers_row()
@@ -96,8 +96,6 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
                     for wsdl in onvif.wsdls:
                         imgui.table_next_row()
                         imgui.table_set_column_index(0)
-                        imgui.text(type(wsdl).__name__)
-                        imgui.table_set_column_index(1)
                         imgui.text(wsdl.binding_name)
-                        imgui.table_set_column_index(2)
-                        imgui.text(wsdl.address)
+                        imgui.table_set_column_index(1)
+                        imgui.text(wsdl.address if wsdl.address else str())

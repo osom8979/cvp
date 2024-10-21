@@ -28,19 +28,21 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
                 self.create_onvif_service(onvif_config, append=True)
 
     def create_onvif_service(self, onvif_config: OnvifConfig, *, append=False):
-        service = OnvifClient(
-            onvif_config,
-            self._wsdl_config,
-            self._home,
-        )
+        service = OnvifClient(onvif_config, self._wsdl_config, self._home)
         if append:
             self.__setitem__(onvif_config.uuid, service)
         return service
 
-    def sync(self, onvif_config: OnvifConfig) -> OnvifClient:
+    def get_synced_client(
+        self,
+        onvif_config: OnvifConfig,
+        wsdl_config: WsdlConfig,
+    ) -> OnvifClient:
         if self.__contains__(onvif_config.uuid):
             service = self.__getitem__(onvif_config.uuid)
-            if service.onvif_config == onvif_config:
+            same_onvif_config = service.onvif_config == onvif_config
+            same_wsdl_config = service.wsdl_config == wsdl_config
+            if same_onvif_config and same_wsdl_config:
                 return service
             else:
                 self.__delitem__(onvif_config.uuid)
