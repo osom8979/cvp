@@ -7,7 +7,6 @@ import imgui
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
-from cvp.logging.logging import logger
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 
@@ -31,15 +30,8 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
 
     def on_update_service(self, item: OnvifConfig):
         onvif = self.context.om.get_synced_client(item, self.context.config.wsdl)
-
         onvif.update_services()
-        for service in onvif.services.values():
-            ns = service.Namespace
-            addr = service.XAddr
-            major = service.Version.Major
-            minor = service.Version.Minor
-            logger.info(f"{ns} ({major}.{minor}) address is '{addr}'")
-
+        onvif.update_wsdl_addresses()
         return onvif
 
     @override

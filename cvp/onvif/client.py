@@ -71,7 +71,6 @@ class OnvifClient:
         self._cache = None if no_cache else ZeepFileCache(cache_dir)
         self._wsse = create_username_token(username, password, use_digest)
         self._transport = Transport(cache=self._cache, session=self._session)
-        self._services = OnvifServiceMapper(self._onvif_config, self._home)
 
         if self._wsse is not None:
             assert username is not None
@@ -88,6 +87,9 @@ class OnvifClient:
                 if not use_digest:
                     logger.warning("<UsernameToken> should be encoded as a digest.")
                 self._session.auth = HTTPDigestAuth(username, password)
+
+        self._services = OnvifServiceMapper(self._onvif_config, self._home)
+        self._services.update_with_cache()
 
         self.devicemgmt = self.create_wsdl(ONVIF_DEVICEMGMT, self._onvif_config.address)
         self.analytics = self.create_wsdl(ONVIF_ANALYTICS)
@@ -146,6 +148,9 @@ class OnvifClient:
         *,
         update_onvif_ns_prefixes=False
     ):
+        if address is None and self._services:
+            address = self._services.get_address(declaration.namespace)
+
         result = CachedWsdlClient(
             onvif_config=self._onvif_config,
             home=self._home,
@@ -173,8 +178,10 @@ class OnvifClient:
     def update_services(self) -> None:
         response = self.devicemgmt.GetServices(IncludeCapability=False)
         self._services.update_with_response(response)
+
+    def update_wsdl_addresses(self) -> None:
         for wsdl in self.wsdls:
-            try:
-                wsdl.address = self._services.get_address(wsdl.namespace)
-            except KeyError:
+            address = self._services.get_address(wsdl.namespace)
+            if address is None:
                 continue
+            wsdl.address = address

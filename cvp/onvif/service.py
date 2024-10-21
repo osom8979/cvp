@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, Final
+from typing import Dict, Final, Optional
 from urllib.parse import urlparse, urlunparse
 
 from cvp.config.sections.onvif import OnvifConfig
@@ -53,10 +53,10 @@ class OnvifServiceMapper(Dict[str, Service]):
         for service in response:
             self.__setitem__(service.Namespace, service)
 
-    def get_address(self, namespace: str) -> str:
+    def get_address(self, namespace: str) -> Optional[str]:
         service = self.get(namespace)
         if service is None:
-            raise KeyError(f"Not found namespace: '{namespace}'")
+            return None
 
         if not self._onvif_config.same_host:
             return service.XAddr
