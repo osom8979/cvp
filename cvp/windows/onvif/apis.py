@@ -10,6 +10,8 @@ from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.button_ex import button_ex
+from cvp.imgui.item_width import item_width
+from cvp.imgui.slider_float import slider_float
 from cvp.types import override
 from cvp.widgets.tab import TabItem
 from cvp.widgets.wsdl_operation import WsdlOperationWidget
@@ -27,6 +29,9 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         self._select_binding = str()
         self._select_api = str()
         self._widgets = dict()
+        self._left_width = 180.0
+        self._min_left_width = 100.0
+        self._max_left_width = 300.0
 
     def on_api_request(self, item: OnvifConfig, operation: OperationProxy):
         pass
@@ -54,11 +59,13 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         except ValueError:
             binding_index = NOT_FOUND_INDEX
 
-        binding_result = imgui.combo(
-            "Binding",
-            binding_index,
-            bindings,
-        )
+        with item_width(-1):
+            binding_result = imgui.combo(
+                "## Binding",
+                binding_index,
+                bindings,
+            )
+
         binding_changed = binding_result[0]
         binding_index = binding_result[1]
         assert isinstance(binding_index, int)
@@ -78,12 +85,24 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             imgui.text_colored(warning_message, *self._warning_color)
             return
 
-        list_box = imgui.begin_list_box("## API List", width=0, height=-1)
-        if list_box.opened:
-            with list_box:
-                for key in apis.keys():
-                    if imgui.selectable(key, key == self._select_api)[1]:
-                        self._select_api = key
+        with begin_child("API List", width=self._left_width):
+            with item_width(-1):
+                left_width = slider_float(
+                    "## API List Width",
+                    self._left_width,
+                    self._min_left_width,
+                    self._max_left_width,
+                    "List width (%.3f)",
+                )
+                if left_width:
+                    self._left_width = left_width.value
+
+                list_box = imgui.begin_list_box("## API List Box", width=-1, height=-1)
+                if list_box.opened:
+                    with list_box:
+                        for key in apis.keys():
+                            if imgui.selectable(key, key == self._select_api)[1]:
+                                self._select_api = key
 
         imgui.same_line()
 

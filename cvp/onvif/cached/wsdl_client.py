@@ -32,14 +32,14 @@ class OnvifCachedWsdlClient(WsdlClient):
 
     def _create_onvif_cached_operation_proxies(self):
         result = dict()
-        for name in self._binding.all():
-            assert isinstance(name, str)
+        for name, operation in self.binding_operations.items():
             result[name] = OnvifCachedOperationProxy(
                 onvif_config=self._onvif_config,
                 home=self._home,
                 binding_name=self._declaration.binding,
                 service_proxy=self._service,
                 operation_name=name,
+                operation=operation,
             )
         return result
 

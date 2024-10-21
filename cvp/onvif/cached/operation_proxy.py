@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Tuple
+from typing import Any, List, Tuple
 
 from zeep.proxy import OperationProxy, ServiceProxy
+from zeep.wsdl.definitions import Operation
+from zeep.xsd import Element
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.resources.home import HomeDir
@@ -17,11 +19,20 @@ class OnvifCachedOperationProxy(OperationProxy):
         binding_name: str,
         service_proxy: ServiceProxy,
         operation_name: str,
+        operation: Operation,
     ):
         super().__init__(service_proxy, operation_name)
         self._onvif_config = onvif_config
         self._home = home
         self._binding_name = binding_name
+        self._operation = operation
+
+    @property
+    def input_elements(self) -> List[Tuple[str, Element]]:
+        try:
+            return self._operation.input.body.type.elements
+        except AttributeError:
+            return list()
 
     @property
     def cache_args(self) -> Tuple[str, str, str]:

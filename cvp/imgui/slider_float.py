@@ -6,21 +6,21 @@ import imgui
 
 
 class SliderFloatResult(NamedTuple):
-    clicked: bool
+    changed: bool
     value: float
 
     @classmethod
     def from_raw(cls, result):
         assert isinstance(result, tuple)
         assert len(result) == 2
-        clicked = result[0]
+        changed = result[0]
         value = result[1]
-        assert isinstance(clicked, bool)
+        assert isinstance(changed, bool)
         assert isinstance(value, float)
-        return cls(clicked, value)
+        return cls(changed, value)
 
     def __bool__(self):
-        return self.clicked
+        return self.changed
 
 
 def slider_float(
