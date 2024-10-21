@@ -94,6 +94,8 @@ class Context:
             home=self._home,
             update=True,
         )
+        self._onvif_manager.preload_onvif_declarations()
+
         self._flow_manager = FlowManager(home=self._home, update=True)
         self._msg_queue = MsgQueue()
 

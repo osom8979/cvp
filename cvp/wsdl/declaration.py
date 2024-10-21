@@ -25,16 +25,21 @@ class WsdlDeclaration:
     def namespace_binding(self) -> str:
         return "{" + self.namespace + "}" + self.binding
 
+    def create_document(self):
+        transport = Transport(cache=ZeepFileCache(get_wsdl_dir()))
+        return Document(
+            location=self.location,
+            transport=transport,  # noqa
+            base=None,
+            settings=Settings(),
+        )
+
+    def load_document(self) -> None:
+        self.document = self.create_document()
+
     @property
     def wsdl(self):
         if self.document is None:
-            transport = Transport(cache=ZeepFileCache(get_wsdl_dir()))
-            self.document = Document(
-                location=self.location,
-                transport=transport,  # noqa
-                base=None,
-                settings=Settings(),
-            )
-
+            self.load_document()
         assert self.document is not None
         return self.document

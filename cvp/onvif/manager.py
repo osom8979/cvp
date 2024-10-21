@@ -5,7 +5,9 @@ from typing import List
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
+from cvp.logging.logging import onvif_logger as logger
 from cvp.onvif.client import OnvifClient
+from cvp.onvif.declarations import ONVIF_DECLARATIONS
 from cvp.resources.home import HomeDir
 
 
@@ -47,3 +49,16 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
             else:
                 self.__delitem__(onvif_config.uuid)
         return self.create_onvif_service(onvif_config, append=True)
+
+    @staticmethod
+    def preload_onvif_declarations() -> None:
+        logger.info("Preload ONVIF wsdl declarations ...")
+        declarations_size = len(ONVIF_DECLARATIONS)
+        for i, decl in enumerate(ONVIF_DECLARATIONS):
+            prefix = f"[{i + 1}/{declarations_size}]"
+            binding = decl.namespace_binding
+            try:
+                logger.debug(f"{prefix} Load ONVIF wsdl declaration: {binding}")
+                decl.load_document()
+            except BaseException as e:
+                logger.error(e)

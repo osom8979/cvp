@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
+from typing import Final, Sequence
 
 from cvp.wsdl.declaration import WsdlDeclaration
 
@@ -86,4 +86,21 @@ ONVIF_SUBSCRIPTION: Final[WsdlDeclaration] = WsdlDeclaration(
     namespace="http://www.onvif.org/ver10/events/wsdl",
     location="http://www.onvif.org/ver10/events/wsdl/event.wsdl",
     binding="SubscriptionManagerBinding",
+)
+
+ONVIF_DECLARATIONS: Sequence[WsdlDeclaration] = (
+    ONVIF_ANALYTICS,
+    ONVIF_DEVICEIO,
+    ONVIF_DEVICEMGMT,
+    ONVIF_EVENTS,
+    ONVIF_IMAGING,
+    ONVIF_MEDIA,
+    ONVIF_NOTIFICATION,
+    ONVIF_PTZ,
+    ONVIF_PULLPOINT,
+    ONVIF_RECEIVER,
+    ONVIF_RECODING,
+    ONVIF_REPLAY,
+    ONVIF_SEARCH,
+    ONVIF_SUBSCRIPTION,
 )
