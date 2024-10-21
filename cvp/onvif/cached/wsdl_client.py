@@ -6,13 +6,13 @@ from zeep import Transport
 from zeep.wsse import UsernameToken
 
 from cvp.config.sections.onvif import OnvifConfig
-from cvp.onvif.cached.operation import CachedOperationProxy
+from cvp.onvif.cached.operation_proxy import OnvifCachedOperationProxy
 from cvp.resources.home import HomeDir
 from cvp.wsdl.client import WsdlClient
 from cvp.wsdl.declaration import WsdlDeclaration
 
 
-class CachedWsdlClient(WsdlClient):
+class OnvifCachedWsdlClient(WsdlClient):
     def __init__(
         self,
         onvif_config: OnvifConfig,
@@ -25,19 +25,19 @@ class CachedWsdlClient(WsdlClient):
         super().__init__(declaration, wsse, transport, address)
         self._onvif_config = onvif_config
         self._home = home
-        self._reallocate_cached_operation_proxies()
+        self._reallocate_onvif_cached_operation_proxies()
 
-    def _reallocate_cached_operation_proxies(self):
-        self._service._operations = self._create_cached_operation_proxies()
+    def _reallocate_onvif_cached_operation_proxies(self):
+        self._service._operations = self._create_onvif_cached_operation_proxies()
 
-    def _create_cached_operation_proxies(self):
+    def _create_onvif_cached_operation_proxies(self):
         result = dict()
         for name in self._binding.all():
             assert isinstance(name, str)
-            result[name] = CachedOperationProxy(
+            result[name] = OnvifCachedOperationProxy(
                 onvif_config=self._onvif_config,
                 home=self._home,
-                binding=self._declaration.binding,
+                binding_name=self._declaration.binding,
                 service_proxy=self._service,
                 operation_name=name,
             )

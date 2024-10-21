@@ -18,7 +18,7 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
         wsdl_config: WsdlConfig,
         home: HomeDir,
         *,
-        update=False
+        update=False,
     ):
         super().__init__()
         self._onvif_configs = onvif_configs
@@ -52,9 +52,10 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
 
     @staticmethod
     def preload_onvif_declarations() -> None:
-        logger.info("Preload ONVIF wsdl declarations ...")
-        declarations_size = len(ONVIF_DECLARATIONS)
-        for i, decl in enumerate(ONVIF_DECLARATIONS):
+        declarations = ONVIF_DECLARATIONS
+        declarations_size = len(declarations)
+        logger.info(f"Preload ONVIF wsdl declarations ({declarations_size}) ...")
+        for i, decl in enumerate(declarations):
             prefix = f"[{i + 1}/{declarations_size}]"
             binding = decl.namespace_binding
             try:

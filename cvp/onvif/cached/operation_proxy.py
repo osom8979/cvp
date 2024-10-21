@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
+from typing import Any, Tuple
 
 from zeep.proxy import OperationProxy, ServiceProxy
 
@@ -9,48 +9,33 @@ from cvp.resources.home import HomeDir
 from cvp.types import override
 
 
-class CachedOperationProxy(OperationProxy):
+class OnvifCachedOperationProxy(OperationProxy):
     def __init__(
         self,
         onvif_config: OnvifConfig,
         home: HomeDir,
-        binding: str,
+        binding_name: str,
         service_proxy: ServiceProxy,
         operation_name: str,
     ):
         super().__init__(service_proxy, operation_name)
         self._onvif_config = onvif_config
         self._home = home
-        self._binding = binding
+        self._binding_name = binding_name
 
     @property
-    def uuid(self):
-        return self._onvif_config.uuid
-
-    @property
-    def binding(self):
-        return self._binding
-
-    @property
-    def docs(self) -> str:
-        return super().__doc__()
-
-    @property
-    def api(self):
-        return self._op_name
-
-    @property
-    def onvifs_path(self):
-        return self._home.onvifs
+    def cache_args(self) -> Tuple[str, str, str]:
+        assert isinstance(self._op_name, str)
+        return self._onvif_config.uuid, self._binding_name, self._op_name
 
     def has_cache(self) -> bool:
-        return self.onvifs_path.has_onvif_object(self.uuid, self.binding, self.api)
+        return self._home.onvifs.has_onvif_object(*self.cache_args)
 
     def read_cache(self) -> Any:
-        return self.onvifs_path.read_onvif_object(self.uuid, self.binding, self.api)
+        return self._home.onvifs.read_onvif_object(*self.cache_args)
 
     def write_cache(self, o: Any) -> int:
-        return self.onvifs_path.write_onvif_object(self.uuid, self.binding, self.api, o)
+        return self._home.onvifs.write_onvif_object(*self.cache_args, o)
 
     @override
     def __call__(self, *args, **kwargs):

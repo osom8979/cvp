@@ -10,7 +10,7 @@ from zeep import Transport
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
 from cvp.logging.logging import onvif_logger as logger
-from cvp.onvif.cached.cache import CachedWsdlClient
+from cvp.onvif.cached.wsdl_client import OnvifCachedWsdlClient
 from cvp.onvif.declarations import (
     ONVIF_ANALYTICS,
     ONVIF_DEVICEIO,
@@ -107,7 +107,7 @@ class OnvifClient:
         self.subscription = self.create_wsdl(ONVIF_SUBSCRIPTION)
 
     @property
-    def wsdls(self) -> Sequence[CachedWsdlClient]:
+    def wsdls(self) -> Sequence[OnvifCachedWsdlClient]:
         return (
             self.devicemgmt,
             self.analytics,
@@ -151,7 +151,7 @@ class OnvifClient:
         if address is None and self._services:
             address = self._services.get_address(declaration.namespace)
 
-        result = CachedWsdlClient(
+        result = OnvifCachedWsdlClient(
             onvif_config=self._onvif_config,
             home=self._home,
             declaration=declaration,

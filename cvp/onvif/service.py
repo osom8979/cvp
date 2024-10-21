@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, Final, Optional
+from typing import Dict, Final, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
 from cvp.config.sections.onvif import OnvifConfig
@@ -17,32 +17,24 @@ class OnvifServiceMapper(Dict[str, Service]):
         onvif_config: OnvifConfig,
         home: HomeDir,
         *,
-        binding=DeviceBinding,
-        api=GetServices,
+        binding_name=DeviceBinding,
+        operation_name=GetServices,
     ):
         super().__init__()
         self._onvif_config = onvif_config
         self._home = home
-        self._binding = binding
-        self._api = api
+        self._binding_name = binding_name
+        self._operation_name = operation_name
 
     @property
-    def uuid(self):
-        return self._onvif_config.uuid
-
-    @property
-    def binding(self):
-        return self._binding
-
-    @property
-    def api(self):
-        return self._api
+    def cache_args(self) -> Tuple[str, str, str]:
+        return self._onvif_config.uuid, self._binding_name, self._operation_name
 
     def has_cache(self) -> bool:
-        return self._home.onvifs.has_onvif_object(self.uuid, self.binding, self.api)
+        return self._home.onvifs.has_onvif_object(*self.cache_args)
 
     def read_cache(self) -> GetServicesResponse:
-        return self._home.onvifs.read_onvif_object(self.uuid, self.binding, self.api)
+        return self._home.onvifs.read_onvif_object(*self.cache_args)
 
     def update_with_cache(self) -> None:
         if not self.has_cache():

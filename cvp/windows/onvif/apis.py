@@ -71,7 +71,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             return
 
         service = wsdls[binding_index]
-        apis = service.operations
+        apis = service.binding_operations
 
         if not apis:
             warning_message = "There are no APIs to choose from."

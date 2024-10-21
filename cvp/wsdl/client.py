@@ -4,6 +4,7 @@ from typing import Dict, Final, Optional
 
 from zeep import Client, Transport
 from zeep.proxy import OperationProxy, ServiceProxy
+from zeep.wsdl.definitions import Operation
 from zeep.wsse import UsernameToken
 
 from cvp.wsdl.declaration import WsdlDeclaration
@@ -54,26 +55,30 @@ class WsdlClient:
         return self._service
 
     @property
-    def operations(self) -> Dict[str, OperationProxy]:
+    def binding_operations(self) -> Dict[str, Operation]:
+        return self._binding.all()
+
+    @property
+    def service_operations(self) -> Dict[str, OperationProxy]:
         # noinspection PyProtectedMember
         return self._service._operations
 
     @property
-    def binding_options(self):
+    def service_binding_options(self):
         # noinspection PyProtectedMember
         return self._service._binding_options
 
     @property
     def address(self) -> Optional[str]:
-        return self.binding_options[ADDRESS_OPTION_KEY]
+        return self.service_binding_options[ADDRESS_OPTION_KEY]
 
     @address.setter
     def address(self, value: str) -> None:
-        self.binding_options[ADDRESS_OPTION_KEY] = value
+        self.service_binding_options[ADDRESS_OPTION_KEY] = value
 
     @property
     def has_address(self) -> bool:
-        return ADDRESS_OPTION_KEY in self.binding_options
+        return self.service_binding_options.get(ADDRESS_OPTION_KEY) is None
 
     def __repr__(self):
         return (
@@ -82,11 +87,11 @@ class WsdlClient:
             ">"
         )
 
-    def __getattr__(self, key):
-        return self._service[key]
+    def __getattr__(self, key: str) -> OperationProxy:
+        return self.service_operations[key]
 
-    def __getitem__(self, key):
-        return self._service[key]
+    def __getitem__(self, key: str) -> OperationProxy:
+        return self.service_operations[key]
 
     def __iter__(self):
         return self._service.__iter__()
