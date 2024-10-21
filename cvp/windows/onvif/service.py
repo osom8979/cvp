@@ -52,10 +52,7 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
             self.context.om.pop(item.uuid)
 
         if has_error:
-            imgui.text_colored(
-                type(self._update_runner.error).__name__,
-                *self._error_color,
-            )
+            imgui.text_colored(str(self._update_runner.error), *self._error_color)
 
         onvif = self.context.om.get(item.uuid)
         if onvif is not None:
