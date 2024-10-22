@@ -2,7 +2,7 @@
 
 from zeep.xsd import AnyURI, Boolean, ComplexType, Element, Float, Integer, String
 
-from cvp.inspect.parameter import ParamType
+from cvp.inspect.argument import ParamType
 
 
 def element_as_ptype(element: Element) -> ParamType:
