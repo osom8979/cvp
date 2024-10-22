@@ -3,7 +3,7 @@
 from typing import Any, Final, List, Optional, Tuple
 
 import imgui
-from zeep.proxy import OperationProxy
+from zeep.wsdl.definitions import Operation
 from zeep.xsd import Boolean, ComplexType, Element, Float, Integer, String
 
 from cvp.types import override
@@ -16,7 +16,7 @@ INPUT_BUFFER_SIZE: Final[int] = 2048
 class WsdlOperationWidget(WidgetInterface):
     def __init__(
         self,
-        operation: OperationProxy,
+        operation: Operation,
         element_separator: Optional[str] = ZEEP_ELEMENT_SEPARATOR,
         **input_values: Any,
     ):
@@ -27,7 +27,7 @@ class WsdlOperationWidget(WidgetInterface):
     @property
     def name(self) -> str:
         # noinspection PyProtectedMember
-        return self._operation._op_name
+        return self._operation.name
 
     @property
     def input(self):
