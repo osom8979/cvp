@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 from inspect import Parameter
-from typing import Annotated, Any, Sequence, get_args, get_origin
+from typing import Annotated, Any, Dict, List, Sequence, Tuple, get_args, get_origin
 
 # noinspection PyProtectedMember
 from typing_extensions import _AnnotatedAlias
@@ -90,4 +90,5 @@ class Argument:
 
 
 class BindArguments(OrderedDict[str, Argument]):
-    pass
+    def build_arguments(self) -> Tuple[List[Any], Dict[str, Any]]:
+        return list(), dict(self)
