@@ -7,24 +7,46 @@ from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.wsse import UsernameToken
 
+from cvp.resources.subdirs.pickles import Pickles
 from cvp.wsdl.declaration import WsdlDeclaration
+from cvp.wsdl.operation_proxy import WsdlOperationProxy
 
-ADDRESS_OPTION_KEY: Final[str] = "address"
+_ADDRESS_BINDING_OPTION_KEY: Final[str] = "address"
 
 
 class WsdlClient:
     def __init__(
         self,
+        pickles: Pickles,
+        uuid: str,
         declaration: WsdlDeclaration,
         wsse: Optional[UsernameToken] = None,
         transport: Optional[Transport] = None,
         address: Optional[str] = None,
     ):
+        self._pickles = pickles
+        self._uuid = uuid
         self._declaration = declaration
         self._client = Client(wsdl=declaration.wsdl, wsse=wsse, transport=transport)
         self._binding = self._client.wsdl.bindings[self.declaration.namespace_binding]
-        binding_options = {ADDRESS_OPTION_KEY: address}
+        binding_options = {_ADDRESS_BINDING_OPTION_KEY: address}
         self._service = ServiceProxy(self._client, self._binding, **binding_options)
+        self._service._operations = self._create_wsdl_operation_proxies()
+
+    def _create_wsdl_operation_proxies(self):
+        result = dict()
+        for name, operation in self._binding.all().items():
+            assert isinstance(name, str)
+            assert isinstance(operation, Operation)
+            result[name] = WsdlOperationProxy(
+                pickles=self._pickles,
+                uuid=self._uuid,
+                binding_name=self._declaration.binding,
+                operation_name=name,
+                service_proxy=self._service,
+                operation=operation,
+            )
+        return result
 
     @property
     def declaration(self):
@@ -70,15 +92,15 @@ class WsdlClient:
 
     @property
     def address(self) -> Optional[str]:
-        return self.service_binding_options[ADDRESS_OPTION_KEY]
+        return self.service_binding_options[_ADDRESS_BINDING_OPTION_KEY]
 
     @address.setter
     def address(self, value: str) -> None:
-        self.service_binding_options[ADDRESS_OPTION_KEY] = value
+        self.service_binding_options[_ADDRESS_BINDING_OPTION_KEY] = value
 
     @property
     def has_address(self) -> bool:
-        return self.service_binding_options.get(ADDRESS_OPTION_KEY) is None
+        return self.service_binding_options.get(_ADDRESS_BINDING_OPTION_KEY) is None
 
     def __repr__(self):
         return (

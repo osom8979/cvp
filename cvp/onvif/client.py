@@ -10,7 +10,6 @@ from zeep import Transport
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsdl import WsdlConfig
 from cvp.logging.logging import onvif_logger as logger
-from cvp.onvif.cached.wsdl_client import OnvifCachedWsdlClient
 from cvp.onvif.declarations import (
     ONVIF_ANALYTICS,
     ONVIF_DEVICEIO,
@@ -107,7 +106,7 @@ class OnvifClient:
         self.subscription = self.create_wsdl(ONVIF_SUBSCRIPTION)
 
     @property
-    def wsdls(self) -> Sequence[OnvifCachedWsdlClient]:
+    def wsdls(self) -> Sequence[WsdlClient]:
         return (
             self.devicemgmt,
             self.analytics,
@@ -130,16 +129,16 @@ class OnvifClient:
         return self._onvif_config.uuid
 
     def has_cache(self, binding: str, api: str) -> bool:
-        return self._home.onvifs.has_onvif_object(self.uuid, binding, api)
+        return self._home.pickles.has_onvif_object(self.uuid, binding, api)
 
     def read_cache(self, binding: str, api: str) -> Any:
-        return self._home.onvifs.read_onvif_object(self.uuid, binding, api)
+        return self._home.pickles.read_onvif_object(self.uuid, binding, api)
 
     def write_cache(self, binding: str, api: str, o: Any) -> int:
-        return self._home.onvifs.write_onvif_object(self.uuid, binding, api, o)
+        return self._home.pickles.write_onvif_object(self.uuid, binding, api, o)
 
     def remove_cache(self, binding: str, api: str) -> None:
-        self._home.onvifs.remove_onvif_object(self.uuid, binding, api)
+        self._home.pickles.remove_onvif_object(self.uuid, binding, api)
 
     def create_wsdl(
         self,
@@ -151,9 +150,9 @@ class OnvifClient:
         if address is None and self._services:
             address = self._services.get_address(declaration.namespace)
 
-        result = OnvifCachedWsdlClient(
-            onvif_config=self._onvif_config,
-            home=self._home,
+        result = WsdlClient(
+            pickles=self._home.pickles,
+            uuid=self._onvif_config.uuid,
             declaration=declaration,
             wsse=self._wsse,
             transport=self._transport,
