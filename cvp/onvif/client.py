@@ -129,16 +129,13 @@ class OnvifClient:
         return self._onvif_config.uuid
 
     def has_cache(self, binding: str, api: str) -> bool:
-        return self._home.pickles.has_onvif_object(self.uuid, binding, api)
+        return self._home.pickles.has_object(self.uuid, binding, api)
 
     def read_cache(self, binding: str, api: str) -> Any:
-        return self._home.pickles.read_onvif_object(self.uuid, binding, api)
-
-    def write_cache(self, binding: str, api: str, o: Any) -> int:
-        return self._home.pickles.write_onvif_object(self.uuid, binding, api, o)
+        return self._home.pickles.read_object(self.uuid, binding, api)
 
     def remove_cache(self, binding: str, api: str) -> None:
-        self._home.pickles.remove_onvif_object(self.uuid, binding, api)
+        self._home.pickles.remove_object(self.uuid, binding, api)
 
     def create_wsdl(
         self,

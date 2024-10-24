@@ -45,7 +45,7 @@ class WsdlOperationProxy(OperationProxy):
         return self._pickles.read_object(*self.cache_args)
 
     def write_cache(self, o: Any) -> int:
-        return self._pickles.write_object(*self.cache_args, o)
+        return self._pickles.write_object(o, *self.cache_args)
 
     @override
     def __call__(self, *args, **kwargs):

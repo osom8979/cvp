@@ -31,10 +31,10 @@ class OnvifServiceMapper(Dict[str, Service]):
         return self._onvif_config.uuid, self._binding_name, self._operation_name
 
     def has_cache(self) -> bool:
-        return self._home.pickles.has_onvif_object(*self.cache_args)
+        return self._home.pickles.has_object(*self.cache_args)
 
     def read_cache(self) -> GetServicesResponse:
-        return self._home.pickles.read_onvif_object(*self.cache_args)
+        return self._home.pickles.read_object(*self.cache_args)
 
     def update_with_cache(self) -> None:
         if not self.has_cache():
