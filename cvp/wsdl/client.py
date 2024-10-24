@@ -3,6 +3,7 @@
 from typing import Dict, Final, Optional
 
 from zeep import Client, Transport
+from zeep.client import Factory
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.wsse import UsernameToken
@@ -23,6 +24,7 @@ class WsdlClient:
         wsse: Optional[UsernameToken] = None,
         transport: Optional[Transport] = None,
         address: Optional[str] = None,
+        type_namespace: Optional[str] = None,
     ):
         self._pickles = pickles
         self._uuid = uuid
@@ -30,22 +32,25 @@ class WsdlClient:
         self._client = Client(wsdl=declaration.wsdl, wsse=wsse, transport=transport)
         self._binding = self._client.wsdl.bindings[self.declaration.namespace_binding]
         binding_options = {_ADDRESS_BINDING_OPTION_KEY: address}
+        factory = self._client.type_factory(type_namespace) if type_namespace else None
         self._service = ServiceProxy(self._client, self._binding, **binding_options)
-        self._service._operations = self._create_wsdl_operation_proxies()
+        self._service._operations = self._create_wsdl_operation_proxies(factory)
 
-    def _create_wsdl_operation_proxies(self):
+    def _create_wsdl_operation_proxies(self, factory: Optional[Factory] = None):
         result = dict()
         for name, operation in self._binding.all().items():
             assert isinstance(name, str)
             assert isinstance(operation, Operation)
-            result[name] = WsdlOperationProxy(
+            operation_proxy = WsdlOperationProxy(
                 pickles=self._pickles,
                 uuid=self._uuid,
                 binding_name=self._declaration.binding,
                 operation_name=name,
                 service_proxy=self._service,
                 operation=operation,
+                factory=factory,
             )
+            result[name] = operation_proxy
         return result
 
     @property

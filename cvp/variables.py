@@ -58,6 +58,3 @@ WSD_TIMEOUT: Final[float] = 30.0
 WSD_NAME_DEFAULT: Final[str] = "New Device"
 
 ZEEP_ELEMENT_SEPARATOR: Final[str] = "."
-
-ONVIF_V10_SCHEMA_URL: Final[str] = "http://www.onvif.org/ver10/schema"
-ONVIF_PROFILE_TOKEN_MAX_LENGTH: Final[int] = 64

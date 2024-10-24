@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 from inspect import Parameter
-from typing import Annotated, Any, Dict, List, Sequence, Tuple, get_args, get_origin
+from typing import Annotated, Any, Dict, Sequence, get_args, get_origin
 
 # noinspection PyProtectedMember
 from typing_extensions import _AnnotatedAlias
@@ -89,6 +89,6 @@ class Argument:
             return object
 
 
-class BindArguments(OrderedDict[str, Argument]):
-    def build_arguments(self) -> Tuple[List[Any], Dict[str, Any]]:
-        return list(), dict(self)
+class ArgumentMapper(OrderedDict[str, Argument]):
+    def kwargs(self) -> Dict[str, Any]:
+        return {k: v.value for k, v in self.items()}

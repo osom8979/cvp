@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
-from typing import Any, Optional, ParamSpec, Sequence, TypeVar
+from typing import Any, Final, Optional, ParamSpec, Sequence, TypeVar
 
 from requests import Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -36,6 +36,9 @@ from cvp.wsdl.wsse import create_username_token
 WsdlRequestParam = ParamSpec("WsdlRequestParam")
 WsdlResponseT = TypeVar("WsdlResponseT")
 WsdlServiceT = TypeVar("WsdlServiceT", bound=WsdlClient)
+
+ONVIF_V10_SCHEMA_URL: Final[str] = "http://www.onvif.org/ver10/schema"
+ONVIF_PROFILE_TOKEN_MAX_LENGTH: Final[int] = 64
 
 
 class OnvifClient:
@@ -159,6 +162,7 @@ class OnvifClient:
             wsse=self._wsse,
             transport=self._transport,
             address=address,
+            type_namespace=ONVIF_V10_SCHEMA_URL,
         )
 
         if update_onvif_ns_prefixes:
