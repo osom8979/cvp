@@ -87,7 +87,12 @@ class OnvifClient:
                     logger.warning("<UsernameToken> should be encoded as a digest.")
                 self._session.auth = HTTPDigestAuth(username, password)
 
-        self._services = OnvifServiceMapper(self._onvif_config, self._home)
+        self._services = OnvifServiceMapper(
+            uuid=self._onvif_config.uuid,
+            same_host=self._onvif_config.same_host,
+            address=self._onvif_config.address,
+            pickles=self._home.pickles,
+        )
         self._services.update_with_cache()
 
         self.devicemgmt = self.create_wsdl(ONVIF_DEVICEMGMT, self._onvif_config.address)
