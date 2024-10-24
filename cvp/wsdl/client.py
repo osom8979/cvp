@@ -9,7 +9,7 @@ from zeep.wsse import UsernameToken
 
 from cvp.resources.subdirs.pickles import Pickles
 from cvp.wsdl.declaration import WsdlDeclaration
-from cvp.wsdl.operation_proxy import WsdlOperationProxy
+from cvp.wsdl.operation import WsdlOperationProxy
 
 _ADDRESS_BINDING_OPTION_KEY: Final[str] = "address"
 
