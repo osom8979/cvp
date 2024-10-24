@@ -42,12 +42,3 @@ class OnvifCachedWsdlClient(WsdlClient):
                 operation=operation,
             )
         return result
-
-    def update_onvif_ns_prefixes(self):
-        self.client.set_ns_prefix("tds", "http://www.onvif.org/ver10/device/wsdl")
-        self.client.set_ns_prefix("tev", "http://www.onvif.org/ver10/events/wsdl")
-        self.client.set_ns_prefix("timg", "http://www.onvif.org/ver20/imaging/wsdl")
-        self.client.set_ns_prefix("tmd", "http://www.onvif.org/ver10/deviceIO/wsdl")
-        self.client.set_ns_prefix("tptz", "http://www.onvif.org/ver20/ptz/wsdl")
-        self.client.set_ns_prefix("ttr", "http://www.onvif.org/ver10/media/wsdl")
-        self.client.set_ns_prefix("ter", "http://www.onvif.org/ver10/error")
