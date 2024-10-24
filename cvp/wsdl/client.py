@@ -3,8 +3,7 @@
 from typing import Dict, Final, Optional
 
 from zeep import Client, Transport
-from zeep.client import Factory
-from zeep.proxy import OperationProxy, ServiceProxy
+from zeep.proxy import ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.wsse import UsernameToken
 
@@ -32,11 +31,15 @@ class WsdlClient:
         self._client = Client(wsdl=declaration.wsdl, wsse=wsse, transport=transport)
         self._binding = self._client.wsdl.bindings[self.declaration.namespace_binding]
         binding_options = {_ADDRESS_BINDING_OPTION_KEY: address}
-        factory = self._client.type_factory(type_namespace) if type_namespace else None
         self._service = ServiceProxy(self._client, self._binding, **binding_options)
-        self._service._operations = self._create_wsdl_operation_proxies(factory)
+        self._service._operations = self._create_wsdl_operation_proxies(type_namespace)
 
-    def _create_wsdl_operation_proxies(self, factory: Optional[Factory] = None):
+    def _create_wsdl_operation_proxies(self, type_namespace: Optional[str] = None):
+        try:
+            factory = self._client.type_factory(type_namespace)
+        except:  # noqa
+            factory = None
+
         result = dict()
         for name, operation in self._binding.all().items():
             assert isinstance(name, str)
@@ -86,7 +89,7 @@ class WsdlClient:
         return self._binding.all()
 
     @property
-    def service_operations(self) -> Dict[str, OperationProxy]:
+    def service_operations(self) -> Dict[str, WsdlOperationProxy]:
         # noinspection PyProtectedMember
         return self._service._operations
 
@@ -114,10 +117,10 @@ class WsdlClient:
             ">"
         )
 
-    def __getattr__(self, key: str) -> OperationProxy:
+    def __getattr__(self, key: str) -> WsdlOperationProxy:
         return self.service_operations[key]
 
-    def __getitem__(self, key: str) -> OperationProxy:
+    def __getitem__(self, key: str) -> WsdlOperationProxy:
         return self.service_operations[key]
 
     def __iter__(self):

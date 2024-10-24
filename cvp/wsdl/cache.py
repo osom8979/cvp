@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+from os import PathLike
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 from urllib.parse import urlparse
 
 from zeep.cache import Base as ZeepCacheBase
@@ -12,7 +13,7 @@ from cvp.types import override
 
 
 class ZeepFileCache(ZeepCacheBase):
-    def __init__(self, prefix: str):
+    def __init__(self, prefix: Union[str, PathLike[str]]):
         super().__init__()
         self._prefix = prefix
 
@@ -40,9 +41,10 @@ class ZeepFileCache(ZeepCacheBase):
         try:
             if filepath.is_file():
                 with filepath.open("rb") as f:
-                    return f.read()
+                    result = f.read()
         except BaseException as e:  # noqa
             logger.error(f"{type(self).__name__}.get(url={url}) error: {e}")
+            return None
         else:
             logger.debug(f"{type(self).__name__}.get(url={url}) ok")
-        return None
+            return result

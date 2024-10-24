@@ -50,9 +50,21 @@ class WsdlOperationProxy(OperationProxy):
         return self._arguments
 
     @property
-    def cache_args(self) -> Tuple[str, str, str]:
+    def uuid(self) -> str:
+        return self._uuid
+
+    @property
+    def binding_name(self) -> str:
+        return self._binding_name
+
+    @property
+    def name(self) -> str:
         assert isinstance(self._op_name, str)
-        return self._uuid, self._binding_name, self._op_name
+        return self._op_name
+
+    @property
+    def cache_args(self) -> Tuple[str, str, str]:
+        return self.uuid, self.binding_name, self.name
 
     def has_cache(self) -> bool:
         return self._pickles.has_object(*self.cache_args)
