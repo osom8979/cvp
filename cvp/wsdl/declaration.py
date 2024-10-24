@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from lxml.etree import QName
 from zeep.settings import Settings
 from zeep.transports import Transport
 from zeep.wsdl import Document
@@ -24,6 +25,10 @@ class WsdlDeclaration:
     @property
     def namespace_binding(self) -> str:
         return "{" + self.namespace + "}" + self.binding
+
+    @property
+    def qname(self) -> QName:
+        return QName(self.namespace_binding)
 
     def create_document(self):
         transport = Transport(cache=ZeepFileCache(get_wsdl_dir()))
