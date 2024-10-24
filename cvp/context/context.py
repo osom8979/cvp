@@ -94,7 +94,10 @@ class Context:
             home=self._home,
             update=True,
         )
-        self._onvif_manager.preload_onvif_declarations()
+
+        if self._config.onvif_manager.preload:
+            logger.info("Preload ONVIF declarations")
+            self._onvif_manager.preload_onvif_declarations()
 
         self._flow_manager = FlowManager(home=self._home, update=True)
         self._msg_queue = MsgQueue()

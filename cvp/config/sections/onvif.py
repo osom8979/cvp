@@ -38,4 +38,4 @@ class OnvifConfig:
 
 @dataclass
 class OnvifManagerConfig(ManagerWindowConfig):
-    pass
+    preload: bool = False

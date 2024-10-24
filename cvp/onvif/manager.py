@@ -52,11 +52,8 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
 
     @staticmethod
     def preload_onvif_declarations() -> None:
-        declarations = ONVIF_DECLARATIONS
-        declarations_size = len(declarations)
-        logger.info(f"Preload ONVIF wsdl declarations ({declarations_size}) ...")
-        for i, decl in enumerate(declarations):
-            prefix = f"[{i + 1}/{declarations_size}]"
+        for i, decl in enumerate(ONVIF_DECLARATIONS):
+            prefix = f"[{i + 1}/{len(ONVIF_DECLARATIONS)}]"
             binding = decl.namespace_binding
             try:
                 logger.debug(f"{prefix} Load ONVIF wsdl declaration: {binding}")
