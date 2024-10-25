@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Tuple
 
-from zeep.client import Factory
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.xsd import Element
@@ -21,21 +20,18 @@ class WsdlOperationProxy(OperationProxy):
         operation_name: str,
         service_proxy: ServiceProxy,
         operation: Operation,
-        factory: Optional[Factory] = None,
     ):
         super().__init__(service_proxy, operation_name)
         self._uuid = uuid
         self._pickles = pickles
         self._binding_name = binding_name
         self._operation = operation
-        self._arguments = self._create_arguments(factory)
+        self._arguments = self._create_arguments()
 
-    def _create_arguments(self, factory: Optional[Factory] = None):
+    def _create_arguments(self):
         result = ArgumentMapper()
         for name, element in self.input_elements:
             result[name] = Argument.from_details(name)
-            if factory is not None:
-                pass
         return result
 
     @property

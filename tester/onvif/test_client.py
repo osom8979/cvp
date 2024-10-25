@@ -77,10 +77,11 @@ class ClientTestCase(TestCase):
         self.assertEqual("ProfileToken", name1)
         self.assertEqual("ProfileToken", element1.name)
 
-        # element0.type.accepted_types[0]()
-        # element0.type.elements[0][1].type
-        # element0.type.elements[0]
-        # self.client.media.client.get_type(element0.type.elements[0][1].type.qname)
+        # b = element0.type.accepted_types[0]()
+        # a = element0.type.elements[0][1].type
+        # c = element0.type.elements[0]
+        # d = self.client.media.client.get_type(element0.type.elements[0][1].type.qname)
+        # f = self.client.media.client.type_factory("http://www.onvif.org/ver10/schema")
 
 
 if __name__ == "__main__":

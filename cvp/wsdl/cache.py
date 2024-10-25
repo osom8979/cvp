@@ -13,9 +13,10 @@ from cvp.types import override
 
 
 class ZeepFileCache(ZeepCacheBase):
-    def __init__(self, prefix: Union[str, PathLike[str]]):
+    def __init__(self, prefix: Union[str, PathLike[str]], *, readonly=False):
         super().__init__()
         self._prefix = prefix
+        self._readonly = readonly
 
     def get_cache_path(self, url: str) -> Path:
         o = urlparse(url)
@@ -24,6 +25,9 @@ class ZeepFileCache(ZeepCacheBase):
 
     @override
     def add(self, url: str, content: Any):
+        if self._readonly:
+            raise ValueError("Cannot add files to read-only storage")
+
         filepath = self.get_cache_path(url)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         try:
@@ -48,3 +52,9 @@ class ZeepFileCache(ZeepCacheBase):
         else:
             logger.debug(f"{type(self).__name__}.get(url={url}) ok")
             return result
+
+    @classmethod
+    def with_package_asset(cls):
+        from cvp.assets import get_wsdl_dir
+
+        return cls(get_wsdl_dir(), readonly=True)

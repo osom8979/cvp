@@ -4,12 +4,9 @@ from dataclasses import dataclass
 from typing import Optional
 
 from lxml.etree import QName
-from zeep.settings import Settings
-from zeep.transports import Transport
 from zeep.wsdl import Document
 
-from cvp.assets import get_wsdl_dir
-from cvp.wsdl.cache import ZeepFileCache
+from cvp.wsdl.document import create_document_with_package_asset
 
 
 @dataclass
@@ -31,13 +28,7 @@ class WsdlDeclaration:
         return QName(self.namespace_binding)
 
     def create_document(self):
-        transport = Transport(cache=ZeepFileCache(get_wsdl_dir()))
-        return Document(
-            location=self.location,
-            transport=transport,  # noqa
-            base=None,
-            settings=Settings(),
-        )
+        return create_document_with_package_asset(self.location)
 
     def load_document(self) -> None:
         self.document = self.create_document()

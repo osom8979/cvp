@@ -23,7 +23,6 @@ class WsdlClient:
         wsse: Optional[UsernameToken] = None,
         transport: Optional[Transport] = None,
         address: Optional[str] = None,
-        type_namespace: Optional[str] = None,
     ):
         self._pickles = pickles
         self._uuid = uuid
@@ -32,14 +31,9 @@ class WsdlClient:
         self._binding = self._client.wsdl.bindings[self.declaration.namespace_binding]
         binding_options = {_ADDRESS_BINDING_OPTION_KEY: address}
         self._service = ServiceProxy(self._client, self._binding, **binding_options)
-        self._service._operations = self._create_wsdl_operation_proxies(type_namespace)
+        self._service._operations = self._create_wsdl_operation_proxies()
 
-    def _create_wsdl_operation_proxies(self, type_namespace: Optional[str] = None):
-        try:
-            factory = self._client.type_factory(type_namespace)
-        except:  # noqa
-            factory = None
-
+    def _create_wsdl_operation_proxies(self):
         result = dict()
         for name, operation in self._binding.all().items():
             assert isinstance(name, str)
@@ -51,7 +45,6 @@ class WsdlClient:
                 operation_name=name,
                 service_proxy=self._service,
                 operation=operation,
-                factory=factory,
             )
             result[name] = operation_proxy
         return result
