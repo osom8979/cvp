@@ -39,6 +39,7 @@ class ArgumentTestCase(TestCase):
         self.assertEqual(2, len(argument.annotated_args))
         self.assertEqual(int, argument.annotated_args[0])
         self.assertEqual("Query2", argument.annotated_args[1])
+        self.assertEqual(100, argument.default)
 
     def test_trivial_type(self):
         def _func(arg0: int):
@@ -65,6 +66,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_annotated)
         self.assertEqual(argument.type_deduction, int)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
+        self.assertEqual(200, argument.default)
 
     def test_default_value(self):
         def _func(arg0=1):
@@ -78,6 +80,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_annotated)
         self.assertEqual(argument.type_deduction, int)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
+        self.assertEqual(1, argument.default)
 
     def test_any(self):
         def _func(arg0: Any):
@@ -156,6 +159,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_annotated)
         self.assertEqual(argument.type_deduction, type(None))
         self.assertRaises(TypeError, lambda: argument.annotated_args)
+        self.assertIsNone(argument.default)
 
     def test_unknown(self):
         def _func(arg0):
@@ -169,6 +173,21 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_annotated)
         self.assertEqual(argument.type_deduction, object)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
+
+    def test_manual_initialize(self):
+        argument = Argument.from_details(
+            name="args0",
+            default=20,
+            annotation=Annotated[str, "Query0"],
+        )
+        self.assertFalse(argument.is_empty_default)
+        self.assertFalse(argument.is_empty_annotation)
+        self.assertTrue(argument.is_annotated)
+        self.assertEqual(argument.type_deduction, str)
+        self.assertEqual(2, len(argument.annotated_args))
+        self.assertEqual(str, argument.annotated_args[0])
+        self.assertEqual("Query0", argument.annotated_args[1])
+        self.assertEqual(20, argument.default)
 
 
 if __name__ == "__main__":

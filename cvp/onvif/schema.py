@@ -2,41 +2,31 @@
 
 from typing import Final, List
 
-from lxml import etree
-
 from cvp.wsdl.cache import ZeepFileCache
+from cvp.wsdl.schema import XsdSchema
 from cvp.wsdl.transport import create_transport_with_package_asset
 
 ONVIF_XSD: Final[str] = "http://www.onvif.org/ver10/schema/onvif.xsd"
+ONVIF_NAMESPACE: Final[str] = "http://www.onvif.org/ver10/schema/"
+
+xs: Final[str] = "xs"
+XSD_URL: Final[str] = "http://www.w3.org/2001/XMLSchema"
 
 
-class OnvifSchema:
+class OnvifSchema(XsdSchema):
     def __init__(self, location=ONVIF_XSD):
+        self._xs = {xs: XSD_URL}
         transport = create_transport_with_package_asset()
         assert isinstance(transport.cache, ZeepFileCache)
-
-        onvif_data = transport.cache.get(location)
-        assert onvif_data is not None
-
-        self._element = etree.XML(onvif_data)
-        assert self._element is not None
-
-        self._xs = {"xs": "http://www.w3.org/2001/XMLSchema"}
-
-    @property
-    def element(self):
-        return self._element
-
-    def xpath(self, xpath: str):
-        return self._element.xpath(xpath, namespaces=self._xs)
+        super().__init__(location=location, transport=transport)
 
     @property
     def simple_types(self):
-        return self.xpath("//xs:simpleType")
+        return self.root.xpath(f"//{xs}:simpleType", namespaces={xs: XSD_URL})
 
     @property
     def complex_types(self):
-        return self.xpath("//xs:complexType")
+        return self.root.xpath(f"//{xs}:complexType", namespaces={xs: XSD_URL})
 
     @property
     def simple_type_names(self):
@@ -48,5 +38,5 @@ class OnvifSchema:
 
     def get_enumerations(self, simple_type: str) -> List[str]:
         xpath = f"//xs:simpleType[@name='{simple_type}']/xs:restriction/xs:enumeration"
-        enumerations = self.xpath(xpath)
+        enumerations = self.root.xpath(xpath, namespaces={"xs": XSD_URL})
         return [enum.get("value") for enum in enumerations]

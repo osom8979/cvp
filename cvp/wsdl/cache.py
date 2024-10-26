@@ -3,13 +3,20 @@
 import os
 from os import PathLike
 from pathlib import Path
-from typing import Any, Union
+from sys import audit
+from typing import Any, NamedTuple, Optional, Union
 from urllib.parse import urlparse
 
 from zeep.cache import Base as ZeepCacheBase
 
 from cvp.logging.logging import wsdl_logger as logger
 from cvp.types import override
+
+
+class ZeepFileCacheAuditArgs(NamedTuple):
+    url: str
+    data: Optional[bytes]
+    error: Optional[BaseException]
 
 
 class ZeepFileCache(ZeepCacheBase):
@@ -48,9 +55,11 @@ class ZeepFileCache(ZeepCacheBase):
                     result = f.read()
         except BaseException as e:  # noqa
             logger.error(f"{type(self).__name__}.get(url={url}) error: {e}")
+            audit("cvp.wsdl.cache", *ZeepFileCacheAuditArgs(url, None, e))
             return None
         else:
             logger.debug(f"{type(self).__name__}.get(url={url}) ok")
+            audit("cvp.wsdl.cache", *ZeepFileCacheAuditArgs(url, result, None))
             return result
 
     @classmethod

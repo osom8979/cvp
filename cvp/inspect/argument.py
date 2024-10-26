@@ -2,16 +2,22 @@
 
 from collections import OrderedDict
 from inspect import Parameter
-from typing import Annotated, Any, Dict, Sequence, get_args, get_origin
+from typing import Annotated, Any, Dict, Optional, Sequence, get_args, get_origin
 
 # noinspection PyProtectedMember
 from typing_extensions import _AnnotatedAlias
 
 
 class Argument:
-    def __init__(self, param: Parameter, value=Parameter.empty):
+    def __init__(
+        self,
+        param: Parameter,
+        value=Parameter.empty,
+        doc: Optional[str] = None,
+    ):
         self.param = param
         self.value = value
+        self.doc = doc
 
     @classmethod
     def from_details(
