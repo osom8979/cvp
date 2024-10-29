@@ -9,17 +9,16 @@ class SchemaTestCase(TestCase):
     def setUp(self):
         self.schema = OnvifSchema()
 
-    def test_simple_types(self):
-        simple_type_names = self.schema.simple_type_names
-        self.assertTrue(simple_type_names)
-
-    def test_complex_type(self):
-        complex_type_names = self.schema.complex_type_names
-        self.assertTrue(complex_type_names)
+    def test_types(self):
+        simple_types = self.schema.simple_types
+        complex_types = self.schema.complex_types
+        types = self.schema.types
+        self.assertEqual(len(types), len(simple_types) + len(complex_types))
 
     def test_stream_type(self):
-        types = self.schema.get_enumerations("StreamType")
-        self.assertSetEqual({"RTP-Unicast", "RTP-Multicast"}, set(types))
+        stream_types = self.schema.get_enumerations("StreamType")
+        self.assertIsNotNone(stream_types)
+        self.assertSetEqual({"RTP-Unicast", "RTP-Multicast"}, set(stream_types))
 
 
 if __name__ == "__main__":

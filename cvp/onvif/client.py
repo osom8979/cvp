@@ -164,6 +164,7 @@ class OnvifClient:
             declaration=declaration,
             wsse=self._wsse,
             transport=self._transport,
+            schema=self._schema,
             address=address,
         )
 

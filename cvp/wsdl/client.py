@@ -10,6 +10,7 @@ from zeep.wsse import UsernameToken
 from cvp.resources.subdirs.pickles import Pickles
 from cvp.wsdl.declaration import WsdlDeclaration
 from cvp.wsdl.operation import WsdlOperationProxy
+from cvp.wsdl.schema import XsdSchema
 
 _ADDRESS_BINDING_OPTION_KEY: Final[str] = "address"
 
@@ -22,6 +23,7 @@ class WsdlClient:
         declaration: WsdlDeclaration,
         wsse: Optional[UsernameToken] = None,
         transport: Optional[Transport] = None,
+        schema: Optional[XsdSchema] = None,
         address: Optional[str] = None,
     ):
         self._pickles = pickles
@@ -29,6 +31,7 @@ class WsdlClient:
         self._declaration = declaration
         self._client = Client(wsdl=declaration.wsdl, wsse=wsse, transport=transport)
         self._binding = self._client.wsdl.bindings[self.declaration.namespace_binding]
+        self._schema = schema
         binding_options = {_ADDRESS_BINDING_OPTION_KEY: address}
         self._service = ServiceProxy(self._client, self._binding, **binding_options)
         self._service._operations = self._create_wsdl_operation_proxies()
@@ -45,6 +48,7 @@ class WsdlClient:
                 operation_name=name,
                 service_proxy=self._service,
                 operation=operation,
+                schema=self._schema,
             )
             result[name] = operation_proxy
         return result
