@@ -6,6 +6,7 @@ from typing import Annotated, Any, List, Optional, Tuple
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.xsd import Element
+from zeep.xsd.elements.any import Any as ZeepAny
 from zeep.xsd.types.builtins import default_types
 
 from cvp.inspect.argument import Argument, ArgumentMapper
@@ -45,26 +46,27 @@ class WsdlOperationProxy(OperationProxy):
             default = None
             value = None
             assert isinstance(element.type.accepted_types, list)
-            assert 1 <= len(element.type.accepted_types)
             assert isinstance(element.type.attributes, list)
 
-            builtin_type = default_types.get(element.type.qname)
-            if builtin_type is not None:
-                type_info = builtin_type
-            elif schema is not None:
-                is_complex_type = bool(element.type.attributes)
-                element_type_name = type(element.type).__name__
-
-                if is_complex_type:
-                    type_info = schema.complex_types[element_type_name]
+            if element.type.qname:
+                builtin_type = default_types.get(element.type.qname)
+                if builtin_type is not None:
+                    type_info = builtin_type
+                elif schema is not None:
+                    type_name = type(element.type).__name__
+                    type_info = schema.get_type(type_name)
                 else:
-                    type_info = schema.simple_types[element_type_name]
-                    # TODO: KeyError: 'TimeZone'
+                    type_info = None
             else:
+                assert isinstance(element, ZeepAny)
                 type_info = None
 
-            primary_accepted_type = element.type.accepted_types[0]
+            if element.type.accepted_types:
+                primary_accepted_type = element.type.accepted_types[0]
+            else:
+                primary_accepted_type = Any
             assert isinstance(primary_accepted_type, type)
+
             annotation = Annotated[primary_accepted_type, type_info]
             result[name] = Argument.from_details(name, kind, default, annotation, value)
         return result
