@@ -24,6 +24,16 @@ class SchemaTestCase(TestCase):
         self.assertEqual(521, len(complex_types))
         self.assertEqual(len(types), len(simple_types) + len(complex_types))
 
+    def test_names(self):
+        types = set(q.localname for q in self.schema.types.keys())
+        names = set(n for n in self.schema.names.keys())
+
+        added_names = names - types
+        removed_names = types - names
+
+        self.assertSetEqual(set(), added_names)
+        self.assertSetEqual(set(), removed_names)
+
     def test_stream_type(self):
         stream_type0 = self.schema["StreamType"]
         stream_type1 = self.schema[f"{self.schema.root_prefix}:StreamType"]
