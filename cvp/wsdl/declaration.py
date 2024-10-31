@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from typing import Optional
 
 from lxml.etree import QName
+from zeep.settings import Settings
 from zeep.wsdl import Document
 
-from cvp.wsdl.document import create_document_with_package_asset
+from cvp.wsdl.schema import XsdSchema
+from cvp.wsdl.transport import create_transport_with_package_asset
 
 
 @dataclass
@@ -16,8 +18,8 @@ class WsdlDeclaration:
     binding: str
     """<wsdl:binding name="???" ...>...</wsdl:binding>"""
 
-    document: Optional[Document] = None
-    no_asset: bool = False
+    _document: Optional[Document] = None
+    _schema: Optional[XsdSchema] = None
 
     @property
     def namespace_binding(self) -> str:
@@ -28,14 +30,36 @@ class WsdlDeclaration:
         return QName(self.namespace_binding)
 
     def create_document(self):
-        return create_document_with_package_asset(self.location)
+        return Document(
+            location=self.location,
+            transport=create_transport_with_package_asset(),  # noqa
+            base=None,
+            settings=Settings(),
+        )
 
     def load_document(self) -> None:
-        self.document = self.create_document()
+        self._document = self.create_document()
 
     @property
     def wsdl(self):
-        if self.document is None:
+        if self._document is None:
             self.load_document()
-        assert self.document is not None
-        return self.document
+        assert self._document is not None
+        return self._document
+
+    def create_schema(self):
+        return XsdSchema.from_target_namespace(
+            location=self.location,
+            transport=create_transport_with_package_asset(),
+            target_namespace=self.namespace,
+        )
+
+    def load_schema(self) -> None:
+        self._schema = self.create_schema()
+
+    @property
+    def schema(self):
+        if self._schema is None:
+            self.load_schema()
+        assert self._schema is not None
+        return self._schema

@@ -58,5 +58,8 @@ class OnvifManager(OrderedDict[str, OnvifClient]):
             try:
                 logger.debug(f"{prefix} Load ONVIF wsdl declaration: {binding}")
                 decl.load_document()
+
+                logger.debug(f"{prefix} Load ONVIF schema declaration: {binding}")
+                decl.load_schema()
             except BaseException as e:
                 logger.error(e)
