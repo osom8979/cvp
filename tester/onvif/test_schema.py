@@ -18,10 +18,13 @@ class SchemaTestCase(TestCase):
     def test_types(self):
         simple_types = self.schema.simple_types
         complex_types = self.schema.complex_types
-        types = self.schema.types
+        elements = self.schema.elements
 
         self.assertEqual(109, len(simple_types))
         self.assertEqual(521, len(complex_types))
+        self.assertEqual(676, len(elements))
+
+        types = self.schema.types
         self.assertEqual(len(types), len(simple_types) + len(complex_types))
 
     def test_names(self):

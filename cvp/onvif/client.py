@@ -27,7 +27,6 @@ from cvp.onvif.declarations import (
     ONVIF_SUBSCRIPTION,
     WsdlDeclaration,
 )
-from cvp.onvif.schema import OnvifSchema
 from cvp.onvif.service import OnvifServiceMapper
 from cvp.resources.home import HomeDir
 from cvp.wsdl.cache import ZeepFileCache
@@ -95,7 +94,6 @@ class OnvifClient:
             pickles=self._home.pickles,
         )
         self._services.update_with_cache()
-        self._schema = OnvifSchema()
 
         self.devicemgmt = self.create_wsdl(ONVIF_DEVICEMGMT, self._onvif_config.address)
         self.analytics = self.create_wsdl(ONVIF_ANALYTICS)
@@ -111,10 +109,6 @@ class OnvifClient:
         self.replay = self.create_wsdl(ONVIF_REPLAY)
         self.search = self.create_wsdl(ONVIF_SEARCH)
         self.subscription = self.create_wsdl(ONVIF_SUBSCRIPTION)
-
-    @property
-    def schema(self):
-        return self._schema
 
     @property
     def wsdls(self) -> Sequence[WsdlClient]:
@@ -164,7 +158,6 @@ class OnvifClient:
             declaration=declaration,
             wsse=self._wsse,
             transport=self._transport,
-            schema=self._schema,
             address=address,
         )
 

@@ -54,7 +54,10 @@ class WsdlOperationProxy(OperationProxy):
                     type_info = builtin_type
                 elif schema is not None:
                     type_name = type(element.type).__name__
-                    type_info = schema.get_type(type_name)
+                    try:
+                        type_info = schema.get_type(type_name)
+                    except KeyError:
+                        type_info = schema.elements.get(type_name)
                 else:
                     type_info = None
             else:
@@ -67,7 +70,8 @@ class WsdlOperationProxy(OperationProxy):
                 primary_accepted_type = Any
             assert isinstance(primary_accepted_type, type)
 
-            annotation = Annotated[primary_accepted_type, type_info]
+            _T = primary_accepted_type
+            annotation = Annotated[_T, type_info]  # type: ignore[valid-type]
             result[name] = Argument.from_details(name, kind, default, annotation, value)
         return result
 

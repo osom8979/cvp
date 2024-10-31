@@ -28,12 +28,12 @@ class XsdSchema:
     _prefixes: Dict[_Prefix, _Namespace]
     _simple_types: Dict[QName, _EtreeElement]
     _complex_types: Dict[QName, _EtreeElement]
+    _elements: Dict[QName, _EtreeElement]
     _types: Dict[QName, _EtreeElement]
     _names: Dict[_LocalName, _EtreeElement]
     _tree: OrderedDict[_Namespace, _EtreeElement]
 
     _location: str
-    _base_url: str
     _transport: Transport
     _xsd_prefix: _Prefix
     _xsd_namespace: _Namespace
@@ -48,7 +48,7 @@ class XsdSchema:
         transport: Optional[Transport] = None,
         *,
         root: Optional[_EtreeElement] = None,
-        base_url: Optional[str] = None,
+        base_location: Optional[str] = None,
         xsd_prefix=XSD_PREFIX,
         xsd_namespace=XSD_NAMESPACE,
         parser: Optional[etree.XMLParser] = None,
@@ -57,12 +57,12 @@ class XsdSchema:
         self._prefixes = dict()
         self._simple_types = dict()
         self._complex_types = dict()
+        self._elements = dict()
         self._types = dict()
         self._names = dict()
         self._tree = OrderedDict()
 
         self._location = location
-        self._base_url = base_url if base_url else urljoin(location, ".")
         self._transport = transport if transport else Transport()
         self._xsd_prefix = xsd_prefix
         self._xsd_namespace = xsd_namespace
@@ -99,16 +99,23 @@ class XsdSchema:
         self._root_prefix = root_prefix
         self._prefixes[root_prefix] = target_namespace
 
-        self._process_element(root)
+        if not base_location:
+            base_location = urljoin(location, ".")
+        assert isinstance(base_location, str)
+        assert base_location
+        self._base_location = base_location
+
+        self._process_element(root, base_location)
         self._insert_node(target_namespace, root)
 
     @classmethod
-    def from_wsdl(
+    def from_target_namespace(
         cls,
         location: str,
         transport: Optional[Transport] = None,
+        target_namespace: Optional[Union[int, str]] = None,
         *,
-        base_url: Optional[str] = None,
+        base_location: Optional[str] = None,
         xsd_prefix=XSD_PREFIX,
         xsd_namespace=XSD_NAMESPACE,
         parser: Optional[etree.XMLParser] = None,
@@ -117,42 +124,46 @@ class XsdSchema:
             transport = Transport()
         assert transport is not None
         assert isinstance(transport, Transport)
+
         data = transport.load(location)
         if not data:
             raise ValueError("There is no schema data")
+
         if not parser:
             parser = etree.XMLParser(remove_comments=True)
         assert parser is not None
         assert isinstance(parser, etree.XMLParser)
-        root = etree.XML(data, parser)
 
+        root = etree.XML(data, parser)
         namespaces = {xsd_prefix: xsd_namespace}
         schemas = list(root.xpath(f"//{xsd_prefix}:schema", namespaces=namespaces))
         if not schemas:
             raise ValueError("Not found schema element")
 
-        result = cls(
-            location=location,
-            transport=transport,
-            root=schemas[0],
-            base_url=base_url,
+        if target_namespace is None:
+            root_node = schemas[0]
+        elif isinstance(target_namespace, int):
+            root_node = schemas[target_namespace]
+        else:
+            assert isinstance(target_namespace, str)
+            root_node = None
+            for e in schemas:
+                assert isinstance(e, _EtreeElement)
+                if target_namespace == e.attrib.get("targetNamespace"):
+                    root_node = e
+                    break
+            if root_node is None:
+                raise ValueError(f"Not found target namespace: '{target_namespace}'")
+
+        return cls(
+            location,
+            transport,
+            root=root_node,
+            base_location=base_location,
             xsd_prefix=xsd_prefix,
             xsd_namespace=xsd_namespace,
             parser=parser,
         )
-
-        if len(schemas) >= 1:
-            for e in schemas[1:]:
-                assert isinstance(e, _EtreeElement)
-                target_namespace = e.attrib.get("targetNamespace")
-                if not target_namespace:
-                    raise ValueError("Not found 'targetNamespace' attribute")
-                assert isinstance(target_namespace, str)
-                assert target_namespace
-                result._process_element(e)
-                result._insert_node(target_namespace, e)
-
-        return result
 
     @property
     def root_element(self) -> _EtreeElement:
@@ -181,6 +192,10 @@ class XsdSchema:
     @property
     def complex_types(self):
         return self._complex_types
+
+    @property
+    def elements(self):
+        return self._elements
 
     @property
     def types(self):
@@ -285,6 +300,23 @@ class XsdSchema:
             result.append((name, e))
         return result
 
+    def get_elements(
+        self,
+        node: _EtreeElement,
+        *,
+        strip_noname=True,
+    ) -> List[Tuple[str, _EtreeElement]]:
+        result = list()
+        xpath = "//" + self.xsd_tag("element")
+        for e in node.xpath(xpath, namespaces=self.xsd_nsmap):
+            assert isinstance(e, _EtreeElement)
+            name = e.get("name")
+            if not name and strip_noname:
+                continue
+            assert isinstance(name, str)
+            result.append((name, e))
+        return result
+
     @staticmethod
     def _is_url(url: str) -> bool:
         try:
@@ -300,11 +332,17 @@ class XsdSchema:
                 return prefix
         raise IndexError(f"Not found namespace prefix: '{namespace}'")
 
-    def _resolve_url(self, location: str) -> str:
-        return location if self._is_url(location) else urljoin(self._base_url, location)
+    def resolve_url(self, location: str, base_location: Optional[str] = None) -> str:
+        if self._is_url(location):
+            return location
+        else:
+            # 'location' is relative path.
+            if base_location:
+                return urljoin(base_location, location)
+            else:
+                return urljoin(self._base_location, location)
 
-    def load(self, location: str):
-        url = self._resolve_url(location)
+    def load(self, url: str) -> _EtreeElement:
         if url in self._loaded:
             raise KeyError(f"Already loaded url: '{url}'")
 
@@ -313,29 +351,27 @@ class XsdSchema:
         self._loaded[url] = node
         return node
 
-    def retrieve_schemas(self, node: _EtreeElement) -> None:
-        for target_namespace, e in self.get_schemas(node):
-            self._process_element(e)
-            self._insert_node(target_namespace, e)
-
-    def _process_element(self, parent: _EtreeElement) -> None:
-        self._process_includes(parent)
-        self._process_imports(parent)
+    def _process_element(self, parent: _EtreeElement, base_location: str) -> None:
+        self._process_includes(parent, base_location)
+        self._process_imports(parent, base_location)
         self._process_nsmap(parent)
 
-    def _process_includes(self, parent: _EtreeElement):
+    def _process_includes(self, parent: _EtreeElement, base_location: str) -> None:
         for node in parent.iterchildren(self.xsd_include):
             assert isinstance(node, _EtreeElement)
             schema_location = node.attrib.get("schemaLocation")
             if not schema_location:
                 continue
 
+            schema_url = self.resolve_url(schema_location, base_location)
+            schema_base = urljoin(schema_url, ".")
+
             try:
-                child = self.load(schema_location)
+                child = self.load(schema_url)
             except KeyError:
                 continue
 
-            self._process_element(child)
+            self._process_element(child, schema_base)
             if child.tag != self.xsd_schema:
                 continue
 
@@ -343,7 +379,7 @@ class XsdSchema:
                 assert isinstance(elem, _EtreeElement)
                 parent.append(elem)
 
-    def _process_imports(self, parent: _EtreeElement):
+    def _process_imports(self, parent: _EtreeElement, base_location: str) -> None:
         for node in parent.iterchildren(self.xsd_import):
             assert isinstance(node, _EtreeElement)
             namespace = node.attrib.get("namespace")
@@ -351,12 +387,15 @@ class XsdSchema:
             if not namespace or not schema_location:
                 continue
 
+            schema_url = self.resolve_url(schema_location, base_location)
+            schema_base = urljoin(schema_url, ".")
+
             try:
-                child = self.load(schema_location)
+                child = self.load(schema_url)
             except KeyError:
                 continue
 
-            self._process_element(child)
+            self._process_element(child, schema_base)
             if child.tag != self.xsd_schema:
                 continue
 
@@ -395,6 +434,10 @@ class XsdSchema:
             self._complex_types[qname] = e
             self._types[qname] = e
             self._names[qname.localname] = e
+
+        for name, e in self.get_elements(node):
+            qname = QName(f"{{{namespace}}}{name}")
+            self._elements[qname] = e
 
     def get_type(self, name: Union[str, QName]) -> _EtreeElement:
         if isinstance(name, QName):
