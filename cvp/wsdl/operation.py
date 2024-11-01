@@ -10,6 +10,7 @@ from zeep.xsd.elements.any import Any as ZeepAny
 from zeep.xsd.types.builtins import default_types
 
 from cvp.inspect.argument import Argument, ArgumentMapper
+from cvp.logging.logging import wsdl_logger as logger
 from cvp.resources.subdirs.pickles import Pickles
 from cvp.types import override
 from cvp.wsdl.schema import XsdSchema
@@ -43,8 +44,8 @@ class WsdlOperationProxy(OperationProxy):
         result = ArgumentMapper()
         for name, element in input_elements:
             kind = Parameter.POSITIONAL_OR_KEYWORD
-            default = None
-            value = None
+            default = Parameter.empty
+            value = Parameter.empty
             assert isinstance(element.type.accepted_types, list)
             assert isinstance(element.type.attributes, list)
 
@@ -111,7 +112,11 @@ class WsdlOperationProxy(OperationProxy):
 
     @override
     def __call__(self, *args, **kwargs):
-        if self.has_cache():
+        use_cache = self.has_cache()
+        suffix = "cache" if use_cache else "operation"
+        logger.info(f"Call {self.name}(args={args}, kwargs={kwargs}) {suffix} ...")
+
+        if use_cache:
             return self.read_cache()
         else:
             response = super().__call__(*args, **kwargs)

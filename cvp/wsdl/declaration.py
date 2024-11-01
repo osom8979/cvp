@@ -34,7 +34,7 @@ class WsdlDeclaration:
             location=self.location,
             transport=create_transport_with_package_asset(),  # noqa
             base=None,
-            settings=Settings(),
+            settings=Settings(raw_response=False, xml_huge_tree=True),
         )
 
     def load_document(self) -> None:

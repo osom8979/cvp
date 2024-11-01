@@ -27,6 +27,10 @@ class OnvifConfig:
     no_verify: bool = False
     same_host: bool = False
 
+    # GUI Handling
+    select_binding: str = field(default_factory=str)
+    select_api: str = field(default_factory=str)
+
     @property
     def is_http_basic(self):
         return self.http_auth == HttpAuth.basic

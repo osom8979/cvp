@@ -2,10 +2,21 @@
 
 from collections import OrderedDict
 from inspect import Parameter
-from typing import Annotated, Any, Dict, Optional, Sequence, get_args, get_origin
+from typing import (
+    Annotated,
+    Any,
+    Dict,
+    Optional,
+    Sequence,
+    TypeVar,
+    get_args,
+    get_origin,
+)
 
 # noinspection PyProtectedMember
 from typing_extensions import _AnnotatedAlias
+
+_ValueT = TypeVar("_ValueT")
 
 
 class Argument:
@@ -46,6 +57,15 @@ class Argument:
     @property
     def kind(self):
         return self.param.kind
+
+    def get_value(self, default: _ValueT) -> _ValueT:
+        if self.value == Parameter.empty:
+            if self.param.default == Parameter.empty:
+                return default
+            else:
+                return self.param.default
+        else:
+            return self.value
 
     @property
     def is_empty_value(self):
@@ -94,7 +114,23 @@ class Argument:
         else:
             return object
 
+    @property
+    def typename(self) -> str:
+        value_type = self.type_deduction
+        if isinstance(value_type, type):
+            return value_type.__name__
+        else:
+            return str(value_type)
+
 
 class ArgumentMapper(OrderedDict[str, Argument]):
+    @property
+    def requestable(self) -> bool:
+        """Ready to Callable?"""
+        if not bool(self):
+            return True
+
+        return all(not a.is_empty_value for a in self.values())
+
     def kwargs(self) -> Dict[str, Any]:
         return {k: v.value for k, v in self.items()}

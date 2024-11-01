@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from pprint import pformat
-from typing import Dict, Final, Tuple
+from types import MappingProxyType
+from typing import Callable, Dict, Final, Sequence, Tuple, TypeAlias
 
 import imgui
-from zeep.proxy import OperationProxy
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
@@ -12,50 +12,110 @@ from cvp.imgui.begin_child import begin_child
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
+from cvp.inspect.argument import Argument
+from cvp.onvif.client import OnvifClient
 from cvp.types import override
 from cvp.widgets.tab import TabItem
-from cvp.widgets.wsdl_operation import WsdlOperationWidget
+from cvp.wsdl.client import WsdlClient
+from cvp.wsdl.operation import WsdlOperationProxy
 
 NOT_FOUND_INDEX: Final[int] = -1
 
 
-class OnvifApisTab(TabItem[OnvifConfig]):
-    _widgets: Dict[Tuple[str, str, str], WsdlOperationWidget]
+class StepDone(RuntimeError):
+    pass
 
+
+def _bool_handler(argument: Argument) -> None:
+    changed, value = imgui.checkbox(argument.name, argument.get_value(False))
+    assert isinstance(changed, bool)
+    assert isinstance(value, bool)
+    if changed:
+        argument.value = value
+
+    if argument.doc and imgui.is_item_hovered():
+        with imgui.begin_tooltip():
+            imgui.text(argument.doc)
+
+
+def _int_handler(argument: Argument) -> None:
+    changed, value = imgui.input_int(argument.name, argument.get_value(0))
+    assert isinstance(changed, bool)
+    assert isinstance(value, int)
+    if changed:
+        argument.value = value
+
+    if argument.doc and imgui.is_item_hovered():
+        with imgui.begin_tooltip():
+            imgui.text(argument.doc)
+
+
+ArgumentRendererMapper: TypeAlias = MappingProxyType[type, Callable[[Argument], None]]
+
+DEFAULT_ARGUMENT_RENDERERS = ArgumentRendererMapper(
+    {
+        bool: _bool_handler,
+        int: _int_handler,
+    }
+)
+
+
+class OnvifApisTab(TabItem[OnvifConfig]):
     def __init__(self, context: Context):
         super().__init__(context, "APIs")
         self._request_runner = self.context.pm.create_thread_runner(self.on_api_request)
+        self._error_color = 1.0, 0.0, 0.0, 1.0
         self._warning_color = 1.0, 1.0, 0.0, 1.0
-        self._select_binding = str()
-        self._select_api = str()
-        self._widgets = dict()
+        self._typename_color = 1.0, 0.647, 0.0, 1.0
         self._left_width = 180.0
         self._min_left_width = 100.0
         self._max_left_width = 300.0
 
-    def on_api_request(self, item: OnvifConfig, operation: OperationProxy):
-        pass
+    @staticmethod
+    def on_api_request(operation: WsdlOperationProxy):
+        operation.call_with_arguments()
 
     @override
     def on_item(self, item: OnvifConfig) -> None:
-        onvif = self.context.om.get(item.uuid)
-        if onvif is None:
-            warning_message = (
-                "ONVIF service instance does not exist."
-                " Please create a service instance first."
-            )
-            imgui.text_colored(warning_message, *self._warning_color)
-            return
+        try:
+            onvif = self.process_onvif_client(item)
+            binding_index, binding_name = self.process_binding_index(item, onvif.wsdls)
+            apis = self.process_apis(onvif.wsdls, binding_index)
+            api_name = self.process_select_api(item, apis)
+            imgui.same_line()
+            self.process_api_details(onvif, binding_name, apis, api_name)
+        except StepDone:
+            pass
 
-        wsdls = onvif.wsdls
+    def process_onvif_client(self, item: OnvifConfig) -> OnvifClient:
+        onvif = self.context.om.get(item.uuid)
+
+        if onvif is None:
+            warning_message_line0 = "ONVIF service instance does not exist."
+            imgui.text_colored(warning_message_line0, *self._warning_color)
+
+            warning_message_line1 = "Please create a service instance first."
+            imgui.text_colored(warning_message_line1, *self._warning_color)
+
+            raise StepDone("ONVIF service instance does not exist")
+
+        return onvif
+
+    def process_binding_index(
+        self,
+        item: OnvifConfig,
+        wsdls: Sequence[WsdlClient],
+    ) -> Tuple[int, str]:
         bindings = [wsdl.binding_name for wsdl in wsdls]
+
         if not bindings:
             warning_message = "There are no bindings to choose from."
             imgui.text_colored(warning_message, *self._warning_color)
-            return
+
+            raise StepDone("ONVIF binding does not exist")
 
         try:
-            binding_index = bindings.index(self._select_binding)
+            binding_index = bindings.index(item.select_binding)
         except ValueError:
             binding_index = NOT_FOUND_INDEX
 
@@ -68,23 +128,40 @@ class OnvifApisTab(TabItem[OnvifConfig]):
 
         binding_changed = binding_result[0]
         binding_index = binding_result[1]
+        assert isinstance(binding_changed, bool)
         assert isinstance(binding_index, int)
-        if binding_changed and 0 <= binding_index < len(bindings):
-            self._select_binding = bindings[binding_index]
 
-        if not self._select_binding:
+        if binding_changed and 0 <= binding_index < len(bindings):
+            item.select_binding = bindings[binding_index]
+
+        if not item.select_binding:
             warning_message = "You must select a binding service."
             imgui.text_colored(warning_message, *self._warning_color)
-            return
 
-        service = wsdls[binding_index]
-        apis = service.binding_operations
+            raise StepDone("ONVIF binding is not selected")
+
+        return binding_index, item.select_binding
+
+    def process_apis(
+        self,
+        wsdls: Sequence[WsdlClient],
+        binding_index: int,
+    ) -> Dict[str, WsdlOperationProxy]:
+        apis = wsdls[binding_index].service_operations
 
         if not apis:
             warning_message = "There are no APIs to choose from."
             imgui.text_colored(warning_message, *self._warning_color)
-            return
 
+            raise StepDone("ONVIF API does not exist")
+
+        return apis
+
+    def process_select_api(
+        self,
+        item: OnvifConfig,
+        apis: Dict[str, WsdlOperationProxy],
+    ) -> str:
         with begin_child("API List", width=self._left_width):
             with item_width(-1):
                 left_width = slider_float(
@@ -101,43 +178,81 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                 if list_box.opened:
                     with list_box:
                         for key in apis.keys():
-                            if imgui.selectable(key, key == self._select_api)[1]:
-                                self._select_api = key
+                            if imgui.selectable(key, key == item.select_api)[1]:
+                                item.select_api = key
 
-        imgui.same_line()
+        return item.select_api
 
+    def process_api_details(
+        self,
+        onvif: OnvifClient,
+        binding_name: str,
+        apis: Dict[str, WsdlOperationProxy],
+        api_name: str,
+    ) -> None:
         with begin_child("API Details", border=True):
-            if self._select_api not in apis:
+            if api_name not in apis:
                 warning_message = "You must select an API."
                 imgui.text_colored(warning_message, *self._warning_color)
-                return
 
-            imgui.text(self._select_api)
+                raise StepDone("ONVIF API is not selected")
+
+            imgui.text(api_name)
             imgui.separator()
 
             imgui.text("Parameters:")
-            operation = apis[self._select_api]
+            operation = apis[api_name]
 
-            widget_key = onvif.uuid, self._select_binding, self._select_api
-            if widget_key not in self._widgets:
-                widget = WsdlOperationWidget(operation)
-                self._widgets[widget_key] = widget
-            else:
-                widget = self._widgets[widget_key]
+            mishandling = self.process_operation(operation)
+            has_cache = onvif.has_cache(binding_name, api_name)
 
-            widget.on_process()
+            disable_request = (
+                mishandling >= 1
+                or not operation.arguments.requestable
+                or bool(self._request_runner)
+            )
 
-            has_cache = onvif.has_cache(self._select_binding, self._select_api)
+            if button_ex("Request", disabled=disable_request):
+                self._request_runner(operation)
 
-            if button_ex("Request", disabled=self._request_runner):
-                self._request_runner(item, operation)
             imgui.same_line()
+
             if button_ex("Remove Cache", disabled=not has_cache):
-                onvif.remove_cache(self._select_binding, self._select_api)
+                onvif.remove_cache(binding_name, api_name)
                 has_cache = False
 
             if has_cache:
                 imgui.text("Response:")
                 with begin_child("Response", border=True):
-                    response = onvif.read_cache(self._select_binding, self._select_api)
+                    response = onvif.read_cache(binding_name, api_name)
                     imgui.text_unformatted(pformat(response))
+
+    def process_operation(self, operation: WsdlOperationProxy) -> int:
+        mishandling = 0
+        for name, argument in operation.arguments.items():
+            try:
+                self.process_argument(argument)
+            except StepDone:
+                mishandling += 1
+        return mishandling
+
+    def process_argument(self, argument: Argument) -> None:
+        assert not argument.is_empty_annotation
+        assert argument.is_annotated
+
+        arg_type = argument.type_deduction
+        typename = arg_type.__name__ if isinstance(arg_type, type) else str(arg_type)
+        assert isinstance(typename, str)
+
+        # default = argument.default
+        # annotation = argument.annotation
+        # kind = argument.kind
+        # empty_value = argument.is_empty_value
+        # value = argument.value
+
+        handler = DEFAULT_ARGUMENT_RENDERERS.get(argument.type_deduction)
+        if handler:
+            handler(argument)
+        else:
+            imgui.text_colored(f"{argument.name} <{typename}>", *self._error_color)
+            raise StepDone(f"Could not find handler for argument of type <{typename}>")
