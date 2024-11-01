@@ -204,7 +204,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             operation = apis[api_name]
 
             mishandling = self.process_operation(operation)
-            has_cache = onvif.has_cache(binding_name, api_name)
+            has_cache = operation.has_cache()
 
             disable_request = (
                 mishandling >= 1
@@ -218,13 +218,13 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             imgui.same_line()
 
             if button_ex("Remove Cache", disabled=not has_cache):
-                onvif.remove_cache(binding_name, api_name)
+                operation.remove_cache()
                 has_cache = False
 
             if has_cache:
                 imgui.text("Response:")
                 with begin_child("Response", border=True):
-                    response = onvif.read_cache(binding_name, api_name)
+                    response = operation.read_cache()
                     imgui.text_unformatted(pformat(response))
 
     def process_operation(self, operation: WsdlOperationProxy) -> int:

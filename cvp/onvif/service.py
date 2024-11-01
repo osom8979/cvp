@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Dict, Final, Iterator, Optional, Protocol, Tuple
-from urllib.parse import urlparse, urlunparse
+from typing import Any, Dict, Final, List, Optional, Tuple, TypedDict
 
+from type_serialize import deserialize
+
+from cvp.net.uri.parser import replace_netloc
 from cvp.resources.subdirs.pickles import Pickles
 
 DeviceBinding: Final[str] = "DeviceBinding"
 GetServices: Final[str] = "GetServices"
 
 
-class OnvifVersion(Protocol):
+class OnvifVersion(TypedDict):
     Major: int
     Minor: int
 
 
-class Service(Protocol):
+class Service(TypedDict):
     Namespace: str
     XAddr: str
-    Capabilities: Optional[Any]
     Version: OnvifVersion
+    Capabilities: Any
 
 
-class GetServicesResponse(Protocol):
-    def __iter__(self) -> Iterator[Service]: ...
-    def __getitem__(self, index: int) -> Service: ...
-    def __len__(self) -> int: ...
+class GetServicesResponse(List[Service]):
+    pass
 
 
 class OnvifServiceMapper(Dict[str, Service]):
@@ -54,7 +54,8 @@ class OnvifServiceMapper(Dict[str, Service]):
         return self._pickles.has_object(*self.cache_args)
 
     def read_cache(self) -> GetServicesResponse:
-        return self._pickles.read_object(*self.cache_args)
+        obj = self._pickles.read_object(*self.cache_args)
+        return deserialize(obj, GetServicesResponse)
 
     def update_with_cache(self) -> None:
         if not self.has_cache():
@@ -63,7 +64,7 @@ class OnvifServiceMapper(Dict[str, Service]):
 
     def update_with_response(self, response: GetServicesResponse) -> None:
         for service in response:
-            self.__setitem__(service.Namespace, service)
+            self.__setitem__(service["Namespace"], service)
 
     def get_address(self, namespace: str) -> Optional[str]:
         service = self.get(namespace)
@@ -71,9 +72,6 @@ class OnvifServiceMapper(Dict[str, Service]):
             return None
 
         if not self._same_host:
-            return service.XAddr
+            return service["XAddr"]
 
-        src_url = urlparse(self._address)
-        new_url = urlparse(service.XAddr)
-        new_url._replace(netloc=src_url.netloc)
-        return str(urlunparse(new_url))
+        return replace_netloc(service["XAddr"], self._address)

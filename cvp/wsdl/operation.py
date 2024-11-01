@@ -14,6 +14,7 @@ from cvp.logging.logging import wsdl_logger as logger
 from cvp.resources.subdirs.pickles import Pickles
 from cvp.types import override
 from cvp.wsdl.schema import XsdSchema
+from cvp.wsdl.serialize import serialize_object
 
 
 class WsdlOperationProxy(OperationProxy):
@@ -110,6 +111,9 @@ class WsdlOperationProxy(OperationProxy):
     def write_cache(self, o: Any) -> int:
         return self._pickles.write_object(o, *self.cache_args)
 
+    def remove_cache(self) -> None:
+        self._pickles.remove_object(*self.cache_args)
+
     @override
     def __call__(self, *args, **kwargs):
         use_cache = self.has_cache()
@@ -120,8 +124,9 @@ class WsdlOperationProxy(OperationProxy):
             return self.read_cache()
         else:
             response = super().__call__(*args, **kwargs)
-            self.write_cache(response)
-            return response
+            result = serialize_object(response)
+            self.write_cache(result)
+            return result
 
     def call_with_arguments(self):
         return self.__call__(**self._arguments.kwargs())

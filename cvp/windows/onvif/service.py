@@ -68,11 +68,14 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
                     for service in onvif.services.values():
                         imgui.table_next_row()
                         imgui.table_set_column_index(0)
-                        imgui.text(service.Namespace)
+                        imgui.text(service["Namespace"])
                         imgui.table_set_column_index(1)
-                        imgui.text(f"{service.Version.Major}.{service.Version.Minor}")
+                        version = service["Version"]
+                        major = version["Major"]
+                        minor = version["Minor"]
+                        imgui.text(f"{major}.{minor}")
                         imgui.table_set_column_index(2)
-                        imgui.text(service.XAddr)
+                        imgui.text(service["XAddr"])
 
             imgui.text("ONVIF WSDL services:")
             wsdl_table = imgui.begin_table("WsdlTable", 3, TABLE_FLAGS)
