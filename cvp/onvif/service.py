@@ -2,10 +2,8 @@
 
 from typing import Any, Dict, Final, List, Optional, Tuple, TypedDict
 
-from type_serialize import deserialize
-
 from cvp.net.uri.parser import replace_netloc
-from cvp.resources.subdirs.pickles import Pickles
+from cvp.resources.formats.json import JsonFormatPath
 
 DeviceBinding: Final[str] = "DeviceBinding"
 GetServices: Final[str] = "GetServices"
@@ -33,7 +31,7 @@ class OnvifServiceMapper(Dict[str, Service]):
         uuid: str,
         same_host: bool,
         address: str,
-        pickles: Pickles,
+        jsons: JsonFormatPath,
         *,
         binding_name=DeviceBinding,
         operation_name=GetServices,
@@ -42,7 +40,7 @@ class OnvifServiceMapper(Dict[str, Service]):
         self._uuid = uuid
         self._same_host = same_host
         self._address = address
-        self._pickles = pickles
+        self._jsons = jsons
         self._binding_name = binding_name
         self._operation_name = operation_name
 
@@ -51,11 +49,10 @@ class OnvifServiceMapper(Dict[str, Service]):
         return self._uuid, self._binding_name, self._operation_name
 
     def has_cache(self) -> bool:
-        return self._pickles.has_object(*self.cache_args)
+        return self._jsons.has_object(*self.cache_args)
 
     def read_cache(self) -> GetServicesResponse:
-        obj = self._pickles.read_object(*self.cache_args)
-        return deserialize(obj, GetServicesResponse)
+        return self._jsons.read_object(*self.cache_args)
 
     def update_with_cache(self) -> None:
         if not self.has_cache():

@@ -7,11 +7,10 @@ from cvp.logging.logging import logger
 from cvp.resources.subdirs.bin import Bin
 from cvp.resources.subdirs.cache import Cache
 from cvp.resources.subdirs.flows import Flows
-from cvp.resources.subdirs.jsons import Jsons
 from cvp.resources.subdirs.keyrings import Keyrings
 from cvp.resources.subdirs.layouts import Layouts
 from cvp.resources.subdirs.logs import Logs
-from cvp.resources.subdirs.pickles import Pickles
+from cvp.resources.subdirs.onvifs import Onvifs
 from cvp.resources.subdirs.processes import Processes
 from cvp.resources.subdirs.temp import Temp
 from cvp.resources.subdirs.wsdl import Wsdl
@@ -30,11 +29,10 @@ class HomeDir(PathFlavour):
         self.bin = Bin.classname_subdir(self)
         self.cache = Cache.classname_subdir(self)
         self.flows = Flows.classname_subdir(self)
-        self.jsons = Jsons.classname_subdir(self)
         self.keyrings = Keyrings.classname_subdir(self)
         self.layouts = Layouts.classname_subdir(self)
         self.logs = Logs.classname_subdir(self)
-        self.pickles = Pickles.classname_subdir(self)
+        self.onvifs = Onvifs.classname_subdir(self)
         self.processes = Processes.classname_subdir(self)
         self.temp = Temp.classname_subdir(self)
         self.wsdl = Wsdl.classname_subdir(self)
@@ -43,11 +41,10 @@ class HomeDir(PathFlavour):
             self.bin,
             self.cache,
             self.flows,
-            self.jsons,
             self.keyrings,
             self.layouts,
             self.logs,
-            self.pickles,
+            self.onvifs,
             self.processes,
             self.temp,
             self.wsdl,

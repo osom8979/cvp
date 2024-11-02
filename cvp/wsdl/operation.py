@@ -11,7 +11,7 @@ from zeep.xsd.types.builtins import default_types
 
 from cvp.inspect.argument import Argument, ArgumentMapper
 from cvp.logging.logging import wsdl_logger as logger
-from cvp.resources.subdirs.pickles import Pickles
+from cvp.resources.formats.json import JsonFormatPath
 from cvp.types import override
 from cvp.wsdl.schema import XsdSchema
 from cvp.wsdl.serialize import serialize_object
@@ -20,7 +20,7 @@ from cvp.wsdl.serialize import serialize_object
 class WsdlOperationProxy(OperationProxy):
     def __init__(
         self,
-        pickles: Pickles,
+        jsons: JsonFormatPath,
         uuid: str,
         binding_name: str,
         operation_name: str,
@@ -30,7 +30,7 @@ class WsdlOperationProxy(OperationProxy):
     ):
         super().__init__(service_proxy, operation_name)
         self._uuid = uuid
-        self._pickles = pickles
+        self._jsons = jsons
         self._binding_name = binding_name
         self._operation = operation
 
@@ -115,16 +115,16 @@ class WsdlOperationProxy(OperationProxy):
         return self._latest is not None
 
     def has_cache(self) -> bool:
-        return self._pickles.has_object(*self.cache_args)
+        return self._jsons.has_object(*self.cache_args)
 
     def read_cache(self) -> Any:
-        return self._pickles.read_object(*self.cache_args)
+        return self._jsons.read_object(*self.cache_args)
 
     def write_cache(self, o: Any) -> int:
-        return self._pickles.write_object(o, *self.cache_args)
+        return self._jsons.write_object(o, *self.cache_args)
 
     def remove_cache(self) -> None:
-        self._pickles.remove_object(*self.cache_args)
+        self._jsons.remove_object(*self.cache_args)
 
     def clear_latest(self) -> None:
         self._latest = None

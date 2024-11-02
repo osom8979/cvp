@@ -7,7 +7,7 @@ from zeep.proxy import ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.wsse import UsernameToken
 
-from cvp.resources.subdirs.pickles import Pickles
+from cvp.resources.formats.json import JsonFormatPath
 from cvp.wsdl.declaration import WsdlDeclaration
 from cvp.wsdl.operation import WsdlOperationProxy
 
@@ -17,14 +17,14 @@ _ADDRESS_BINDING_OPTION_KEY: Final[str] = "address"
 class WsdlClient:
     def __init__(
         self,
-        pickles: Pickles,
+        jsons: JsonFormatPath,
         uuid: str,
         declaration: WsdlDeclaration,
         wsse: Optional[UsernameToken] = None,
         transport: Optional[Transport] = None,
         address: Optional[str] = None,
     ):
-        self._pickles = pickles
+        self._jsons = jsons
         self._uuid = uuid
         self._declaration = declaration
         self._client = Client(wsdl=declaration.wsdl, wsse=wsse, transport=transport)
@@ -40,7 +40,7 @@ class WsdlClient:
             assert isinstance(name, str)
             assert isinstance(operation, Operation)
             operation_proxy = WsdlOperationProxy(
-                pickles=self._pickles,
+                jsons=self._jsons,
                 uuid=self._uuid,
                 binding_name=self._declaration.binding,
                 operation_name=name,

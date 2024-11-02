@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
-from typing import Any, Optional, ParamSpec, Sequence, TypeVar
+from typing import Optional, ParamSpec, Sequence, TypeVar
 
 from requests import Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -91,7 +91,7 @@ class OnvifClient:
             uuid=self._onvif_config.uuid,
             same_host=self._onvif_config.same_host,
             address=self._onvif_config.address,
-            pickles=self._home.pickles,
+            jsons=self._home.onvifs,
         )
         self._services.update_with_cache()
 
@@ -133,15 +133,6 @@ class OnvifClient:
     def uuid(self):
         return self._onvif_config.uuid
 
-    def has_cache(self, binding: str, api: str) -> bool:
-        return self._home.pickles.has_object(self.uuid, binding, api)
-
-    def read_cache(self, binding: str, api: str) -> Any:
-        return self._home.pickles.read_object(self.uuid, binding, api)
-
-    def remove_cache(self, binding: str, api: str) -> None:
-        self._home.pickles.remove_object(self.uuid, binding, api)
-
     def create_wsdl(
         self,
         declaration: WsdlDeclaration,
@@ -153,7 +144,7 @@ class OnvifClient:
             address = self._services.get_address(declaration.namespace)
 
         result = WsdlClient(
-            pickles=self._home.pickles,
+            jsons=self._home.onvifs,
             uuid=self._onvif_config.uuid,
             declaration=declaration,
             wsse=self._wsse,
