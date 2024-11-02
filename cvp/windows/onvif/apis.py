@@ -204,7 +204,6 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             operation = apis[api_name]
 
             mishandling = self.process_operation(operation)
-            has_cache = operation.has_cache()
 
             disable_request = (
                 mishandling >= 1
@@ -217,14 +216,30 @@ class OnvifApisTab(TabItem[OnvifConfig]):
 
             imgui.same_line()
 
-            if button_ex("Remove Cache", disabled=not has_cache):
-                operation.remove_cache()
-                has_cache = False
+            has_latest = operation.has_latest()
+            has_cache = operation.has_cache()
+            disable_remove_cache = not has_latest and not has_cache
 
-            if has_cache:
+            if button_ex("Remove Cache", disabled=disable_remove_cache):
+                if has_latest:
+                    operation.clear_latest()
+                    has_latest = False
+                if has_cache:
+                    operation.remove_cache()
+                    has_cache = False
+
+            if has_latest or has_cache:
                 imgui.text("Response:")
                 with begin_child("Response", border=True):
-                    response = operation.read_cache()
+                    if has_latest:
+                        response = operation.latest
+                    elif has_cache:
+                        response = operation.read_cache()
+                        if not has_latest:
+                            operation.latest = response
+                    else:
+                        assert False, "Inaccessible section"
+
                     imgui.text_unformatted(pformat(response))
 
     def process_operation(self, operation: WsdlOperationProxy) -> int:

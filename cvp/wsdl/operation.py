@@ -36,6 +36,7 @@ class WsdlOperationProxy(OperationProxy):
 
         input_elements = self._operation.input.body.type.elements
         self._arguments = self._create_arguments(input_elements, schema)
+        self._latest = None
 
     @staticmethod
     def _create_arguments(
@@ -99,8 +100,19 @@ class WsdlOperationProxy(OperationProxy):
         return self._op_name
 
     @property
+    def latest(self) -> Any:
+        return self._latest
+
+    @latest.setter
+    def latest(self, value: Any) -> None:
+        self._latest = value
+
+    @property
     def cache_args(self) -> Tuple[str, str, str]:
         return self.uuid, self.binding_name, self.name
+
+    def has_latest(self) -> bool:
+        return self._latest is not None
 
     def has_cache(self) -> bool:
         return self._pickles.has_object(*self.cache_args)
@@ -114,19 +126,25 @@ class WsdlOperationProxy(OperationProxy):
     def remove_cache(self) -> None:
         self._pickles.remove_object(*self.cache_args)
 
+    def clear_latest(self) -> None:
+        self._latest = None
+
     @override
     def __call__(self, *args, **kwargs):
-        use_cache = self.has_cache()
-        suffix = "cache" if use_cache else "operation"
-        logger.info(f"Call {self.name}(args={args}, kwargs={kwargs}) {suffix} ...")
+        prefix = f"Call {self.name}(args={args}, kwargs={kwargs})"
 
-        if use_cache:
-            return self.read_cache()
+        if self._latest is not None:
+            logger.info(f"{prefix} memory cache")
+        elif self.has_cache():
+            logger.info(f"{prefix} file cache")
+            self._latest = self.read_cache()
         else:
+            logger.info(f"{prefix} operation")
             response = super().__call__(*args, **kwargs)
-            result = serialize_object(response)
-            self.write_cache(result)
-            return result
+            self._latest = serialize_object(response)
+            self.write_cache(self._latest)
+
+        return self._latest
 
     def call_with_arguments(self):
         return self.__call__(**self._arguments.kwargs())
