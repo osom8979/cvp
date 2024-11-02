@@ -61,6 +61,8 @@ DEFAULT_ARGUMENT_RENDERERS = ArgumentRendererMapper(
 
 
 class OnvifApisTab(TabItem[OnvifConfig]):
+    _response_cache: Dict[Tuple[str, str, str], str]
+
     def __init__(self, context: Context):
         super().__init__(context, "APIs")
         self._request_runner = self.context.pm.create_thread_runner(self.on_api_request)
@@ -70,6 +72,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         self._left_width = 180.0
         self._min_left_width = 100.0
         self._max_left_width = 300.0
+        self._response_cache = dict()
 
     @staticmethod
     def on_api_request(operation: WsdlOperationProxy):
@@ -83,7 +86,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             apis = self.process_apis(onvif.wsdls, binding_index)
             api_name = self.process_select_api(item, apis)
             imgui.same_line()
-            self.process_api_details(onvif, binding_name, apis, api_name)
+            self.process_api_details(apis, api_name)
         except StepDone:
             pass
 
@@ -185,8 +188,6 @@ class OnvifApisTab(TabItem[OnvifConfig]):
 
     def process_api_details(
         self,
-        onvif: OnvifClient,
-        binding_name: str,
         apis: Dict[str, WsdlOperationProxy],
         api_name: str,
     ) -> None:
@@ -230,6 +231,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
 
             if has_latest or has_cache:
                 imgui.text("Response:")
+
                 with begin_child("Response", border=True):
                     if has_latest:
                         response = operation.latest
@@ -240,7 +242,14 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                     else:
                         assert False, "Inaccessible section"
 
-                    imgui.text_unformatted(pformat(response))
+                    response_key = operation.cache_args
+                    if response_key in self._response_cache:
+                        response_content = self._response_cache[response_key]
+                    else:
+                        response_content = pformat(response)
+                        self._response_cache[response_key] = response_content
+
+                    imgui.text_unformatted(response_content)
 
     def process_operation(self, operation: WsdlOperationProxy) -> int:
         mishandling = 0

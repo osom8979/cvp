@@ -38,4 +38,7 @@ def serialize_object(o: Any, target_cls=dict) -> Any:
     if isinstance(o, list):
         return list(serialize_object(sub, target_cls) for sub in o)
 
-    return o
+    if isinstance(o, (str, int, float, bool, type(None))):
+        return o
+
+    raise TypeError(f"Object of type {type(o).__name__} is not serializable")
