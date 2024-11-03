@@ -5,7 +5,13 @@ from enum import StrEnum, auto, unique
 from typing import Optional
 from uuid import uuid4
 
+from cvp.colors.types import RGBA
 from cvp.config.sections.bases.manager import ManagerWindowConfig
+from cvp.variables import (
+    DEFAULT_API_SELECT_WIDTH,
+    MAX_API_SELECT_WIDTH,
+    MIN_API_SELECT_WIDTH,
+)
 
 
 @unique
@@ -43,3 +49,11 @@ class OnvifConfig:
 @dataclass
 class OnvifManagerConfig(ManagerWindowConfig):
     preload: bool = False
+
+    api_select_width: float = DEFAULT_API_SELECT_WIDTH
+    min_api_select_width: float = MIN_API_SELECT_WIDTH
+    max_api_select_width: float = MAX_API_SELECT_WIDTH
+
+    error_color: RGBA = 1.0, 0.0, 0.0, 1.0
+    warning_color: RGBA = 1.0, 1.0, 0.0, 1.0
+    typename_color: RGBA = 1.0, 0.647, 0.0, 1.0

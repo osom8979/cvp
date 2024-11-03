@@ -471,8 +471,10 @@ class XsdSchema:
         return list(node.iterchildren(self.xsd_restriction))
 
     def get_enumeration(self, node: _EtreeElement) -> List[_EtreeElement]:
-        restriction = self.get_restriction(node)[0]
-        return list(restriction.iterchildren(self.xsd_enumeration))
+        result = list()
+        for restriction in self.get_restriction(node):
+            result += list(restriction.iterchildren(self.xsd_enumeration))
+        return result
 
     def get_enumeration_values(self, node: _EtreeElement) -> List[str]:
         enumerations = self.get_enumeration(node)

@@ -9,7 +9,7 @@ from zeep.xsd import Element
 from zeep.xsd.elements.any import Any as ZeepAny
 from zeep.xsd.types.builtins import default_types
 
-from cvp.inspect.argument import Argument, ArgumentMapper
+from cvp.inspect.argument import Argument, ArgumentMapper, Constraints
 from cvp.logging.logging import wsdl_logger as logger
 from cvp.resources.formats.json import JsonFormatPath
 from cvp.types import override
@@ -45,11 +45,12 @@ class WsdlOperationProxy(OperationProxy):
     ):
         result = ArgumentMapper()
         for name, element in input_elements:
-            kind = Parameter.POSITIONAL_OR_KEYWORD
-            default = Parameter.empty
-            value = Parameter.empty
             assert isinstance(element.type.accepted_types, list)
             assert isinstance(element.type.attributes, list)
+            default = Parameter.empty
+            value = Parameter.empty
+            kind = Parameter.POSITIONAL_OR_KEYWORD
+            doc = str()
 
             if element.type.qname:
                 builtin_type = default_types.get(element.type.qname)
@@ -73,9 +74,20 @@ class WsdlOperationProxy(OperationProxy):
                 primary_accepted_type = Any
             assert isinstance(primary_accepted_type, type)
 
+            if issubclass(primary_accepted_type, (bool, int, float, str)):
+                if value == Parameter.empty:
+                    value = primary_accepted_type()
+
             _T = primary_accepted_type
             annotation = Annotated[_T, type_info]  # type: ignore[valid-type]
-            result[name] = Argument.from_details(name, kind, default, annotation, value)
+            result[name] = Argument.from_details(
+                name,
+                kind,
+                default,
+                annotation,
+                value,
+                doc,
+            )
         return result
 
     @property

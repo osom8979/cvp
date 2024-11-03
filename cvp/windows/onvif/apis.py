@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from pprint import pformat
-from types import MappingProxyType
-from typing import Callable, Dict, Final, Sequence, Tuple, TypeAlias
+import json
+from traceback import format_exc
+from typing import Any, Dict, Final, Sequence, Tuple
 
 import imgui
 
@@ -12,71 +12,101 @@ from cvp.imgui.begin_child import begin_child
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
-from cvp.inspect.argument import Argument
 from cvp.onvif.client import OnvifClient
 from cvp.types import override
 from cvp.widgets.tab import TabItem
+from cvp.widgets.wsdl_operation import WsdlOperationWidget
 from cvp.wsdl.client import WsdlClient
 from cvp.wsdl.operation import WsdlOperationProxy
 
 NOT_FOUND_INDEX: Final[int] = -1
 
 
-class StepDone(RuntimeError):
+class StepDone(ValueError):
     pass
 
 
-def _bool_handler(argument: Argument) -> None:
-    changed, value = imgui.checkbox(argument.name, argument.get_value(False))
-    assert isinstance(changed, bool)
-    assert isinstance(value, bool)
-    if changed:
-        argument.value = value
-
-    if argument.doc and imgui.is_item_hovered():
-        with imgui.begin_tooltip():
-            imgui.text(argument.doc)
-
-
-def _int_handler(argument: Argument) -> None:
-    changed, value = imgui.input_int(argument.name, argument.get_value(0))
-    assert isinstance(changed, bool)
-    assert isinstance(value, int)
-    if changed:
-        argument.value = value
-
-    if argument.doc and imgui.is_item_hovered():
-        with imgui.begin_tooltip():
-            imgui.text(argument.doc)
-
-
-ArgumentRendererMapper: TypeAlias = MappingProxyType[type, Callable[[Argument], None]]
-
-DEFAULT_ARGUMENT_RENDERERS = ArgumentRendererMapper(
-    {
-        bool: _bool_handler,
-        int: _int_handler,
-    }
-)
+class ResponseTraceBack(ValueError):
+    pass
 
 
 class OnvifApisTab(TabItem[OnvifConfig]):
     _response_cache: Dict[Tuple[str, str, str], str]
+    _response_error: Dict[Tuple[str, str, str], BaseException]
 
     def __init__(self, context: Context):
         super().__init__(context, "APIs")
+        self._operation_widget = WsdlOperationWidget()
         self._request_runner = self.context.pm.create_thread_runner(self.on_api_request)
-        self._error_color = 1.0, 0.0, 0.0, 1.0
-        self._warning_color = 1.0, 1.0, 0.0, 1.0
-        self._typename_color = 1.0, 0.647, 0.0, 1.0
-        self._left_width = 180.0
-        self._min_left_width = 100.0
-        self._max_left_width = 300.0
         self._response_cache = dict()
+        self._response_error = dict()
 
-    @staticmethod
-    def on_api_request(operation: WsdlOperationProxy):
-        operation.call_with_arguments()
+    def on_api_request(self, operation: WsdlOperationProxy):
+        key = operation.cache_args
+        try:
+            response = operation.call_with_arguments()
+            result = json.dumps(response, indent=2, sort_keys=True)
+            self._response_cache[key] = result
+            self._response_error.pop(key, None)
+        except BaseException as e:
+            error = ResponseTraceBack(format_exc())
+            error.__cause__ = e
+            self._response_cache.pop(key, None)
+            self._response_error[key] = error
+            raise
+
+    @property
+    def api_select_width(self) -> float:
+        return self.context.config.onvif_manager.api_select_width
+
+    @api_select_width.setter
+    def api_select_width(self, value: float) -> None:
+        self.context.config.onvif_manager.api_select_width = value
+
+    @property
+    def min_api_select_width(self) -> float:
+        return self.context.config.onvif_manager.min_api_select_width
+
+    @min_api_select_width.setter
+    def min_api_select_width(self, value: float) -> None:
+        self.context.config.onvif_manager.min_api_select_width = value
+
+    @property
+    def max_api_select_width(self) -> float:
+        return self.context.config.onvif_manager.max_api_select_width
+
+    @max_api_select_width.setter
+    def max_api_select_width(self, value: float) -> None:
+        self.context.config.onvif_manager.max_api_select_width = value
+
+    @property
+    def error_color(self):
+        return self.context.config.onvif_manager.error_color
+
+    @property
+    def warning_color(self):
+        return self.context.config.onvif_manager.warning_color
+
+    @property
+    def typename_color(self):
+        return self.context.config.onvif_manager.typename_color
+
+    def slider_api_select_width(self) -> None:
+        result = slider_float(
+            "## API List Width",
+            self.api_select_width,
+            self.min_api_select_width,
+            self.max_api_select_width,
+            "List width (%.3f)",
+        )
+        if result:
+            self.api_select_width = result.value
+
+    def text_error(self, text: str) -> None:
+        imgui.text_colored(text, *self.error_color)
+
+    def text_warning(self, text: str) -> None:
+        imgui.text_colored(text, *self.warning_color)
 
     @override
     def on_item(self, item: OnvifConfig) -> None:
@@ -94,12 +124,8 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         onvif = self.context.om.get(item.uuid)
 
         if onvif is None:
-            warning_message_line0 = "ONVIF service instance does not exist."
-            imgui.text_colored(warning_message_line0, *self._warning_color)
-
-            warning_message_line1 = "Please create a service instance first."
-            imgui.text_colored(warning_message_line1, *self._warning_color)
-
+            self.text_warning("ONVIF service instance does not exist")
+            self.text_warning("Please create a service instance first")
             raise StepDone("ONVIF service instance does not exist")
 
         return onvif
@@ -112,9 +138,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         bindings = [wsdl.binding_name for wsdl in wsdls]
 
         if not bindings:
-            warning_message = "There are no bindings to choose from."
-            imgui.text_colored(warning_message, *self._warning_color)
-
+            self.text_warning("There are no bindings to choose from")
             raise StepDone("ONVIF binding does not exist")
 
         try:
@@ -138,9 +162,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             item.select_binding = bindings[binding_index]
 
         if not item.select_binding:
-            warning_message = "You must select a binding service."
-            imgui.text_colored(warning_message, *self._warning_color)
-
+            self.text_warning("You must select a binding service")
             raise StepDone("ONVIF binding is not selected")
 
         return binding_index, item.select_binding
@@ -153,9 +175,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         apis = wsdls[binding_index].service_operations
 
         if not apis:
-            warning_message = "There are no APIs to choose from."
-            imgui.text_colored(warning_message, *self._warning_color)
-
+            self.text_warning("There are no APIs to choose from")
             raise StepDone("ONVIF API does not exist")
 
         return apis
@@ -165,17 +185,9 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         item: OnvifConfig,
         apis: Dict[str, WsdlOperationProxy],
     ) -> str:
-        with begin_child("API List", width=self._left_width):
+        with begin_child("API List", width=self.api_select_width):
             with item_width(-1):
-                left_width = slider_float(
-                    "## API List Width",
-                    self._left_width,
-                    self._min_left_width,
-                    self._max_left_width,
-                    "List width (%.3f)",
-                )
-                if left_width:
-                    self._left_width = left_width.value
+                self.slider_api_select_width()
 
                 list_box = imgui.begin_list_box("## API List Box", width=-1, height=-1)
                 if list_box.opened:
@@ -193,9 +205,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
     ) -> None:
         with begin_child("API Details", border=True):
             if api_name not in apis:
-                warning_message = "You must select an API."
-                imgui.text_colored(warning_message, *self._warning_color)
-
+                self.text_warning("You must select an API")
                 raise StepDone("ONVIF API is not selected")
 
             imgui.text(api_name)
@@ -204,8 +214,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             imgui.text("Parameters:")
             operation = apis[api_name]
 
-            mishandling = self.process_operation(operation)
-
+            mishandling = self._operation_widget.process_operation(operation)
             disable_request = (
                 mishandling >= 1
                 or not operation.arguments.requestable
@@ -229,10 +238,26 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                     operation.remove_cache()
                     has_cache = False
 
-            if has_latest or has_cache:
-                imgui.text("Response:")
+            error = self._response_error.get(operation.cache_args)
+            if error is not None:
+                assert isinstance(error, ResponseTraceBack)
+                assert isinstance(error.__cause__, BaseException)
+                base_error = error.__cause__
 
-                with begin_child("Response", border=True):
+                imgui.text("Response error:")
+                for line in str(base_error).splitlines():
+                    self.text_error(line)
+
+                if self.context.debug and self.context.verbose >= 1:
+                    with begin_child("Error Area", border=True):
+                        imgui.text_unformatted(str(error))
+
+                raise StepDone("An error occurred in the operation request") from error
+
+            if has_latest or has_cache:
+                imgui.text("Response result:")
+
+                with begin_child("Result Area", border=True):
                     if has_latest:
                         response = operation.latest
                     elif has_cache:
@@ -242,41 +267,13 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                     else:
                         assert False, "Inaccessible section"
 
-                    response_key = operation.cache_args
-                    if response_key in self._response_cache:
-                        response_content = self._response_cache[response_key]
-                    else:
-                        response_content = pformat(response)
-                        self._response_cache[response_key] = response_content
+                    content = self.format_response(operation.cache_args, response)
+                    imgui.text_unformatted(content)
 
-                    imgui.text_unformatted(response_content)
-
-    def process_operation(self, operation: WsdlOperationProxy) -> int:
-        mishandling = 0
-        for name, argument in operation.arguments.items():
-            try:
-                self.process_argument(argument)
-            except StepDone:
-                mishandling += 1
-        return mishandling
-
-    def process_argument(self, argument: Argument) -> None:
-        assert not argument.is_empty_annotation
-        assert argument.is_annotated
-
-        arg_type = argument.type_deduction
-        typename = arg_type.__name__ if isinstance(arg_type, type) else str(arg_type)
-        assert isinstance(typename, str)
-
-        # default = argument.default
-        # annotation = argument.annotation
-        # kind = argument.kind
-        # empty_value = argument.is_empty_value
-        # value = argument.value
-
-        handler = DEFAULT_ARGUMENT_RENDERERS.get(argument.type_deduction)
-        if handler:
-            handler(argument)
+    def format_response(self, key: Tuple[str, str, str], response: Any) -> str:
+        if key in self._response_cache:
+            return self._response_cache[key]
         else:
-            imgui.text_colored(f"{argument.name} <{typename}>", *self._error_color)
-            raise StepDone(f"Could not find handler for argument of type <{typename}>")
+            result = json.dumps(response, indent=2, sort_keys=True)
+            self._response_cache[key] = result
+            return result

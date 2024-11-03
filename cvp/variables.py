@@ -34,6 +34,10 @@ MAX_SIDEBAR_HEIGHT: Final[float] = 260.0
 MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 
+DEFAULT_API_SELECT_WIDTH: Final[float] = 180.0
+MIN_API_SELECT_WIDTH: Final[float] = 100.0
+MAX_API_SELECT_WIDTH: Final[float] = 300.0
+
 MIN_POPUP_WIDTH: Final[int] = 120
 MIN_POPUP_HEIGHT: Final[int] = 50
 MIN_POPUP_CONFIRM_WIDTH: Final[int] = 280
