@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from dataclasses import dataclass, field
 from inspect import Parameter
 from typing import (
     Annotated,
     Any,
     Dict,
-    List,
     Optional,
     Sequence,
     TypeVar,
@@ -19,11 +17,6 @@ from typing import (
 from typing_extensions import _AnnotatedAlias
 
 _ValueT = TypeVar("_ValueT")
-
-
-@dataclass
-class Constraints:
-    choices: List[Any] = field(default_factory=list)
 
 
 class Argument:

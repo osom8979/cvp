@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from typing import Callable, Dict, Final, Optional, Tuple
+from typing import Any, Callable, Dict, Final, Optional, Tuple
 
 import imgui
-from zeep.xsd.valueobjects import CompoundValue
 
 from cvp.colors.types import RGBA
 from cvp.inspect.argument import Argument
 from cvp.types import override
 from cvp.variables import ZEEP_ELEMENT_SEPARATOR
 from cvp.widgets.widget import WidgetInterface
-from cvp.wsdl.operation import WsdlOperationProxy
+from cvp.wsdl.operation import ElementAnnotation, WsdlOperationProxy
+
+# from zeep.xsd.elements.any import Any as ZeepAny
+# from zeep.xsd.types.builtins import default_types
+# from zeep.xsd.valueobjects import CompoundValue
+
 
 NOT_FOUND_INDEX: Final[int] = -1
 INPUT_BUFFER_SIZE: Final[int] = 2048
@@ -53,61 +57,41 @@ class WsdlOperationWidget(WidgetInterface):
             with imgui.begin_tooltip():
                 imgui.text(argument.doc)
 
-    def find_handler(self, cls: type) -> Callable[[Argument, Optional[str]], None]:
-        if issubclass(cls, CompoundValue):
-            return self.do_compound_value
-        elif issubclass(cls, str):
-            return self.do_string
-        elif issubclass(cls, float):
-            return self.do_floating
-        elif issubclass(cls, int):
-            return self.do_integer
-        elif issubclass(cls, bool):
-            return self.do_boolean
-        raise TypeError(f"Cannot find handler for {cls}")
-
     def do_argument(self, argument: Argument, parent: Optional[str] = None) -> bool:
-        assert not argument.is_empty_annotation
-        assert argument.is_annotated
-
-        arg_type = argument.type_deduction
-        typename = arg_type.__name__ if isinstance(arg_type, type) else str(arg_type)
-        assert isinstance(typename, str)
-
-        handler = self.find_handler(arg_type)
+        cls = argument.type_deduction
+        handler = self.find_handler(cls)
         if not handler:
+            typename = cls.__name__ if isinstance(cls, type) else str(cls)
             imgui.text_colored(f"{argument.name} <{typename}>", *self._error_color)
             return False
 
         handler(argument, parent)
         return True
 
-    def do_boolean(self, argument: Argument, parent: Optional[str] = None) -> None:
-        label = self.label_key(argument, parent)[0]
-        changed, value = imgui.checkbox(label, argument.get_value(False))
-        self.tooltip(argument)
-        assert isinstance(changed, bool)
-        assert isinstance(value, bool)
-        if changed:
-            argument.value = value
+    def find_handler(self, cls: Any) -> Callable[[Argument, Optional[str]], None]:
+        if cls is None:
+            return self.do_none
 
-    def do_integer(self, argument: Argument, parent: Optional[str] = None) -> None:
-        label = self.label_key(argument, parent)[0]
-        changed, value = imgui.input_int(label, argument.get_value(0))
-        self.tooltip(argument)
-        assert isinstance(changed, bool)
-        assert isinstance(value, int)
-        if changed:
-            argument.value = value
+        if isinstance(cls, type):
+            if issubclass(cls, str):
+                return self.do_string
+            elif issubclass(cls, float):
+                return self.do_floating
+            elif issubclass(cls, int):
+                return self.do_integer
+            elif issubclass(cls, bool):
+                return self.do_boolean
+            raise TypeError(f"Cannot find handler for {cls}")
 
-    def do_floating(self, argument: Argument, parent: Optional[str] = None) -> None:
+        if isinstance(cls, ElementAnnotation):
+            return self.do_element
+
+        raise TypeError(f"Unsupported type: {type(cls).__name__}")
+
+    def do_none(self, argument: Argument, parent: Optional[str] = None) -> None:
         label = self.label_key(argument, parent)[0]
-        changed, value = imgui.input_float(label, argument.get_value(0.0))
+        imgui.text(label)
         self.tooltip(argument)
-        assert isinstance(changed, bool)
-        assert isinstance(value, float)
-        if changed:
-            argument.value = value
 
     def do_string(self, argument: Argument, parent: Optional[str] = None) -> None:
         label = self.label_key(argument, parent)[0]
@@ -142,11 +126,67 @@ class WsdlOperationWidget(WidgetInterface):
         if changed:
             argument.value = value
 
-    def do_compound_value(
-        self,
-        argument: Argument,
-        parent: Optional[str] = None,
-    ) -> None:
+    def do_floating(self, argument: Argument, parent: Optional[str] = None) -> None:
+        label = self.label_key(argument, parent)[0]
+        changed, value = imgui.input_float(label, argument.get_value(0.0))
+        self.tooltip(argument)
+        assert isinstance(changed, bool)
+        assert isinstance(value, float)
+        if changed:
+            argument.value = value
+
+    def do_integer(self, argument: Argument, parent: Optional[str] = None) -> None:
+        label = self.label_key(argument, parent)[0]
+        changed, value = imgui.input_int(label, argument.get_value(0))
+        self.tooltip(argument)
+        assert isinstance(changed, bool)
+        assert isinstance(value, int)
+        if changed:
+            argument.value = value
+
+    def do_boolean(self, argument: Argument, parent: Optional[str] = None) -> None:
+        label = self.label_key(argument, parent)[0]
+        changed, value = imgui.checkbox(label, argument.get_value(False))
+        self.tooltip(argument)
+        assert isinstance(changed, bool)
+        assert isinstance(value, bool)
+        if changed:
+            argument.value = value
+
+    def do_element(self, argument: Argument, parent: Optional[str] = None) -> None:
+        annotation = argument.annotation
+        assert isinstance(annotation, ElementAnnotation)
+        element = annotation.element
+        # schema = annotation.schema
+
+        assert isinstance(element.type.accepted_types, list)
+        assert isinstance(element.type.attributes, list)
+
+        # if element.type.qname:
+        #     builtin_type = default_types.get(element.type.qname)
+        #     if builtin_type is not None:
+        #         type_info = builtin_type
+        #     elif schema is not None:
+        #         type_name = type(element.type).__name__
+        #         try:
+        #             type_info = schema.get_type(type_name)
+        #         except KeyError:
+        #             type_info = schema.elements.get(type_name)
+        #     else:
+        #         type_info = None
+        # else:
+        #     assert isinstance(element, ZeepAny)
+        #     type_info = None
+
+        # if element.type.accepted_types:
+        #     primary_accepted_type = element.type.accepted_types[0]
+        #     if issubclass(primary_accepted_type, (bool, int, float, str)):
+        #         if value == Parameter.empty:
+        #             value = primary_accepted_type()
+        # else:
+        #     primary_accepted_type = Any
+        # assert isinstance(primary_accepted_type, type)
+
         label, key = self.label_key(argument, parent)
         if imgui.tree_node(label, imgui.TREE_NODE_DEFAULT_OPEN):
             # for child_name, child_element in element.type.elements:

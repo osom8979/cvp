@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from inspect import Parameter
-from typing import Annotated, Any, List, Optional, Tuple
+from typing import Any, List, NamedTuple, Optional, Tuple
 
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
 from zeep.xsd import Element
-from zeep.xsd.elements.any import Any as ZeepAny
-from zeep.xsd.types.builtins import default_types
 
-from cvp.inspect.argument import Argument, ArgumentMapper, Constraints
+from cvp.inspect.argument import Argument, ArgumentMapper
 from cvp.logging.logging import wsdl_logger as logger
 from cvp.resources.formats.json import JsonFormatPath
 from cvp.types import override
 from cvp.wsdl.schema import XsdSchema
 from cvp.wsdl.serialize import serialize_object
+
+
+class ElementAnnotation(NamedTuple):
+    element: Element
+    schema: Optional[XsdSchema] = None
 
 
 class WsdlOperationProxy(OperationProxy):
@@ -45,49 +47,8 @@ class WsdlOperationProxy(OperationProxy):
     ):
         result = ArgumentMapper()
         for name, element in input_elements:
-            assert isinstance(element.type.accepted_types, list)
-            assert isinstance(element.type.attributes, list)
-            default = Parameter.empty
-            value = Parameter.empty
-            kind = Parameter.POSITIONAL_OR_KEYWORD
-            doc = str()
-
-            if element.type.qname:
-                builtin_type = default_types.get(element.type.qname)
-                if builtin_type is not None:
-                    type_info = builtin_type
-                elif schema is not None:
-                    type_name = type(element.type).__name__
-                    try:
-                        type_info = schema.get_type(type_name)
-                    except KeyError:
-                        type_info = schema.elements.get(type_name)
-                else:
-                    type_info = None
-            else:
-                assert isinstance(element, ZeepAny)
-                type_info = None
-
-            if element.type.accepted_types:
-                primary_accepted_type = element.type.accepted_types[0]
-            else:
-                primary_accepted_type = Any
-            assert isinstance(primary_accepted_type, type)
-
-            if issubclass(primary_accepted_type, (bool, int, float, str)):
-                if value == Parameter.empty:
-                    value = primary_accepted_type()
-
-            _T = primary_accepted_type
-            annotation = Annotated[_T, type_info]  # type: ignore[valid-type]
-            result[name] = Argument.from_details(
-                name,
-                kind,
-                default,
-                annotation,
-                value,
-                doc,
-            )
+            annotation = ElementAnnotation(element, schema)
+            result[name] = Argument.from_details(name, annotation=annotation)
         return result
 
     @property
