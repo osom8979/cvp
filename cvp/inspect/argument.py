@@ -23,7 +23,7 @@ class Argument:
     def __init__(
         self,
         param: Parameter,
-        value=Parameter.empty,
+        value: Any = Parameter.empty,
         doc: Optional[str] = None,
     ):
         self.param = param
@@ -99,7 +99,6 @@ class Argument:
 
         return get_args(self.param.annotation)
 
-    @property
     def type_deduction(self) -> type:
         if not self.is_empty_annotation:
             if self.is_annotated:
@@ -114,14 +113,6 @@ class Argument:
             return type(self.param.default)
         else:
             return object
-
-    @property
-    def typename(self) -> str:
-        value_type = self.type_deduction
-        if isinstance(value_type, type):
-            return value_type.__name__
-        else:
-            return str(value_type)
 
 
 class ArgumentMapper(OrderedDict[str, Argument]):

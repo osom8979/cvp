@@ -19,7 +19,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertTrue(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, int)
+        self.assertEqual(argument.type_deduction(), int)
         self.assertEqual(3, len(argument.annotated_args))
         self.assertEqual(int, argument.annotated_args[0])
         self.assertEqual("Query0", argument.annotated_args[1])
@@ -35,7 +35,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertTrue(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, int)
+        self.assertEqual(argument.type_deduction(), int)
         self.assertEqual(2, len(argument.annotated_args))
         self.assertEqual(int, argument.annotated_args[0])
         self.assertEqual("Query2", argument.annotated_args[1])
@@ -51,7 +51,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, int)
+        self.assertEqual(argument.type_deduction(), int)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_trivial_type_with_default(self):
@@ -64,7 +64,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, int)
+        self.assertEqual(argument.type_deduction(), int)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
         self.assertEqual(200, argument.default)
 
@@ -78,7 +78,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_empty_default)
         self.assertTrue(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, int)
+        self.assertEqual(argument.type_deduction(), int)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
         self.assertEqual(1, argument.default)
 
@@ -92,7 +92,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, Any)
+        self.assertEqual(argument.type_deduction(), Any)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_list(self):
@@ -105,7 +105,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, list)
+        self.assertEqual(argument.type_deduction(), list)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_sequence(self):
@@ -118,7 +118,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, collections.abc.Sequence)
+        self.assertEqual(argument.type_deduction(), collections.abc.Sequence)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_optional(self):
@@ -131,7 +131,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, Union)
+        self.assertEqual(argument.type_deduction(), Union)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_union(self):
@@ -144,7 +144,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, Union)
+        self.assertEqual(argument.type_deduction(), Union)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_none(self):
@@ -157,7 +157,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_empty_default)
         self.assertTrue(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, type(None))
+        self.assertEqual(argument.type_deduction(), type(None))
         self.assertRaises(TypeError, lambda: argument.annotated_args)
         self.assertIsNone(argument.default)
 
@@ -171,7 +171,7 @@ class ArgumentTestCase(TestCase):
         self.assertTrue(argument.is_empty_default)
         self.assertTrue(argument.is_empty_annotation)
         self.assertFalse(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, object)
+        self.assertEqual(argument.type_deduction(), object)
         self.assertRaises(TypeError, lambda: argument.annotated_args)
 
     def test_manual_initialize(self):
@@ -183,7 +183,7 @@ class ArgumentTestCase(TestCase):
         self.assertFalse(argument.is_empty_default)
         self.assertFalse(argument.is_empty_annotation)
         self.assertTrue(argument.is_annotated)
-        self.assertEqual(argument.type_deduction, str)
+        self.assertEqual(argument.type_deduction(), str)
         self.assertEqual(2, len(argument.annotated_args))
         self.assertEqual(str, argument.annotated_args[0])
         self.assertEqual("Query0", argument.annotated_args[1])

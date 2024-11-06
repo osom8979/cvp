@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
@@ -10,13 +10,9 @@ from cvp.inspect.argument import Argument, ArgumentMapper
 from cvp.logging.logging import wsdl_logger as logger
 from cvp.resources.formats.json import JsonFormatPath
 from cvp.types import override
+from cvp.wsdl.annotation import ElementAnnotation
 from cvp.wsdl.schema import XsdSchema
 from cvp.wsdl.serialize import serialize_object
-
-
-class ElementAnnotation(NamedTuple):
-    element: Element
-    schema: Optional[XsdSchema] = None
 
 
 class WsdlOperationProxy(OperationProxy):
