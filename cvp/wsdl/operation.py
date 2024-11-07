@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Tuple
 
 from zeep.proxy import OperationProxy, ServiceProxy
 from zeep.wsdl.definitions import Operation
@@ -24,7 +24,7 @@ class WsdlOperationProxy(OperationProxy):
         operation_name: str,
         service_proxy: ServiceProxy,
         operation: Operation,
-        schema: Optional[XsdSchema] = None,
+        schema: XsdSchema,
     ):
         super().__init__(service_proxy, operation_name)
         self._uuid = uuid
@@ -37,10 +37,7 @@ class WsdlOperationProxy(OperationProxy):
         self._latest = None
 
     @staticmethod
-    def _create_arguments(
-        input_elements: List[Tuple[str, Element]],
-        schema: Optional[XsdSchema] = None,
-    ):
+    def _create_arguments(input_elements: List[Tuple[str, Element]], schema: XsdSchema):
         result = ArgumentMapper()
         for name, element in input_elements:
             annotation = ElementAnnotation(element, schema)
