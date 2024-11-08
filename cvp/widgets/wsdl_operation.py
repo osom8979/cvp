@@ -6,7 +6,7 @@ from typing import Any, Dict, Final, List, Optional, Tuple
 
 import imgui
 from lxml.etree import QName as _EtreeQName
-from zeep.xsd import Element
+from zeep.xsd import Attribute, Element
 from zeep.xsd.valueobjects import CompoundValue
 
 from cvp.colors.types import RGBA
@@ -96,7 +96,7 @@ class WsdlOperationWidget(WidgetInterface):
         return None
 
     def do_boolean(self, name: str, value: Any, parent: str) -> bool:
-        if value == Parameter.empty:
+        if value in (None, Parameter.empty):
             value = False
         assert isinstance(value, bool)
         label, key = self.label_key(name, parent)
@@ -106,7 +106,7 @@ class WsdlOperationWidget(WidgetInterface):
         return value
 
     def do_integer(self, name: str, value: Any, parent: str) -> int:
-        if value == Parameter.empty:
+        if value in (None, Parameter.empty):
             value = 0
         assert isinstance(value, int)
         label, key = self.label_key(name, parent)
@@ -116,7 +116,7 @@ class WsdlOperationWidget(WidgetInterface):
         return value
 
     def do_floating(self, name: str, value: Any, parent: str) -> float:
-        if value == Parameter.empty:
+        if value in (None, Parameter.empty):
             value = 0.0
         assert isinstance(value, float)
         label, key = self.label_key(name, parent)
@@ -126,7 +126,7 @@ class WsdlOperationWidget(WidgetInterface):
         return value
 
     def do_string(self, name: str, value: Any, parent: str) -> str:
-        if value == Parameter.empty:
+        if value in (None, Parameter.empty):
             value = str()
         assert isinstance(value, str)
         label, key = self.label_key(name, parent)
@@ -143,7 +143,7 @@ class WsdlOperationWidget(WidgetInterface):
         choices: List[str],
     ) -> str:
         assert choices
-        if value == Parameter.empty:
+        if value in (None, Parameter.empty):
             value = choices[0]
         assert isinstance(value, str)
         label, key = self.label_key(name, parent)
@@ -225,30 +225,101 @@ class WsdlOperationWidget(WidgetInterface):
         tree_label, tree_key = self.label_key(element.attr_name, parent)
         if imgui.tree_node(tree_label, imgui.TREE_NODE_DEFAULT_OPEN):
             try:
-                for child_name, child_element in element.type.elements:
-                    assert isinstance(child_name, str)
-                    if is_private_member(child_name):
-                        continue
+                assert isinstance(element.type.elements, list)
+                for element_name, child_element in element.type.elements:
+                    assert isinstance(element_name, str)
+                    self._object_elements(
+                        name=element_name,
+                        element=child_element,
+                        value=value,
+                        schema=schema,
+                        parent=tree_key,
+                    )
 
-                    if isinstance(child_element, Element):
-                        if child_element.is_optional:
-                            continue
-
-                        item_value = self.do_element(
-                            name=child_name,
-                            value=getattr(value, child_name, Parameter.empty),
-                            parent=tree_key,
-                            element=child_element,
-                            schema=schema,
-                        )
-                        setattr(value, child_name, item_value)
-                    else:
-                        message = f"Unsupported element type: '{child_name}'"
-                        self.text_error(message)
-                        raise TypeError(message)
+                assert isinstance(element.type.attributes, list)
+                for attribute_name, child_attribute in element.type.attributes:
+                    assert isinstance(attribute_name, str)
+                    self._object_attribute(
+                        name=attribute_name,
+                        attribute=child_attribute,
+                        value=value,
+                        schema=schema,
+                        parent=tree_key,
+                    )
             finally:
                 imgui.tree_pop()
         return value
+
+    def _object_attribute(
+        self,
+        name: str,
+        attribute: Attribute,
+        value: object,
+        schema: XsdSchema,
+        parent: str,
+    ) -> None:
+        assert isinstance(name, str)
+        if is_private_member(name):
+            return
+
+        if not isinstance(attribute, Attribute):
+            message = f"Unsupported attribute type: '{name}'"
+            self.text_error(message)
+            raise TypeError(message)
+
+        if attribute.is_optional:
+            return
+
+        attribute_value = getattr(value, name, None)
+        if not attribute.required:
+            has_attribute = attribute_value is not None
+            key_attribute = self.value_key(name, parent)
+            checkbox_key = self.value_key("__checkbox__", key_attribute)
+            label = f"[OPTIONAL] Use {name}###{checkbox_key}"
+            use_attribute = imgui.checkbox(label, has_attribute)[1]
+            assert isinstance(use_attribute, bool)
+            if not use_attribute:
+                if has_attribute:
+                    setattr(value, name, None)
+                return
+
+        attribute_value = self.do_element(
+            name=name,
+            value=attribute_value,
+            parent=parent,
+            element=attribute,
+            schema=schema,
+        )
+        setattr(value, name, attribute_value)
+
+    def _object_elements(
+        self,
+        name: str,
+        element: Element,
+        value: object,
+        schema: XsdSchema,
+        parent: str,
+    ) -> None:
+        assert isinstance(name, str)
+        if is_private_member(name):
+            return
+
+        if not isinstance(element, Element):
+            message = f"Unsupported element type: '{name}'"
+            self.text_error(message)
+            raise TypeError(message)
+
+        if element.is_optional:
+            return
+
+        item_value = self.do_element(
+            name=name,
+            value=getattr(value, name, Parameter.empty),
+            parent=parent,
+            element=element,
+            schema=schema,
+        )
+        setattr(value, name, item_value)
 
     @override
     def on_process(self) -> None:
@@ -260,6 +331,8 @@ class WsdlOperationWidget(WidgetInterface):
     def process_operation(self, operation: WsdlOperationProxy) -> int:
         mishandling = 0
         for argument in operation.arguments.values():
+            if is_private_member(argument.name):
+                continue
             if not self.do_root_argument(argument):
                 mishandling += 1
         return mishandling
