@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, unique
-from typing import Tuple
 
+from cvp.colors.types import RGBA
 from cvp.config.sections.bases.window import WindowConfig
+from cvp.palette.basic import LIME, RED, YELLOW
 
 
 @unique
@@ -22,9 +23,9 @@ class OverlayWindowConfig(WindowConfig):
     alpha: float = 0.2
     fps_warning_threshold: float = 30.0
     fps_error_threshold: float = 8.0
-    normal_color: Tuple[float, float, float] = 0.0, 1.0, 0.0
-    warning_color: Tuple[float, float, float] = 1.0, 1.0, 0.0
-    error_color: Tuple[float, float, float] = 1.0, 0.0, 0.0
+    error_color: RGBA = field(default_factory=lambda: (*RED, 1.0))
+    normal_color: RGBA = field(default_factory=lambda: (*LIME, 1.0))
+    warning_color: RGBA = field(default_factory=lambda: (*YELLOW, 1.0))
 
     @property
     def is_top_left(self):

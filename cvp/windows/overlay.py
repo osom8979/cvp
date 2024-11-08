@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from math import floor
-from typing import Final, Sequence, Tuple
+from typing import Final, Tuple
 
 import imgui
 
+from cvp.colors.types import RGBA
 from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_popup_context_window import (
@@ -62,7 +63,7 @@ class OverlayWindow(Window[OverlayWindowConfig]):
         y = 0.0 if self.is_top_side else 1.0
         return x, y
 
-    def get_framerate_color(self, framerate: float) -> Sequence[float]:
+    def get_framerate_color(self, framerate: float) -> RGBA:
         if framerate >= self.window_config.fps_warning_threshold:
             return self.window_config.normal_color
         elif framerate >= self.window_config.fps_error_threshold:

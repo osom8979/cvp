@@ -17,7 +17,6 @@ class OverlayPreference(PreferenceWidget):
     def __init__(self, context: Context, label="Overlay"):
         self._config = context.config.overlay_window
         self._label = label
-
         self._anchors = list(Anchor)
         self._anchor_names = [str(a.name) for a in Anchor]
         self._anchor_index = self._anchors.index(self._config.anchor)
@@ -90,7 +89,7 @@ class OverlayPreference(PreferenceWidget):
             )
 
         imgui.text("Normal Color:")
-        normal_color_result = imgui.color_edit3(
+        normal_color_result = imgui.color_edit4(
             "##NormalColor",
             *self._config.normal_color,
         )
@@ -98,12 +97,12 @@ class OverlayPreference(PreferenceWidget):
         if normal_color_changed:
             normal_color_value = normal_color_result[1]
             assert isinstance(normal_color_value, tuple)
-            assert len(normal_color_value) == 3
+            assert len(normal_color_value) == 4
             self._config.normal_color = normal_color_value
             logger.info(f"Changed normal_color level: {normal_color_value}")
 
         imgui.text("Warning Color:")
-        warning_color_result = imgui.color_edit3(
+        warning_color_result = imgui.color_edit4(
             "##WarningColor",
             *self._config.warning_color,
         )
@@ -111,12 +110,12 @@ class OverlayPreference(PreferenceWidget):
         if warning_color_changed:
             warning_color_value = warning_color_result[1]
             assert isinstance(warning_color_value, tuple)
-            assert len(warning_color_value) == 3
+            assert len(warning_color_value) == 4
             self._config.warning_color = warning_color_value
             logger.info(f"Changed warning_color level: {warning_color_value}")
 
         imgui.text("Error Color:")
-        error_color_result = imgui.color_edit3(
+        error_color_result = imgui.color_edit4(
             "##ErrorColor",
             *self._config.error_color,
         )
@@ -124,6 +123,6 @@ class OverlayPreference(PreferenceWidget):
         if error_color_changed:
             error_color_value = error_color_result[1]
             assert isinstance(error_color_value, tuple)
-            assert len(error_color_value) == 3
+            assert len(error_color_value) == 4
             self._config.error_color = error_color_value
             logger.info(f"Changed error_color level: {error_color_value}")
