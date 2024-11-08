@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from argparse import Namespace
 from inspect import Parameter
-from typing import Any, Final, List, Optional, Tuple
+from typing import Any, Dict, Final, List, Optional, Tuple
 
 import imgui
 from lxml.etree import QName as _EtreeQName
@@ -10,6 +11,7 @@ from zeep.xsd.valueobjects import CompoundValue
 
 from cvp.colors.types import RGBA
 from cvp.inspect.argument import Argument
+from cvp.inspect.member import get_public_instance_attributes, is_private_member
 from cvp.types import override
 from cvp.variables import ZEEP_ELEMENT_SEPARATOR
 from cvp.widgets.widget import WidgetInterface
@@ -200,7 +202,7 @@ class WsdlOperationWidget(WidgetInterface):
                     kwargs = self.do_element_kwargs(element, schema, parent)
                     return accepted_type(**kwargs)
                 else:
-                    return self.do_compound_value(element, value, schema, parent)
+                    return self.do_object(element, value, schema, parent)
 
         raise TypeError(f"No type is supported: {name}")
 
@@ -209,42 +211,29 @@ class WsdlOperationWidget(WidgetInterface):
         element: Element,
         schema: XsdSchema,
         parent: str,
-    ) -> Any:
-        result = dict()
-        tree_label, tree_key = self.label_key(element.attr_name, parent)
-        if imgui.tree_node(tree_label, imgui.TREE_NODE_DEFAULT_OPEN):
-            try:
-                for child_name, child_element in element.type.elements:
-                    assert isinstance(child_name, str)
-                    if isinstance(child_element, Element):
-                        result[child_name] = self.do_element(
-                            name=child_name,
-                            value=Parameter.empty,
-                            parent=tree_key,
-                            element=child_element,
-                            schema=schema,
-                        )
-                    else:
-                        message = f"Unsupported element type: '{child_name}'"
-                        self.text_error(message)
-                        raise TypeError(message)
-            finally:
-                imgui.tree_pop()
-        return result
+    ) -> Dict[str, Any]:
+        value = self.do_object(element, Namespace(), schema, parent)
+        return {k: v for k, v in get_public_instance_attributes(value)}
 
-    def do_compound_value(
+    def do_object(
         self,
         element: Element,
-        value: CompoundValue,
+        value: object,
         schema: XsdSchema,
         parent: str,
-    ) -> CompoundValue:
+    ) -> object:
         tree_label, tree_key = self.label_key(element.attr_name, parent)
         if imgui.tree_node(tree_label, imgui.TREE_NODE_DEFAULT_OPEN):
             try:
                 for child_name, child_element in element.type.elements:
                     assert isinstance(child_name, str)
+                    if is_private_member(child_name):
+                        continue
+
                     if isinstance(child_element, Element):
+                        if child_element.is_optional:
+                            continue
+
                         item_value = self.do_element(
                             name=child_name,
                             value=getattr(value, child_name, Parameter.empty),
