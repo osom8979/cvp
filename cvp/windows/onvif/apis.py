@@ -41,6 +41,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         self._request_runner = self.context.pm.create_thread_runner(self.on_api_request)
         self._response_cache = dict()
         self._response_error = dict()
+        self._show_copied_message = False
 
     def on_api_request(self, operation: WsdlOperationProxy):
         key = operation.cache_args
@@ -81,6 +82,10 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         self.context.config.onvif_manager.max_api_select_width = value
 
     @property
+    def success_color(self):
+        return self.context.config.onvif_manager.success_color
+
+    @property
     def error_color(self):
         return self.context.config.onvif_manager.error_color
 
@@ -92,6 +97,15 @@ class OnvifApisTab(TabItem[OnvifConfig]):
     def typename_color(self):
         return self.context.config.onvif_manager.typename_color
 
+    def text_success(self, text: str) -> None:
+        imgui.text_colored(text, *self.success_color)
+
+    def text_error(self, text: str) -> None:
+        imgui.text_colored(text, *self.error_color)
+
+    def text_warning(self, text: str) -> None:
+        imgui.text_colored(text, *self.warning_color)
+
     def slider_api_select_width(self) -> None:
         result = slider_float(
             "## API List Width",
@@ -102,12 +116,6 @@ class OnvifApisTab(TabItem[OnvifConfig]):
         )
         if result:
             self.api_select_width = result.value
-
-    def text_error(self, text: str) -> None:
-        imgui.text_colored(text, *self.error_color)
-
-    def text_warning(self, text: str) -> None:
-        imgui.text_colored(text, *self.warning_color)
 
     @override
     def on_item(self, item: OnvifConfig) -> None:
@@ -193,7 +201,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                 list_box = imgui.begin_list_box("## API List Box", width=-1, height=-1)
                 if list_box.opened:
                     with list_box:
-                        for key in apis.keys():
+                        for i, key in enumerate(apis.keys()):
                             if imgui.selectable(key, key == item.select_api)[1]:
                                 item.select_api = key
 
@@ -246,6 +254,12 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                 base_error = error.__cause__
 
                 imgui.text("Response error:")
+
+                if self.context.debug and self.context.verbose >= 1:
+                    imgui.same_line()
+                    if imgui.small_button("Copy"):
+                        put_clipboard_text(str(error))
+
                 for line in str(base_error).splitlines():
                     self.text_error(line)
 
@@ -271,10 +285,19 @@ class OnvifApisTab(TabItem[OnvifConfig]):
 
                 imgui.same_line()
                 if imgui.small_button("Copy"):
+                    self._show_copied_message = True
                     put_clipboard_text(content)
 
-            with begin_child("Result Area", border=True):
-                imgui.text_unformatted(content)
+                if self._show_copied_message:
+                    imgui.same_line()
+                    self.text_success("copied")
+
+                content_key = ".".join(operation.cache_args)
+                with begin_child(f"Result Area###{content_key}", border=True):
+                    if imgui.is_window_appearing():
+                        self._show_copied_message = False
+
+                    imgui.text_unformatted(content)
 
     def format_response(self, key: Tuple[str, str, str], response: Any) -> str:
         if key in self._response_cache:
