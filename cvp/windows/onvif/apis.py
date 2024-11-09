@@ -10,6 +10,7 @@ from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.button_ex import button_ex
+from cvp.imgui.clipboard import put_clipboard_text
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
 from cvp.onvif.client import OnvifClient
@@ -257,18 +258,23 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             if has_latest or has_cache:
                 imgui.text("Response result:")
 
-                with begin_child("Result Area", border=True):
-                    if has_latest:
-                        response = operation.latest
-                    elif has_cache:
-                        response = operation.read_cache()
-                        if not has_latest:
-                            operation.latest = response
-                    else:
-                        assert False, "Inaccessible section"
+                if has_latest:
+                    response = operation.latest
+                elif has_cache:
+                    response = operation.read_cache()
+                    if not has_latest:
+                        operation.latest = response
+                else:
+                    assert False, "Inaccessible section"
 
-                    content = self.format_response(operation.cache_args, response)
-                    imgui.text_unformatted(content)
+                content = self.format_response(operation.cache_args, response)
+
+                imgui.same_line()
+                if imgui.small_button("Copy"):
+                    put_clipboard_text(content)
+
+            with begin_child("Result Area", border=True):
+                imgui.text_unformatted(content)
 
     def format_response(self, key: Tuple[str, str, str], response: Any) -> str:
         if key in self._response_cache:
