@@ -88,16 +88,16 @@ class Context:
             os.environ[PYOPENGL_USE_ACCELERATE] = use_accelerate
             logger.info(f"Update environ: {PYOPENGL_USE_ACCELERATE}={use_accelerate}")
 
+        if self._config.onvif_manager.preload:
+            logger.info("Preload ONVIF declarations")
+            OnvifManager.preload_onvif_declarations()
+
         self._onvif_manager = OnvifManager(
             onvif_configs=self._config.onvifs,
             wsdl_config=self._config.wsdl,
             home=self._home,
             update=True,
         )
-
-        if self._config.onvif_manager.preload:
-            logger.info("Preload ONVIF declarations")
-            self._onvif_manager.preload_onvif_declarations()
 
         self._flow_manager = FlowManager(home=self._home, update=True)
         self._msg_queue = MsgQueue()

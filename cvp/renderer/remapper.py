@@ -24,9 +24,12 @@ class KeycodeRemapper:
         self.r_super = self._at(pygame.K_RSUPER)
 
     def _at(self, pygame_keycode: int) -> int:
-        if pygame_keycode not in self._pygame_to_imgui:
-            self._pygame_to_imgui[pygame_keycode] = len(self._pygame_to_imgui)
-        return self._pygame_to_imgui[pygame_keycode]
+        if pygame_keycode in self._pygame_to_imgui:
+            return self._pygame_to_imgui[pygame_keycode]
+        else:
+            next_index = len(self._pygame_to_imgui)
+            self._pygame_to_imgui[pygame_keycode] = next_index
+            return next_index
 
     def __call__(self, pygame_keycode: int) -> int:
         return self._at(pygame_keycode)

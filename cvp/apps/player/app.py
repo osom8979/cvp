@@ -236,6 +236,7 @@ class PlayerApplication:
 
         self.config.display.fullscreen = pygame.display.is_fullscreen()
         self.config.display.size = pygame.display.get_window_size()
+
         self._context.save_config()
         imgui.save_ini_settings_to_disk(str(self.home.gui_ini))
 
@@ -247,16 +248,22 @@ class PlayerApplication:
     def on_process(self) -> None:
         while not self._context.is_done():
             with self._profiler:
-                for event in pygame.event.get():
-                    self.on_event(event)
+                try:
+                    for event in pygame.event.get():
+                        self.on_event(event)
 
-                for msg in self._context.mq.get():
-                    self.on_msg(msg)
+                    for msg in self._context.mq.get():
+                        self.on_msg(msg)
 
-                self.on_keyboard_shortcut(get_pressed())
-                self.on_tick()
-                self.on_frame()
-                self.on_next()
+                    self.on_keyboard_shortcut(get_pressed())
+                    self.on_tick()
+                    self.on_frame()
+                    self.on_next()
+                finally:
+                    self.on_after()
+
+    def on_after(self) -> None:
+        self._renderer.do_after()
 
     def on_event(self, event: Event) -> None:
         assert NOEVENT < event.type < NUMEVENTS
