@@ -119,42 +119,37 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
             "formatter": "colored",
             "stream": "ext://sys.stdout",
         },
+        "root_file": _timed_rotating_file_handler_config("__root__"),
         "cvp_file": _timed_rotating_file_handler_config("cvp"),
         "cvp_worker_file": _timed_rotating_file_handler_config("cvp.worker"),
-        "zeep_file": _timed_rotating_file_handler_config("zeep"),
     },
     "loggers": {
         # root logger
         "": {
-            "handlers": ["stdout_colored", "cvp_file"],
+            "handlers": ["root_file"],
             "level": "DEBUG",
         },
         "OpenGL": {"level": "DEBUG"},
         "asyncio": {"level": "DEBUG"},
         "httpcore": {"level": "DEBUG"},
         "httpx": {"level": "DEBUG"},
-        "zeep": {
-            "handlers": ["zeep_file"],
+        "zeep": {"level": "DEBUG"},
+        CVP_LOGGER_NAME: {
+            "handlers": ["stdout_colored", "cvp_file"],
             "level": "DEBUG",
             "propagate": 0,
         },
-        CVP_LOGGER_NAME: {"level": "DEBUG"},
         CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
-        CVP_EVENT_LOGGER_NAME: {
-            "handlers": ["stdout_colored"],
-            "level": "INFO",
-            "propagate": 0,
-        },
+        CVP_EVENT_LOGGER_NAME: {"level": "INFO"},
+        CVP_MSG_LOGGER_NAME: {"level": "DEBUG"},
+        CVP_ONVIF_LOGGER_NAME: {"level": "INFO"},
         CVP_PROFILE_LOGGER_NAME: {"level": "DEBUG"},
-        CVP_WIDGETS_LOGGER_NAME: {
-            "handlers": ["stdout_colored"],
-            "level": "INFO",
-            "propagate": 0,
-        },
+        CVP_WIDGETS_LOGGER_NAME: {"level": "INFO"},
         CVP_WORKER_LOGGER_NAME: {
             "handlers": ["stdout_colored", "cvp_worker_file"],
             "level": "DEBUG",
             "propagate": 0,
         },
+        CVP_WSDL_LOGGER_NAME: {"level": "INFO"},
     },
 }

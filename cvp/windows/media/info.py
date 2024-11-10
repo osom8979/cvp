@@ -64,3 +64,11 @@ class MediaInfoTab(TabItem[MediaWindowConfig]):
         imgui.same_line()
         if button_ex("Remove", disabled=not removable):
             self.context.pm.pop(item.uuid)
+
+        imgui.separator()
+        imgui.text("Window visibility")
+        if button_ex("Show", disabled=item.opened):
+            item.opened = True
+        imgui.same_line()
+        if button_ex("Hide", disabled=not item.opened):
+            item.opened = False

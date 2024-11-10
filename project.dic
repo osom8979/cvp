@@ -47,6 +47,7 @@ demuxers
 demuxing
 deviceio
 devicemgmt
+directsound
 dirnames
 dirpath
 discardcorrupt

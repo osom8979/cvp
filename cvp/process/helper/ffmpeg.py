@@ -59,8 +59,22 @@ class FFmpegProcessHelper:
         return process
 
     @staticmethod
-    def rgb24_pipe_stdout_args(width: int, height: int) -> Sequence[str]:
+    def alsa_default_args(stream_index=0) -> Sequence[str]:
+        return "-map", f"{stream_index}:a", "-f", "alsa", "default"
+
+    @staticmethod
+    def directsound_default_args(stream_index=0) -> Sequence[str]:
+        return "-map", f"{stream_index}:a", "-f", "directsound", "default"
+
+    @staticmethod
+    def rgb24_pipe_stdout_args(
+        width: int,
+        height: int,
+        stream_index=0,
+    ) -> Sequence[str]:
         return (
+            "-map",
+            f"{stream_index}:v",
             "-f",
             "rawvideo",
             "-pix_fmt",
@@ -74,8 +88,10 @@ class FFmpegProcessHelper:
         args = (
             self.ffmpeg,
             "-hide_banner",
+            "-re",
             "-i",
             file,
+            *self.alsa_default_args(),
             *self.rgb24_pipe_stdout_args(width, height),
         )
         frame_shape = width, height, RGB24_CHANNELS
