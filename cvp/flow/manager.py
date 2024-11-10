@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+from copy import deepcopy
 from os import PathLike
 from typing import Optional, Union
 
@@ -137,7 +138,14 @@ class FlowManager(OrderedDict[str, Graph]):
     def get_node_template(self, path: Union[str, FlowPath]):
         return self._catalog.get_node_template(path)
 
-    def add_node(self, path: Union[str, FlowPath]) -> None:
+    def add_node(
+        self,
+        path: Union[str, FlowPath],
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+    ) -> None:
         graph = self.current_graph
         if graph is None:
             raise LookupError("A graph must be selected")
@@ -147,6 +155,10 @@ class FlowManager(OrderedDict[str, Graph]):
         node_docs = node_template.docs
         node_icon = node_template.icon
         node_color = node_template.color
+        node_rounding = node_template.rounding
+        node_flags = node_template.flags
+        node_thickness = node_template.thickness
+
         node_pins = list()
         for pin_template in node_template.pins:
             pin = Pin(
@@ -163,7 +175,11 @@ class FlowManager(OrderedDict[str, Graph]):
             name=node_name,
             docs=node_docs,
             icon=node_icon,
-            color=node_color,
+            roi=(x1, y1, x2, y2),
+            color=deepcopy(node_color),
+            rounding=node_rounding,
+            flags=node_flags,
+            thickness=node_thickness,
             pins=node_pins,
         )
         graph.nodes.append(node)

@@ -5,7 +5,6 @@ from typing import Final, Tuple
 
 import imgui
 
-from cvp.colors.types import RGBA
 from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_popup_context_window import (
@@ -15,6 +14,7 @@ from cvp.imgui.begin_popup_context_window import (
 from cvp.imgui.menu_item_ex import menu_item_ex
 from cvp.system.usage import SystemUsage
 from cvp.types import override
+from cvp.types.colors import RGBA
 from cvp.widgets.window import Window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (

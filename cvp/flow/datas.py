@@ -5,6 +5,9 @@ from enum import StrEnum, auto, unique
 from typing import List
 from uuid import uuid4
 
+from cvp.palette.basic import WHITE
+from cvp.types import RGBA, ROI
+
 
 @unique
 class Prefix(StrEnum):
@@ -41,7 +44,7 @@ class DataType:
     name: str = field(default_factory=str)  # Primary Key
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: str = field(default_factory=str)
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     path: str = field(default_factory=str)
 
 
@@ -88,7 +91,10 @@ class NodeTemplate:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: str = field(default_factory=str)
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    rounding: float = 0.0
+    flags: int = 0
+    thickness: float = 2.0
     pins: List[PinTemplate] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
 
@@ -99,7 +105,11 @@ class Node:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: str = field(default_factory=str)
+    roi: ROI = field(default_factory=lambda: (0.0, 0.0, 160.0, 60.0))
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    rounding: float = 1.0
+    flags: int = 0
+    thickness: float = 2.0
     pins: List[Pin] = field(default_factory=list)
 
 
@@ -108,7 +118,7 @@ class GraphTemplate:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: str = field(default_factory=str)
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     nodes: List[NodeTemplate] = field(default_factory=list)
     arcs: List[ArcTemplate] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)
@@ -128,7 +138,7 @@ class Graph:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: str = field(default_factory=str)
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     canvas: Canvas = field(default_factory=Canvas)

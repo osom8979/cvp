@@ -271,14 +271,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self.begin_child_canvas()
         try:
             self.on_canvas()
-
-            with imgui.begin_drag_drop_target() as drag_drop_target:
-                if drag_drop_target.hovered:
-                    payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
-                    if payload is not None:
-                        node_path = str(payload, encoding="utf-8")
-                        self.context.fm.add_node(node_path)
-
             self.on_popup_menu()
         finally:
             imgui.end_child()
@@ -335,6 +327,37 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             alpha = self._control.alpha
             img_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, alpha)
             draw_list.add_image(img_id, img_p1, img_p2, (0, 0), (1, 1), img_color)
+
+        graph = self.current_graph
+        if graph is None:
+            return
+
+        for node in graph.nodes:
+            node_p1, node_p2 = self._control.calc_roi(node.roi, canvas_pos)
+            x1, y1 = node_p1
+            x2, y2 = node_p2
+            rounding = node.rounding
+            flags = node.flags
+            thickness = node.thickness
+            outline_color = imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 1.0)
+            node_color = imgui.get_color_u32_rgba(*node.color)
+            draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
+            draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)
+
+        # for arc in graph.arcs:
+        #     pass
+
+        with imgui.begin_drag_drop_target() as drag_drop_target:
+            if drag_drop_target.hovered:
+                payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
+                if payload is not None:
+                    node_path = str(payload, encoding="utf-8")
+                    mx, my = imgui.get_mouse_pos()
+                    x1 = mx - cx
+                    y1 = my - cy
+                    x2 = x1 + 100
+                    y2 = y1 + 100
+                    self.context.fm.add_node(node_path, x1, y1, x2, y2)
 
     def on_popup_menu(self):
         if not self._enable_context_menu:

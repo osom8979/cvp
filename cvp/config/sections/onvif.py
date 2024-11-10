@@ -5,9 +5,9 @@ from enum import StrEnum, auto, unique
 from typing import Optional
 from uuid import uuid4
 
-from cvp.colors.types import RGBA
 from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.palette.basic import GREEN, RED, YELLOW
+from cvp.types.colors import RGBA
 from cvp.variables import (
     DEFAULT_API_SELECT_WIDTH,
     MAX_API_SELECT_WIDTH,

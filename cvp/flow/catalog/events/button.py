@@ -8,8 +8,6 @@ class ButtonEventNode(NodeTemplate):
         super().__init__(
             name=type(self).__name__,
             docs="Button Event Node",
-            icon=None,
-            color=None,
             pins=[PinTemplate()],
             tags=["event"],
         )

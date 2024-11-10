@@ -3,9 +3,9 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
 
-from cvp.colors.types import RGBA
 from cvp.config.sections.bases.window import WindowConfig
 from cvp.palette.basic import LIME, RED, YELLOW
+from cvp.types.colors import RGBA
 
 
 @unique
