@@ -3,7 +3,7 @@
 from typing import Sequence
 
 from cvp.context.context import Context
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.popup import Popup
 from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.windows.preference._base import PreferenceWidget

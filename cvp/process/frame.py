@@ -20,7 +20,7 @@ from typing import (
 from cvp.buffers.frame import FrameBuffer
 from cvp.process.process import Process
 from cvp.process.stream import StreamBufferPair
-from cvp.types import override
+from cvp.types.override import override
 
 
 class FrameShape(NamedTuple):

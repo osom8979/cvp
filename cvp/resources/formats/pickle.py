@@ -5,7 +5,7 @@ from os import PathLike
 from typing import Any, Final, Union
 
 from cvp.resources.formats._base import BaseFormatPath
-from cvp.types import override
+from cvp.types.override import override
 
 PICKLE_PROTOCOL_VERSION: Final[int] = 5
 PICKLE_ENCODING: Final[str] = "ASCII"

@@ -22,7 +22,7 @@ from cvp.pygame.constants import Constants
 from cvp.pygame.constants.event_type import EventType
 from cvp.pygame.events.callbacks import EventCallbacks
 from cvp.pygame.events.event_map import EventWrapper, create_event_map
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.popup import Popup
 from cvp.widgets.widget import WidgetInterface

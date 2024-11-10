@@ -9,7 +9,7 @@ import imgui
 from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.text_centered import text_centered
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import (
     MAX_SIDEBAR_WIDTH,
     MIN_SIDEBAR_WIDTH,

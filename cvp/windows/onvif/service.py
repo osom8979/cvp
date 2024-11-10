@@ -7,7 +7,7 @@ import imgui
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 TABLE_FLAGS: Final[int] = (

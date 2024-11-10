@@ -12,7 +12,7 @@ from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.media.info import MediaInfoTab

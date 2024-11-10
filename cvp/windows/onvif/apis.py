@@ -14,7 +14,7 @@ from cvp.imgui.clipboard import put_clipboard_text
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
 from cvp.onvif.client import OnvifClient
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 from cvp.widgets.wsdl_operation import WsdlOperationWidget
 from cvp.wsdl.client import WsdlClient

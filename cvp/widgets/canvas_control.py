@@ -7,7 +7,7 @@ import imgui
 
 from cvp.imgui.drag_float import drag_float2
 from cvp.imgui.slider_float import slider_float
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.widget import WidgetInterface
 
 BUTTON_LEFT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT

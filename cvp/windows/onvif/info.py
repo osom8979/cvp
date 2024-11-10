@@ -8,7 +8,7 @@ from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.input_text_value import input_text_value
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 INPUT_BUFFER_SIZE: Final[int] = 2048

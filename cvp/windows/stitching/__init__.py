@@ -7,7 +7,7 @@ import imgui
 from cvp.config.sections.stitching import StitchingAuiConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.aui import AuiWindow
 
 WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE

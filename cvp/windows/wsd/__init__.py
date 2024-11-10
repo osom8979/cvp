@@ -13,7 +13,7 @@ from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
 from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import WSD_NAME_DEFAULT
 from cvp.widgets.manager import Manager
 

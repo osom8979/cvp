@@ -17,7 +17,7 @@ from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import (
     AUI_PADDING_HEIGHT,
     AUI_PADDING_WIDTH,

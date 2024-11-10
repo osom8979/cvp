@@ -8,7 +8,7 @@ from os import PathLike
 from typing import BinaryIO, Deque, Optional, Union
 from weakref import finalize
 
-from cvp.types import override
+from cvp.types.override import override
 
 
 def open_file(path: Union[str, PathLike[str]]):

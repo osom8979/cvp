@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from io import BytesIO
 from typing import IO, Callable, Optional
 
-from cvp.types import override
+from cvp.types.override import override
 
 
 class FrameInterface(ABC):

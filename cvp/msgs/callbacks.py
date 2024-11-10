@@ -3,7 +3,7 @@
 from typing import Any, Optional
 
 from cvp.msgs.interface import MsgInterface
-from cvp.types import override
+from cvp.types.override import override
 
 
 class MsgCallbacks(MsgInterface):

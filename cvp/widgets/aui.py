@@ -11,7 +11,7 @@ from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.styles import style_item_spacing, style_window_padding
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import (
     AUI_PADDING_HEIGHT,
     AUI_PADDING_WIDTH,

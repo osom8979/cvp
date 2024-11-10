@@ -9,7 +9,7 @@ from cvp.config.sections.bases.sidebar import SidebarWindowConfig
 from cvp.config.sections.proxies.sidebar import SidebarWidthProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.types import override
+from cvp.types.override import override
 from cvp.variables import (
     MAX_SIDEBAR_WIDTH,
     MIN_SIDEBAR_WIDTH,

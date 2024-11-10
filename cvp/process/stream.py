@@ -4,7 +4,7 @@ from os import PathLike
 from typing import Optional, Union
 
 from cvp.buffers.lines import LinesBuffer
-from cvp.types import override
+from cvp.types.override import override
 
 
 class StreamBuffer(LinesBuffer):

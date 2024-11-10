@@ -5,7 +5,7 @@ import imgui
 from cvp.context.context import Context
 from cvp.flow.datas import Graph
 from cvp.imgui.text_centered import text_centered
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 

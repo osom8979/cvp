@@ -7,7 +7,7 @@ from pygame.transform import scale
 
 from cvp.pygame.transforms._base import TransformBase
 from cvp.pygame.types import SequenceProtocol
-from cvp.types import override
+from cvp.types.override import override
 
 
 class ScaleTransform(TransformBase):

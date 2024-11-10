@@ -3,7 +3,7 @@
 from typing import Optional, Protocol
 
 from cvp.patterns.proxy import ValueProxy, ValueT
-from cvp.types import override
+from cvp.types.override import override
 
 
 class LockerProtocol(Protocol):

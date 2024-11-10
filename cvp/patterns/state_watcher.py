@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, Generic, Optional, final
 
 from cvp.patterns.proxy import ValueProxy, ValueT
-from cvp.types import override
+from cvp.types.override import override
 
 
 class StateObserverInterface(Generic[ValueT], ABC):

@@ -6,7 +6,8 @@ from typing import List
 from uuid import uuid4
 
 from cvp.palette.basic import WHITE
-from cvp.types import RGBA, ROI
+from cvp.types.colors import RGBA
+from cvp.types.shapes import ROI
 
 
 @unique

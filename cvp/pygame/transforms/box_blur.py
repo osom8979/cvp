@@ -4,7 +4,7 @@ from pygame.surface import Surface
 from pygame.transform import box_blur
 
 from cvp.pygame.transforms._base import TransformBase
-from cvp.types import override
+from cvp.types.override import override
 
 
 class BoxBlurTransform(TransformBase):

@@ -6,7 +6,7 @@ import imgui
 
 from cvp.context.context import Context
 from cvp.flow.datas import Graph
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 DOUBLE_CLICK: Final[int] = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK

@@ -6,7 +6,7 @@ from cvp.pygame.constants.button_type import ButtonType
 from cvp.pygame.constants.keycode import Keycode
 from cvp.pygame.constants.keymod import Keymod
 from cvp.pygame.events.interface import EventInterface
-from cvp.types import override
+from cvp.types.override import override
 
 
 class EventCallbacks(EventInterface):

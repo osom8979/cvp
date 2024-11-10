@@ -6,7 +6,7 @@ from typing import Any, Union
 import orjson
 
 from cvp.resources.formats._base import BaseFormatPath
-from cvp.types import override
+from cvp.types.override import override
 
 
 class JsonFormatPath(BaseFormatPath):

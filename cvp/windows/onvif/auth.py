@@ -7,7 +7,7 @@ import imgui
 from cvp.config.sections.onvif import HttpAuth, OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.input_text_value import input_text_value
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 ENTER_RETURN: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE

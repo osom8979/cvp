@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from cvp.system.path import PathFlavour
-from cvp.types import override
+from cvp.types.override import override
 
 
 class FormatInterface(ABC):

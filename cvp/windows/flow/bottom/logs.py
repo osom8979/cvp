@@ -4,7 +4,7 @@ import imgui
 
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.types import override
+from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 

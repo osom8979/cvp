@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from zeep.cache import Base as ZeepCacheBase
 
 from cvp.logging.logging import wsdl_logger as logger
-from cvp.types import override
+from cvp.types.override import override
 
 CACHE_SET_AUDIT_EVENT: Final[str] = "cvp.wsdl.cache.set"
 CACHE_GET_AUDIT_EVENT: Final[str] = "cvp.wsdl.cache.set"

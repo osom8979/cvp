@@ -5,7 +5,7 @@ from unittest import TestCase, main
 
 from cvp.patterns.proxy import ValueProxy
 from cvp.patterns.state_watcher import OneShotStateObserver, StateWatcher
-from cvp.types import override
+from cvp.types.override import override
 
 
 class _TestInteger(ValueProxy[int]):
