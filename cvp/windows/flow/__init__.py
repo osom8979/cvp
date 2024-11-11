@@ -174,10 +174,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if graph is None:
             return
 
-        graph.canvas.pan_x = self._control.pan_x
-        graph.canvas.pan_y = self._control.pan_y
-        graph.canvas.zoom = self._control.zoom
-        graph.canvas.alpha = self._control.alpha
         self.context.save_graph(graph)
 
     def on_open_graph(self, uuid: str):
@@ -188,10 +184,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if graph is None:
             return
 
-        self._control.pan_x = graph.canvas.pan_x
-        self._control.pan_y = graph.canvas.pan_y
-        self._control.zoom = graph.canvas.zoom
-        self._control.alpha = graph.canvas.alpha
+        self._control.canvas = graph.canvas
 
     def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
@@ -300,6 +293,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
         self._control.do_control(
+            canvas_pos=canvas_pos,
             canvas_size=canvas_size,
             has_context_menu=self._enable_context_menu,
         )
@@ -321,8 +315,9 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             img_y = 0
             img_w = self._background.width
             img_h = self._background.height
-            img_roi = img_x, img_y, img_w, img_h
-            img_p1, img_p2 = self._control.calc_roi(img_roi, canvas_pos)
+            img_roi = self._control.calc_roi((img_x, img_y, img_w, img_h), canvas_pos)
+            img_p1 = img_roi[0], img_roi[1]
+            img_p2 = img_roi[2], img_roi[3]
 
             alpha = self._control.alpha
             img_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, alpha)
@@ -333,9 +328,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             return
 
         for node in graph.nodes:
-            node_p1, node_p2 = self._control.calc_roi(node.roi, canvas_pos)
-            x1, y1 = node_p1
-            x2, y2 = node_p2
+            node_roi = self._control.calc_roi(node.roi, canvas_pos)
+            x1, y1, x2, y2 = node_roi
             rounding = node.rounding
             flags = node.flags
             thickness = node.thickness

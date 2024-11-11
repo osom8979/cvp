@@ -5,9 +5,12 @@ from typing import Final, Optional, Tuple
 
 import imgui
 
+from cvp.flow.datas import Canvas
 from cvp.imgui.drag_float import drag_float2
 from cvp.imgui.slider_float import slider_float
+from cvp.imgui.style_disable_input import style_disable_input
 from cvp.types.override import override
+from cvp.types.shapes import ROI, Point
 from cvp.widgets.widget import WidgetInterface
 
 BUTTON_LEFT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
@@ -16,10 +19,10 @@ BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
 
 
 class CanvasControl(WidgetInterface):
-    def __init__(self):
+    def __init__(self, canvas: Optional[Canvas] = None):
+        self.canvas = canvas if canvas else Canvas()
+
         self.pan_label = "Pan"
-        self.pan_x = 0.0
-        self.pan_y = 0.0
         self.pan_speed = 0.1
         self.pan_min = 0.0
         self.pan_max = 0.0
@@ -27,7 +30,6 @@ class CanvasControl(WidgetInterface):
         self.pan_flags = 0
 
         self.zoom_label = "Zoom"
-        self.zoom = 1.0
         self.zoom_step = 0.02
         self.zoom_min = 0.01
         self.zoom_max = 10.0
@@ -35,12 +37,48 @@ class CanvasControl(WidgetInterface):
         self.zoom_flags = 0
 
         self.alpha_label = "Alpha"
-        self.alpha = 1.0
         self.alpha_min = 0.0
         self.alpha_max = 1.0
         self.alpha_fmt = "%.3f"
 
         self.button_flags = BUTTON_LEFT | BUTTON_MIDDLE | BUTTON_RIGHT
+
+        self.local_pos_x = 0.0
+        self.local_pos_y = 0.0
+        self.global_pos_x = 0.0
+        self.global_pos_y = 0.0
+
+    @property
+    def pan_x(self) -> float:
+        return self.canvas.pan_x
+
+    @pan_x.setter
+    def pan_x(self, value: float) -> None:
+        self.canvas.pan_x = value
+
+    @property
+    def pan_y(self) -> float:
+        return self.canvas.pan_y
+
+    @pan_y.setter
+    def pan_y(self, value: float) -> None:
+        self.canvas.pan_y = value
+
+    @property
+    def zoom(self) -> float:
+        return self.canvas.zoom
+
+    @zoom.setter
+    def zoom(self, value: float) -> None:
+        self.canvas.zoom = value
+
+    @property
+    def alpha(self) -> float:
+        return self.canvas.alpha
+
+    @alpha.setter
+    def alpha(self, value: float) -> None:
+        self.canvas.alpha = value
 
     def reset(self):
         self.pan_x = 0.0
@@ -79,6 +117,19 @@ class CanvasControl(WidgetInterface):
             self.alpha_fmt,
         )
 
+    def calc_coord(self, point: Point, canvas_pos: Optional[Point] = None) -> Point:
+        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
+        assert isinstance(cx, float)
+        assert isinstance(cy, float)
+        x = cx + (point[0] + self.pan_x) * self.zoom
+        y = cy + (point[1] + self.pan_y) * self.zoom
+        return x, y
+
+    def calc_roi(self, roi: ROI, canvas_pos: Optional[Point] = None) -> ROI:
+        p1 = self.calc_coord((roi[0], roi[1]), canvas_pos)
+        p2 = self.calc_coord((roi[2], roi[3]), canvas_pos)
+        return p1[0], p1[1], p2[0], p2[1]
+
     @override
     def on_process(self) -> None:
         if pan := self.drag_pan():
@@ -91,12 +142,18 @@ class CanvasControl(WidgetInterface):
         if alpha := self.slider_alpha():
             self.alpha = alpha.value
 
+        with style_disable_input():
+            imgui.input_int2("Local", self.local_pos_x, self.local_pos_y)
+            imgui.input_int2("Global", self.global_pos_x, self.global_pos_y)
+
     def do_control(
         self,
+        canvas_pos: Optional[Tuple[float, float]] = None,
         canvas_size: Optional[Tuple[float, float]] = None,
         pan_button=imgui.MOUSE_BUTTON_MIDDLE,
         has_context_menu=False,
     ) -> None:
+        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
         cw, ch = canvas_size if canvas_size else imgui.get_content_region_available()
 
         # Using `imgui.invisible_button()` as a convenience
@@ -128,6 +185,16 @@ class CanvasControl(WidgetInterface):
             self.zoom = self.zoom_max
         elif self.zoom < self.zoom_min:
             self.zoom = self.zoom_min
+
+        if is_hovered:
+            mouse_pos = imgui.get_mouse_pos()
+            assert isinstance(mouse_pos[0], float)
+            assert isinstance(mouse_pos[1], float)
+            self.local_pos_x = mouse_pos[0] - cx
+            self.local_pos_y = mouse_pos[1] - cy
+
+            self.global_pos_x = (self.local_pos_x - self.pan_x) * self.zoom
+            self.global_pos_y = (self.local_pos_y - self.pan_y) * self.zoom
 
     def vertical_lines(
         self,
@@ -176,24 +243,3 @@ class CanvasControl(WidgetInterface):
             result.append((x1, y1, x2, y2))
             y += step * self.zoom
         return result
-
-    def calc_coord(
-        self,
-        point: Tuple[float, float],
-        canvas_pos: Optional[Tuple[float, float]] = None,
-    ):
-        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
-        x = cx + (point[0] + self.pan_x) * self.zoom
-        y = cy + (point[1] + self.pan_y) * self.zoom
-        return x, y
-
-    def calc_roi(
-        self,
-        roi: Tuple[float, float, float, float],
-        canvas_pos: Optional[Tuple[float, float]] = None,
-    ):
-        p1 = self.calc_coord((roi[0], roi[1]), canvas_pos)
-        p2 = self.calc_coord((roi[2], roi[3]), canvas_pos)
-        return p1, p2
