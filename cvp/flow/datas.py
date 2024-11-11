@@ -74,8 +74,10 @@ class Pin:
 class ArcTemplate:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
-    start: str = field(default_factory=str)
-    end: str = field(default_factory=str)
+    start_node: str = field(default_factory=str)
+    start_pin: str = field(default_factory=str)
+    end_node: str = field(default_factory=str)
+    end_pin: str = field(default_factory=str)
 
 
 @dataclass
@@ -83,8 +85,10 @@ class Arc:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
-    start: str = field(default_factory=str)
-    end: str = field(default_factory=str)
+    start_node: str = field(default_factory=str)
+    start_pin: str = field(default_factory=str)
+    end_node: str = field(default_factory=str)
+    end_pin: str = field(default_factory=str)
 
 
 @dataclass

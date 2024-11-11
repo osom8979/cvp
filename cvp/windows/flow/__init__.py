@@ -302,12 +302,32 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             grid_color = imgui.get_color_u32_rgba(*self._grid_line_color)
             step = self._grid_step
             thickness = 1.0
-            for line in self._control.vertical_lines(step, canvas_pos, canvas_size):
+            v_lines = self._control.vertical_lines(step, canvas_pos, canvas_size)
+            h_lines = self._control.horizontal_lines(step, canvas_pos, canvas_size)
+            for line in v_lines:
                 x1, y1, x2, y2 = line
                 draw_list.add_line(x1, y1, x2, y2, grid_color, thickness)
-            for line in self._control.horizontal_lines(step, canvas_pos, canvas_size):
+            for line in h_lines:
                 x1, y1, x2, y2 = line
                 draw_list.add_line(x1, y1, x2, y2, grid_color, thickness)
+
+            center = self._control.calc_coord((0, 0), canvas_pos)
+            center_x, center_y = center
+            center_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 0.6)
+
+            # Draw x-axis
+            x1 = cx
+            y1 = center_y
+            x2 = cx + cw
+            y2 = center_y
+            draw_list.add_line(x1, y1, x2, y2, center_color, thickness)
+
+            # Draw y-axis
+            x1 = center_x
+            y1 = cy
+            x2 = center_x
+            y2 = cy + ch
+            draw_list.add_line(x1, y1, x2, y2, center_color, thickness)
 
         if self._background is not None:
             img_id = self._background.texture_id
@@ -347,8 +367,14 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
                     mx, my = imgui.get_mouse_pos()
-                    x1 = mx - cx
-                    y1 = my - cy
+                    assert isinstance(mx, float)
+                    assert isinstance(my, float)
+                    local_x = mx - cx
+                    local_y = my - cy
+                    global_x = (local_x - self._control.pan_x) / self._control.zoom
+                    global_y = (local_y - self._control.pan_y) / self._control.zoom
+                    x1 = global_x
+                    y1 = global_y
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)

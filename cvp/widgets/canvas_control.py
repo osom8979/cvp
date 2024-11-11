@@ -192,9 +192,8 @@ class CanvasControl(WidgetInterface):
             assert isinstance(mouse_pos[1], float)
             self.local_pos_x = mouse_pos[0] - cx
             self.local_pos_y = mouse_pos[1] - cy
-
-            self.global_pos_x = (self.local_pos_x - self.pan_x) * self.zoom
-            self.global_pos_y = (self.local_pos_y - self.pan_y) * self.zoom
+            self.global_pos_x = (self.local_pos_x - self.pan_x) / self.zoom
+            self.global_pos_y = (self.local_pos_y - self.pan_y) / self.zoom
 
     def vertical_lines(
         self,
