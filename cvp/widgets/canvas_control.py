@@ -117,18 +117,47 @@ class CanvasControl(WidgetInterface):
             self.alpha_fmt,
         )
 
-    def calc_coord(self, point: Point, canvas_pos: Optional[Point] = None) -> Point:
-        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
+    def world_to_screen_coord(
+        self,
+        world_point: Point,
+        cursor_screen_pos: Optional[Point] = None,
+    ) -> Point:
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        assert cursor_screen_pos is not None
+        cx, cy = cursor_screen_pos
         assert isinstance(cx, float)
         assert isinstance(cy, float)
-        x = cx + (point[0] + self.pan_x) * self.zoom
-        y = cy + (point[1] + self.pan_y) * self.zoom
+        x = cx + (world_point[0] + self.pan_x) * self.zoom
+        y = cy + (world_point[1] + self.pan_y) * self.zoom
         return x, y
 
-    def calc_roi(self, roi: ROI, canvas_pos: Optional[Point] = None) -> ROI:
-        p1 = self.calc_coord((roi[0], roi[1]), canvas_pos)
-        p2 = self.calc_coord((roi[2], roi[3]), canvas_pos)
+    def world_to_screen_roi(
+        self,
+        world_roi: ROI,
+        cursor_screen_pos: Optional[Point] = None,
+    ) -> ROI:
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        assert cursor_screen_pos is not None
+        p1 = self.world_to_screen_coord((world_roi[0], world_roi[1]), cursor_screen_pos)
+        p2 = self.world_to_screen_coord((world_roi[2], world_roi[3]), cursor_screen_pos)
         return p1[0], p1[1], p2[0], p2[1]
+
+    def screen_to_world_coord(
+        self,
+        screen_point: Point,
+        cursor_screen_pos: Optional[Point] = None,
+    ) -> Point:
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        assert cursor_screen_pos is not None
+        cx, cy = cursor_screen_pos
+        assert isinstance(cx, float)
+        assert isinstance(cy, float)
+        x = (screen_point[0] - cx) / self.zoom - self.pan_x
+        y = (screen_point[1] - cy) / self.zoom - self.pan_y
+        return x, y
 
     @override
     def on_process(self) -> None:
@@ -143,8 +172,8 @@ class CanvasControl(WidgetInterface):
             self.alpha = alpha.value
 
         with style_disable_input():
-            imgui.input_int2("Local", self.local_pos_x, self.local_pos_y)
-            imgui.input_int2("Global", self.global_pos_x, self.global_pos_y)
+            imgui.input_float2("Local", self.local_pos_x, self.local_pos_y)
+            imgui.input_float2("Global", self.global_pos_x, self.global_pos_y)
 
     def do_control(
         self,
@@ -153,8 +182,20 @@ class CanvasControl(WidgetInterface):
         pan_button=imgui.MOUSE_BUTTON_MIDDLE,
         has_context_menu=False,
     ) -> None:
-        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
-        cw, ch = canvas_size if canvas_size else imgui.get_content_region_available()
+        if canvas_pos is None:
+            canvas_pos = imgui.get_cursor_screen_pos()
+        if canvas_size is None:
+            canvas_size = imgui.get_content_region_available()
+
+        assert canvas_pos is not None
+        assert canvas_size is not None
+        cx, cy = canvas_pos
+        cw, ch = canvas_size
+
+        assert isinstance(cx, float)
+        assert isinstance(cy, float)
+        assert isinstance(cw, float)
+        assert isinstance(ch, float)
 
         # Using `imgui.invisible_button()` as a convenience
         # 1) it will advance the layout cursor and
@@ -187,13 +228,15 @@ class CanvasControl(WidgetInterface):
             self.zoom = self.zoom_min
 
         if is_hovered:
-            mouse_pos = imgui.get_mouse_pos()
-            assert isinstance(mouse_pos[0], float)
-            assert isinstance(mouse_pos[1], float)
-            self.local_pos_x = mouse_pos[0] - cx
-            self.local_pos_y = mouse_pos[1] - cy
-            self.global_pos_x = (self.local_pos_x - self.pan_x) / self.zoom
-            self.global_pos_y = (self.local_pos_y - self.pan_y) / self.zoom
+            mx, my = imgui.get_mouse_pos()
+            assert isinstance(mx, float)
+            assert isinstance(my, float)
+            self.local_pos_x = mx - cx
+            self.local_pos_y = my - cy
+
+            global_pos = self.screen_to_world_coord((mx, my), canvas_pos)
+            self.global_pos_x = global_pos[0]
+            self.global_pos_y = global_pos[1]
 
     def vertical_lines(
         self,

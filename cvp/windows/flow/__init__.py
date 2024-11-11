@@ -311,7 +311,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 x1, y1, x2, y2 = line
                 draw_list.add_line(x1, y1, x2, y2, grid_color, thickness)
 
-            center = self._control.calc_coord((0, 0), canvas_pos)
+            center = self._control.world_to_screen_coord((0, 0), canvas_pos)
             center_x, center_y = center
             center_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 0.6)
 
@@ -335,20 +335,28 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             img_y = 0
             img_w = self._background.width
             img_h = self._background.height
-            img_roi = self._control.calc_roi((img_x, img_y, img_w, img_h), canvas_pos)
-            img_p1 = img_roi[0], img_roi[1]
-            img_p2 = img_roi[2], img_roi[3]
+            img_roi = img_x, img_y, img_w, img_h
+            img_screen_roi = self._control.world_to_screen_roi(img_roi, canvas_pos)
+            img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
+            img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
 
             alpha = self._control.alpha
             img_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, alpha)
-            draw_list.add_image(img_id, img_p1, img_p2, (0, 0), (1, 1), img_color)
+            draw_list.add_image(
+                img_id,
+                img_screen_p1,
+                img_screen_p2,
+                (0, 0),
+                (1, 1),
+                img_color,
+            )
 
         graph = self.current_graph
         if graph is None:
             return
 
         for node in graph.nodes:
-            node_roi = self._control.calc_roi(node.roi, canvas_pos)
+            node_roi = self._control.world_to_screen_roi(node.roi, canvas_pos)
             x1, y1, x2, y2 = node_roi
             rounding = node.rounding
             flags = node.flags
@@ -369,12 +377,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                     mx, my = imgui.get_mouse_pos()
                     assert isinstance(mx, float)
                     assert isinstance(my, float)
-                    local_x = mx - cx
-                    local_y = my - cy
-                    global_x = (local_x - self._control.pan_x) / self._control.zoom
-                    global_y = (local_y - self._control.pan_y) / self._control.zoom
-                    x1 = global_x
-                    y1 = global_y
+                    x1, y1 = self._control.screen_to_world_coord((mx, my), canvas_pos)
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
