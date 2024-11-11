@@ -178,8 +178,20 @@ class CanvasControl(WidgetInterface):
             self.alpha = alpha.value
 
         with style_disable_input():
-            imgui.input_float2("Local", self.local_pos_x, self.local_pos_y)
-            imgui.input_float2("Global", self.global_pos_x, self.global_pos_y)
+            imgui.input_float2(
+                "Local",
+                self.local_pos_x,
+                self.local_pos_y,
+                "%.3f",
+                imgui.INPUT_TEXT_READ_ONLY,
+            )
+            imgui.input_float2(
+                "Global",
+                self.global_pos_x,
+                self.global_pos_y,
+                "%.3f",
+                imgui.INPUT_TEXT_READ_ONLY,
+            )
 
     def update(
         self,

@@ -10,7 +10,7 @@ from cvp.imgui.style_disable_input import (
     style_disable_input,
 )
 
-_FORCE_READ_ONLY: Final[int] = imgui.INPUT_TEXT_READ_ONLY
+FORCE_READ_ONLY: Final[int] = imgui.INPUT_TEXT_READ_ONLY
 
 
 def input_text_disabled(
@@ -23,4 +23,4 @@ def input_text_disabled(
     background_color=DEFAULT_DISABLE_BACKGROUND_COLOR,
 ) -> None:
     with style_disable_input(text_color, background_color):
-        imgui.input_text(label, value, buffer_length, flags | _FORCE_READ_ONLY)
+        imgui.input_text(label, value, buffer_length, flags | FORCE_READ_ONLY)
