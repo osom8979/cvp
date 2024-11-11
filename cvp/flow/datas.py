@@ -99,7 +99,7 @@ class NodeTemplate:
     color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     rounding: float = 0.0
     flags: int = 0
-    thickness: float = 2.0
+    thickness: float = 1.0
     pins: List[PinTemplate] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
 
@@ -114,7 +114,7 @@ class Node:
     color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     rounding: float = 1.0
     flags: int = 0
-    thickness: float = 2.0
+    thickness: float = 1.0
     pins: List[Pin] = field(default_factory=list)
 
 
@@ -138,6 +138,21 @@ class Canvas:
 
 
 @dataclass
+class Grid:
+    visible: bool = False
+    step: float = 50.0
+    thickness: float = 1.0
+    color: RGBA = field(default_factory=lambda: (0.8, 0.8, 0.8, 0.2))
+
+
+@dataclass
+class Axis:
+    visible: bool = False
+    thickness: float = 1.0
+    color: RGBA = field(default_factory=lambda: (1.0, 0.0, 0.0, 0.6))
+
+
+@dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
@@ -146,4 +161,9 @@ class Graph:
     color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
+    dtypes: List[DataType] = field(default_factory=list)
     canvas: Canvas = field(default_factory=Canvas)
+    grid_x: Grid = field(default_factory=Grid)
+    grid_y: Grid = field(default_factory=Grid)
+    axis_x: Axis = field(default_factory=Axis)
+    axis_y: Axis = field(default_factory=Axis)

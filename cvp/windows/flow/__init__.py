@@ -84,10 +84,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._node_path = str()
 
         self._grid_step = 50.0
-        self._draw_grid = True
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._grid_filled_color = 0.5, 0.5, 0.5, 1.0
-        self._grid_line_color = 0.8, 0.8, 0.8, 0.2
         self._background = None
         self._enable_context_menu = True
 
@@ -292,42 +290,53 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         filled_color = imgui.get_color_u32_rgba(*self._clear_color)
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
-        self._control.do_control(
-            canvas_pos=canvas_pos,
-            canvas_size=canvas_size,
+        self._control.update(
+            cursor_screen_pos=canvas_pos,
+            content_region_available=canvas_size,
             has_context_menu=self._enable_context_menu,
         )
 
-        if self._draw_grid:
-            grid_color = imgui.get_color_u32_rgba(*self._grid_line_color)
-            step = self._grid_step
-            thickness = 1.0
-            v_lines = self._control.vertical_lines(step, canvas_pos, canvas_size)
-            h_lines = self._control.horizontal_lines(step, canvas_pos, canvas_size)
-            for line in v_lines:
-                x1, y1, x2, y2 = line
-                draw_list.add_line(x1, y1, x2, y2, grid_color, thickness)
-            for line in h_lines:
-                x1, y1, x2, y2 = line
-                draw_list.add_line(x1, y1, x2, y2, grid_color, thickness)
+        graph = self.current_graph
+        if graph is None:
+            return
 
-            center = self._control.world_to_screen_coord((0, 0), canvas_pos)
-            center_x, center_y = center
-            center_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 0.6)
+        if graph.grid_x.visible:
+            color = imgui.get_color_u32_rgba(*graph.grid_x.color)
+            step = graph.grid_x.step
+            thickness = graph.grid_x.thickness
+            lines = self._control.vertical_grid_lines(step, canvas_pos, canvas_size)
+            for line in lines:
+                x1, y1, x2, y2 = line
+                draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-            # Draw x-axis
+        if graph.grid_y.visible:
+            color = imgui.get_color_u32_rgba(*graph.grid_y.color)
+            step = graph.grid_y.step
+            thickness = graph.grid_y.thickness
+            lines = self._control.horizontal_grid_lines(step, canvas_pos, canvas_size)
+            for line in lines:
+                x1, y1, x2, y2 = line
+                draw_list.add_line(x1, y1, x2, y2, color, thickness)
+
+        origin_x, origin_y = self._control.world_origin_to_screen_coord(canvas_pos)
+
+        if graph.axis_x.visible:
+            color = imgui.get_color_u32_rgba(*graph.axis_x.color)
+            thickness = graph.axis_x.thickness
             x1 = cx
-            y1 = center_y
+            y1 = origin_y
             x2 = cx + cw
-            y2 = center_y
-            draw_list.add_line(x1, y1, x2, y2, center_color, thickness)
+            y2 = origin_y
+            draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-            # Draw y-axis
-            x1 = center_x
+        if graph.axis_y.visible:
+            color = imgui.get_color_u32_rgba(*graph.axis_y.color)
+            thickness = graph.axis_y.thickness
+            x1 = origin_x
             y1 = cy
-            x2 = center_x
+            x2 = origin_x
             y2 = cy + ch
-            draw_list.add_line(x1, y1, x2, y2, center_color, thickness)
+            draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
         if self._background is not None:
             img_id = self._background.texture_id
@@ -350,10 +359,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 (1, 1),
                 img_color,
             )
-
-        graph = self.current_graph
-        if graph is None:
-            return
 
         for node in graph.nodes:
             node_roi = self._control.world_to_screen_roi(node.roi, canvas_pos)

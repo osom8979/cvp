@@ -132,6 +132,12 @@ class CanvasControl(WidgetInterface):
         y = cy + (world_point[1] + self.pan_y) * self.zoom
         return x, y
 
+    def world_origin_to_screen_coord(
+        self,
+        cursor_screen_pos: Optional[Point] = None,
+    ) -> Point:
+        return self.world_to_screen_coord((0.0, 0.0), cursor_screen_pos)
+
     def world_to_screen_roi(
         self,
         world_roi: ROI,
@@ -175,22 +181,22 @@ class CanvasControl(WidgetInterface):
             imgui.input_float2("Local", self.local_pos_x, self.local_pos_y)
             imgui.input_float2("Global", self.global_pos_x, self.global_pos_y)
 
-    def do_control(
+    def update(
         self,
-        canvas_pos: Optional[Tuple[float, float]] = None,
-        canvas_size: Optional[Tuple[float, float]] = None,
+        cursor_screen_pos: Optional[Tuple[float, float]] = None,
+        content_region_available: Optional[Tuple[float, float]] = None,
         pan_button=imgui.MOUSE_BUTTON_MIDDLE,
         has_context_menu=False,
     ) -> None:
-        if canvas_pos is None:
-            canvas_pos = imgui.get_cursor_screen_pos()
-        if canvas_size is None:
-            canvas_size = imgui.get_content_region_available()
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        if content_region_available is None:
+            content_region_available = imgui.get_content_region_available()
 
-        assert canvas_pos is not None
-        assert canvas_size is not None
-        cx, cy = canvas_pos
-        cw, ch = canvas_size
+        assert cursor_screen_pos is not None
+        assert content_region_available is not None
+        cx, cy = cursor_screen_pos
+        cw, ch = content_region_available
 
         assert isinstance(cx, float)
         assert isinstance(cy, float)
@@ -234,22 +240,35 @@ class CanvasControl(WidgetInterface):
             self.local_pos_x = mx - cx
             self.local_pos_y = my - cy
 
-            global_pos = self.screen_to_world_coord((mx, my), canvas_pos)
+            global_pos = self.screen_to_world_coord((mx, my), cursor_screen_pos)
             self.global_pos_x = global_pos[0]
             self.global_pos_y = global_pos[1]
 
-    def vertical_lines(
+    def vertical_grid_lines(
         self,
         step: float,
-        canvas_pos: Optional[Tuple[float, float]] = None,
-        canvas_size: Optional[Tuple[float, float]] = None,
+        cursor_screen_pos: Optional[Tuple[float, float]] = None,
+        content_region_available: Optional[Tuple[float, float]] = None,
     ):
-        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
-        cw, ch = canvas_size if canvas_size else imgui.get_content_region_available()
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        if content_region_available is None:
+            content_region_available = imgui.get_content_region_available()
+
+        assert cursor_screen_pos is not None
+        assert content_region_available is not None
+        cx, cy = cursor_screen_pos
+        cw, ch = content_region_available
+
         assert isinstance(cx, float)
         assert isinstance(cy, float)
         assert isinstance(cw, float)
         assert isinstance(ch, float)
+
+        if step <= 0:
+            raise ValueError("The 'step' value must be greater than 0")
+        if self.zoom <= 0:
+            raise ValueError("The 'zoom' value must be greater than 0")
 
         result = list()
         x = fmod(self.pan_x * self.zoom, step * self.zoom)
@@ -262,14 +281,22 @@ class CanvasControl(WidgetInterface):
             x += step * self.zoom
         return result
 
-    def horizontal_lines(
+    def horizontal_grid_lines(
         self,
         step: float,
-        canvas_pos: Optional[Tuple[float, float]] = None,
-        canvas_size: Optional[Tuple[float, float]] = None,
+        cursor_screen_pos: Optional[Tuple[float, float]] = None,
+        content_region_available: Optional[Tuple[float, float]] = None,
     ):
-        cx, cy = canvas_pos if canvas_pos else imgui.get_cursor_screen_pos()
-        cw, ch = canvas_size if canvas_size else imgui.get_content_region_available()
+        if cursor_screen_pos is None:
+            cursor_screen_pos = imgui.get_cursor_screen_pos()
+        if content_region_available is None:
+            content_region_available = imgui.get_content_region_available()
+
+        assert cursor_screen_pos is not None
+        assert content_region_available is not None
+        cx, cy = cursor_screen_pos
+        cw, ch = content_region_available
+
         assert isinstance(cx, float)
         assert isinstance(cy, float)
         assert isinstance(cw, float)
