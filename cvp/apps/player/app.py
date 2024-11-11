@@ -28,6 +28,7 @@ from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.flow import FlowWindow
+from cvp.windows.font import FontManager
 from cvp.windows.labeling import LabelingWindow
 from cvp.windows.layout import LayoutManager
 from cvp.windows.media import MediaManager
@@ -49,6 +50,7 @@ class PlayerApplication:
         self._profiler = ProfileLogging(profile_logger)
 
         self._flow = FlowWindow(self._context)
+        self._font_manager = FontManager(self._context)
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManager(self._context, self._windows)
         self._media_manager = MediaManager(self._context, self._windows)
@@ -218,6 +220,7 @@ class PlayerApplication:
 
         self._windows.add_windows(
             self._flow,
+            self._font_manager,
             self._labeling_manager,
             self._layout_manager,
             self._media_manager,
@@ -358,6 +361,11 @@ class PlayerApplication:
             self._process_manager.flip_opened()
         if imgui.menu_item("Window", None, self._window_manager.opened)[0]:
             self._window_manager.flip_opened()
+
+        imgui.separator()
+
+        if imgui.menu_item("Font", None, self._font_manager.opened)[0]:
+            self._font_manager.flip_opened()
         if imgui.menu_item("Preference", "Ctrl+Alt+S", self._pref_manager.opened)[0]:
             self._pref_manager.opened = not self._pref_manager.opened
 

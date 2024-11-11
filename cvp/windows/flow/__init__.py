@@ -83,9 +83,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._graph_path = str()
         self._node_path = str()
 
-        self._grid_step = 50.0
         self._clear_color = 0.5, 0.5, 0.5, 1.0
-        self._grid_filled_color = 0.5, 0.5, 0.5, 1.0
         self._background = None
         self._enable_context_menu = True
 
@@ -277,12 +275,16 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             imgui.pop_style_var()
 
     def on_canvas(self) -> None:
+        mx, my = imgui.get_mouse_pos()
         cx, cy = imgui.get_cursor_screen_pos()
         cw, ch = imgui.get_content_region_available()
+        assert isinstance(mx, float)
+        assert isinstance(my, float)
         assert isinstance(cx, float)
         assert isinstance(cy, float)
         assert isinstance(cw, float)
         assert isinstance(ch, float)
+        mouse_pos = mx, my
         canvas_pos = cx, cy
         canvas_size = cw, ch
 
@@ -379,10 +381,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    mx, my = imgui.get_mouse_pos()
-                    assert isinstance(mx, float)
-                    assert isinstance(my, float)
-                    x1, y1 = self._control.screen_to_world_coord((mx, my), canvas_pos)
+                    x1, y1 = self._control.screen_to_world_coord(mouse_pos, canvas_pos)
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
