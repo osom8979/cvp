@@ -9,13 +9,13 @@ from cvp.msgs.msg import Msg
 from cvp.pygame.constants.event_type import KEY_EVENTS
 from cvp.pygame.constants.keycode import Keycode
 from cvp.pygame.constants.keymod import Keymod
-from cvp.renderer.window.window import Window
+from cvp.renderer.window.base import WindowBase
 
 
-class WindowMapper(OrderedDict[str, Window]):
+class WindowMapper(OrderedDict[str, WindowBase]):
     def add_window(
         self,
-        window: Window,
+        window: WindowBase,
         key: Optional[str] = None,
         *,
         no_create=False,
@@ -31,7 +31,7 @@ class WindowMapper(OrderedDict[str, Window]):
 
         self.__setitem__(key, window)
 
-    def add_windows(self, *windows: Window, no_create=False) -> None:
+    def add_windows(self, *windows: WindowBase, no_create=False) -> None:
         for window in windows:
             self.add_window(window, no_create=no_create)
 

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from abc import abstractmethod
-from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, Optional, Tuple, TypeVar
 
 import imgui
@@ -22,93 +20,16 @@ from cvp.pygame.constants import Constants
 from cvp.pygame.constants.event_type import EventType
 from cvp.pygame.events.callbacks import EventCallbacks
 from cvp.pygame.events.event_map import EventWrapper, create_event_map
-from cvp.renderer.popup.popup import Popup
-from cvp.renderer.window.widget import WidgetInterface
+from cvp.renderer.popup.base import PopupBase
+from cvp.renderer.window.interface import WindowInterface
+from cvp.renderer.window.query import WindowQuery
 from cvp.types.override import override
 from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
-
-
-class WindowInterface(WidgetInterface):
-    @property
-    @abstractmethod
-    def context(self):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def key(self) -> str:
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def label(self) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def begin(self) -> Tuple[bool, bool]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def end(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_create(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_destroy(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_event(self, event: Event) -> Optional[bool]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_msg(self, msg: Msg) -> Optional[bool]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_before(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_after(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def on_popup(self, popup: Popup, result: Any) -> None:
-        raise NotImplementedError
-
 
 WindowConfigT = TypeVar("WindowConfigT", bound=WindowConfig)
 
 
-@dataclass
-class WindowQuery:
-    x: float = 0.0
-    y: float = 0.0
-    w: float = 0.0
-    h: float = 0.0
-    focused: bool = False
-    hovered: bool = False
-
-    def update(self):
-        self.x, self.y = imgui.get_window_position()
-        self.w, self.h = imgui.get_window_size()
-        self.focused = imgui.is_window_focused()
-        self.hovered = imgui.is_window_hovered()
-
-    @property
-    def position(self):
-        return self.x, self.y
-
-    @property
-    def size(self):
-        return self.w, self.h
-
-
-class Window(
+class WindowBase(
     Generic[WindowConfigT],
     WindowInterface,
     EventCallbacks,
@@ -118,7 +39,7 @@ class Window(
     Mouseable,
     Constants,
 ):
-    _popups: Dict[str, Popup]
+    _popups: Dict[str, PopupBase]
     _events: Dict[int, EventWrapper]
     _msgs: Dict[int, MsgWrapper]
 
@@ -355,13 +276,13 @@ class Window(
         pass
 
     @override
-    def on_popup(self, popup: Popup, result: Any) -> None:
+    def on_popup(self, popup: PopupBase, result: Any) -> None:
         pass
 
-    def register_popup(self, popup: Popup) -> None:
+    def register_popup(self, popup: PopupBase) -> None:
         self._popups[popup.title] = popup
 
-    def unregister_popup(self, popup: Popup) -> None:
+    def unregister_popup(self, popup: PopupBase) -> None:
         self._popups.pop(popup.title)
 
     def register_event_callback(

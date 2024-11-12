@@ -12,7 +12,7 @@ from cvp.variables import MIN_POPUP_HEIGHT, MIN_POPUP_WIDTH
 ResultT = TypeVar("ResultT")
 
 
-class Popup(Generic[ResultT], ABC):
+class PopupBase(Generic[ResultT], ABC):
     _target: Optional[Callable[[ResultT], None]]
     _result: Optional[ResultT]
 

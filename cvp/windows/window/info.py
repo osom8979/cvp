@@ -6,17 +6,17 @@ from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.input_text_disabled import input_text_disabled
-from cvp.renderer.window.window import Window
+from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 
-class WindowInfoTab(TabItem[Window]):
+class WindowInfoTab(TabItem[WindowBase]):
     def __init__(self, context: Context):
         super().__init__(context, "Info")
 
     @override
-    def on_item(self, item: Window) -> None:
+    def on_item(self, item: WindowBase) -> None:
         imgui.text("Key:")
         input_text_disabled("## Key", item.key)
 

@@ -3,8 +3,8 @@
 from typing import Sequence
 
 from cvp.context.context import Context
-from cvp.renderer.popup.popup import Popup
-from cvp.renderer.popup.popup_propagator import PopupPropagator
+from cvp.renderer.popup.base import PopupBase
+from cvp.renderer.popup.propagator import PopupPropagator
 from cvp.types.override import override
 from cvp.windows.preference._base import PreferenceWidget
 from cvp.windows.preference.ffmpeg.exe import ExeTabs
@@ -23,7 +23,7 @@ class FFmpegPreference(PopupPropagator, PreferenceWidget):
 
     @property
     @override
-    def popups(self) -> Sequence[Popup]:
+    def popups(self) -> Sequence[PopupBase]:
         return self._tabs.popups
 
     @override

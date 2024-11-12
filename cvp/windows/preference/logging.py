@@ -14,8 +14,8 @@ from cvp.logging.logging import (
     set_root_level,
 )
 from cvp.popups.open_file import OpenFilePopup
-from cvp.renderer.popup.popup import Popup
-from cvp.renderer.popup.popup_propagator import PopupPropagator
+from cvp.renderer.popup.base import PopupBase
+from cvp.renderer.popup.propagator import PopupPropagator
 from cvp.types.override import override
 from cvp.windows.preference._base import PreferenceWidget
 
@@ -39,7 +39,7 @@ class LoggingPreference(PopupPropagator, PreferenceWidget):
 
     @property
     @override
-    def popups(self) -> Sequence[Popup]:
+    def popups(self) -> Sequence[PopupBase]:
         return [self._logging_browser]
 
     @property

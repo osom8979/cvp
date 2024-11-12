@@ -4,14 +4,14 @@ from typing import Mapping
 
 from cvp.config.sections.window import WindowManagerConfig
 from cvp.context.context import Context
-from cvp.renderer.window.window import Window
-from cvp.renderer.window.window_mapper import WindowMapper
+from cvp.renderer.window.base import WindowBase
+from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
 from cvp.widgets.manager_tab import ManagerTab
 from cvp.windows.window.info import WindowInfoTab
 
 
-class WindowManager(ManagerTab[WindowManagerConfig, Window]):
+class WindowManager(ManagerTab[WindowManagerConfig, WindowBase]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
@@ -24,5 +24,5 @@ class WindowManager(ManagerTab[WindowManagerConfig, Window]):
         self.register(WindowInfoTab(context))
 
     @override
-    def get_menus(self) -> Mapping[str, Window]:
+    def get_menus(self) -> Mapping[str, WindowBase]:
         return self._windows

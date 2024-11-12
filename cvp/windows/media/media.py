@@ -10,7 +10,7 @@ from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item_ex
-from cvp.renderer.window.window import Window
+from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
@@ -18,7 +18,7 @@ _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
 
 
-class MediaWindow(Window[MediaWindowConfig]):
+class MediaWindow(WindowBase[MediaWindowConfig]):
     def __init__(self, context: Context, window_config: MediaWindowConfig):
         super().__init__(
             context=context,

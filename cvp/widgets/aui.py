@@ -11,7 +11,7 @@ from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.styles import style_item_spacing, style_window_padding
-from cvp.renderer.window.window import Window
+from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
 from cvp.variables import (
     AUI_PADDING_HEIGHT,
@@ -46,7 +46,7 @@ class AuiInterface(ABC):
         raise NotImplementedError
 
 
-class AuiWindow(Window[AuiSectionT], AuiInterface):
+class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
     def __init__(
         self,
         context: Context,

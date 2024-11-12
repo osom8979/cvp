@@ -26,7 +26,7 @@ from cvp.logging.profile import ProfileLogging
 from cvp.msgs.msg import Msg
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
-from cvp.renderer.window.window_mapper import WindowMapper
+from cvp.renderer.window.mapper import WindowMapper
 from cvp.windows.flow import FlowWindow
 from cvp.windows.font import FontManager
 from cvp.windows.labeling import LabelingWindow

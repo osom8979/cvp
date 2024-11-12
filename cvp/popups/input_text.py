@@ -8,12 +8,12 @@ import pygame
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_value import input_text_value
 from cvp.imgui.item_width import item_width
-from cvp.renderer.popup.popup import Popup
+from cvp.renderer.popup.base import PopupBase
 from cvp.types.override import override
 from cvp.variables import MIN_POPUP_TEXT_INPUT_HEIGHT, MIN_POPUP_TEXT_INPUT_WIDTH
 
 
-class InputTextPopup(Popup[str]):
+class InputTextPopup(PopupBase[str]):
     def __init__(
         self,
         title: Optional[str] = None,

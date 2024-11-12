@@ -6,12 +6,12 @@ import imgui
 import pygame
 
 from cvp.imgui.button_ex import button_ex
-from cvp.renderer.popup.popup import Popup
+from cvp.renderer.popup.base import PopupBase
 from cvp.types.override import override
 from cvp.variables import MIN_POPUP_CONFIRM_HEIGHT, MIN_POPUP_CONFIRM_WIDTH
 
 
-class ConfirmPopup(Popup[bool]):
+class ConfirmPopup(PopupBase[bool]):
     def __init__(
         self,
         title: Optional[str] = None,

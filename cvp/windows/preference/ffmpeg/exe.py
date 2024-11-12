@@ -10,8 +10,8 @@ from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.patterns.proxy import ValueProxy
 from cvp.popups.open_file import OpenFilePopup
-from cvp.renderer.popup.popup import Popup
-from cvp.renderer.popup.popup_propagator import PopupPropagator
+from cvp.renderer.popup.base import PopupBase
+from cvp.renderer.popup.propagator import PopupPropagator
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.resources.download.runner import DownloadRunner
 from cvp.system.platform import SysMach, get_system_machine
@@ -65,7 +65,7 @@ class ExeItem(TabItem, PopupPropagator):
 
     @property
     @override
-    def popups(self) -> Sequence[Popup]:
+    def popups(self) -> Sequence[PopupBase]:
         return [self._browser]
 
     @property
@@ -148,8 +148,8 @@ class ExeTabs(TabBar, PopupPropagator):
 
     @property
     @override
-    def popups(self) -> Sequence[Popup]:
-        result: List[Popup] = list()
+    def popups(self) -> Sequence[PopupBase]:
+        result: List[PopupBase] = list()
         for item in self._items.values():
             if not isinstance(item, PopupPropagator):
                 continue
