@@ -76,6 +76,8 @@ class WindowBase(
         self._query = WindowQuery()
 
         self._appeared = False
+        self._focused = False
+        self._hovered = False
 
     def _has_flag(self, flag: int) -> bool:
         return bool(self.flags & flag)
@@ -266,6 +268,22 @@ class WindowBase(
         logger.debug(f"{repr(self)} Empty disappeared event")
 
     @override
+    def on_focused(self) -> None:
+        logger.debug(f"{repr(self)} Empty focused event")
+
+    @override
+    def on_unfocused(self) -> None:
+        logger.debug(f"{repr(self)} Empty unfocused event")
+
+    @override
+    def on_hovered(self) -> None:
+        logger.debug(f"{repr(self)} Empty hovered event")
+
+    @override
+    def on_unhovered(self) -> None:
+        logger.debug(f"{repr(self)} Empty unhovered event")
+
+    @override
     def on_event(self, event: Event) -> Optional[bool]:
         pass
 
@@ -368,8 +386,32 @@ class WindowBase(
     def do_disappeared(self) -> None:
         if not self._appeared:
             return
-        self.on_disappeared()
         self._appeared = False
+        self.on_disappeared()
+
+    def do_focused(self) -> None:
+        if self._focused:
+            return
+        self._focused = True
+        self.on_focused()
+
+    def do_unfocused(self) -> None:
+        if not self._focused:
+            return
+        self._focused = False
+        self.on_unfocused()
+
+    def do_hovered(self) -> None:
+        if self._hovered:
+            return
+        self._hovered = True
+        self.on_hovered()
+
+    def do_unhovered(self) -> None:
+        if not self._hovered:
+            return
+        self._hovered = False
+        self.on_unhovered()
 
     def do_process(self) -> None:
         if not self._initialized:
@@ -377,6 +419,8 @@ class WindowBase(
 
         if not self.opened:
             self.do_disappeared()
+            self.do_unfocused()
+            self.do_unhovered()
             return
 
         self.on_before()
@@ -389,12 +433,18 @@ class WindowBase(
                 set_window_min_size(self._min_width, self._min_height)
                 self.do_appeared()
 
-            if imgui.is_window_focused():
-                pass
+            if imgui.is_window_focused(imgui.FOCUS_ROOT_AND_CHILD_WINDOWS):
+                self.do_focused()
+            else:
+                self.do_unfocused()
+
+            if imgui.is_window_hovered(imgui.HOVERED_ROOT_AND_CHILD_WINDOWS):
+                self.do_hovered()
+            else:
+                self.do_unhovered()
 
             if not opened:
                 self.opened = False
-                self.do_disappeared()
                 return
 
             if not expanded:

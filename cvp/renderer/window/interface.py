@@ -51,6 +51,22 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
     @abstractmethod
+    def on_focused(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_unfocused(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_hovered(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_unhovered(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_event(self, event: Event) -> Optional[bool]:
         raise NotImplementedError
 
