@@ -3,7 +3,7 @@
 import os
 from unittest import TestCase, main
 
-from cvp.renderer.modules import find_libsdl2_path
+from cvp.pygame.modules import find_libsdl2_path
 
 
 class ModulesTestCase(TestCase):
