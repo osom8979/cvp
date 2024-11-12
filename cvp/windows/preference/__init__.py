@@ -7,9 +7,9 @@ import imgui
 
 from cvp.config.sections.preference import PreferenceManagerConfig
 from cvp.context.context import Context
+from cvp.renderer.popup.popup_propagator import PopupPropagator
 from cvp.types.override import override
 from cvp.widgets.manager import Manager
-from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.windows.preference._base import PreferenceWidget
 from cvp.windows.preference.appearance import AppearancePreference
 from cvp.windows.preference.concurrency import ConcurrencyPreference

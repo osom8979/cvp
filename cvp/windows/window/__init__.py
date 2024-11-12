@@ -4,10 +4,10 @@ from typing import Mapping
 
 from cvp.config.sections.window import WindowManagerConfig
 from cvp.context.context import Context
+from cvp.renderer.window.window import Window
+from cvp.renderer.window.window_mapper import WindowMapper
 from cvp.types.override import override
 from cvp.widgets.manager_tab import ManagerTab
-from cvp.widgets.window import Window
-from cvp.widgets.window_mapper import WindowMapper
 from cvp.windows.window.info import WindowInfoTab
 
 

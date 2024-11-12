@@ -11,10 +11,10 @@ from zeep.xsd.valueobjects import CompoundValue
 
 from cvp.inspect.argument import Argument
 from cvp.inspect.member import get_public_instance_attributes, is_private_member
+from cvp.renderer.window.widget import WidgetInterface
 from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.variables import ZEEP_ELEMENT_SEPARATOR
-from cvp.widgets.widget import WidgetInterface
 from cvp.wsdl.annotation import ElementAnnotation
 from cvp.wsdl.operation import WsdlOperationProxy
 from cvp.wsdl.schema import XsdSchema

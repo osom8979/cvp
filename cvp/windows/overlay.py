@@ -12,10 +12,10 @@ from cvp.imgui.begin_popup_context_window import (
     end_popup_context_window,
 )
 from cvp.imgui.menu_item_ex import menu_item_ex
+from cvp.renderer.window.window import Window
 from cvp.system.usage import SystemUsage
 from cvp.types.colors import RGBA
 from cvp.types.override import override
-from cvp.widgets.window import Window
 
 OVERLAY_WINDOW_FLAGS: Final[int] = (
     imgui.WINDOW_NO_DECORATION

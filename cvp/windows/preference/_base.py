@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from cvp.widgets.widget import WidgetInterface
+from cvp.renderer.window.widget import WidgetInterface
 
 
 class PreferenceWidget(WidgetInterface, ABC):

@@ -9,9 +9,9 @@ from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
+from cvp.renderer.window.window_mapper import WindowMapper
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
-from cvp.widgets.window_mapper import WindowMapper
 
 ENTER_RETURNS: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 

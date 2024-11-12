@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Sequence
 
-from cvp.widgets.popup import Popup
+from cvp.renderer.popup.popup import Popup
 
 
 class PopupPropagator(ABC):

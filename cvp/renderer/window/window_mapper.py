@@ -9,7 +9,7 @@ from cvp.msgs.msg import Msg
 from cvp.pygame.constants.event_type import KEY_EVENTS
 from cvp.pygame.constants.keycode import Keycode
 from cvp.pygame.constants.keymod import Keymod
-from cvp.widgets.window import Window
+from cvp.renderer.window.window import Window
 
 
 class WindowMapper(OrderedDict[str, Window]):

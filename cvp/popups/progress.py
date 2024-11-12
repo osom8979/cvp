@@ -7,8 +7,8 @@ import imgui
 import pygame
 
 from cvp.imgui.button_ex import button_ex
+from cvp.renderer.popup.popup import Popup
 from cvp.types.override import override
-from cvp.widgets.popup import Popup
 
 
 class ProgressPopup(Popup[None]):

@@ -7,8 +7,8 @@ from cvp.flow.path import PATH_SEPARATOR
 from cvp.imgui.drag_type import DRAG_FLOW_GRAPH_TYPE as DRAG_GRAPH
 from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE as DRAG_NODE
 from cvp.imgui.indent import indent
+from cvp.renderer.window.widget import WidgetInterface
 from cvp.types.override import override
-from cvp.widgets.widget import WidgetInterface
 
 
 class Catalogs(WidgetInterface):

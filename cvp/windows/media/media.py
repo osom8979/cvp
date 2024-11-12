@@ -10,8 +10,8 @@ from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item_ex
+from cvp.renderer.window.window import Window
 from cvp.types.override import override
-from cvp.widgets.window import Window
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR

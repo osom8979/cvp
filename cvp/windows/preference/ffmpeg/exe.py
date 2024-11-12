@@ -10,12 +10,12 @@ from cvp.context.context import Context
 from cvp.imgui.button_ex import button_ex
 from cvp.patterns.proxy import ValueProxy
 from cvp.popups.open_file import OpenFilePopup
+from cvp.renderer.popup.popup import Popup
+from cvp.renderer.popup.popup_propagator import PopupPropagator
 from cvp.resources.download.links.ffmpeg import FFMPEG_LINKS, FFPROBE_LINKS, LinkMap
 from cvp.resources.download.runner import DownloadRunner
 from cvp.system.platform import SysMach, get_system_machine
 from cvp.types.override import override
-from cvp.widgets.popup import Popup
-from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.widgets.tab import TabBar, TabItem
 
 

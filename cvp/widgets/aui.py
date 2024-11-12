@@ -11,6 +11,7 @@ from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.styles import style_item_spacing, style_window_padding
+from cvp.renderer.window.window import Window
 from cvp.types.override import override
 from cvp.variables import (
     AUI_PADDING_HEIGHT,
@@ -23,7 +24,6 @@ from cvp.variables import (
     MIN_WINDOW_WIDTH,
 )
 from cvp.widgets.splitter import Splitter
-from cvp.widgets.window import Window
 
 AuiSectionT = TypeVar("AuiSectionT", bound=AuiWindowConfig)
 

@@ -13,9 +13,9 @@ from cvp.imgui.button_ex import button_ex
 from cvp.imgui.footer_height_to_reserve import footer_height_to_reserve
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
+from cvp.renderer.popup.popup import Popup
 from cvp.types.override import override
 from cvp.variables import MIN_POPUP_OPEN_FILE_HEIGHT, MIN_POPUP_OPEN_FILE_WIDTH
-from cvp.widgets.popup import Popup
 
 ENTER_RETURN = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 DOUBLE_CLICK = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK

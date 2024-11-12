@@ -14,9 +14,9 @@ from cvp.logging.logging import (
     set_root_level,
 )
 from cvp.popups.open_file import OpenFilePopup
+from cvp.renderer.popup.popup import Popup
+from cvp.renderer.popup.popup_propagator import PopupPropagator
 from cvp.types.override import override
-from cvp.widgets.popup import Popup
-from cvp.widgets.popup_propagator import PopupPropagator
 from cvp.windows.preference._base import PreferenceWidget
 
 NOT_FOUND_INDEX: Final[int] = -1

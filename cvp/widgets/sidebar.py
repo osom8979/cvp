@@ -9,6 +9,7 @@ from cvp.config.sections.bases.sidebar import SidebarWindowConfig
 from cvp.config.sections.proxies.sidebar import SidebarWidthProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
+from cvp.renderer.window.window import Window
 from cvp.types.override import override
 from cvp.variables import (
     MAX_SIDEBAR_WIDTH,
@@ -17,7 +18,6 @@ from cvp.variables import (
     MIN_WINDOW_WIDTH,
 )
 from cvp.widgets.splitter import Splitter
-from cvp.widgets.window import Window
 
 SidebarWidthT = TypeVar("SidebarWidthT", bound=SidebarWindowConfig)
 
