@@ -51,7 +51,7 @@ class PlayerApplication:
         self._profiler = ProfileLogging(profile_logger)
 
         self._flow = FlowWindow(self._context)
-        self._font_manager = FontManager(self._context)
+        self._font_manager = FontManager(self._context, self._fonts)
         self._labeling_manager = LabelingWindow(self._context)
         self._layout_manager = LayoutManager(self._context, self._windows)
         self._media_manager = MediaManager(self._context, self._windows)
