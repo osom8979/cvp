@@ -43,6 +43,14 @@ class WindowInterface(WidgetInterface):
         raise NotImplementedError
 
     @abstractmethod
+    def on_appearing(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def on_disappeared(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def on_event(self, event: Event) -> Optional[bool]:
         raise NotImplementedError
 

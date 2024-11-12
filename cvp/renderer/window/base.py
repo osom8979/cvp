@@ -75,6 +75,8 @@ class WindowBase(
         self._msgs = dict()
         self._query = WindowQuery()
 
+        self._appeared = False
+
     def _has_flag(self, flag: int) -> bool:
         return bool(self.flags & flag)
 
@@ -249,11 +251,19 @@ class WindowBase(
 
     @override
     def on_create(self) -> None:
-        pass
+        logger.debug(f"{repr(self)} Empty create event")
 
     @override
     def on_destroy(self) -> None:
-        pass
+        logger.debug(f"{repr(self)} Empty destroy event")
+
+    @override
+    def on_appearing(self) -> None:
+        logger.debug(f"{repr(self)} Empty appearing event")
+
+    @override
+    def on_disappeared(self) -> None:
+        logger.debug(f"{repr(self)} Empty disappeared event")
 
     @override
     def on_event(self, event: Event) -> Optional[bool]:
@@ -349,11 +359,24 @@ class WindowBase(
 
         return self._msgs[get_msg_type_number(msg.type)](msg)
 
+    def do_appeared(self) -> None:
+        if self._appeared:
+            return
+        self._appeared = True
+        self.on_appearing()
+
+    def do_disappeared(self) -> None:
+        if not self._appeared:
+            return
+        self.on_disappeared()
+        self._appeared = False
+
     def do_process(self) -> None:
         if not self._initialized:
             raise ValueError("The window instance is not initialized")
 
         if not self.opened:
+            self.do_disappeared()
             return
 
         self.on_before()
@@ -364,9 +387,14 @@ class WindowBase(
 
             if imgui.is_window_appearing():
                 set_window_min_size(self._min_width, self._min_height)
+                self.do_appeared()
+
+            if imgui.is_window_focused():
+                pass
 
             if not opened:
                 self.opened = False
+                self.do_disappeared()
                 return
 
             if not expanded:
