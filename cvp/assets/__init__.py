@@ -4,6 +4,7 @@ import os
 import sys
 from functools import lru_cache
 from pathlib import Path
+from typing import Final
 
 
 @lru_cache
@@ -46,24 +47,30 @@ def get_wsdl_path() -> Path:
     return Path(get_wsdl_dir())
 
 
+FONT_FILENAME_JBM_NL_NFM_R: Final[str] = "JetBrainsMonoNLNerdFontMono-Regular.ttf"
+FONT_FILENAME_MDI: Final[str] = "materialdesignicons-webfont.ttf"
+FONT_FILENAME_NGC: Final[str] = "NanumGothicCoding.ttf"
+FONT_FILENAME_NGC_B: Final[str] = "NanumGothicCoding-Bold.ttf"
+
+
 @lru_cache
 def get_jbm_nl_nfm_r_font_path() -> str:
-    return os.path.join(get_fonts_dir(), "JetBrainsMonoNLNerdFontMono-Regular.ttf")
+    return os.path.join(get_fonts_dir(), FONT_FILENAME_JBM_NL_NFM_R)
 
 
 @lru_cache
 def get_mdi_font_path() -> str:
-    return os.path.join(get_fonts_dir(), "materialdesignicons-webfont.ttf")
+    return os.path.join(get_fonts_dir(), FONT_FILENAME_MDI)
 
 
 @lru_cache
 def get_ngc_font_path() -> str:
-    return os.path.join(get_fonts_dir(), "NanumGothicCoding.ttf")
+    return os.path.join(get_fonts_dir(), FONT_FILENAME_NGC)
 
 
 @lru_cache
 def get_ngc_b_font_path() -> str:
-    return os.path.join(get_fonts_dir(), "NanumGothicCoding-Bold.ttf")
+    return os.path.join(get_fonts_dir(), FONT_FILENAME_NGC_B)
 
 
 @lru_cache

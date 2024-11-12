@@ -75,7 +75,7 @@ class PropsTab(TabItem[str]):
                 assert isinstance(changed, bool)
                 assert isinstance(value, float)
                 if changed:
-                    axis.step = value
+                    axis.thickness = value
 
                 if color_result := color_edit4("Color", *axis.color):
                     axis.color = color_result.color

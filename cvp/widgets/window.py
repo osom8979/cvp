@@ -90,10 +90,14 @@ class WindowQuery:
     y: float = 0.0
     w: float = 0.0
     h: float = 0.0
+    focused: bool = False
+    hovered: bool = False
 
     def update(self):
         self.x, self.y = imgui.get_window_position()
         self.w, self.h = imgui.get_window_size()
+        self.focused = imgui.is_window_focused()
+        self.hovered = imgui.is_window_hovered()
 
     @property
     def position(self):

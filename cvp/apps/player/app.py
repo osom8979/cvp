@@ -19,7 +19,7 @@ from cvp.assets import get_default_icon_path
 from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProxy
 from cvp.context.autofixer import AutoFixer
 from cvp.context.context import Context
-from cvp.imgui.fonts import add_jbm_font, add_ngc_font
+from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.styles import default_style_colors
 from cvp.logging.logging import event_logger, logger, msg_logger, profile_logger
 from cvp.logging.profile import ProfileLogging
@@ -47,6 +47,7 @@ class PlayerApplication:
     def __init__(self, context: Context):
         self._context = context
         self._windows = WindowMapper()
+        self._fonts = FontMapper()
         self._profiler = ProfileLogging(profile_logger)
 
         self._flow = FlowWindow(self._context)
@@ -202,13 +203,11 @@ class PlayerApplication:
         pixels = self.config.font.pixels
         scale = self.config.font.scale
         font_size_pixels = pixels * scale
-        add_jbm_font(font_size_pixels)
-        add_ngc_font(font_size_pixels)
+        self._fonts.add_defaults(font_size_pixels)
 
         user_font = self.config.font.family
         if user_font and os.path.isfile(user_font):
-            korean_ranges = io.fonts.get_glyph_ranges_korean()
-            io.fonts.add_font_from_file_ttf(user_font, font_size_pixels, korean_ranges)
+            self._fonts.add_korean_ttf(user_font, font_size_pixels)
 
         io.font_global_scale /= self.config.font.scale
         self._renderer.refresh_font_texture()
