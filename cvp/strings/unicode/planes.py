@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, NamedTuple, Sequence
+from typing import Final, NamedTuple, Sequence, Tuple
 
 PLANE_INDEX_MIN: Final[int] = 0
 PLANE_INDEX_MAX: Final[int] = 16
@@ -13,6 +13,10 @@ class UnicodePlane(NamedTuple):
     begin: int
     end: int
 
+    @property
+    def range(self) -> Tuple[int, int]:
+        return self.begin, self.end
+
     def __repr__(self):
         return f"Plane {self.idx} {self.short}: U+{self.begin:04X} - U+{self.end:04X}"
 
@@ -23,14 +27,18 @@ class UnicodePlaneCategory(NamedTuple):
     begin: int
     end: int
 
+    @property
+    def range(self) -> Tuple[int, int]:
+        return self.begin, self.end
+
     def __repr__(self):
         return f"{self.long} ({self.short}): U+{self.begin:04X} - U+{self.end:04X}"
 
     def make_plane(self, idx: int, begin: int, end: int) -> UnicodePlane:
         assert PLANE_INDEX_MIN <= idx <= PLANE_INDEX_MAX
+        assert begin < end
         assert self.begin <= begin <= self.end
         assert self.begin <= end <= self.end
-        assert begin < end
         return UnicodePlane(idx, self.long, self.short, begin, end)
 
     def __call__(self, idx: int) -> UnicodePlane:
@@ -73,7 +81,7 @@ PLANE12 = UNASSIGNED(12)
 PLANE13 = UNASSIGNED(13)
 PLANE14 = SSP(14)
 PLANE15 = PUA_A(15)
-PLANE16 = PUA_B(15)
+PLANE16 = PUA_B(16)
 
 PLANES: Sequence[UnicodePlane] = (
     PLANE0,
