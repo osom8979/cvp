@@ -18,7 +18,7 @@ BUTTON_MIDDLE: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
 BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
 
 
-class CanvasControl(WidgetInterface):
+class CanvasController(WidgetInterface):
     def __init__(self, canvas: Optional[Canvas] = None):
         self.canvas = canvas if canvas else Canvas()
 
@@ -313,6 +313,11 @@ class CanvasControl(WidgetInterface):
         assert isinstance(cy, float)
         assert isinstance(cw, float)
         assert isinstance(ch, float)
+
+        if step <= 0:
+            raise ValueError("The 'step' value must be greater than 0")
+        if self.zoom <= 0:
+            raise ValueError("The 'zoom' value must be greater than 0")
 
         result = list()
         y = fmod(self.pan_y * self.zoom, step * self.zoom)

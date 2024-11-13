@@ -29,7 +29,7 @@ from cvp.variables import (
     MIN_WINDOW_WIDTH,
 )
 from cvp.widgets.aui import AuiWindow
-from cvp.widgets.canvas_control import CanvasControl
+from cvp.widgets.canvas.controller import CanvasController
 from cvp.widgets.splitter import Splitter
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
@@ -73,7 +73,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             padding_height=padding_height,
         )
 
-        self._control = CanvasControl()
+        self._control = CanvasController()
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context)
         self._right_tabs = FlowRightTabs(context)
