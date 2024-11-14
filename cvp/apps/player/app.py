@@ -27,6 +27,7 @@ from cvp.msgs.msg import Msg
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.renderer.window.mapper import WindowMapper
+from cvp.renderer.world.world import World
 from cvp.windows.flow import FlowWindow
 from cvp.windows.font import FontManager
 from cvp.windows.labeling import LabelingWindow
@@ -49,6 +50,7 @@ class PlayerApplication:
         self._windows = WindowMapper()
         self._fonts = FontMapper()
         self._profiler = ProfileLogging(profile_logger)
+        self._world = World(self._context)
 
         self._flow = FlowWindow(self._context)
         self._font_manager = FontManager(self._context, self._fonts)
@@ -217,6 +219,9 @@ class PlayerApplication:
 
         GL.glClearColor(0, 0, 0, 1)
 
+        self._world.on_create()
+        self._world.on_window_resized(size[0], size[1])
+
         self._windows.add_windows(
             self._flow,
             self._font_manager,
@@ -260,6 +265,7 @@ class PlayerApplication:
                     self.on_keyboard_shortcut(get_pressed())
                     self.on_tick()
                     self.on_frame()
+
                     self.on_next()
                 finally:
                     self.on_after()
@@ -278,6 +284,8 @@ class PlayerApplication:
     def on_event_fallback(self, event: Event) -> None:
         if event.type == pygame.QUIT:
             self._confirm_quit.show()
+        elif event.type == pygame.WINDOWRESIZED:
+            self._world.on_window_resized(event.x, event.y)
 
         self._renderer.do_event(event)
 
@@ -303,14 +311,18 @@ class PlayerApplication:
     def on_frame(self) -> None:
         imgui.new_frame()
         try:
-            GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+            GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
+
             self.on_main_menu()
             self.on_popups()
             self._windows.do_process()
+
             if self.debug:
                 self.on_metrics_window()
                 self.on_style_editor_window()
                 self.on_demo_window()
+
+            self._world.on_process(imgui.get_io().delta_time)
         finally:
             # Cannot use `screen.fill((1, 1, 1))` because pygame's screen does not
             # support fill() on OpenGL surfaces
