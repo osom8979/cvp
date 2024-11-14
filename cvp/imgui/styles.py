@@ -1,33 +1,44 @@
 # -*- coding: utf-8 -*-
 
 from contextlib import contextmanager
-from enum import StrEnum, auto, unique
+from enum import StrEnum, unique
 from typing import Union
 
 import imgui
 
 
 @unique
-class Styles(StrEnum):
-    dark = auto()
-    light = auto()
-    classic = auto()
+class DefaultStyles(StrEnum):
+    """
+    ImGui style names start with a capital letter.
+
+    Do not use `enum.auto()` when assigning values, as it forces them to lowercase.
+    """
+
+    Dark = "Dark"
+    Light = "Light"
+    Classic = "Classic"
 
 
-def style_colors(style: Styles) -> None:
-    if style == Styles.dark:
+def style_colors(style: DefaultStyles) -> None:
+    if style == DefaultStyles.Dark:
         imgui.style_colors_dark()
-    elif style == Styles.light:
+    elif style == DefaultStyles.Light:
         imgui.style_colors_light()
-    elif style == Styles.classic:
+    elif style == DefaultStyles.Classic:
         imgui.style_colors_classic()
     else:
         raise ValueError(f"Unknown style: {style}")
 
 
-def default_style_colors(style: Union[str, Styles], default=Styles.dark) -> None:
+def default_style_colors(
+    style: Union[str, DefaultStyles],
+    default=DefaultStyles.Dark,
+) -> None:
     try:
-        style_colors(style if isinstance(style, Styles) else Styles(style))
+        if not isinstance(style, DefaultStyles):
+            style = DefaultStyles(style)
+        style_colors(style)
     except:  # noqa
         style_colors(default)
 
