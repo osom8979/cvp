@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
+# https://en.wikipedia.org/wiki/Plane_(Unicode)
 
 from typing import Final, NamedTuple, Sequence, Tuple
 
 PLANE_INDEX_MIN: Final[int] = 0
 PLANE_INDEX_MAX: Final[int] = 16
 
+MAXIMUM_CODE_POINTS: Final[int] = 65_536
+assert MAXIMUM_CODE_POINTS == 0x10000
+assert MAXIMUM_CODE_POINTS - 1 == 0xFFFF
+
+UNASSIGNED_PLANE_INDEX_MIN: Final[int] = 4
+UNASSIGNED_PLANE_INDEX_MAX: Final[int] = 13
+
 
 class UnicodePlane(NamedTuple):
-    idx: int
-    long: str
-    short: str
+    number: int
+    long_name: str
+    short_name: str
     begin: int
     end: int
 
@@ -18,70 +26,43 @@ class UnicodePlane(NamedTuple):
         return self.begin, self.end
 
     def __repr__(self):
-        return f"Plane {self.idx} {self.short}: U+{self.begin:04X} - U+{self.end:04X}"
+        return f"{self.number} {self.short_name}: U+{self.begin:04X} - U+{self.end:04X}"
 
 
-class UnicodePlaneCategory(NamedTuple):
-    long: str
-    short: str
-    begin: int
-    end: int
-
-    @property
-    def range(self) -> Tuple[int, int]:
-        return self.begin, self.end
-
-    def __repr__(self):
-        return f"{self.long} ({self.short}): U+{self.begin:04X} - U+{self.end:04X}"
-
-    def make_plane(self, idx: int, begin: int, end: int) -> UnicodePlane:
-        assert PLANE_INDEX_MIN <= idx <= PLANE_INDEX_MAX
-        assert begin < end
-        assert self.begin <= begin <= self.end
-        assert self.begin <= end <= self.end
-        return UnicodePlane(idx, self.long, self.short, begin, end)
-
-    def __call__(self, idx: int) -> UnicodePlane:
-        begin = idx * 0x10000
-        end = begin + 0xFFFF
-        return self.make_plane(idx, begin, end)
+def _plane_range(number: int) -> Tuple[int, int]:
+    assert PLANE_INDEX_MIN <= number <= PLANE_INDEX_MAX
+    begin = number * MAXIMUM_CODE_POINTS
+    end = begin + MAXIMUM_CODE_POINTS - 1
+    return begin, end
 
 
-# fmt: off
-BMP = UnicodePlaneCategory("Basic Multilingual Plane", "BMP", 0x0000, 0xFFFF)
-SMP = UnicodePlaneCategory("Supplementary Multilingual Plane", "SMP", 0x10000, 0x1FFFF)
-SIP = UnicodePlaneCategory("Supplementary Ideographic Plane", "SIP", 0x20000, 0x2FFFF)
-TIP = UnicodePlaneCategory("Tertiary Ideographic Plane", "TIP", 0x30000, 0x3FFFF)
-UNASSIGNED = UnicodePlaneCategory("Unassigned", "-", 0x40000, 0xDFFFF)
-SSP = UnicodePlaneCategory("Supplementary Special-purpose Plane", "SSP", 0xE0000, 0xEFFFF)  # noqa: E501
-PUA_A = UnicodePlaneCategory("Private Use Plane A", "PUA-A", 0xF0000, 0xFFFFF)
-PUA_B = UnicodePlaneCategory("Private Use Plane B", "PUA-B", 0x100000, 0x10FFFF)
-# fmt: on
+def _plane(number: int, long_name: str, short_name: str) -> UnicodePlane:
+    begin, end = _plane_range(number)
+    return UnicodePlane(number, long_name, short_name, begin, end)
 
-PUA_AB = UnicodePlaneCategory(
-    "Supplementary Private Use Area planes",
-    "SPUA-A/B",
-    PUA_A.begin,
-    PUA_B.end,
-)
 
-PLANE0 = BMP(0)
-PLANE1 = SMP(1)
-PLANE2 = SIP(2)
-PLANE3 = TIP(3)
-PLANE4 = UNASSIGNED(4)
-PLANE5 = UNASSIGNED(5)
-PLANE6 = UNASSIGNED(6)
-PLANE7 = UNASSIGNED(7)
-PLANE8 = UNASSIGNED(8)
-PLANE9 = UNASSIGNED(9)
-PLANE10 = UNASSIGNED(10)
-PLANE11 = UNASSIGNED(11)
-PLANE12 = UNASSIGNED(12)
-PLANE13 = UNASSIGNED(13)
-PLANE14 = SSP(14)
-PLANE15 = PUA_A(15)
-PLANE16 = PUA_B(16)
+def _unassigned(number: int) -> UnicodePlane:
+    assert UNASSIGNED_PLANE_INDEX_MIN <= number <= UNASSIGNED_PLANE_INDEX_MAX
+    return _plane(number, "Unassigned", "-")
+
+
+PLANE0 = _plane(0, "Basic Multilingual Plane", "BMP")
+PLANE1 = _plane(1, "Supplementary Multilingual Plane", "SMP")
+PLANE2 = _plane(2, "Supplementary Ideographic Plane", "SIP")
+PLANE3 = _plane(3, "Tertiary Ideographic Plane", "TIP")
+PLANE4 = _unassigned(4)
+PLANE5 = _unassigned(5)
+PLANE6 = _unassigned(6)
+PLANE7 = _unassigned(7)
+PLANE8 = _unassigned(8)
+PLANE9 = _unassigned(9)
+PLANE10 = _unassigned(10)
+PLANE11 = _unassigned(11)
+PLANE12 = _unassigned(12)
+PLANE13 = _unassigned(13)
+PLANE14 = _plane(14, "Supplementary Special-purpose Plane", "SSP")
+PLANE15 = _plane(15, "Private Use Plane A", "PUA-A")
+PLANE16 = _plane(16, "Private Use Plane B", "PUA-B")
 
 PLANES: Sequence[UnicodePlane] = (
     PLANE0,
@@ -102,3 +83,11 @@ PLANES: Sequence[UnicodePlane] = (
     PLANE15,
     PLANE16,
 )
+
+BMP = PLANE0
+SMP = PLANE1
+SIP = PLANE2
+TIP = PLANE3
+SSP = PLANE14
+PUA_A = PLANE15
+PUA_B = PLANE16
