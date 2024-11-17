@@ -77,20 +77,26 @@ class Texture:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.release()
 
-    def update_texture(self, pixels: Optional[bytes] = None) -> None:
+    def _update_texture(self, fmt: int, pixels: Optional[bytes] = None) -> None:
         assert self._bound, "Texture must be bound"
 
         GL.glTexImage2D(
             GL.GL_TEXTURE_2D,
             0,
-            GL.GL_RGB,
+            fmt,
             self._width,
             self._height,
             0,
-            GL.GL_RGB,
+            fmt,
             GL.GL_UNSIGNED_BYTE,
             pixels,
         )
+
+    def update_rgb_texture(self, pixels: Optional[bytes] = None) -> None:
+        self._update_texture(GL.GL_RGB, pixels)
+
+    def update_alpha_texture(self, pixels: Optional[bytes] = None) -> None:
+        self._update_texture(GL.GL_ALPHA, pixels)
 
     def _clear_texture_sub_image_2d(self) -> None:
         assert self._bound, "Texture must be bound"

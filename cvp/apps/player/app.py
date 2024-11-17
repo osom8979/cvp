@@ -209,7 +209,7 @@ class PlayerApplication:
 
         user_font = self.config.font.family
         if user_font and os.path.isfile(user_font):
-            self._fonts.add_korean_ttf(user_font, font_size_pixels)
+            self._fonts.add_ttf(user_font, font_size_pixels)
 
         io.font_global_scale /= self.config.font.scale
         self._renderer.refresh_font_texture()
@@ -240,6 +240,8 @@ class PlayerApplication:
     def on_exit(self) -> None:
         self._context.teardown_process_manager()
         self._windows.do_destroy()
+        self._world.on_destroy()
+        self._fonts.close()
 
         self.config.display.fullscreen = pygame.display.is_fullscreen()
         self.config.display.size = pygame.display.get_window_size()

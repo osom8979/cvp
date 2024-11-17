@@ -1,111 +1,42 @@
 # -*- coding: utf-8 -*-
 
-import os
-from typing import List
+from dataclasses import dataclass, field
+from typing import List, NamedTuple, Optional
 
 import imgui
 
 # noinspection PyProtectedMember
 from imgui.core import _Font
 
-from cvp.assets import (
-    get_jbm_nl_nfm_r_font_path,
-    get_mdi_font_path,
-    get_ngc_b_font_path,
-    get_ngc_font_path,
-)
-from cvp.variables import FONT_RANGES_EXTENSION
+from cvp.fonts.ranges import CodepointRange
+from cvp.fonts.ttf import TTF
+from cvp.gl.texture import Texture
 
 
-def read_font_ranges(path: str) -> List[int]:
-    result = list()
-    with open(path, "rt") as file:
-        for line in file:
-            hex_values = line.strip().split()
-            for hex_value in hex_values:
-                result.append(int(hex_value.strip(), 16))
-    return result
+class TTFItem(NamedTuple):
+    ttf: TTF
+    ranges: List[CodepointRange]
+    size: int
 
 
-def create_glyph_ranges(path: str):
-    ranges = read_font_ranges(path)
-    ranges.append(0)
-    return imgui.core.GlyphRanges(ranges)
+@dataclass
+class Font:
+    font: _Font
+    family: str
+    size: int
+    ttfs: List[TTFItem] = field(default_factory=list)
+    texture: Optional[Texture] = None
 
+    def __str__(self):
+        return f"{self.family} ({self.size}px)"
 
-def add_ngc_font(
-    size_pixels: int,
-    ranges_ext=FONT_RANGES_EXTENSION,
-    mdi_correction_pixel=0,
-) -> _Font:
-    mdi = get_mdi_font_path()
-    ngc = get_ngc_font_path()
+    def __enter__(self):
+        imgui.push_font(self.font)
+        return self
 
-    mdi_ranges = create_glyph_ranges(os.path.splitext(mdi)[0] + ranges_ext)
-    ngc_ranges = create_glyph_ranges(os.path.splitext(ngc)[0] + ranges_ext)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        imgui.pop_font()
 
-    io = imgui.get_io()
-    merge_mode = imgui.core.FontConfig(merge_mode=True)
-
-    io.fonts.add_font_from_file_ttf(ngc, size_pixels, None, ngc_ranges)
-    return io.fonts.add_font_from_file_ttf(
-        mdi,
-        size_pixels + mdi_correction_pixel,
-        merge_mode,
-        mdi_ranges,
-    )
-
-
-def add_ngc_b_font(
-    size_pixels: int,
-    ranges_ext=FONT_RANGES_EXTENSION,
-    mdi_correction_pixel=0,
-) -> _Font:
-    mdi = get_mdi_font_path()
-    ngc = get_ngc_b_font_path()
-
-    mdi_ranges = create_glyph_ranges(os.path.splitext(mdi)[0] + ranges_ext)
-    ngc_ranges = create_glyph_ranges(os.path.splitext(ngc)[0] + ranges_ext)
-
-    io = imgui.get_io()
-    merge_mode = imgui.core.FontConfig(merge_mode=True)
-
-    io.fonts.add_font_from_file_ttf(ngc, size_pixels, None, ngc_ranges)
-    return io.fonts.add_font_from_file_ttf(
-        mdi,
-        size_pixels + mdi_correction_pixel,
-        merge_mode,
-        mdi_ranges,
-    )
-
-
-def add_jbm_font(
-    size_pixels: int,
-    ranges_ext=FONT_RANGES_EXTENSION,
-    mdi_correction_pixel=0,
-    korean_correction_pixel=-4,
-) -> _Font:
-    jbm = get_jbm_nl_nfm_r_font_path()
-    mdi = get_mdi_font_path()
-    ngc = get_ngc_font_path()
-
-    jbm_ranges = create_glyph_ranges(os.path.splitext(jbm)[0] + ranges_ext)
-    mdi_ranges = create_glyph_ranges(os.path.splitext(mdi)[0] + ranges_ext)
-
-    io = imgui.get_io()
-    merge_mode = imgui.core.FontConfig(merge_mode=True)
-    korean_ranges = io.fonts.get_glyph_ranges_korean()
-
-    io.fonts.add_font_from_file_ttf(jbm, size_pixels, None, jbm_ranges)
-    io.fonts.add_font_from_file_ttf(
-        mdi,
-        size_pixels + mdi_correction_pixel,
-        merge_mode,
-        mdi_ranges,
-    )
-    return io.fonts.add_font_from_file_ttf(
-        ngc,
-        size_pixels + korean_correction_pixel,
-        merge_mode,
-        korean_ranges,
-    )
+    def close(self) -> None:
+        if self.texture is not None:
+            self.texture.close()

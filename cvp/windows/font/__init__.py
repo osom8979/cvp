@@ -7,10 +7,12 @@ import imgui
 from cvp.config.sections.font import FontManagerConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.imgui.font_manager import FontItem, FontMapper
+from cvp.imgui.font import Font
+from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
+from cvp.strings.unicode.blocks import BLOCKS
 from cvp.types.override import override
 from cvp.variables import (
     DEFAULT_API_SELECT_WIDTH,
@@ -20,7 +22,7 @@ from cvp.variables import (
 from cvp.widgets.manager import Manager
 
 
-class FontManager(Manager[FontManagerConfig, FontItem]):
+class FontManager(Manager[FontManagerConfig, Font]):
     def __init__(self, context: Context, fonts: FontMapper):
         super().__init__(
             context=context,
@@ -35,7 +37,7 @@ class FontManager(Manager[FontManagerConfig, FontItem]):
         self._max_range_select_width = MAX_API_SELECT_WIDTH
 
     @override
-    def get_menus(self) -> Mapping[str, FontItem]:
+    def get_menus(self) -> Mapping[str, Font]:
         return {key: value for key, value in self._fonts.items()}
 
     @override
@@ -54,12 +56,12 @@ class FontManager(Manager[FontManagerConfig, FontItem]):
             self._range_select_width = result.value
 
     @override
-    def on_menu(self, key: str, item: FontItem) -> None:
+    def on_menu(self, key: str, item: Font) -> None:
         imgui.text("Font information")
         imgui.separator()
 
         input_text_disabled("Font family", item.family)
-        input_text_disabled("Font pixel size", str(item.size_pixels))
+        input_text_disabled("Font pixel size", str(item.size))
 
         with begin_child("Unicode Range List", width=self._range_select_width):
             with item_width(-1):
