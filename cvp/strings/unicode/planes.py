@@ -25,44 +25,48 @@ class UnicodePlane(NamedTuple):
     def range(self) -> Tuple[int, int]:
         return self.begin, self.end
 
+    @property
+    def unassigned(self) -> bool:
+        return UNASSIGNED_PLANE_INDEX_MIN <= self.number <= UNASSIGNED_PLANE_INDEX_MAX
+
     def __repr__(self):
         return f"{self.number} {self.short_name}: U+{self.begin:04X} - U+{self.end:04X}"
 
 
-def _plane_range(number: int) -> Tuple[int, int]:
+def get_plane_range(number: int) -> Tuple[int, int]:
     assert PLANE_INDEX_MIN <= number <= PLANE_INDEX_MAX
     begin = number * MAXIMUM_CODE_POINTS
     end = begin + MAXIMUM_CODE_POINTS - 1
     return begin, end
 
 
-def _plane(number: int, long_name: str, short_name: str) -> UnicodePlane:
-    begin, end = _plane_range(number)
+def make_plane(number: int, long_name: str, short_name: str) -> UnicodePlane:
+    begin, end = get_plane_range(number)
     return UnicodePlane(number, long_name, short_name, begin, end)
 
 
-def _unassigned(number: int) -> UnicodePlane:
+def make_unassigned(number: int) -> UnicodePlane:
     assert UNASSIGNED_PLANE_INDEX_MIN <= number <= UNASSIGNED_PLANE_INDEX_MAX
-    return _plane(number, "Unassigned", "-")
+    return make_plane(number, "Unassigned", "-")
 
 
-PLANE0 = _plane(0, "Basic Multilingual Plane", "BMP")
-PLANE1 = _plane(1, "Supplementary Multilingual Plane", "SMP")
-PLANE2 = _plane(2, "Supplementary Ideographic Plane", "SIP")
-PLANE3 = _plane(3, "Tertiary Ideographic Plane", "TIP")
-PLANE4 = _unassigned(4)
-PLANE5 = _unassigned(5)
-PLANE6 = _unassigned(6)
-PLANE7 = _unassigned(7)
-PLANE8 = _unassigned(8)
-PLANE9 = _unassigned(9)
-PLANE10 = _unassigned(10)
-PLANE11 = _unassigned(11)
-PLANE12 = _unassigned(12)
-PLANE13 = _unassigned(13)
-PLANE14 = _plane(14, "Supplementary Special-purpose Plane", "SSP")
-PLANE15 = _plane(15, "Private Use Plane A", "PUA-A")
-PLANE16 = _plane(16, "Private Use Plane B", "PUA-B")
+PLANE0 = make_plane(0, "Basic Multilingual Plane", "BMP")
+PLANE1 = make_plane(1, "Supplementary Multilingual Plane", "SMP")
+PLANE2 = make_plane(2, "Supplementary Ideographic Plane", "SIP")
+PLANE3 = make_plane(3, "Tertiary Ideographic Plane", "TIP")
+PLANE4 = make_unassigned(4)
+PLANE5 = make_unassigned(5)
+PLANE6 = make_unassigned(6)
+PLANE7 = make_unassigned(7)
+PLANE8 = make_unassigned(8)
+PLANE9 = make_unassigned(9)
+PLANE10 = make_unassigned(10)
+PLANE11 = make_unassigned(11)
+PLANE12 = make_unassigned(12)
+PLANE13 = make_unassigned(13)
+PLANE14 = make_plane(14, "Supplementary Special-purpose Plane", "SSP")
+PLANE15 = make_plane(15, "Private Use Plane A", "PUA-A")
+PLANE16 = make_plane(16, "Private Use Plane B", "PUA-B")
 
 PLANES: Sequence[UnicodePlane] = (
     PLANE0,

@@ -12,7 +12,7 @@ from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
-from cvp.strings.unicode.blocks import BLOCKS
+from cvp.strings.unicode.planes import PLANES
 from cvp.types.override import override
 from cvp.variables import (
     DEFAULT_API_SELECT_WIDTH,
@@ -35,6 +35,7 @@ class FontManager(Manager[FontManagerConfig, Font]):
         self._range_select_width = DEFAULT_API_SELECT_WIDTH
         self._min_range_select_width = MIN_API_SELECT_WIDTH
         self._max_range_select_width = MAX_API_SELECT_WIDTH
+        self._select_name = str()
 
     @override
     def get_menus(self) -> Mapping[str, Font]:
@@ -66,17 +67,19 @@ class FontManager(Manager[FontManagerConfig, Font]):
         with begin_child("Unicode Range List", width=self._range_select_width):
             with item_width(-1):
                 self.slider_range_select_width()
-
-                # list_box = imgui.begin_list_box(
-                #     "## Unicode Range List Box",
-                #     width=-1,
-                #     height=-1,
-                # )
-                # if list_box.opened:
-                #     with list_box:
-                #         for key in apis.keys():
-                #             if imgui.selectable(key, key == item.select_api)[1]:
-                #                 item.select_api = key
+                list_box = imgui.begin_list_box(
+                    "## Unicode Range List Box",
+                    width=-1,
+                    height=-1,
+                )
+                if list_box.opened:
+                    with list_box:
+                        for plane in PLANES:
+                            if plane.unassigned:
+                                continue
+                            name = plane.short_name
+                            if imgui.selectable(name, name == self._select_name)[1]:
+                                self._select_name = name
 
         # import unicodedata
         # for codepoint in range(0x110000):
