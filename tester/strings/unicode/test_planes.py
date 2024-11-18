@@ -2,7 +2,7 @@
 
 from unittest import TestCase, main
 
-from cvp.strings.unicode.planes import PLANES
+from cvp.strings.unicode.planes import BMP, PLANES
 
 
 class PlanesTestCase(TestCase):
@@ -24,6 +24,13 @@ class PlanesTestCase(TestCase):
         self.assertTupleEqual((0xE0000, 0xEFFFF), PLANES[14].range)
         self.assertTupleEqual((0xF0000, 0xFFFFF), PLANES[15].range)
         self.assertTupleEqual((0x100000, 0x10FFFF), PLANES[16].range)
+
+    def test_split_ranges(self):
+        ranges = BMP.split_ranges()
+        self.assertTupleEqual((0x0000, 0x00FF), ranges[0])
+        self.assertTupleEqual((0x0100, 0x01FF), ranges[1])
+        self.assertTupleEqual((0xFE00, 0xFEFF), ranges[-2])
+        self.assertTupleEqual((0xFF00, 0xFFFF), ranges[-1])
 
 
 if __name__ == "__main__":

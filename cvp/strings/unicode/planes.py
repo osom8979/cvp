@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # https://en.wikipedia.org/wiki/Plane_(Unicode)
 
-from typing import Final, NamedTuple, Sequence, Tuple
+from typing import Final, List, NamedTuple, Sequence, Tuple
 
 PLANE_INDEX_MIN: Final[int] = 0
 PLANE_INDEX_MAX: Final[int] = 16
@@ -24,6 +24,12 @@ class UnicodePlane(NamedTuple):
     @property
     def range(self) -> Tuple[int, int]:
         return self.begin, self.end
+
+    def split_ranges(self, step=0xFF) -> List[Tuple[int, int]]:
+        result = list()
+        for i in range(self.begin, self.end, step + 1):
+            result.append((i, i + step))
+        return result
 
     @property
     def unassigned(self) -> bool:

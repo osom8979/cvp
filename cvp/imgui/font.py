@@ -18,6 +18,12 @@ class TTFItem(NamedTuple):
     ranges: List[CodepointRange]
     size: int
 
+    def has_codepoint(self, codepoint: int) -> bool:
+        for begin, end in self.ranges:
+            if begin <= codepoint <= end:
+                return True
+        return False
+
 
 @dataclass
 class Font:
