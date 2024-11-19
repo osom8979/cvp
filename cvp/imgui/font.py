@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import List, NamedTuple, Optional
+from typing import List, NamedTuple, Optional, Set, Tuple
 
 import imgui
 
@@ -13,7 +13,7 @@ from cvp.fonts.ttf import TTF
 from cvp.gl.texture import Texture
 
 
-class TTFItem(NamedTuple):
+class FontDetails(NamedTuple):
     ttf: TTF
     ranges: List[CodepointRange]
     size: int
@@ -24,13 +24,29 @@ class TTFItem(NamedTuple):
                 return True
         return False
 
+    def as_blocks(self, step=0x100) -> Set[Tuple[int, int]]:
+        result = set()
+        for begin, end in self.ranges:
+            block_begin = (begin // step) * step
+            block_end = block_begin + step - 1
+            assert block_begin <= begin
+            assert block_end <= end
+            result.add((block_begin, block_end))
+
+            while block_end < end:
+                block_begin += step
+                block_end += step
+                assert end <= block_begin
+                result.add((block_begin, block_end))
+        return result
+
 
 @dataclass
 class Font:
     font: _Font
     family: str
     size: int
-    ttfs: List[TTFItem] = field(default_factory=list)
+    ttfs: List[FontDetails] = field(default_factory=list)
     texture: Optional[Texture] = None
 
     def __str__(self):

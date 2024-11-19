@@ -11,7 +11,7 @@ from imgui.core import FontConfig, GlyphRanges, _Font
 from cvp.fonts.ranges import CodepointRange, flatten_ranges
 from cvp.fonts.ttf import TTF
 from cvp.gl.texture import Texture
-from cvp.imgui.font import Font, TTFItem
+from cvp.imgui.font import Font, FontDetails
 
 
 def create_glyph_ranges(ranges: List[CodepointRange]) -> GlyphRanges:
@@ -39,7 +39,7 @@ def create_glyph_ranges(ranges: List[CodepointRange]) -> GlyphRanges:
 
 class FontBuilder:
     _font: Optional[_Font]
-    _ttfs: List[TTFItem]
+    _ttfs: List[FontDetails]
 
     def __init__(self, name: str, size: int):
         self._font = None
@@ -84,16 +84,18 @@ class FontBuilder:
             None if self._font is None else self._merge,
             create_glyph_ranges(ranges),
         )
-        self._ttfs.append(TTFItem(ttf, ranges, size))
+        self._ttfs.append(FontDetails(ttf, ranges, size))
         return self
 
+    @staticmethod
+    def _create_current_font_texture() -> Texture:
+        texture = Texture()
+        width, height, pixels = imgui.get_io().fonts.get_tex_data_as_alpha8()
+        texture.open(width, height)
+        with texture:
+            texture.update_alpha_texture(pixels)
+        return texture
+
     def done(self, *, use_texture=False) -> Font:
-        if use_texture:
-            texture = Texture()
-            width, height, pixels = imgui.get_io().fonts.get_tex_data_as_alpha8()
-            texture.open(width, height)
-            with texture:
-                texture.update_alpha_texture(pixels)
-        else:
-            texture = None
+        texture = self._create_current_font_texture() if use_texture else None
         return Font(self._font, self._name, self._size, self._ttfs, texture)

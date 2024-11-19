@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from os import PathLike
-from typing import Final, List, NamedTuple, Sequence, SupportsIndex, Union
+from typing import Final, List, NamedTuple, Sequence, SupportsIndex, Tuple, Union
 
-HEXADECIMAL: Final[SupportsIndex] = 16
+UNICODE_SINGLE_BLOCK_SIZE: Final[int] = 0x100
 COMMENT_PREFIX: Final[str] = "#"
+HEXADECIMAL: Final[SupportsIndex] = 16
 
 
 class CodepointRange(NamedTuple):
@@ -13,6 +14,23 @@ class CodepointRange(NamedTuple):
 
     def size(self) -> int:
         return abs(self.end - self.begin) + 1
+
+    def has_codepoint(self, codepoint: int) -> bool:
+        return self.begin <= codepoint <= self.end
+
+    def as_blocks(self, step=UNICODE_SINGLE_BLOCK_SIZE) -> List[Tuple[int, int]]:
+        block_begin = (self.begin // step) * step
+        block_end = block_begin + step - 1
+
+        assert block_begin <= self.begin
+        result = [(block_begin, block_end)]
+
+        while block_end < self.end:
+            block_begin += step
+            block_end += step
+            result.append((block_begin, block_end))
+
+        return result
 
 
 def read_ranges(path: Union[str, PathLike[str]]) -> List[CodepointRange]:
