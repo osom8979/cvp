@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import isqrt
-from typing import Mapping
+from typing import Mapping, Tuple
 
 import imgui
 
@@ -14,12 +14,8 @@ from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
+from cvp.types.colors import RGBA
 from cvp.types.override import override
-from cvp.variables import (
-    DEFAULT_API_SELECT_WIDTH,
-    MAX_API_SELECT_WIDTH,
-    MIN_API_SELECT_WIDTH,
-)
 from cvp.widgets.manager import Manager
 
 
@@ -33,17 +29,50 @@ class FontManager(Manager[FontManagerConfig, Font]):
             flags=None,
         )
         self._fonts = fonts
-        self._range_select_width = DEFAULT_API_SELECT_WIDTH
-        self._min_range_select_width = MIN_API_SELECT_WIDTH
-        self._max_range_select_width = MAX_API_SELECT_WIDTH
-        self._plane_step = 0xFF
-        self._selected_block = 0, 0
-        self._text_color = 1.0, 1.0, 1.0, 1.0
-        self._stroke_color = 1.0, 1.0, 1.0, 0.3
-        self._rounding = 0.0
-        self._rect_flags = 0
-        self._thickness = 1.0
-        self._padding = 4.0
+
+    @property
+    def range_select_width(self) -> float:
+        return self.window_config.range_select_width
+
+    @range_select_width.setter
+    def range_select_width(self, value: float) -> None:
+        self.window_config.range_select_width = value
+
+    @property
+    def min_range_select_width(self) -> float:
+        return self.window_config.min_range_select_width
+
+    @property
+    def max_range_select_width(self) -> float:
+        return self.window_config.max_range_select_width
+
+    @property
+    def selected_block(self) -> Tuple[int, int]:
+        return self.window_config.selected_block
+
+    @selected_block.setter
+    def selected_block(self, value: Tuple[int, int]) -> None:
+        self.window_config.selected_block = value
+
+    @property
+    def selected_begin(self) -> int:
+        return self.selected_block[0]
+
+    @property
+    def selected_end(self) -> int:
+        return self.selected_block[1]
+
+    @property
+    def text_color(self) -> RGBA:
+        return self.window_config.text_color
+
+    @property
+    def normal_stroke_color(self) -> RGBA:
+        return self.window_config.normal_stroke_color
+
+    @property
+    def error_stroke_color(self) -> RGBA:
+        return self.window_config.error_stroke_color
 
     @override
     def get_menus(self) -> Mapping[str, Font]:
@@ -61,7 +90,7 @@ class FontManager(Manager[FontManagerConfig, Font]):
         input_text_disabled("Font family", item.family)
         input_text_disabled("Font pixel size", str(item.size))
 
-        with begin_child("Planes", width=self._range_select_width):
+        with begin_child("Planes", width=self.range_select_width):
             with item_width(-1):
                 self.slider_range_select_width()
                 list_box = imgui.begin_list_box("##Planes", width=-1, height=-1)
@@ -77,29 +106,30 @@ class FontManager(Manager[FontManagerConfig, Font]):
     def slider_range_select_width(self) -> None:
         result = slider_float(
             "## Unicode Range List Width",
-            self._range_select_width,
-            self._min_range_select_width,
-            self._max_range_select_width,
+            self.range_select_width,
+            self.min_range_select_width,
+            self.max_range_select_width,
             "List width (%.3f)",
         )
         if result:
-            self._range_select_width = result.value
+            self.range_select_width = result.value
 
     def selectable_blocks(self, item: Font) -> None:
         for block in item.blocks:
             begin, end = block
             label = f"{begin:06X}-{end:06X}"
-            if imgui.selectable(label, block == self._selected_block)[1]:
-                self._selected_block = block
+            if imgui.selectable(label, block == self.selected_block)[1]:
+                self.selected_block = block
 
     def draw_codepoint_matrix(self, item: Font) -> None:
-        codepoint_begin = self._selected_block[0]
-        stroke_color = imgui.get_color_u32_rgba(*self._stroke_color)
-        text_color = imgui.get_color_u32_rgba(*self._text_color)
-        padding = self._padding
-        rounding = self._rounding
-        rect_flags = self._rect_flags
-        thickness = self._thickness
+        codepoint_begin = self.selected_begin
+        normal_stroke_color = imgui.get_color_u32_rgba(*self.normal_stroke_color)
+        error_stroke_color = imgui.get_color_u32_rgba(*self.error_stroke_color)
+        text_color = imgui.get_color_u32_rgba(*self.text_color)
+        padding = self.window_config.padding
+        rounding = self.window_config.rounding
+        rect_flags = self.window_config.rect_flags
+        thickness = self.window_config.thickness
 
         cx, cy = imgui.get_cursor_screen_pos()
         draw_list = get_window_draw_list()
@@ -119,12 +149,13 @@ class FontManager(Manager[FontManagerConfig, Font]):
             roi = x1, y1, x2, y2
             codepoint = codepoint_begin + i
             cp_detail = item.get_codepoint_detail(codepoint)
-            if not cp_detail:
-                continue
+            stroke_color = normal_stroke_color if cp_detail else error_stroke_color
 
             draw_list.add_rect(*roi, stroke_color, rounding, rect_flags, thickness)
-            with item:
-                draw_list.add_text(x1, y1, text_color, cp_detail.character)
+
+            if cp_detail:
+                with item:
+                    draw_list.add_text(x1, y1, text_color, cp_detail.character)
 
             if imgui.is_mouse_hovering_rect(*roi):
                 with imgui.begin_tooltip():

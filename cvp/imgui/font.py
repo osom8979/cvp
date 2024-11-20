@@ -27,6 +27,10 @@ class FontDetail:
                 return True
         return False
 
+    @property
+    def best_camp(self) -> Dict[int, str]:
+        return self.ttf.ttf.getBestCmap()
+
 
 class CodepointDetail:
     def __init__(self, codepoint: int, detail: Optional[FontDetail] = None):
@@ -53,7 +57,7 @@ class CodepointDetail:
             self.exists = True
             self.filepath = str(detail.ttf.path)
             self.filename = os.path.basename(detail.ttf.path)
-            self.glyph = detail.ttf.ttf.getBestCmap().get(codepoint)
+            self.glyph = detail.best_camp.get(codepoint, str())
 
     def __bool__(self):
         return self.exists
