@@ -9,12 +9,18 @@ import imgui
 
 from cvp.assets import (
     FONT_FILENAME_JBM_NL_NFM_R,
+    FONT_FILENAME_MDI,
     FONT_FILENAME_NGC,
     FONT_FILENAME_NGC_B,
 )
 from cvp.imgui.font import Font
 from cvp.imgui.font_builder import FontBuilder
-from cvp.imgui.font_defaults import add_jbm_font, add_ngc_b_font, add_ngc_font
+from cvp.imgui.font_defaults import (
+    add_jbm_font,
+    add_mdi_font,
+    add_ngc_b_font,
+    add_ngc_font,
+)
 
 
 class FontMapper(OrderedDict[str, Font]):
@@ -27,8 +33,7 @@ class FontMapper(OrderedDict[str, Font]):
         return f"{name}, {size}px"
 
     def add_jbm_font(self, size: int, *, use_texture=False):
-        name = FONT_FILENAME_JBM_NL_NFM_R
-        key = self.gen_font_key(name, size)
+        key = self.gen_font_key(FONT_FILENAME_JBM_NL_NFM_R, size)
         if self.__contains__(key):
             raise KeyError(f"Already exists font key: {key}")
 
@@ -37,8 +42,7 @@ class FontMapper(OrderedDict[str, Font]):
         return font
 
     def add_ngc_font(self, size: int, *, use_texture=False):
-        name = FONT_FILENAME_NGC
-        key = self.gen_font_key(name, size)
+        key = self.gen_font_key(FONT_FILENAME_NGC, size)
         if self.__contains__(key):
             raise KeyError(f"Already exists font key: {key}")
 
@@ -47,8 +51,7 @@ class FontMapper(OrderedDict[str, Font]):
         return font
 
     def add_ngc_b_font(self, size: int, *, use_texture=False):
-        name = FONT_FILENAME_NGC_B
-        key = self.gen_font_key(name, size)
+        key = self.gen_font_key(FONT_FILENAME_NGC_B, size)
         if self.__contains__(key):
             raise KeyError(f"Already exists font key: {key}")
 
@@ -56,10 +59,14 @@ class FontMapper(OrderedDict[str, Font]):
         self.__setitem__(key, font)
         return font
 
-    def add_defaults(self, size: int, *, use_texture=False) -> None:
-        self.add_jbm_font(size, use_texture=use_texture)
-        self.add_ngc_font(size, use_texture=use_texture)
-        self.add_ngc_b_font(size, use_texture=use_texture)
+    def add_mdi_font(self, size: int, *, use_texture=False):
+        key = self.gen_font_key(FONT_FILENAME_MDI, size)
+        if self.__contains__(key):
+            raise KeyError(f"Already exists font key: {key}")
+
+        font = add_mdi_font(size, use_texture=use_texture)
+        self.__setitem__(key, font)
+        return font
 
     def add_ttf(
         self,

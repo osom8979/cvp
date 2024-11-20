@@ -8,6 +8,7 @@ import imgui
 from cvp.config.sections.font import FontManagerConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
+from cvp.imgui.clipboard import put_clipboard_text
 from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.font import Font
 from cvp.imgui.font_manager import FontMapper
@@ -158,6 +159,9 @@ class FontManager(Manager[FontManagerConfig, Font]):
                     draw_list.add_text(x1, y1, text_color, cp_detail.character)
 
             if imgui.is_mouse_hovering_rect(*roi):
+                if imgui.is_mouse_clicked(0):
+                    put_clipboard_text(f"\\U{codepoint:08X}")
+
                 with imgui.begin_tooltip():
                     message = cp_detail.as_unformatted_text()
                     imgui.text_unformatted(message.strip())

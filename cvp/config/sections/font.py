@@ -17,7 +17,16 @@ from cvp.variables import (
 class FontConfig:
     family: str = field(default_factory=str)
     scale: float = 1.0
-    pixels: int = 14
+    regular_pixels: int = 14
+    icon_pixels: int = 22
+
+    @property
+    def regular_font_size_pixels(self):
+        return self.regular_pixels * self.scale
+
+    @property
+    def icon_font_size_pixels(self):
+        return self.icon_pixels * self.scale
 
 
 @dataclass
