@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-import unicodedata
 from math import isqrt
 from typing import Mapping
 
@@ -119,41 +117,16 @@ class FontManager(Manager[FontManagerConfig, Font]):
             y2 = y1 + cell_size
 
             roi = x1, y1, x2, y2
-            draw_list.add_rect(*roi, stroke_color, rounding, rect_flags, thickness)
-
             codepoint = codepoint_begin + i
-            character = chr(codepoint)
+            cp_detail = item.get_codepoint_detail(codepoint)
+            if not cp_detail:
+                continue
 
+            draw_list.add_rect(*roi, stroke_color, rounding, rect_flags, thickness)
             with item:
-                draw_list.add_text(x1, y1, text_color, character)
+                draw_list.add_text(x1, y1, text_color, cp_detail.character)
 
             if imgui.is_mouse_hovering_rect(*roi):
                 with imgui.begin_tooltip():
-                    try:
-                        name = unicodedata.name(character)
-                    except ValueError:
-                        name = "[Unknown]"
-
-                    try:
-                        detail = item.find_detail(codepoint)
-                        filename = os.path.basename(detail.ttf.path)
-                        glyph = detail.ttf.ttf.getBestCmap().get(codepoint)
-                    except KeyError:
-                        filename = "[Unknown]"
-                        glyph = "[Unknown]"
-
-                    category = unicodedata.category(character)
-                    combining = unicodedata.combining(character)
-                    bidirectional = unicodedata.bidirectional(character)
-
-                    message = (
-                        f"{character}\n"
-                        f"Codepoint: U+{codepoint:06X}\n"
-                        f"Name: {name}\n"
-                        f"Category: {category}\n"
-                        f"Combining: {combining}\n"
-                        f"Bidirectional: {bidirectional}\n"
-                        f"Glyph: {glyph}\n"
-                        f"Filename: {filename}"
-                    )
-                    imgui.text_unformatted(message)
+                    message = cp_detail.as_unformatted_text()
+                    imgui.text_unformatted(message.strip())
