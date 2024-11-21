@@ -15,6 +15,7 @@ from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.item_width import item_width
 from cvp.imgui.slider_float import slider_float
+from cvp.imgui.text_centered import text_centered
 from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.widgets.manager import Manager
@@ -123,6 +124,10 @@ class FontManager(Manager[FontManagerConfig, Font]):
                 self.selected_block = block
 
     def draw_codepoint_matrix(self, item: Font) -> None:
+        if self.selected_block not in item.blocks:
+            text_centered("Please select a item")
+            return
+
         codepoint_begin = self.selected_begin
         normal_stroke_color = imgui.get_color_u32_rgba(*self.normal_stroke_color)
         error_stroke_color = imgui.get_color_u32_rgba(*self.error_stroke_color)

@@ -8,12 +8,6 @@ from typing import Dict, List, Optional, Union
 
 from fontTools.ttLib import TTFont
 
-from cvp.assets import (
-    get_jbm_nl_nfm_r_font_path,
-    get_mdi_font_path,
-    get_ngc_b_font_path,
-    get_ngc_font_path,
-)
 from cvp.fonts.ranges import CodepointRange, read_ranges
 from cvp.variables import CODEPOINT_RANGES_EXTENSION
 
@@ -81,19 +75,3 @@ class TTF:
 
     def read_default_ranges(self) -> List[CodepointRange]:
         return read_ranges(self.get_default_ranges_path())
-
-    @classmethod
-    def from_jbm_nl_nfm_r(cls):
-        return cls(get_jbm_nl_nfm_r_font_path())
-
-    @classmethod
-    def from_mdi(cls):
-        return cls(get_mdi_font_path())
-
-    @classmethod
-    def from_ngc_b(cls):
-        return cls(get_ngc_b_font_path())
-
-    @classmethod
-    def from_ngc(cls):
-        return cls(get_ngc_font_path())

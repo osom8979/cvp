@@ -6,6 +6,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Final
 
+from cvp.variables import CODEPOINT_GLYPHS_EXTENSION, CODEPOINT_RANGES_EXTENSION
+
 
 @lru_cache
 def get_assets_dir() -> str:
@@ -47,32 +49,92 @@ def get_wsdl_path() -> Path:
     return Path(get_wsdl_dir())
 
 
-FONT_FILENAME_JBM_NL_NFM_R: Final[str] = "JetBrainsMonoNLNerdFontMono-Regular.ttf"
-FONT_FILENAME_MDI: Final[str] = "materialdesignicons-webfont.ttf"
-FONT_FILENAME_NGC: Final[str] = "NanumGothicCoding.ttf"
-FONT_FILENAME_NGC_B: Final[str] = "NanumGothicCoding-Bold.ttf"
+@lru_cache
+def get_default_icon_path() -> str:
+    return os.path.join(get_icons_dir(), "icon.png")
+
+
+FONT_FILENAME_JBM_NL_NFM_R: Final[str] = "JetBrainsMonoNLNerdFontMono-Regular"
+FONT_FILENAME_MDI: Final[str] = "materialdesignicons-webfont"
+FONT_FILENAME_NGC: Final[str] = "NanumGothicCoding"
+FONT_FILENAME_NGC_B: Final[str] = "NanumGothicCoding-Bold"
+
+_TTF: Final[str] = ".ttf"
+FONT_TTF_FILENAME_JBM_NL_NFM_R: Final[str] = FONT_FILENAME_JBM_NL_NFM_R + _TTF
+FONT_TTF_FILENAME_MDI: Final[str] = FONT_FILENAME_MDI + _TTF
+FONT_TTF_FILENAME_NGC: Final[str] = FONT_FILENAME_NGC + _TTF
+FONT_TTF_FILENAME_NGC_B: Final[str] = FONT_FILENAME_NGC_B + _TTF
 
 
 @lru_cache
 def get_jbm_nl_nfm_r_font_path() -> str:
-    return os.path.join(get_fonts_dir(), FONT_FILENAME_JBM_NL_NFM_R)
+    return os.path.join(get_fonts_dir(), FONT_TTF_FILENAME_JBM_NL_NFM_R)
 
 
 @lru_cache
 def get_mdi_font_path() -> str:
-    return os.path.join(get_fonts_dir(), FONT_FILENAME_MDI)
+    return os.path.join(get_fonts_dir(), FONT_TTF_FILENAME_MDI)
 
 
 @lru_cache
 def get_ngc_font_path() -> str:
-    return os.path.join(get_fonts_dir(), FONT_FILENAME_NGC)
+    return os.path.join(get_fonts_dir(), FONT_TTF_FILENAME_NGC)
 
 
 @lru_cache
 def get_ngc_b_font_path() -> str:
-    return os.path.join(get_fonts_dir(), FONT_FILENAME_NGC_B)
+    return os.path.join(get_fonts_dir(), FONT_TTF_FILENAME_NGC_B)
+
+
+_RANGES: Final[str] = CODEPOINT_RANGES_EXTENSION
+FONT_RANGES_FILENAME_JBM_NL_NFM_R: Final[str] = FONT_FILENAME_JBM_NL_NFM_R + _RANGES
+FONT_RANGES_FILENAME_MDI: Final[str] = FONT_FILENAME_MDI + _RANGES
+FONT_RANGES_FILENAME_NGC: Final[str] = FONT_FILENAME_NGC + _RANGES
+FONT_RANGES_FILENAME_NGC_B: Final[str] = FONT_FILENAME_NGC_B + _RANGES
 
 
 @lru_cache
-def get_default_icon_path() -> str:
-    return os.path.join(get_icons_dir(), "icon.png")
+def get_jbm_nl_nfm_r_font_ranges_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_RANGES_FILENAME_JBM_NL_NFM_R)
+
+
+@lru_cache
+def get_mdi_font_ranges_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_RANGES_FILENAME_MDI)
+
+
+@lru_cache
+def get_ngc_font_ranges_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_RANGES_FILENAME_NGC)
+
+
+@lru_cache
+def get_ngc_b_font_ranges_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_RANGES_FILENAME_NGC_B)
+
+
+_GLYPHS: Final[str] = CODEPOINT_GLYPHS_EXTENSION
+FONT_GLYPHS_FILENAME_JBM_NL_NFM_R: Final[str] = FONT_FILENAME_JBM_NL_NFM_R + _GLYPHS
+FONT_GLYPHS_FILENAME_MDI: Final[str] = FONT_FILENAME_MDI + _GLYPHS
+FONT_GLYPHS_FILENAME_NGC: Final[str] = FONT_FILENAME_NGC + _GLYPHS
+FONT_GLYPHS_FILENAME_NGC_B: Final[str] = FONT_FILENAME_NGC_B + _GLYPHS
+
+
+@lru_cache
+def get_jbm_nl_nfm_r_font_glyphs_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_GLYPHS_FILENAME_JBM_NL_NFM_R)
+
+
+@lru_cache
+def get_mdi_font_glyphs_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_GLYPHS_FILENAME_MDI)
+
+
+@lru_cache
+def get_ngc_font_glyphs_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_GLYPHS_FILENAME_NGC)
+
+
+@lru_cache
+def get_ngc_b_font_glyphs_path() -> str:
+    return os.path.join(get_fonts_dir(), FONT_GLYPHS_FILENAME_NGC_B)
