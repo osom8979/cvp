@@ -10,14 +10,14 @@ from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.types.override import override
-from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.manager_tabs import ManagerTabs
 from cvp.windows.onvif.apis import OnvifApisTab
 from cvp.windows.onvif.auth import OnvifAuthTab
 from cvp.windows.onvif.info import OnvifInfoTab
 from cvp.windows.onvif.service import OnvifServiceTab
 
 
-class OnvifManager(ManagerTab[OnvifManagerConfig, OnvifConfig]):
+class OnvifManager(ManagerTabs[OnvifManagerConfig, OnvifConfig]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,

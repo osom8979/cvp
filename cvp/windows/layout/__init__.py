@@ -10,11 +10,11 @@ from cvp.imgui.button_ex import button_ex
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
-from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.manager_tabs import ManagerTabs
 from cvp.windows.layout.info import LayoutInfoTab
 
 
-class LayoutManager(ManagerTab[LayoutManagerConfig, LayoutConfig]):
+class LayoutManager(ManagerTabs[LayoutManagerConfig, LayoutConfig]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

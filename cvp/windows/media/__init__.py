@@ -14,12 +14,12 @@ from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
-from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.manager_tabs import ManagerTabs
 from cvp.windows.media.info import MediaInfoTab
 from cvp.windows.media.media import MediaWindow
 
 
-class MediaManager(ManagerTab[MediaManagerConfig, MediaWindowConfig]):
+class MediaManager(ManagerTabs[MediaManagerConfig, MediaWindowConfig]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,

@@ -14,7 +14,7 @@ from cvp.widgets.manager import Manager, ManagerWindowConfigT, MenuItemT
 from cvp.widgets.tab import TabBar, TabItem
 
 
-class ManagerTab(Manager[ManagerWindowConfigT, MenuItemT]):
+class ManagerTabs(Manager[ManagerWindowConfigT, MenuItemT]):
     def __init__(
         self,
         context: Context,

@@ -7,11 +7,11 @@ from cvp.context.context import Context
 from cvp.renderer.window.base import WindowBase
 from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
-from cvp.widgets.manager_tab import ManagerTab
+from cvp.widgets.manager_tabs import ManagerTabs
 from cvp.windows.window.info import WindowInfoTab
 
 
-class WindowManager(ManagerTab[WindowManagerConfig, WindowBase]):
+class WindowManager(ManagerTabs[WindowManagerConfig, WindowBase]):
     def __init__(self, context: Context, windows: WindowMapper):
         super().__init__(
             context=context,
