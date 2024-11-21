@@ -38,6 +38,7 @@ from cvp.windows.overlay import OverlayWindow
 from cvp.windows.preference import PreferenceManager
 from cvp.windows.process import ProcessManager
 from cvp.windows.stitching import StitchingWindow
+from cvp.windows.toast import ToastWindow
 from cvp.windows.window import WindowManager
 from cvp.windows.wsd import WsdManager
 
@@ -62,6 +63,7 @@ class PlayerApplication:
         self._pref_manager = PreferenceManager(self._context)
         self._process_manager = ProcessManager(self._context)
         self._stitching = StitchingWindow(self._context)
+        self._toast = ToastWindow(self._context)
         self._window_manager = WindowManager(self._context, self._windows)
         self._wsd_manager = WsdManager(self._context)
 
@@ -234,6 +236,7 @@ class PlayerApplication:
             self._pref_manager,
             self._process_manager,
             self._stitching,
+            self._toast,
             self._window_manager,
             self._wsd_manager,
         )
