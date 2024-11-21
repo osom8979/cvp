@@ -36,24 +36,31 @@ def _write_default_font_ranges() -> None:
     create_ngc_b_ttf().write_ranges(get_ngc_b_font_ranges_path())
 
 
+def write_default_font_ranges(*, printer=print, verbose=False) -> None:
+    if verbose:
+        printer("Writing ranges file...")
+    _write_default_font_ranges()
+    if verbose:
+        printer("Completed writing the ranges file.")
+
+
 def _write_default_font_glyphs() -> None:
     # TODO
     pass
 
 
-def _write_default_cache_files(verbose=False) -> None:
+def write_default_font_glyphs(*, printer=print, verbose=False) -> None:
     if verbose:
-        print("Writing ranges file...")
-    _write_default_font_ranges()
-    if verbose:
-        print("Completed writing the ranges file.")
-
-    if verbose:
-        print("Writing glyphs file...")
+        printer("Writing glyphs file...")
     _write_default_font_glyphs()
     if verbose:
-        print("Completed writing the glyphs file.")
+        printer("Completed writing the glyphs file.")
+
+
+def write_default_cache_files(*, printer=print, verbose=False) -> None:
+    write_default_font_ranges(printer=printer, verbose=verbose)
+    write_default_font_glyphs(printer=printer, verbose=verbose)
 
 
 if __name__ == "__main__":
-    _write_default_cache_files(verbose=True)
+    write_default_cache_files(verbose=True)
