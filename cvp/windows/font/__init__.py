@@ -165,8 +165,7 @@ class FontManager(Manager[FontManagerConfig, Font]):
 
             if self.focused and imgui.is_mouse_hovering_rect(*roi):
                 if self.is_mouse_left_button_clicked():
-                    text = f"\\U{codepoint:08X}"
-                    put_clipboard_text(text)
+                    put_clipboard_text(cp_detail.as_printable_unicode())
                     self.toast("Copied to clipboard")
 
                 with imgui.begin_tooltip():

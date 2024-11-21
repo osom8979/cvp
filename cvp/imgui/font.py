@@ -62,6 +62,9 @@ class CodepointDetail:
     def __bool__(self):
         return self.exists
 
+    def as_printable_unicode(self) -> str:
+        return f"\\U{self.codepoint:08X}"
+
     def as_unformatted_text(self):
         return (
             f"{self.character}\n"
