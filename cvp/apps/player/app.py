@@ -308,7 +308,7 @@ class PlayerApplication:
 
     def on_msg_fallback(self, msg: Msg) -> None:
         if msg.mtype == MsgType.toast:
-            print(msg)
+            self._toast.show_simple(msg.message)
 
     def on_keyboard_shortcut(self, keys: ScancodeWrapper) -> None:
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:

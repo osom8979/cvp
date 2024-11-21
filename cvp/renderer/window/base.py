@@ -220,6 +220,28 @@ class WindowBase(
         return self._query
 
     @property
+    def focused(self):
+        return self._focused
+
+    @property
+    def hovered(self):
+        return self._hovered
+
+    def is_mouse_button_clicked(self, button_index: int) -> bool:
+        if not self.hovered:
+            return False
+        return imgui.is_mouse_clicked(button_index)
+
+    def is_mouse_left_button_clicked(self) -> bool:
+        return self.is_mouse_button_clicked(imgui.MOUSE_BUTTON_LEFT)
+
+    def is_mouse_middle_button_clicked(self) -> bool:
+        return self.is_mouse_button_clicked(imgui.MOUSE_BUTTON_MIDDLE)
+
+    def is_mouse_right_button_clicked(self) -> bool:
+        return self.is_mouse_button_clicked(imgui.MOUSE_BUTTON_RIGHT)
+
+    @property
     @override
     def context(self):
         return self._context
@@ -427,7 +449,12 @@ class WindowBase(
             return
 
         self.on_before()
+        try:
+            self._process_main()
+        finally:
+            self.on_after()
 
+    def _process_main(self) -> None:
         expanded, opened = self.begin()
         try:
             self._query.update()
@@ -461,5 +488,3 @@ class WindowBase(
             popup_result = popup.do_process()
             if popup_result is not None:
                 self.on_popup(popup, popup_result)
-
-        self.on_after()

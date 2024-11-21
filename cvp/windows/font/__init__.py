@@ -163,8 +163,8 @@ class FontManager(Manager[FontManagerConfig, Font]):
                 with item:
                     draw_list.add_text(x1, y1, text_color, cp_detail.character)
 
-            if imgui.is_mouse_hovering_rect(*roi):
-                if imgui.is_mouse_clicked(0):
+            if self.focused and imgui.is_mouse_hovering_rect(*roi):
+                if self.is_mouse_left_button_clicked():
                     text = f"\\U{codepoint:08X}"
                     put_clipboard_text(text)
                     self.toast("Copied to clipboard")

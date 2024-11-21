@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
+from collections import deque
+from dataclasses import dataclass
+from typing import Deque, Final
 
 import imgui
 
@@ -18,7 +20,14 @@ TOAST_WINDOW_FLAGS: Final[int] = (
 )
 
 
+@dataclass
+class ToastItem:
+    message: str
+
+
 class ToastWindow(WindowBase[ToastWindowConfig]):
+    _items: Deque[ToastItem]
+
     def __init__(self, context: Context):
         super().__init__(
             context=context,
@@ -27,7 +36,31 @@ class ToastWindow(WindowBase[ToastWindowConfig]):
             closable=False,
             flags=TOAST_WINDOW_FLAGS,
         )
+        self._items = deque()
+
+    def show_toast(self, item: ToastItem) -> None:
+        self._items.append(item)
+        self.opened = True
+
+    def show_simple(self, message: str) -> None:
+        self.show_toast(ToastItem(message))
+
+    @override
+    def on_before(self) -> None:
+        imgui.push_style_var(imgui.STYLE_WINDOW_ROUNDING, 15.0)
+
+    @override
+    def on_after(self) -> None:
+        imgui.pop_style_var()
 
     @override
     def on_process(self) -> None:
-        pass
+        if not self._items:
+            self.opened = False
+            return
+
+        item = self._items[0]
+        imgui.text(item.message)
+
+        if self.is_mouse_left_button_clicked():
+            self._items.pop()
