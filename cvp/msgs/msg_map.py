@@ -27,13 +27,13 @@ class MsgWrapper:
 
     def __init__(
         self,
-        msg_type: MsgType,
+        mtype: MsgType,
         name: str,
-        func: Callable[..., Optional[bool]],
+        func: Callable[..., Any],
     ):
         self._params = list(signature(func).parameters.keys())
-        self._msg_type = msg_type
-        self._msg_name = get_msg_type_name(msg_type)
+        self._mtype = mtype
+        self._name = get_msg_type_name(mtype)
         self._fallback_name = name
         self._fallback_func = func
         self._fallback_signature = signature(func)

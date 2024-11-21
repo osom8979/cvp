@@ -31,7 +31,7 @@ class EventWrapper:
         self,
         event_type: EventType,
         name: str,
-        func: Callable[..., Optional[bool]],
+        func: Callable[..., Any],
     ):
         self._params = list(signature(func).parameters.keys())
         self._event_type = event_type

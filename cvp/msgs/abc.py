@@ -7,10 +7,10 @@ from cvp.msgs.attribute import set_msg_type
 from cvp.msgs.msg_type import MsgType
 
 
-def abstractmsg(msg_type: MsgType):
+def abstractmsg(mtype: MsgType):
     def _param_wrapper(func):
         abstractmethod(func)
-        set_msg_type(func, msg_type)
+        set_msg_type(func, mtype)
 
         @wraps(func)
         def _func_wrapper(*args, **kwargs):

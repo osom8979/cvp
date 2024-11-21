@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Tuple
+from typing import Tuple
 
 from cvp.pygame.constants.button_type import ButtonType
 from cvp.pygame.constants.keycode import Keycode
@@ -11,11 +11,11 @@ from cvp.types.override import override
 
 class EventCallbacks(EventInterface):
     @override
-    def on_quit(self) -> Optional[bool]:
+    def on_quit(self):
         pass
 
     @override
-    def on_active_event(self, gain: int, state: int) -> Optional[bool]:
+    def on_active_event(self, gain: int, state: int):
         pass
 
     @override
@@ -25,7 +25,7 @@ class EventCallbacks(EventInterface):
         mod: Keymod,
         unicode: str,
         scancode: int,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
@@ -35,7 +35,7 @@ class EventCallbacks(EventInterface):
         mod: Keymod,
         unicode: str,
         scancode: int,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
@@ -45,7 +45,7 @@ class EventCallbacks(EventInterface):
         rel: Tuple[int, int],
         buttons: Tuple[int, int, int],
         touch: bool,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
@@ -54,7 +54,7 @@ class EventCallbacks(EventInterface):
         pos: Tuple[int, int],
         button: ButtonType,
         touch: bool,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
@@ -63,59 +63,59 @@ class EventCallbacks(EventInterface):
         pos: Tuple[int, int],
         button: ButtonType,
         touch: bool,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
-    def on_joy_axis_motion(self, joy, instance_id, axis, value) -> Optional[bool]:
+    def on_joy_axis_motion(self, joy, instance_id, axis, value):
         pass
 
     @override
-    def on_joy_ball_motion(self, joy, instance_id, ball, rel) -> Optional[bool]:
+    def on_joy_ball_motion(self, joy, instance_id, ball, rel):
         pass
 
     @override
-    def on_joy_hat_motion(self, joy, instance_id, hat, value) -> Optional[bool]:
+    def on_joy_hat_motion(self, joy, instance_id, hat, value):
         pass
 
     @override
-    def on_joy_button_up(self, joy, instance_id, button) -> Optional[bool]:
+    def on_joy_button_up(self, joy, instance_id, button):
         pass
 
     @override
-    def on_joy_button_down(self, joy, instance_id, button) -> Optional[bool]:
+    def on_joy_button_down(self, joy, instance_id, button):
         pass
 
     @override
-    def on_video_resize(self, size: Tuple[int, int], w: int, h: int) -> Optional[bool]:
+    def on_video_resize(self, size: Tuple[int, int], w: int, h: int):
         pass
 
     @override
-    def on_video_expose(self) -> Optional[bool]:
+    def on_video_expose(self):
         pass
 
     @override
-    def on_user_event(self, code: int) -> Optional[bool]:
+    def on_user_event(self, code: int):
         pass
 
     @override
-    def on_audio_device_added(self, which: int, iscapture: int) -> Optional[bool]:
+    def on_audio_device_added(self, which: int, iscapture: int):
         pass
 
     @override
-    def on_audio_device_removed(self, which: int, iscapture: int) -> Optional[bool]:
+    def on_audio_device_removed(self, which: int, iscapture: int):
         pass
 
     @override
-    def on_finger_motion(self, touch_id, finger_id, x, y, dx, dy) -> Optional[bool]:
+    def on_finger_motion(self, touch_id, finger_id, x, y, dx, dy):
         pass
 
     @override
-    def on_finger_down(self, touch_id, finger_id, x, y, dx, dy) -> Optional[bool]:
+    def on_finger_down(self, touch_id, finger_id, x, y, dx, dy):
         pass
 
     @override
-    def on_finger_up(self, touch_id, finger_id, x, y, dx, dy) -> Optional[bool]:
+    def on_finger_up(self, touch_id, finger_id, x, y, dx, dy):
         pass
 
     @override
@@ -127,7 +127,7 @@ class EventCallbacks(EventInterface):
         precise_x: float,
         precise_y: float,
         touch: bool,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
@@ -139,173 +139,173 @@ class EventCallbacks(EventInterface):
         pinched,
         rotated,
         num_fingers,
-    ) -> Optional[bool]:
+    ):
         pass
 
     @override
-    def on_text_editing(self, text: str, start: int, length: int) -> Optional[bool]:
+    def on_text_editing(self, text: str, start: int, length: int):
         pass
 
     @override
-    def on_text_input(self, text: str) -> Optional[bool]:
+    def on_text_input(self, text: str):
         pass
 
     @override
-    def on_drop_file(self, file: str) -> Optional[bool]:
+    def on_drop_file(self, file: str):
         pass
 
     @override
-    def on_drop_begin(self) -> Optional[bool]:
+    def on_drop_begin(self):
         pass
 
     @override
-    def on_drop_complete(self) -> Optional[bool]:
+    def on_drop_complete(self):
         pass
 
     @override
-    def on_drop_text(self) -> Optional[bool]:
+    def on_drop_text(self):
         pass
 
     @override
-    def on_midi_in(self) -> Optional[bool]:
+    def on_midi_in(self):
         pass
 
     @override
-    def on_midi_out(self) -> Optional[bool]:
+    def on_midi_out(self):
         pass
 
     @override
-    def on_controller_device_added(self, device_index: int) -> Optional[bool]:
+    def on_controller_device_added(self, device_index: int):
         pass
 
     @override
-    def on_joy_device_added(self, device_index: int) -> Optional[bool]:
+    def on_joy_device_added(self, device_index: int):
         pass
 
     @override
-    def on_controller_device_removed(self, instance_id: int) -> Optional[bool]:
+    def on_controller_device_removed(self, instance_id: int):
         pass
 
     @override
-    def on_joy_device_removed(self, instance_id: int) -> Optional[bool]:
+    def on_joy_device_removed(self, instance_id: int):
         pass
 
     @override
-    def on_controller_device_remapped(self, instance_id: int) -> Optional[bool]:
+    def on_controller_device_remapped(self, instance_id: int):
         pass
 
     @override
-    def on_keymap_changed(self) -> Optional[bool]:
+    def on_keymap_changed(self):
         pass
 
     @override
-    def on_clipboard_update(self) -> Optional[bool]:
+    def on_clipboard_update(self):
         pass
 
     @override
-    def on_render_targets_reset(self) -> Optional[bool]:
+    def on_render_targets_reset(self):
         pass
 
     @override
-    def on_render_device_reset(self) -> Optional[bool]:
+    def on_render_device_reset(self):
         pass
 
     @override
-    def on_locale_changed(self) -> Optional[bool]:
+    def on_locale_changed(self):
         pass
 
     @override
-    def on_window_shown(self) -> Optional[bool]:
+    def on_window_shown(self):
         pass
 
     @override
-    def on_window_hidden(self) -> Optional[bool]:
+    def on_window_hidden(self):
         pass
 
     @override
-    def on_window_exposed(self) -> Optional[bool]:
+    def on_window_exposed(self):
         pass
 
     @override
-    def on_window_moved(self, x: int, y: int) -> Optional[bool]:
+    def on_window_moved(self, x: int, y: int):
         pass
 
     @override
-    def on_window_resized(self, x: int, y: int) -> Optional[bool]:
+    def on_window_resized(self, x: int, y: int):
         pass
 
     @override
-    def on_window_size_changed(self, x: int, y: int) -> Optional[bool]:
+    def on_window_size_changed(self, x: int, y: int):
         pass
 
     @override
-    def on_window_minimized(self) -> Optional[bool]:
+    def on_window_minimized(self):
         pass
 
     @override
-    def on_window_maximized(self) -> Optional[bool]:
+    def on_window_maximized(self):
         pass
 
     @override
-    def on_window_restored(self) -> Optional[bool]:
+    def on_window_restored(self):
         pass
 
     @override
-    def on_window_enter(self) -> Optional[bool]:
+    def on_window_enter(self):
         pass
 
     @override
-    def on_window_leave(self) -> Optional[bool]:
+    def on_window_leave(self):
         pass
 
     @override
-    def on_window_focus_gained(self) -> Optional[bool]:
+    def on_window_focus_gained(self):
         pass
 
     @override
-    def on_window_focus_lost(self) -> Optional[bool]:
+    def on_window_focus_lost(self):
         pass
 
     @override
-    def on_window_close(self) -> Optional[bool]:
+    def on_window_close(self):
         pass
 
     @override
-    def on_window_take_focus(self) -> Optional[bool]:
+    def on_window_take_focus(self):
         pass
 
     @override
-    def on_window_hit_test(self) -> Optional[bool]:
+    def on_window_hit_test(self):
         pass
 
     @override
-    def on_window_icc_prof_changed(self) -> Optional[bool]:
+    def on_window_icc_prof_changed(self):
         pass
 
     @override
-    def on_window_display_changed(self) -> Optional[bool]:
+    def on_window_display_changed(self):
         pass
 
     @override
-    def on_app_terminating(self) -> Optional[bool]:
+    def on_app_terminating(self):
         pass
 
     @override
-    def on_app_low_memory(self) -> Optional[bool]:
+    def on_app_low_memory(self):
         pass
 
     @override
-    def on_app_will_enter_background(self) -> Optional[bool]:
+    def on_app_will_enter_background(self):
         pass
 
     @override
-    def on_app_did_enter_background(self) -> Optional[bool]:
+    def on_app_did_enter_background(self):
         pass
 
     @override
-    def on_app_will_enter_foreground(self) -> Optional[bool]:
+    def on_app_will_enter_foreground(self):
         pass
 
     @override
-    def on_app_did_enter_foreground(self) -> Optional[bool]:
+    def on_app_did_enter_foreground(self):
         pass

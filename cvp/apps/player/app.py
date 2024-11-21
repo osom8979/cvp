@@ -24,6 +24,7 @@ from cvp.imgui.styles import default_style_colors
 from cvp.logging.logging import event_logger, logger, msg_logger, profile_logger
 from cvp.logging.profile import ProfileLogging
 from cvp.msgs.msg import Msg
+from cvp.msgs.msg_type import MsgType
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.renderer import PygameRenderer
 from cvp.renderer.window.mapper import WindowMapper
@@ -296,14 +297,18 @@ class PlayerApplication:
         self._renderer.do_event(event)
 
     def on_msg(self, msg: Msg) -> None:
-        msg_logger.debug(f"Msg {msg.name} uuid={msg.uuid}, data={msg.data}")
+        name = msg.get_type_name()
+        uuid = msg.uuid
+        args = msg.as_args()
+        msg_logger.debug(f"<Msg {name} {uuid}> {args}")
 
         consumed_msg = self._windows.do_msg(msg)
         if not consumed_msg:
             self.on_msg_fallback(msg)
 
     def on_msg_fallback(self, msg: Msg) -> None:
-        pass
+        if msg.mtype == MsgType.toast:
+            print(msg)
 
     def on_keyboard_shortcut(self, keys: ScancodeWrapper) -> None:
         if keys[pygame.K_LCTRL] and keys[pygame.K_q]:

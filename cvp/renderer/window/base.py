@@ -329,6 +329,9 @@ class WindowBase(
     def update_msg_map(self, obj: Any, cls: type) -> None:
         self._msgs.update(create_msg_map(obj, cls))
 
+    def toast(self, message: str) -> None:
+        self._context.mq.append_toast(message)
+
     def do_create(self) -> None:
         if self._initialized:
             raise ValueError("Already initialized window instance")
@@ -375,7 +378,7 @@ class WindowBase(
         if bool(self.on_msg(msg)):
             return True
 
-        return self._msgs[get_msg_type_number(msg.type)](msg)
+        return self._msgs[get_msg_type_number(msg.mtype)](msg)
 
     def do_appeared(self) -> None:
         if self._appeared:

@@ -13,5 +13,5 @@ def get_msg_type(func) -> Optional[int]:
     return getattr(func, MSG_TYPE_ATTR_NAME, None)
 
 
-def set_msg_type(func, event_type: int) -> None:
-    setattr(func, MSG_TYPE_ATTR_NAME, event_type)
+def set_msg_type(func, mtype: int) -> None:
+    setattr(func, MSG_TYPE_ATTR_NAME, mtype)
