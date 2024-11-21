@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# https://easings.net/
 
 from math import cos, pi, pow, sin, sqrt
 from typing import Callable, Final
