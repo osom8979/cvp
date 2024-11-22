@@ -309,19 +309,19 @@ class WindowBase(
 
     @override
     def on_shown(self):
-        pass
+        logger.debug(f"{repr(self)} Empty shown event")
 
     @override
     def on_hidden(self):
-        pass
+        logger.debug(f"{repr(self)} Empty hidden event")
 
     @override
     def on_expanded(self):
-        pass
+        logger.debug(f"{repr(self)} Empty expanded event")
 
     @override
     def on_unexpanded(self):
-        pass
+        logger.debug(f"{repr(self)} Empty unexpanded event")
 
     @override
     def on_event(self, event: Event) -> Optional[bool]:
@@ -500,34 +500,34 @@ class WindowBase(
         self.on_before()
         try:
             expanded, opened = self.begin()
-            try:
-                self._query.update()
+            self._query.update(expanded, opened)
 
-                if imgui.is_window_appearing():
+            try:
+                if self._query.appearing:
                     set_window_min_size(self._min_width, self._min_height)
                     self.do_appeared()
 
-                if imgui.is_window_focused(imgui.FOCUS_ROOT_AND_CHILD_WINDOWS):
+                if self._query.focused:
                     self.do_focused()
                 else:
                     self.do_unfocused()
 
-                if imgui.is_window_hovered(imgui.HOVERED_ROOT_AND_CHILD_WINDOWS):
+                if self._query.hovered:
                     self.do_hovered()
                 else:
                     self.do_unhovered()
 
-                if opened:
+                if self._query.opened:
                     self.do_shown()
                 else:
                     self.do_hidden()
                     self.opened = False
                     return
 
-                if expanded:
-                    self.on_expanded()
+                if self._query.expanded:
+                    self.do_expanded()
                 else:
-                    self.on_unexpanded()
+                    self.do_unexpanded()
                     return
 
                 self.on_process()
