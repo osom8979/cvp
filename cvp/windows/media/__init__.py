@@ -110,5 +110,5 @@ class MediaManager(ManagerTabs[MediaManagerConfig, MediaWindowConfig]):
         assert selected_menu is not None
 
         uuid = selected_menu.uuid
-        self._windows[uuid].set_removable()
+        self._windows.set_removable(uuid)
         self.context.config.remove_media_window(uuid)

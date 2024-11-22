@@ -78,6 +78,8 @@ class WindowBase(
         self._appeared = False
         self._focused = False
         self._hovered = False
+        self._shown = False
+        self._expanded = False
 
     def _has_flag(self, flag: int) -> bool:
         return bool(self.flags & flag)
@@ -306,6 +308,22 @@ class WindowBase(
         logger.debug(f"{repr(self)} Empty unhovered event")
 
     @override
+    def on_shown(self):
+        pass
+
+    @override
+    def on_hidden(self):
+        pass
+
+    @override
+    def on_expanded(self):
+        pass
+
+    @override
+    def on_unexpanded(self):
+        pass
+
+    @override
     def on_event(self, event: Event) -> Optional[bool]:
         pass
 
@@ -438,6 +456,36 @@ class WindowBase(
         self._hovered = False
         self.on_unhovered()
 
+    def do_shown(self) -> None:
+        if self._shown:
+            return
+        self._shown = True
+        self.on_shown()
+
+    def do_hidden(self) -> None:
+        if not self._shown:
+            return
+        self._shown = False
+        self.on_hidden()
+
+    def do_expanded(self) -> None:
+        if self._expanded:
+            return
+        self._expanded = True
+        self.on_expanded()
+
+    def do_unexpanded(self) -> None:
+        if not self._expanded:
+            return
+        self._expanded = False
+        self.on_unexpanded()
+
+    def do_popup_process(self):
+        for popup in self._popups.values():
+            result = popup.do_process()
+            if result is not None:
+                self.on_popup(popup, result)
+
     def do_process(self) -> None:
         if not self._initialized:
             raise ValueError("The window instance is not initialized")
@@ -446,45 +494,46 @@ class WindowBase(
             self.do_disappeared()
             self.do_unfocused()
             self.do_unhovered()
+            self.do_hidden()
             return
 
         self.on_before()
         try:
-            self._process_main()
+            expanded, opened = self.begin()
+            try:
+                self._query.update()
+
+                if imgui.is_window_appearing():
+                    set_window_min_size(self._min_width, self._min_height)
+                    self.do_appeared()
+
+                if imgui.is_window_focused(imgui.FOCUS_ROOT_AND_CHILD_WINDOWS):
+                    self.do_focused()
+                else:
+                    self.do_unfocused()
+
+                if imgui.is_window_hovered(imgui.HOVERED_ROOT_AND_CHILD_WINDOWS):
+                    self.do_hovered()
+                else:
+                    self.do_unhovered()
+
+                if opened:
+                    self.do_shown()
+                else:
+                    self.do_hidden()
+                    self.opened = False
+                    return
+
+                if expanded:
+                    self.on_expanded()
+                else:
+                    self.on_unexpanded()
+                    return
+
+                self.on_process()
+            finally:
+                self.end()
+
+            self.do_popup_process()
         finally:
             self.on_after()
-
-    def _process_main(self) -> None:
-        expanded, opened = self.begin()
-        try:
-            self._query.update()
-
-            if imgui.is_window_appearing():
-                set_window_min_size(self._min_width, self._min_height)
-                self.do_appeared()
-
-            if imgui.is_window_focused(imgui.FOCUS_ROOT_AND_CHILD_WINDOWS):
-                self.do_focused()
-            else:
-                self.do_unfocused()
-
-            if imgui.is_window_hovered(imgui.HOVERED_ROOT_AND_CHILD_WINDOWS):
-                self.do_hovered()
-            else:
-                self.do_unhovered()
-
-            if not opened:
-                self.opened = False
-                return
-
-            if not expanded:
-                return
-
-            self.on_process()
-        finally:
-            self.end()
-
-        for popup in self._popups.values():
-            popup_result = popup.do_process()
-            if popup_result is not None:
-                self.on_popup(popup, popup_result)

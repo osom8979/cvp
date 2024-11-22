@@ -13,6 +13,9 @@ from cvp.renderer.window.base import WindowBase
 
 
 class WindowMapper(OrderedDict[str, WindowBase]):
+    def set_removable(self, uuid: str) -> None:
+        self.__getitem__(uuid).set_removable()
+
     def add_window(
         self,
         window: WindowBase,
