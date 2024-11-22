@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from typing import Optional
+from typing import List, Optional, Sequence
 
 from pygame.event import Event
 
+from cvp.itertools.find_index import NOT_FOUND_INDEX, find_index
 from cvp.msgs.msg import Msg
 from cvp.pygame.constants.event_type import KEY_EVENTS
 from cvp.pygame.constants.keycode import Keycode
@@ -34,7 +35,29 @@ class WindowMapper(OrderedDict[str, WindowBase]):
 
         self.__setitem__(key, window)
 
-    def add_windows(self, *windows: WindowBase, no_create=False) -> None:
+    @staticmethod
+    def reorder_windows(
+        windows: Sequence[WindowBase],
+        begin_order: List[str],
+    ) -> List[WindowBase]:
+        remain_windows = list(windows)
+        ordered_windows = list()
+        for key in begin_order:
+            index = find_index(remain_windows, lambda w: w.key == key)
+            if index != NOT_FOUND_INDEX:
+                ordered_windows.append(remain_windows.pop(index))
+        ordered_windows.extend(remain_windows)
+        ordered_windows.reverse()
+        return ordered_windows
+
+    def add_windows(
+        self,
+        *windows: WindowBase,
+        no_create=False,
+        begin_order: Optional[List[str]] = None,
+    ) -> None:
+        if begin_order:
+            windows = tuple(self.reorder_windows(windows, begin_order))
         for window in windows:
             self.add_window(window, no_create=no_create)
 

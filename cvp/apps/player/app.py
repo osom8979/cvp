@@ -240,6 +240,7 @@ class PlayerApplication:
             self._toast,
             self._window_manager,
             self._wsd_manager,
+            begin_order=self._context.config.window_manager.begin_order,
         )
 
     def on_exit(self) -> None:
