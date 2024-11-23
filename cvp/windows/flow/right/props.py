@@ -104,5 +104,5 @@ class PropsTab(TabItem[str]):
         graph = self.context.fm.current_graph
         assert graph is not None
 
-        input_text_disabled("Type", "-")
+        input_text_disabled("Type", "Node")
         input_text_disabled("Key", item)

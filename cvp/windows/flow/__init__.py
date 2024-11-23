@@ -7,6 +7,7 @@ import imgui
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
+from cvp.flow.datas import Node
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.draw_list import get_window_draw_list
@@ -82,6 +83,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._prev_cursor = None
         self._graph_path = str()
         self._node_path = str()
+        self._node: Optional[Node] = None
 
         self._clear_color = 0.5, 0.5, 0.5, 1.0
         self._background = None
@@ -362,6 +364,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 img_color,
             )
 
+        left_clicked = self.is_mouse_left_button_clicked()
+        hovering_canvas = imgui.is_mouse_hovering_rect(cx, cy, cx + cw, cy + ch)
+        select_node: Optional[Node] = None
+
         for node in graph.nodes:
             node_roi = self._control.world_to_screen_roi(node.roi, canvas_pos)
             x1, y1, x2, y2 = node_roi
@@ -372,6 +378,27 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             node_color = imgui.get_color_u32_rgba(*node.color)
             draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
             draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)
+
+            hovering = imgui.is_mouse_hovering_rect(x1, y1, x2, y2)
+            if hovering:
+                select_node = node
+
+        if left_clicked:
+            if select_node is not None:
+                self._node = select_node
+                self._node_path = select_node.name
+            elif hovering_canvas:
+                self._node = None
+                self._node_path = str()
+
+        if self._node is not None:
+            node_roi = self._control.world_to_screen_roi(self._node.roi, canvas_pos)
+            x1, y1, x2, y2 = node_roi
+            rounding = self._node.rounding
+            flags = self._node.flags
+            thickness = self._node.thickness + 1
+            select_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
+            draw_list.add_rect(x1, y1, x2, y2, select_color, rounding, flags, thickness)
 
         # for arc in graph.arcs:
         #     pass

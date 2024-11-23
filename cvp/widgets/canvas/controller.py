@@ -197,7 +197,7 @@ class CanvasController(WidgetInterface):
         self,
         cursor_screen_pos: Optional[Tuple[float, float]] = None,
         content_region_available: Optional[Tuple[float, float]] = None,
-        pan_button=imgui.MOUSE_BUTTON_MIDDLE,
+        pan_button=imgui.MOUSE_BUTTON_RIGHT,
         has_context_menu=False,
     ) -> None:
         if cursor_screen_pos is None:
