@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 from cvp.config.sections.bases.window import WindowConfig
+from cvp.logging.logging import DEBUG, ERROR, INFO, NOTSET, WARNING
 from cvp.palette.basic import LIME, RED, WHITE, YELLOW
 from cvp.types.colors import RGB
 
@@ -66,3 +67,15 @@ class ToastWindowConfig(WindowConfig):
     def padding(self, value: Tuple[float, float]) -> None:
         self.padding_x = value[0]
         self.padding_y = value[1]
+
+    def get_level_color(self, level: int) -> RGB:
+        if WARNING < level <= ERROR:
+            return self.error_color
+        elif INFO < level <= WARNING:
+            return self.warning_color
+        elif DEBUG < level <= INFO:
+            return self.normal_color
+        elif NOTSET < level <= DEBUG:
+            return self.success_color
+        else:
+            raise ValueError(f"Invalid level {level}")
