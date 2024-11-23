@@ -13,7 +13,7 @@ from cvp.imgui.draw_list import get_window_draw_list
 from cvp.imgui.font import Font
 from cvp.imgui.font_manager import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.imgui.slider_float import slider_float
 from cvp.imgui.text_centered import text_centered
 from cvp.types.colors import RGBA

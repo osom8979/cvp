@@ -3,7 +3,7 @@
 import imgui
 
 
-def button_ex(label: str, width=0.0, height=0.0, disabled=False) -> bool:
+def button(label: str, width=0.0, height=0.0, disabled=False) -> bool:
     if disabled:
         imgui.push_style_var(imgui.STYLE_ALPHA, imgui.get_style().alpha * 0.5)
 

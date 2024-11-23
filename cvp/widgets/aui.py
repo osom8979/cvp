@@ -10,7 +10,7 @@ from cvp.config.sections.proxies.aui import AuiBottomProxy, AuiLeftProxy, AuiRig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.cursor import cursor_pos_y
-from cvp.imgui.styles import style_item_spacing, style_window_padding
+from cvp.imgui.push_style_var import style_item_spacing, style_window_padding
 from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
 from cvp.variables import (

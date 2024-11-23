@@ -6,9 +6,9 @@ from typing import Final, Optional, Tuple
 import imgui
 
 from cvp.flow.datas import Canvas
-from cvp.imgui.drag_float import drag_float2
+from cvp.imgui.drag_float2 import drag_float2
+from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
-from cvp.imgui.style_disable_input import style_disable_input
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.override import override
 from cvp.types.shapes import ROI, Point

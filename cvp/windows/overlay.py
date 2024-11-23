@@ -11,7 +11,7 @@ from cvp.imgui.begin_popup_context_window import (
     begin_popup_context_window,
     end_popup_context_window,
 )
-from cvp.imgui.menu_item_ex import menu_item_ex
+from cvp.imgui.menu_item_ex import menu_item
 from cvp.renderer.window.base import WindowBase
 from cvp.system.usage import SystemUsage
 from cvp.types.colors import RGBA
@@ -106,16 +106,16 @@ class OverlayWindow(WindowBase[OverlayWindowConfig]):
                 end_popup_context_window()
 
     def on_popup_context_window(self) -> None:
-        if menu_item_ex("Top-Left", self.window_config.is_top_left):
+        if menu_item("Top-Left", self.window_config.is_top_left):
             self.window_config.set_top_left()
-        if menu_item_ex("Top-Right", self.window_config.is_top_right):
+        if menu_item("Top-Right", self.window_config.is_top_right):
             self.window_config.set_top_right()
-        if menu_item_ex("Bottom-Left", self.window_config.is_bottom_left):
+        if menu_item("Bottom-Left", self.window_config.is_bottom_left):
             self.window_config.set_bottom_left()
-        if menu_item_ex("Bottom-Right", self.window_config.is_bottom_right):
+        if menu_item("Bottom-Right", self.window_config.is_bottom_right):
             self.window_config.set_bottom_right()
 
         imgui.separator()
 
-        if menu_item_ex("Close"):
+        if menu_item("Close"):
             self.opened = False

@@ -23,10 +23,11 @@ class MenuItemResult(NamedTuple):
         return self.clicked
 
 
-def menu_item_ex(
+def menu_item(
     label: str,
     selected=False,
     shortcut: Optional[str] = None,
     enabled=True,
 ):
-    return MenuItemResult.from_raw(imgui.menu_item(label, shortcut, selected, enabled))
+    result = imgui.menu_item(label, shortcut, selected, enabled)
+    return MenuItemResult.from_raw(result)

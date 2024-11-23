@@ -8,9 +8,9 @@ from wsdiscovery import WSDiscovery
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.input_text_disabled import input_text_disabled
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
 from cvp.types.override import override
@@ -95,11 +95,11 @@ class WsdManager(Manager[WsdManagerConfig, WsdConfig]):
 
     @override
     def on_process_sidebar_top(self) -> None:
-        if button_ex("Discovery", disabled=self._wsd_running):
+        if button("Discovery", disabled=self._wsd_running):
             self.run_discovery()
         imgui.same_line()
         selected_menu = self.latest_menus.get(self.selected)
-        if button_ex("Remove", disabled=selected_menu is None):
+        if button("Remove", disabled=selected_menu is None):
             self._confirm_remove.show()
 
     @override

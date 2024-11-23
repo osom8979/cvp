@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.context.context import Context
-from cvp.imgui.styles import DefaultStyles, style_colors
+from cvp.imgui.push_style_var import DefaultStyles, style_colors
 from cvp.logging.logging import logger
 from cvp.types.override import override
 from cvp.windows.preference._base import PreferenceWidget

@@ -6,7 +6,7 @@ import imgui
 
 from cvp.config.sections.layout import LayoutConfig, LayoutManagerConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.popups.confirm import ConfirmPopup
 from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
@@ -46,7 +46,7 @@ class LayoutManager(ManagerTabs[LayoutManagerConfig, LayoutConfig]):
             self.context.config.layouts.append(config)
         imgui.same_line()
         selected_menu = self.latest_menus.get(self.selected)
-        if button_ex("Remove", disabled=selected_menu is None):
+        if button("Remove", disabled=selected_menu is None):
             self._confirm_remove.show()
 
     def on_confirm_remove(self, value: bool) -> None:

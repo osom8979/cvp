@@ -18,7 +18,7 @@ from logging import getLogger
 from logging.handlers import TimedRotatingFileHandler
 from os import PathLike
 from sys import stdout
-from typing import Optional, Union
+from typing import Final, Optional, Sequence, Union
 
 from cvp.logging.variables import (
     CVP_DOWNLOAD_LOGGER_NAME,
@@ -52,17 +52,19 @@ widgets_logger = getLogger(CVP_WIDGETS_LOGGER_NAME)
 worker_logger = getLogger(CVP_WORKER_LOGGER_NAME)
 wsdl_logger = getLogger(CVP_WSDL_LOGGER_NAME)
 
-SEVERITY_NAME_CRITICAL = "critical"
-SEVERITY_NAME_FATAL = "fatal"
-SEVERITY_NAME_ERROR = "error"
-SEVERITY_NAME_WARNING = "warning"
-SEVERITY_NAME_WARN = "warn"
-SEVERITY_NAME_INFO = "info"
-SEVERITY_NAME_DEBUG = "debug"
-SEVERITY_NAME_NOTSET = "notset"
-SEVERITY_NAME_OFF = "off"
+OFF: Final[int] = CRITICAL + 100
 
-SEVERITIES = (
+SEVERITY_NAME_CRITICAL: Final[str] = "critical"
+SEVERITY_NAME_FATAL: Final[str] = "fatal"
+SEVERITY_NAME_ERROR: Final[str] = "error"
+SEVERITY_NAME_WARNING: Final[str] = "warning"
+SEVERITY_NAME_WARN: Final[str] = "warn"
+SEVERITY_NAME_INFO: Final[str] = "info"
+SEVERITY_NAME_DEBUG: Final[str] = "debug"
+SEVERITY_NAME_NOTSET: Final[str] = "notset"
+SEVERITY_NAME_OFF: Final[str] = "off"
+
+SEVERITIES: Final[Sequence[str]] = (
     SEVERITY_NAME_CRITICAL,
     SEVERITY_NAME_FATAL,
     SEVERITY_NAME_ERROR,
@@ -98,7 +100,7 @@ def convert_level_number(level: Optional[Union[str, int]] = None) -> int:
         elif ll == SEVERITY_NAME_NOTSET:
             return NOTSET
         elif ll == SEVERITY_NAME_OFF:
-            return CRITICAL + 100
+            return OFF
         else:
             try:
                 return int(ll)

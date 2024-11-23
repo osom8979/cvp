@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable, Mapping, Optional
 import imgui
 import pygame
 
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.renderer.popup.base import PopupBase
 from cvp.types.override import override
 
@@ -71,13 +71,13 @@ class ProgressPopup(PopupBase[None]):
             imgui.close_current_popup()
             return None
 
-        if button_ex(self.cancel_button_label, disabled=self.completed):
+        if button(self.cancel_button_label, disabled=self.completed):
             imgui.close_current_popup()
             return None
 
         imgui.same_line()
 
-        if button_ex(self.close_button_label, disabled=not self.completed):
+        if button(self.close_button_label, disabled=not self.completed):
             imgui.close_current_popup()
             return None
 

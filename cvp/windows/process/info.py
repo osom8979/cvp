@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.process.process import Process
 from cvp.types.override import override
@@ -32,11 +32,11 @@ class ProcessInfoTab(TabItem[Process]):
         stoppable = self.context.pm.stoppable(key)
         removable = self.context.pm.removable(key)
 
-        if button_ex("Spawn", disabled=not spawnable):
+        if button("Spawn", disabled=not spawnable):
             pass
         imgui.same_line()
-        if button_ex("Stop", disabled=not stoppable):
+        if button("Stop", disabled=not stoppable):
             self.context.pm.interrupt(key)
         imgui.same_line()
-        if button_ex("Remove", disabled=not removable):
+        if button("Remove", disabled=not removable):
             self.context.pm.pop(key)

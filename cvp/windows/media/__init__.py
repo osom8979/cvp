@@ -8,7 +8,7 @@ import imgui
 from cvp.config.sections.media import MediaManagerConfig, MediaWindowConfig
 from cvp.config.sections.media import Mode as MediaSectionMode
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -75,7 +75,7 @@ class MediaManager(ManagerTabs[MediaManagerConfig, MediaWindowConfig]):
             self._open_url_popup.show()
         imgui.same_line()
         selected_menu = self.latest_menus.get(self.selected)
-        if button_ex("Remove", disabled=selected_menu is None):
+        if button("Remove", disabled=selected_menu is None):
             self._confirm_remove.show()
 
     @override

@@ -4,8 +4,8 @@ import imgui
 
 from cvp.context.context import Context
 from cvp.flow.path import PATH_SEPARATOR
-from cvp.imgui.drag_type import DRAG_FLOW_GRAPH_TYPE as DRAG_GRAPH
-from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE as DRAG_NODE
+from cvp.imgui.drag_types import DRAG_FLOW_GRAPH_TYPE as DRAG_GRAPH
+from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE as DRAG_NODE
 from cvp.imgui.indent import indent
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.override import override

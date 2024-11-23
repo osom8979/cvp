@@ -6,7 +6,7 @@ import imgui
 
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
@@ -41,12 +41,12 @@ class OnvifServiceTab(TabItem[OnvifConfig]):
         has_error = bool(self._update_runner.error)
         disabled_clear = not has_service or update_running
 
-        if button_ex("Update ONVIF Service", disabled=update_running):
+        if button("Update ONVIF Service", disabled=update_running):
             assert not update_running
             self._update_runner(item)
 
         imgui.same_line()
-        if button_ex("Remove ONVIF Service", disabled=disabled_clear):
+        if button("Remove ONVIF Service", disabled=disabled_clear):
             assert has_service
             assert not update_running
             self.context.om.pop(item.uuid)

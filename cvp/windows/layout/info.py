@@ -6,9 +6,9 @@ import imgui
 
 from cvp.config.sections.layout import LayoutConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.input_text_disabled import input_text_disabled
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.renderer.window.mapper import WindowMapper
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
@@ -58,13 +58,13 @@ class LayoutInfoTab(TabItem[LayoutConfig]):
 
         has_layout = self.has_layout(item)
 
-        if button_ex("Save"):
+        if button("Save"):
             self.save_layout(item)
         imgui.same_line()
-        if button_ex("Load", disabled=not has_layout):
+        if button("Load", disabled=not has_layout):
             self.load_layout(item)
         imgui.same_line()
-        if button_ex("Remove", disabled=not has_layout):
+        if button("Remove", disabled=not has_layout):
             self.remove_layout(item)
 
         if has_layout:

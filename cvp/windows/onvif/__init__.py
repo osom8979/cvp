@@ -6,7 +6,7 @@ import imgui
 
 from cvp.config.sections.onvif import OnvifConfig, OnvifManagerConfig
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.types.override import override
@@ -59,7 +59,7 @@ class OnvifManager(ManagerTabs[OnvifManagerConfig, OnvifConfig]):
             self._open_url_popup.show()
         imgui.same_line()
         selected_menu = self.latest_menus.get(self.selected)
-        if button_ex("Remove", disabled=selected_menu is None):
+        if button("Remove", disabled=selected_menu is None):
             self._confirm_remove.show()
 
     def on_open_url_popup(self, url: str) -> None:

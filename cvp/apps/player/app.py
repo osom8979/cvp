@@ -20,7 +20,7 @@ from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProx
 from cvp.context.autofixer import AutoFixer
 from cvp.context.context import Context
 from cvp.imgui.font_manager import FontMapper
-from cvp.imgui.styles import default_style_colors
+from cvp.imgui.push_style_var import default_style_colors
 from cvp.logging.logging import event_logger, logger, msg_logger, profile_logger
 from cvp.logging.profile import ProfileLogging
 from cvp.msgs.msg import Msg

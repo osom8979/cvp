@@ -9,7 +9,7 @@ import imgui
 import pygame
 
 from cvp.imgui.begin_child import begin_child
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.footer_height_to_reserve import footer_height_to_reserve
 from cvp.imgui.set_window_min_size import set_window_min_size
 from cvp.logging.logging import logger
@@ -150,7 +150,7 @@ class OpenFilePopup(PopupBase[str]):
         select_dir = os.path.isdir(self._selected)
         enabled_open = select_file or select_dir
 
-        if button_ex(self._open_button_label, disabled=not enabled_open):
+        if button(self._open_button_label, disabled=not enabled_open):
             if select_file:
                 imgui.close_current_popup()
                 return self._selected

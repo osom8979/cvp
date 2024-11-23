@@ -7,7 +7,7 @@ import imgui
 
 from cvp.config.sections.proxies.ffmpeg import FFmpegProxy, FFprobeProxy
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.patterns.proxy import ValueProxy
 from cvp.popups.open_file import OpenFilePopup
 from cvp.renderer.popup.base import PopupBase
@@ -100,16 +100,16 @@ class ExeItem(TabItem, PopupPropagator):
 
         imgui.same_line()
         which_path = which(self._filename)
-        if button_ex("Which", disabled=not which_path):
+        if button("Which", disabled=not which_path):
             assert isinstance(which_path, str)
             self.exe_path = which_path
 
         imgui.same_line()
-        if button_ex("Cache"):
+        if button("Cache"):
             pass
 
         imgui.same_line()
-        if button_ex("Browse"):
+        if button("Browse"):
             self._browser.show()
 
         imgui.separator()
@@ -133,7 +133,7 @@ class ExeItem(TabItem, PopupPropagator):
         imgui.text("URL:")
         imgui.text_unformatted(down.url)
 
-        if button_ex("Download Archive", disabled=self._runner is not None):
+        if button("Download Archive", disabled=self._runner is not None):
             self._runner = self.context.start_download_thread(down, 30.0, True)
 
         if self._runner is not None:

@@ -3,13 +3,23 @@
 from collections import deque
 from dataclasses import dataclass
 from time import time
-from typing import Deque, Final, Tuple
+from typing import Deque, Final, Optional, Union
 
 import imgui
 
 from cvp.config.sections.toast import ToastWindowConfig
 from cvp.context.context import Context
+from cvp.imgui.draw_list import get_foreground_draw_list
+from cvp.logging.logging import (
+    DEBUG,
+    ERROR,
+    INFO,
+    NOTSET,
+    WARNING,
+    convert_level_number,
+)
 from cvp.renderer.window.base import WindowBase
+from cvp.types.colors import RGB
 from cvp.types.override import override
 
 TOAST_WINDOW_FLAGS: Final[int] = (
@@ -19,12 +29,16 @@ TOAST_WINDOW_FLAGS: Final[int] = (
     | imgui.WINDOW_NO_MOVE
     | imgui.WINDOW_NO_NAV
     | imgui.WINDOW_UNSAVED_DOCUMENT
+    | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS
+    | imgui.WINDOW_NO_FOCUS_ON_APPEARING
+    | imgui.WINDOW_NO_INPUTS
 )
 
 
 @dataclass
 class ToastItem:
     message: str
+    level: Optional[Union[str, int]] = None
 
 
 class ToastWindow(WindowBase[ToastWindowConfig]):
@@ -41,9 +55,20 @@ class ToastWindow(WindowBase[ToastWindowConfig]):
         self._items = deque()
         self._begin = time()
 
-    def show_toast(self, item: ToastItem) -> None:
-        self._items.append(item)
+    def reset_timer(self) -> None:
         self._begin = time()
+
+    def pop_item(self) -> None:
+        if not self._items:
+            return
+        self._items.pop()
+        self.reset_timer()
+
+    def show_toast(self, item: ToastItem) -> None:
+        if not self._items:
+            self.reset_timer()
+
+        self._items.append(item)
         self.opened = True
 
     def show_simple(self, message: str) -> None:
@@ -70,60 +95,29 @@ class ToastWindow(WindowBase[ToastWindowConfig]):
         elif elapsed <= self.fadein + self.waiting + self.fadeout:
             return 1.0 - (elapsed - self.fadein - self.waiting) / self.fadeout
         else:
-            return -1.0
+            raise ValueError("Exceeded fadeout range")
 
-    @property
-    def window_position(self) -> Tuple[float, float]:
-        viewport = imgui.get_main_viewport()
-        work_pos = viewport.work_pos  # Use work area to avoid menu-bar/task-bar, if any
-        work_size = viewport.work_size
-        work_pos_x, work_pos_y = work_pos
-        work_size_x, work_size_y = work_size
+    def get_level_color(self, level: Optional[Union[str, int]] = None) -> RGB:
+        if level is None:
+            return self.window_config.normal_color
 
-        margin_x = self.window_config.margin_x
-        margin_y = self.window_config.margin_y
+        level = convert_level_number(level)
+        assert isinstance(level, int)
 
-        work_pos_x += margin_x
-        work_pos_y += margin_y
-        work_size_x -= margin_x * 2
-        work_size_y -= margin_y * 2
-
-        anchor_x = self.window_config.anchor_x
-        anchor_y = self.window_config.anchor_y
-
-        x = work_pos_x + work_size_x * anchor_x
-        y = work_pos_y + work_size_y * anchor_y
-        return x, y
+        if WARNING < level <= ERROR:
+            return self.window_config.error_color
+        elif INFO < level <= WARNING:
+            return self.window_config.warning_color
+        elif DEBUG < level <= INFO:
+            return self.window_config.normal_color
+        elif NOTSET < level <= DEBUG:
+            return self.window_config.success_color
+        else:
+            raise ValueError(f"Invalid level {level}")
 
     @override
     def on_before(self) -> None:
-        rounding = self.window_config.rounding
-        imgui.push_style_var(imgui.STYLE_WINDOW_ROUNDING, rounding)
-
-        padding_x = self.window_config.padding_x
-        padding_y = self.window_config.padding_y
-        imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (padding_x, padding_y))
-
-        background_color = self.window_config.background_color
-        imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, *background_color)
-
-        pos_x, pos_y = self.window_position
-        pivot_x = self.window_config.pivot_x
-        pivot_y = self.window_config.pivot_y
-        imgui.set_next_window_position(pos_x, pos_y, imgui.ALWAYS, pivot_x, pivot_y)
-
-        alpha = self.update_alpha(time())
-        if 0 <= alpha:
-            imgui.set_next_window_bg_alpha(alpha)
-        else:
-            assert alpha < 0
-            if self._items:
-                self._items.pop()
-
-    @override
-    def on_after(self) -> None:
-        imgui.pop_style_color()
-        imgui.pop_style_var(2)
+        imgui.set_next_window_bg_alpha(0)
 
     @override
     def on_process(self) -> None:
@@ -131,8 +125,72 @@ class ToastWindow(WindowBase[ToastWindowConfig]):
             self.opened = False
             return
 
-        item = self._items[0]
-        imgui.text(item.message)
+        try:
+            alpha = self.update_alpha(time())
+        except ValueError:
+            self.pop_item()
+            return
 
-        if self.is_mouse_left_button_clicked():
-            self._items.pop()
+        current_item = self._items[0]
+        message = current_item.message
+        level = current_item.level
+
+        br, bg, bb = self._window_config.background_color
+        assert isinstance(br, float)
+        assert isinstance(bg, float)
+        assert isinstance(bb, float)
+        background_color = imgui.get_color_u32_rgba(br, bg, bb, alpha)
+
+        fr, fg, fb = self.get_level_color(level)
+        assert isinstance(fr, float)
+        assert isinstance(fg, float)
+        assert isinstance(fb, float)
+        foreground_color = imgui.get_color_u32_rgba(fr, fg, fb, alpha)
+
+        pivot_x = self.window_config.pivot_x
+        pivot_y = self.window_config.pivot_y
+        anchor_x = self.window_config.anchor_x
+        anchor_y = self.window_config.anchor_y
+        margin_x = self.window_config.margin_x
+        margin_y = self.window_config.margin_y
+        padding_x = self.window_config.padding_x
+        padding_y = self.window_config.padding_y
+        rounding = self.window_config.rounding
+
+        viewport = imgui.get_main_viewport()
+        work_pos = viewport.work_pos  # Use work area to avoid menu-bar/task-bar, if any
+        work_size = viewport.work_size
+        work_pos_x, work_pos_y = work_pos
+        work_size_x, work_size_y = work_size
+
+        canvas_pos_x = work_pos_x + margin_x
+        canvas_pos_y = work_pos_y + margin_y
+        canvas_size_x = work_size_x - margin_x * 2
+        canvas_size_y = work_size_y - margin_y * 2
+
+        text_width, text_height = imgui.calc_text_size(message)
+        assert isinstance(text_width, float)
+        assert isinstance(text_height, float)
+        window_size_x = text_width + padding_x * 2
+        window_size_y = text_height + padding_y * 2
+
+        x1 = canvas_pos_x + (canvas_size_x * anchor_x) - (window_size_x * pivot_x)
+        y1 = canvas_pos_y + (canvas_size_y * anchor_y) - (window_size_y * pivot_y)
+        x2 = x1 + window_size_x
+        y2 = y1 + window_size_y
+        draw_list = get_foreground_draw_list()
+        draw_list.add_rect_filled(x1, y1, x2, y2, background_color, rounding)
+
+        text_x = x1 + padding_x
+        text_y = y1 + padding_x
+        draw_list.add_text(text_x, text_y, foreground_color, message)
+
+        mx, my = imgui.get_mouse_pos()
+        assert isinstance(mx, float)
+        assert isinstance(my, float)
+
+        hovering = x1 <= mx <= x2 and y1 <= my <= y2
+        clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_LEFT)
+
+        if hovering and clicked:
+            self.pop_item()

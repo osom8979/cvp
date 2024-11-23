@@ -5,9 +5,9 @@ from typing import Callable, Optional
 import imgui
 import pygame
 
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.input_text_value import input_text_value
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.renderer.popup.base import PopupBase
 from cvp.types.override import override
 from cvp.variables import MIN_POPUP_TEXT_INPUT_HEIGHT, MIN_POPUP_TEXT_INPUT_WIDTH
@@ -67,11 +67,11 @@ class InputTextPopup(PopupBase[str]):
             imgui.close_current_popup()
             return None
 
-        if button_ex(self._cancel_button_label):
+        if button(self._cancel_button_label):
             imgui.close_current_popup()
             return None
         imgui.same_line()
-        if button_ex(self._ok_button_label, disabled=not self._text):
+        if button(self._ok_button_label, disabled=not self._text):
             imgui.close_current_popup()
             return self._text
 

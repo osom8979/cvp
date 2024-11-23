@@ -5,10 +5,10 @@ import imgui
 from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
 from cvp.ffmpeg.ffprobe.inspect import inspect_video_frame_size
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.input_text_value import input_text_value
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.logging.logging import logger
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
@@ -51,7 +51,7 @@ class MediaInfoTab(TabItem[MediaWindowConfig]):
         status = self.context.pm.status(item.uuid)
         imgui.text(f"Process ({status})")
 
-        if button_ex("Spawn", disabled=not spawnable):
+        if button("Spawn", disabled=not spawnable):
             self.context.pm.spawn_ffmpeg_with_file(
                 key=item.uuid,
                 file=item.file,
@@ -59,16 +59,16 @@ class MediaInfoTab(TabItem[MediaWindowConfig]):
                 height=item.frame_height,
             )
         imgui.same_line()
-        if button_ex("Stop", disabled=not stoppable):
+        if button("Stop", disabled=not stoppable):
             self.context.pm.interrupt(item.uuid)
         imgui.same_line()
-        if button_ex("Remove", disabled=not removable):
+        if button("Remove", disabled=not removable):
             self.context.pm.pop(item.uuid)
 
         imgui.separator()
         imgui.text("Window visibility")
-        if button_ex("Show", disabled=item.opened):
+        if button("Show", disabled=item.opened):
             item.opened = True
         imgui.same_line()
-        if button_ex("Hide", disabled=not item.opened):
+        if button("Hide", disabled=not item.opened):
             item.opened = False

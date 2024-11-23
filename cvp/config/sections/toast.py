@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import Tuple
 
 from cvp.config.sections.bases.window import WindowConfig
 from cvp.palette.basic import LIME, RED, WHITE, YELLOW
-from cvp.types.colors import RGBA
+from cvp.types.colors import RGB
 
 
 @dataclass
@@ -17,12 +18,51 @@ class ToastWindowConfig(WindowConfig):
     margin_y: float = 12.0
     padding_x: float = 8.0
     padding_y: float = 8.0
+
+    rounding: float = 15.0
+
     fadein: float = 0.5
     fadeout: float = 0.5
     waiting: float = 2.0
-    rounding: float = 15.0
-    background_color: RGBA = field(default_factory=lambda: (0.5, 0.5, 0.5, 1.0))
-    success_color: RGBA = field(default_factory=lambda: (*LIME, 1.0))
-    normal_color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
-    warning_color: RGBA = field(default_factory=lambda: (*YELLOW, 1.0))
-    error_color: RGBA = field(default_factory=lambda: (*RED, 1.0))
+
+    background_color: RGB = 0.5, 0.5, 0.5
+    success_color: RGB = LIME
+    normal_color: RGB = WHITE
+    warning_color: RGB = YELLOW
+    error_color: RGB = RED
+
+    @property
+    def pivot(self) -> Tuple[float, float]:
+        return self.pivot_x, self.pivot_y
+
+    @pivot.setter
+    def pivot(self, value: Tuple[float, float]) -> None:
+        self.pivot_x = value[0]
+        self.pivot_y = value[1]
+
+    @property
+    def anchor(self) -> Tuple[float, float]:
+        return self.anchor_x, self.anchor_y
+
+    @anchor.setter
+    def anchor(self, value: Tuple[float, float]) -> None:
+        self.anchor_x = value[0]
+        self.anchor_y = value[1]
+
+    @property
+    def margin(self) -> Tuple[float, float]:
+        return self.margin_x, self.margin_y
+
+    @margin.setter
+    def margin(self, value: Tuple[float, float]) -> None:
+        self.margin_x = value[0]
+        self.margin_y = value[1]
+
+    @property
+    def padding(self) -> Tuple[float, float]:
+        return self.padding_x, self.padding_y
+
+    @padding.setter
+    def padding(self, value: Tuple[float, float]) -> None:
+        self.padding_x = value[0]
+        self.padding_y = value[1]

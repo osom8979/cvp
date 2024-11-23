@@ -18,6 +18,7 @@ from cvp.windows.preference.ffmpeg import FFmpegPreference
 from cvp.windows.preference.keyring import KeyringPreference
 from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
+from cvp.windows.preference.toast import ToastPreference
 from cvp.windows.preference.wsdl import WsdlPreference
 
 
@@ -39,6 +40,7 @@ class PreferenceManager(Manager[PreferenceManagerConfig, PreferenceWidget]):
             KeyringPreference(context),
             LoggingPreference(context),
             ConcurrencyPreference(context),
+            ToastPreference(context),
             DeveloperPreference(context),
         ]
 

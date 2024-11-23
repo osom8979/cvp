@@ -5,7 +5,7 @@ from typing import Callable, Optional
 import imgui
 import pygame
 
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.renderer.popup.base import PopupBase
 from cvp.types.override import override
 from cvp.variables import MIN_POPUP_CONFIRM_HEIGHT, MIN_POPUP_CONFIRM_WIDTH
@@ -52,11 +52,11 @@ class ConfirmPopup(PopupBase[bool]):
             imgui.close_current_popup()
             return False
 
-        if button_ex(self._cancel_button_label):
+        if button(self._cancel_button_label):
             imgui.close_current_popup()
             return False
         imgui.same_line()
-        if button_ex(self._ok_button_label):
+        if button(self._ok_button_label):
             imgui.close_current_popup()
             return True
 

@@ -9,9 +9,9 @@ import imgui
 from cvp.config.sections.onvif import OnvifConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.clipboard import put_clipboard_text
-from cvp.imgui.item_width import item_width
+from cvp.imgui.push_item_width import item_width
 from cvp.imgui.slider_float import slider_float
 from cvp.onvif.client import OnvifClient
 from cvp.types.override import override
@@ -230,7 +230,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
                 or bool(self._request_runner)
             )
 
-            if button_ex("Request", disabled=disable_request):
+            if button("Request", disabled=disable_request):
                 self._request_runner(operation)
 
             imgui.same_line()
@@ -239,7 +239,7 @@ class OnvifApisTab(TabItem[OnvifConfig]):
             has_cache = operation.has_cache()
             disable_remove_cache = not has_latest and not has_cache
 
-            if button_ex("Remove Cache", disabled=disable_remove_cache):
+            if button("Remove Cache", disabled=disable_remove_cache):
                 if has_latest:
                     operation.clear_latest()
                     has_latest = False

@@ -8,10 +8,10 @@ from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
-from cvp.imgui.drag_type import DRAG_FLOW_NODE_TYPE
+from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.draw_list import get_window_draw_list
-from cvp.imgui.menu_item_ex import menu_item_ex
-from cvp.imgui.styles import style_item_spacing
+from cvp.imgui.menu_item_ex import menu_item
+from cvp.imgui.push_style_var import style_item_spacing
 from cvp.imgui.text_centered import text_centered
 from cvp.logging.logging import logger
 from cvp.popups.confirm import ConfirmPopup
@@ -394,7 +394,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             return
 
         try:
-            if menu_item_ex("Reset"):
+            if menu_item("Reset"):
                 self._control.reset()
         finally:
             imgui.end_popup()

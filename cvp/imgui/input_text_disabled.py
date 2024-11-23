@@ -4,7 +4,7 @@ from typing import Final
 
 import imgui
 
-from cvp.imgui.style_disable_input import (
+from cvp.imgui.push_style_var import (
     DEFAULT_DISABLE_BACKGROUND_COLOR,
     DEFAULT_DISABLE_TEXT_COLOR,
     style_disable_input,

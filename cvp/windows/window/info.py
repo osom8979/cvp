@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.context.context import Context
-from cvp.imgui.button_ex import button_ex
+from cvp.imgui.button import button
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.renderer.window.base import WindowBase
@@ -29,10 +29,10 @@ class WindowInfoTab(TabItem[WindowBase]):
         imgui.separator()
         imgui.text("Visibility:")
 
-        if button_ex("Show", disabled=item.opened):
+        if button("Show", disabled=item.opened):
             item.opened = True
         imgui.same_line()
-        if button_ex("Hide", disabled=not item.opened):
+        if button("Hide", disabled=not item.opened):
             item.opened = False
 
         imgui.separator()

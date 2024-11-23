@@ -9,11 +9,11 @@ def put_clipboard_text(text: str) -> None:
     imgui.set_clipboard_text(text)
 
 
-def get_clipboard_text(text: str) -> str:
+def get_clipboard_text() -> str:
     if result := pygame.scrap.get_text():
         return result
 
-    if result := imgui.set_clipboard_text(text):
+    if result := imgui.get_clipboard_text():
         return result
 
     return str()
