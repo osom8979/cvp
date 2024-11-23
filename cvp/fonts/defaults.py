@@ -14,19 +14,19 @@ from cvp.fonts.ttf import TTF
 
 
 def create_jbm_nl_nfm_r_ttf():
-    return TTF(get_jbm_nl_nfm_r_font_path())
+    return TTF.from_filepath(get_jbm_nl_nfm_r_font_path())
 
 
 def create_mdi_ttf():
-    return TTF(get_mdi_font_path())
+    return TTF.from_filepath(get_mdi_font_path())
 
 
 def create_ngc_ttf():
-    return TTF(get_ngc_font_path())
+    return TTF.from_filepath(get_ngc_font_path())
 
 
 def create_ngc_b_ttf():
-    return TTF(get_ngc_b_font_path())
+    return TTF.from_filepath(get_ngc_b_font_path())
 
 
 def _write_default_font_ranges() -> None:

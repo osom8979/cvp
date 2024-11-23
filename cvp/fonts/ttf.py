@@ -13,15 +13,26 @@ from cvp.variables import CODEPOINT_RANGES_EXTENSION
 
 
 class TTF:
-    path: Path
-    ttf: TTFont
+    def __init__(self, path: Path, ttf: TTFont):
+        self._path = path
+        self._ttf = ttf
 
-    def __init__(self, path: Union[str, PathLike[str]]):
-        self.path = path if isinstance(path, Path) else Path(path)
-        self.ttf = TTFont(self.path)
+    @classmethod
+    def from_filepath(cls, path: Union[str, PathLike[str]]):
+        path = path if isinstance(path, Path) else Path(path)
+        assert isinstance(path, Path)
+        return cls(path, TTFont(path))
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def ttf(self):
+        return self._ttf
 
     def get_character_map(self) -> Dict[int, str]:
-        items = self.ttf["cmap"].getBestCmap().items()
+        items = self._ttf["cmap"].getBestCmap().items()
         return {codepoint: glyph_name for codepoint, glyph_name in items}
 
     def get_codepoints(self, *, sorting=False, reverse=False) -> List[int]:

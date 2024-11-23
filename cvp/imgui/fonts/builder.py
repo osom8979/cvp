@@ -67,7 +67,7 @@ class FontBuilder:
         *,
         size: Optional[int] = None,
     ):
-        ttf = TTF(path)
+        ttf = TTF.from_filepath(path)
 
         if not ranges:
             ranges = ttf.get_glyph_ranges()
