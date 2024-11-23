@@ -8,10 +8,11 @@ import imgui
 # noinspection PyProtectedMember
 from imgui.core import FontConfig, GlyphRanges, _Font
 
+from cvp.fonts.cached_ttf import CachedTTF
 from cvp.fonts.ranges import UNICODE_SINGLE_BLOCK_SIZE, CodepointRange, flatten_ranges
 from cvp.fonts.ttf import TTF
 from cvp.gl.texture import Texture
-from cvp.imgui.fonts.font import Font, FontDetail
+from cvp.imgui.fonts.font import Font
 
 
 def create_glyph_ranges(ranges: List[CodepointRange]) -> GlyphRanges:
@@ -39,7 +40,7 @@ def create_glyph_ranges(ranges: List[CodepointRange]) -> GlyphRanges:
 
 class FontBuilder:
     _font: Optional[_Font]
-    _details: List[FontDetail]
+    _details: List[CachedTTF]
 
     def __init__(self, name: str, size: int):
         self._font = None
@@ -88,7 +89,7 @@ class FontBuilder:
             None if self._font is None else self._merge,
             create_glyph_ranges(ranges),
         )
-        self._details.append(FontDetail(ttf, ranges, size))
+        self._details.append(CachedTTF(ttf, ranges, size))
         return self
 
     @staticmethod

@@ -28,8 +28,15 @@ class TTF:
         return self._path
 
     @property
+    def basename(self):
+        return os.path.basename(self._path)
+
+    @property
     def ttf(self):
         return self._ttf
+
+    def get_best_camp(self) -> Dict[int, str]:
+        return self._ttf.getBestCmap()
 
     def get_character_map(self) -> Dict[int, str]:
         items = self._ttf["cmap"].getBestCmap().items()

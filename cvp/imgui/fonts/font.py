@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
@@ -10,30 +9,13 @@ import imgui
 # noinspection PyProtectedMember
 from imgui.core import _Font
 
-from cvp.fonts.ranges import CodepointRange
+from cvp.fonts.cached_ttf import CachedTTF
 from cvp.fonts.ttf import TTF
 from cvp.gl.texture import Texture
 
 
-@dataclass
-class FontDetail:
-    ttf: TTF
-    ranges: List[CodepointRange]
-    size: int
-
-    def has_codepoint(self, codepoint: int) -> bool:
-        for begin, end in self.ranges:
-            if begin <= codepoint <= end:
-                return True
-        return False
-
-    @property
-    def best_camp(self) -> Dict[int, str]:
-        return self.ttf.ttf.getBestCmap()
-
-
 class CodepointDetail:
-    def __init__(self, codepoint: int, detail: Optional[FontDetail] = None):
+    def __init__(self, codepoint: int, ttf: Optional[TTF] = None):
         self.codepoint = codepoint
         self.character = chr(codepoint)
         self.category = str()
@@ -53,11 +35,11 @@ class CodepointDetail:
         except ValueError:
             pass
 
-        if detail is not None:
+        if ttf is not None:
             self.exists = True
-            self.filepath = str(detail.ttf.path)
-            self.filename = os.path.basename(detail.ttf.path)
-            self.glyph = detail.best_camp.get(codepoint, str())
+            self.filepath = str(ttf.path)
+            self.filename = ttf.basename
+            self.glyph = ttf.get_best_camp().get(codepoint, str())
 
     def __bool__(self):
         return self.exists
@@ -84,7 +66,7 @@ class Font:
     family: str
     size: int
     block_step: int
-    details: List[FontDetail] = field(default_factory=list)
+    details: List[CachedTTF] = field(default_factory=list)
     blocks: List[Tuple[int, int]] = field(default_factory=list)
     texture: Optional[Texture] = None
     codepoints: Dict[int, CodepointDetail] = field(default_factory=dict)
@@ -99,13 +81,13 @@ class Font:
     def __exit__(self, exc_type, exc_val, exc_tb):
         imgui.pop_font()
 
-    def find_font_detail(self, codepoint: int) -> FontDetail:
+    def find_font_detail(self, codepoint: int) -> CachedTTF:
         for detail in self.details:
             if detail.has_codepoint(codepoint):
                 return detail
         raise ValueError(f"Not found codepoint: {codepoint}")
 
-    def get_font_detail(self, codepoint: int) -> Optional[FontDetail]:
+    def get_font_detail(self, codepoint: int) -> Optional[CachedTTF]:
         try:
             return self.find_font_detail(codepoint)
         except ValueError:
@@ -115,7 +97,8 @@ class Font:
         cp_detail = self.codepoints.get(codepoint)
         if cp_detail is None:
             font_detail = self.get_font_detail(codepoint)
-            cp_detail = CodepointDetail(codepoint, font_detail)
+            ttf = font_detail.ttf if font_detail is not None else None
+            cp_detail = CodepointDetail(codepoint, ttf)
             self.codepoints[codepoint] = cp_detail
         return cp_detail
 
