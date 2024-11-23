@@ -8,8 +8,8 @@ from cvp.assets import (
     get_ngc_b_font_path,
     get_ngc_font_path,
 )
-from cvp.imgui.font import Font
-from cvp.imgui.font_builder import FontBuilder
+from cvp.imgui.fonts.builder import FontBuilder
+from cvp.imgui.fonts.font import Font
 
 
 def add_ngc_font(size: int, *, use_texture=False) -> Font:

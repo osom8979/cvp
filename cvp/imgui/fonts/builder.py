@@ -11,7 +11,7 @@ from imgui.core import FontConfig, GlyphRanges, _Font
 from cvp.fonts.ranges import UNICODE_SINGLE_BLOCK_SIZE, CodepointRange, flatten_ranges
 from cvp.fonts.ttf import TTF
 from cvp.gl.texture import Texture
-from cvp.imgui.font import Font, FontDetail
+from cvp.imgui.fonts.font import Font, FontDetail
 
 
 def create_glyph_ranges(ranges: List[CodepointRange]) -> GlyphRanges:

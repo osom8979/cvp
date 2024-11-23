@@ -13,14 +13,14 @@ from cvp.assets import (
     FONT_FILENAME_NGC,
     FONT_FILENAME_NGC_B,
 )
-from cvp.imgui.font import Font
-from cvp.imgui.font_builder import FontBuilder
-from cvp.imgui.font_defaults import (
+from cvp.imgui.fonts.builder import FontBuilder
+from cvp.imgui.fonts.defaults import (
     add_jbm_font,
     add_mdi_font,
     add_ngc_b_font,
     add_ngc_font,
 )
+from cvp.imgui.fonts.font import Font
 
 
 class FontMapper(OrderedDict[str, Font]):

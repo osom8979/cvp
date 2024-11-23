@@ -19,7 +19,7 @@ from cvp.assets import get_default_icon_path
 from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProxy
 from cvp.context.autofixer import AutoFixer
 from cvp.context.context import Context
-from cvp.imgui.font_manager import FontMapper
+from cvp.imgui.fonts.manager import FontMapper
 from cvp.imgui.push_style_var import default_style_colors
 from cvp.logging.logging import event_logger, logger, msg_logger, profile_logger
 from cvp.logging.profile import ProfileLogging
