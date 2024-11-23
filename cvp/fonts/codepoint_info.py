@@ -6,7 +6,7 @@ from typing import Optional
 from cvp.fonts.ttf import TTF
 
 
-class Codepoint:
+class CodepointInfo:
     def __init__(self, codepoint: int, ttf: Optional[TTF] = None):
         self.codepoint = codepoint
         self.character = chr(codepoint)

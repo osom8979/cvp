@@ -154,7 +154,7 @@ class FontManager(Manager[FontManagerConfig, Font]):
 
             roi = x1, y1, x2, y2
             codepoint = codepoint_begin + i
-            cp_detail = item.get_codepoint_detail(codepoint)
+            cp_detail = item.get_codepoint_info(codepoint)
             stroke_color = normal_stroke_color if cp_detail else error_stroke_color
 
             draw_list.add_rect(*roi, stroke_color, rounding, rect_flags, thickness)

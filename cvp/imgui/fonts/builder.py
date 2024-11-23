@@ -18,14 +18,14 @@ from cvp.imgui.fonts.glyph_ranges import create_glyph_ranges
 
 class FontBuilder:
     _font: Optional[_Font]
-    _details: List[CachedTTF]
+    _ttfs: List[CachedTTF]
 
     def __init__(self, name: str, size: int):
         self._font = None
         self._name = name
         self._size = size
         self._merge = FontConfig(merge_mode=True)
-        self._details = list()
+        self._ttfs = list()
 
     @property
     def name(self):
@@ -61,13 +61,12 @@ class FontBuilder:
         if size < 0:
             raise ValueError("Invalid size")
 
-        self._font = imgui.get_io().fonts.add_font_from_file_ttf(
-            str(ttf.path),
-            size,
-            None if self._font is None else self._merge,
-            create_glyph_ranges(ranges),
-        )
-        self._details.append(CachedTTF(ttf, ranges, size))
+        fonts = imgui.get_io().fonts
+        filename = str(ttf.path)
+        config = None if self._font is None else self._merge
+        glyph_ranges = create_glyph_ranges(ranges)
+        self._font = fonts.add_font_from_file_ttf(filename, size, config, glyph_ranges)
+        self._ttfs.append(CachedTTF(ttf, ranges, size))
         return self
 
     @staticmethod
@@ -81,8 +80,8 @@ class FontBuilder:
 
     def _create_blocks(self, step=UNICODE_SINGLE_BLOCK_SIZE) -> List[Tuple[int, int]]:
         result = set()
-        for detail in self._details:
-            for cp_range in detail.ranges:
+        for ttf in self._ttfs:
+            for cp_range in ttf.ranges:
                 for block_range in cp_range.as_blocks(step):
                     result.add(block_range)
         return list(sorted(result, key=lambda x: x[0]))
@@ -93,7 +92,7 @@ class FontBuilder:
             self._name,
             self._size,
             block_step,
-            self._details,
+            self._ttfs,
             self._create_blocks(block_step),
             self._create_font_texture() if use_texture else None,
         )
