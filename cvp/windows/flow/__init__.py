@@ -182,7 +182,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if graph is None:
             return
 
-        self._control.canvas = graph.canvas
+        self._control.canvas_props = graph.canvas
 
     def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
@@ -244,7 +244,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
-        self._control.on_process()
+        self._control.render_controllers()
         imgui.spacing()
 
         self._right_tabs.do_process(self._node_path)
@@ -271,7 +271,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         try:
-            return begin_child("## Canvas", border=True, flags=CANVAS_FLAGS)
+            return begin_child("##Canvas", border=True, flags=CANVAS_FLAGS)
         finally:
             imgui.pop_style_color()
             imgui.pop_style_var()
@@ -294,7 +294,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         filled_color = imgui.get_color_u32_rgba(*self._clear_color)
         draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
 
-        self._control.update(
+        self._control.do_process(
             cursor_screen_pos=canvas_pos,
             content_region_available=canvas_size,
             has_context_menu=self._enable_context_menu,
@@ -322,7 +322,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 x1, y1, x2, y2 = line
                 draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-        origin_x, origin_y = self._control.world_origin_to_screen_coord(canvas_pos)
+        origin_x, origin_y = self._control.local_origin_to_screen_coords(canvas_pos)
 
         if graph.axis_x.visible:
             color = imgui.get_color_u32_rgba(*graph.axis_x.color)
@@ -349,7 +349,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             img_w = self._background.width
             img_h = self._background.height
             img_roi = img_x, img_y, img_w, img_h
-            img_screen_roi = self._control.world_to_screen_roi(img_roi, canvas_pos)
+            img_screen_roi = self._control.canvas_to_screen_roi(img_roi, canvas_pos)
             img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
             img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
 
@@ -369,7 +369,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         select_node: Optional[Node] = None
 
         for node in graph.nodes:
-            node_roi = self._control.world_to_screen_roi(node.roi, canvas_pos)
+            node_roi = self._control.canvas_to_screen_roi(node.roi, canvas_pos)
             x1, y1, x2, y2 = node_roi
             rounding = node.rounding
             flags = node.flags
@@ -392,7 +392,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 self._node_path = str()
 
         if self._node is not None:
-            node_roi = self._control.world_to_screen_roi(self._node.roi, canvas_pos)
+            node_roi = self._control.canvas_to_screen_roi(self._node.roi, canvas_pos)
             x1, y1, x2, y2 = node_roi
             rounding = self._node.rounding
             flags = self._node.flags
@@ -408,7 +408,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    x1, y1 = self._control.screen_to_world_coord(mouse_pos, canvas_pos)
+                    x1, y1 = self._control.screen_to_canvas_coords(
+                        mouse_pos,
+                        canvas_pos,
+                    )
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
