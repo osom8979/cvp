@@ -18,8 +18,8 @@ BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
 
 
 class CanvasController:
-    def __init__(self, canvas: Optional[CanvasProps] = None):
-        self.canvas_props = canvas if canvas else CanvasProps()
+    def __init__(self, canvas_props: Optional[CanvasProps] = None):
+        self.canvas_props = canvas_props if canvas_props else CanvasProps()
 
         self.pan_label = "Pan"
         self.pan_speed = 0.1
@@ -52,7 +52,14 @@ class CanvasController:
         self.canvas_pos_fmt = "%.3f"
         self.canvas_pos_flags = imgui.INPUT_TEXT_READ_ONLY
 
-        self.button_flags = BUTTON_LEFT | BUTTON_MIDDLE | BUTTON_RIGHT
+        self.has_context_menu = False
+        self.control_button_flags = BUTTON_LEFT | BUTTON_MIDDLE | BUTTON_RIGHT
+        self.control_button = imgui.MOUSE_BUTTON_LEFT
+        self.control_threshold = -1.0
+
+        self.hovering = False
+        self.activated = False
+        self.dragging = False
 
     @property
     def pan_x(self) -> float:
@@ -209,12 +216,22 @@ class CanvasController:
         y = (screen_point[1] - cy) / self.zoom - self.pan_y
         return x, y
 
-    def do_process(
+    @property
+    def lock_threshold_for_pan(self) -> float:
+        """
+        Pan (we use a zero mouse threshold when there's no context menu)
+        You may decide to make that threshold dynamic based on whether
+        the mouse is hovering something etc.
+        """
+        return self.control_threshold if self.has_context_menu else 0.0
+
+    def is_dragging_for_pan(self) -> bool:
+        return imgui.is_mouse_dragging(self.control_button, self.lock_threshold_for_pan)
+
+    def do_control(
         self,
         cursor_screen_pos: Optional[Tuple[float, float]] = None,
         content_region_available: Optional[Tuple[float, float]] = None,
-        pan_button=imgui.MOUSE_BUTTON_RIGHT,
-        has_context_menu=False,
     ) -> None:
         if cursor_screen_pos is None:
             cursor_screen_pos = imgui.get_cursor_screen_pos()
@@ -234,23 +251,19 @@ class CanvasController:
         # Using `imgui.invisible_button()` as a convenience
         # 1) it will advance the layout cursor and
         # 2) allows us to use `is_item_hovered()`/`is_item_active()`
-        imgui.invisible_button("##CanvasButton", cw, ch, self.button_flags)
+        imgui.invisible_button("##ControlButton", cw, ch, self.control_button_flags)
 
-        is_hovered = imgui.is_item_hovered()
-        is_active = imgui.is_item_active()
+        self.hovering = imgui.is_item_hovered()
+        self.activated = imgui.is_item_active()
+        self.dragging = self.is_dragging_for_pan()
 
         io = imgui.get_io()
-        if is_active:
-            # Pan (we use a zero mouse threshold when there's no context menu)
-            # You may decide to make that threshold dynamic based on whether
-            # the mouse is hovering something etc.
-            lock_threshold_for_pan = -1.0 if has_context_menu else 0.0
-            is_dragging = imgui.is_mouse_dragging(pan_button, lock_threshold_for_pan)
-            if is_dragging:
+        if self.activated:
+            if self.dragging:
                 self.pan_x += io.mouse_delta.x / self.zoom
                 self.pan_y += io.mouse_delta.y / self.zoom
 
-        if is_hovered and io.mouse_wheel != 0:
+        if self.hovering and io.mouse_wheel != 0:
             if io.mouse_wheel > 0:
                 self.zoom += self.zoom_step
             elif io.mouse_wheel < 0:
@@ -261,7 +274,7 @@ class CanvasController:
         elif self.zoom < self.zoom_min:
             self.zoom = self.zoom_min
 
-        if is_hovered:
+        if self.hovering:
             mx, my = imgui.get_mouse_pos()
             assert isinstance(mx, float)
             assert isinstance(my, float)
