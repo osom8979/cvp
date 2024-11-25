@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Tuple
 
 from cvp.config.sections.bases.manager import ManagerWindowConfig
-from cvp.palette.basic import ORANGE, WHITE
+from cvp.palette.basic import RED, WHITE
 from cvp.types.colors import RGBA
 from cvp.variables import (
     DEFAULT_API_SELECT_WIDTH,
@@ -37,7 +37,7 @@ class FontManagerConfig(ManagerWindowConfig):
     selected_block: Tuple[int, int] = field(default_factory=lambda: (0, 0))
     text_color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
     normal_stroke_color: RGBA = field(default_factory=lambda: (*WHITE, 0.3))
-    error_stroke_color: RGBA = field(default_factory=lambda: (*ORANGE, 0.3))
+    error_stroke_color: RGBA = field(default_factory=lambda: (*RED, 0.3))
     rounding: float = 0.0
     rect_flags: int = 0
     thickness: float = 1.0
