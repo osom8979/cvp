@@ -5,17 +5,15 @@ from typing import Optional
 import imgui
 
 from cvp.flow.datas import Canvas as CanvasProps
-from cvp.imgui.draw_list import DrawList, get_window_draw_list
-from cvp.types.shapes import Point
+from cvp.imgui.draw_list import create_empty_draw_list, get_window_draw_list
+from cvp.types.shapes import Point, Size
 from cvp.widgets.canvas.controller import CanvasController
 
 
 class BaseCanvas(CanvasController):
     _mouse_pos: Point
     _canvas_pos: Point
-    _canvas_size: Point
-    _hovering: bool
-    _draw_list: Optional[DrawList]
+    _canvas_size: Size
 
     def __init__(self, canvas_props: Optional[CanvasProps] = None):
         super().__init__(canvas_props)
@@ -26,7 +24,7 @@ class BaseCanvas(CanvasController):
         self._left_button_clicked = False
         self._middle_button_clicked = False
         self._right_button_clicked = False
-        self._draw_list = None
+        self._draw_list = create_empty_draw_list()
 
     @property
     def mouse_pos(self):
@@ -41,8 +39,16 @@ class BaseCanvas(CanvasController):
         return self._canvas_size
 
     @property
-    def draw_list(self) -> DrawList:
-        assert self._draw_list is not None
+    def canvas_roi(self):
+        return (
+            self._canvas_pos[0],
+            self._canvas_pos[1],
+            self._canvas_pos[0] + self._canvas_size[0],
+            self._canvas_pos[1] + self._canvas_size[1],
+        )
+
+    @property
+    def draw_list(self):
         return self._draw_list
 
     def next_state(self):

@@ -6,6 +6,10 @@ import imgui
 from imgui.core import _DrawList as DrawList
 
 
+def create_empty_draw_list():
+    return DrawList()
+
+
 def get_window_draw_list():
     draw_list = imgui.get_window_draw_list()
     assert isinstance(draw_list, DrawList)

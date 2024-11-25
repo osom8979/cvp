@@ -293,52 +293,18 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             cursor_screen_pos=canvas_pos,
             content_region_available=canvas_size,
         )
-        draw_list = self._canvas.draw_list
-
-        filled_color = imgui.get_color_u32_rgba(*self._clear_color)
-        draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
+        self._canvas.fill(self._clear_color)
 
         graph = self.current_graph
         if graph is None:
             return
 
-        if graph.grid_x.visible:
-            color = imgui.get_color_u32_rgba(*graph.grid_x.color)
-            step = graph.grid_x.step
-            thickness = graph.grid_x.thickness
-            lines = self._canvas.vertical_grid_lines(step, canvas_pos, canvas_size)
-            for line in lines:
-                x1, y1, x2, y2 = line
-                draw_list.add_line(x1, y1, x2, y2, color, thickness)
+        self._canvas.draw_grid_x(graph.grid_x)
+        self._canvas.draw_grid_y(graph.grid_y)
+        self._canvas.draw_axis_x(graph.axis_x)
+        self._canvas.draw_axis_y(graph.axis_y)
 
-        if graph.grid_y.visible:
-            color = imgui.get_color_u32_rgba(*graph.grid_y.color)
-            step = graph.grid_y.step
-            thickness = graph.grid_y.thickness
-            lines = self._canvas.horizontal_grid_lines(step, canvas_pos, canvas_size)
-            for line in lines:
-                x1, y1, x2, y2 = line
-                draw_list.add_line(x1, y1, x2, y2, color, thickness)
-
-        origin_x, origin_y = self._canvas.local_origin_to_screen_coords(canvas_pos)
-
-        if graph.axis_x.visible:
-            color = imgui.get_color_u32_rgba(*graph.axis_x.color)
-            thickness = graph.axis_x.thickness
-            x1 = cx
-            y1 = origin_y
-            x2 = cx + cw
-            y2 = origin_y
-            draw_list.add_line(x1, y1, x2, y2, color, thickness)
-
-        if graph.axis_y.visible:
-            color = imgui.get_color_u32_rgba(*graph.axis_y.color)
-            thickness = graph.axis_y.thickness
-            x1 = origin_x
-            y1 = cy
-            x2 = origin_x
-            y2 = cy + ch
-            draw_list.add_line(x1, y1, x2, y2, color, thickness)
+        draw_list = self._canvas.draw_list
 
         if self._background is not None:
             img_id = self._background.texture_id
