@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
+from typing import List, Optional, Sequence
 
 import imgui
 
@@ -136,3 +136,11 @@ class IntegratedCanvas(BaseCanvas, WidgetInterface):
         node_color = imgui.get_color_u32_rgba(*node.color)
         self._draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
         self._draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)
+
+    def find_hovering_nodes(self, nodes: Sequence[Node]) -> List[Node]:
+        result = list()
+        for node in nodes:
+            roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
+            if imgui.is_mouse_hovering_rect(*roi):
+                result.append(node)
+        return result
