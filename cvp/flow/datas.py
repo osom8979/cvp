@@ -139,7 +139,7 @@ class Canvas:
 
 @dataclass
 class Grid:
-    visible: bool = False
+    visible: bool = True
     step: float = 50.0
     thickness: float = 1.0
     color: RGBA = field(default_factory=lambda: (0.8, 0.8, 0.8, 0.2))
@@ -147,7 +147,7 @@ class Grid:
 
 @dataclass
 class Axis:
-    visible: bool = False
+    visible: bool = True
     thickness: float = 1.0
     color: RGBA = field(default_factory=lambda: (1.0, 0.0, 0.0, 0.6))
 
