@@ -7,6 +7,7 @@ import imgui
 from cvp.flow.datas import Axis
 from cvp.flow.datas import Canvas as CanvasProps
 from cvp.flow.datas import Grid
+from cvp.gl.texture import Texture
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.colors import RGBA
 from cvp.types.override import override
@@ -98,3 +99,29 @@ class IntegratedCanvas(BaseCanvas, WidgetInterface):
         x2 = origin_x
         y2 = cy + ch
         self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
+
+    def draw_texture(
+        self,
+        texture: Texture,
+        x: float,
+        y: float,
+        color: Optional[RGBA] = None,
+    ) -> None:
+        img_id = texture.texture
+        img_x = x
+        img_y = y
+        img_w = texture.width
+        img_h = texture.height
+        img_roi = img_x, img_y, img_w, img_h
+        img_screen_roi = self.canvas_to_screen_roi(img_roi, self._canvas_pos)
+        img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
+        img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
+        img_color = imgui.get_color_u32_rgba(*color) if color is not None else 0
+        self._draw_list.add_image(
+            img_id,
+            img_screen_p1,
+            img_screen_p2,
+            (0, 0),
+            (1, 1),
+            img_color,
+        )

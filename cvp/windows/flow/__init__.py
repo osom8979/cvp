@@ -85,7 +85,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._node: Optional[Node] = None
 
         self._clear_color = 0.5, 0.5, 0.5, 1.0
-        self._background = None
 
         self._split_tree = SplitTreeProxy(context.config.flow_aui)
         self._tree_splitter = Splitter.from_horizontal(
@@ -305,29 +304,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._canvas.draw_axis_y(graph.axis_y)
 
         draw_list = self._canvas.draw_list
-
-        if self._background is not None:
-            img_id = self._background.texture_id
-            img_x = 0
-            img_y = 0
-            img_w = self._background.width
-            img_h = self._background.height
-            img_roi = img_x, img_y, img_w, img_h
-            img_screen_roi = self._canvas.canvas_to_screen_roi(img_roi, canvas_pos)
-            img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
-            img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
-
-            alpha = self._canvas.alpha
-            img_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, alpha)
-            draw_list.add_image(
-                img_id,
-                img_screen_p1,
-                img_screen_p2,
-                (0, 0),
-                (1, 1),
-                img_color,
-            )
-
         left_clicked = self.is_mouse_left_button_clicked()
         hovering_canvas = imgui.is_mouse_hovering_rect(cx, cy, cx + cw, cy + ch)
         select_node: Optional[Node] = None

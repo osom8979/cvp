@@ -14,15 +14,27 @@ class Texture:
         self._bound = False
 
     @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return self._height
+
+    @property
+    def texture(self):
+        return self._texture
+
+    @property
+    def bound(self):
+        return self._bound
+
+    @property
     def opened(self) -> bool:
         return self._texture != 0
 
     def __bool__(self) -> bool:
         return self.opened
-
-    @property
-    def bound(self) -> bool:
-        return self._bound
 
     def open(self, width: int, height: int) -> None:
         if self._texture != 0:
