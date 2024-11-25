@@ -6,7 +6,7 @@ import imgui
 
 from cvp.flow.datas import Axis
 from cvp.flow.datas import Canvas as CanvasProps
-from cvp.flow.datas import Grid
+from cvp.flow.datas import Grid, Node
 from cvp.gl.texture import Texture
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.colors import RGBA
@@ -125,3 +125,14 @@ class IntegratedCanvas(BaseCanvas, WidgetInterface):
             (1, 1),
             img_color,
         )
+
+    def draw_node(self, node: Node) -> None:
+        node_roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
+        x1, y1, x2, y2 = node_roi
+        rounding = node.rounding
+        flags = node.flags
+        thickness = node.thickness
+        outline_color = imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 1.0)
+        node_color = imgui.get_color_u32_rgba(*node.color)
+        self._draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
+        self._draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)

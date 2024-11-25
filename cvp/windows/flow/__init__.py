@@ -309,16 +309,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         select_node: Optional[Node] = None
 
         for node in graph.nodes:
+            self._canvas.draw_node(node)
+
             node_roi = self._canvas.canvas_to_screen_roi(node.roi, canvas_pos)
             x1, y1, x2, y2 = node_roi
-            rounding = node.rounding
-            flags = node.flags
-            thickness = node.thickness
-            outline_color = imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 1.0)
-            node_color = imgui.get_color_u32_rgba(*node.color)
-            draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
-            draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)
-
             hovering = imgui.is_mouse_hovering_rect(x1, y1, x2, y2)
             if hovering:
                 select_node = node
