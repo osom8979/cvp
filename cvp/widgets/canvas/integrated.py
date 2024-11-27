@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Optional, Sequence
+from typing import Optional
 
 import imgui
 
@@ -8,29 +8,13 @@ from cvp.flow.datas import Axis
 from cvp.flow.datas import Canvas as CanvasProps
 from cvp.flow.datas import Grid, Node
 from cvp.gl.texture import Texture
-from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.colors import RGBA
-from cvp.types.override import override
 from cvp.widgets.canvas._base import BaseCanvas
 
 
-class IntegratedCanvas(BaseCanvas, WidgetInterface):
+class IntegratedCanvas(BaseCanvas):
     def __init__(self, canvas_props: Optional[CanvasProps] = None):
         super().__init__(canvas_props)
-
-    @override
-    def on_process(self) -> None:
-        self.next_state()
-        assert self._draw_list is not None
-        self.do_button_control()
-        # draw_list = self._draw_list
-        # mx, my = self._mouse_pos
-        # cx, cy = self._canvas_pos
-        # cw, ch = self._canvas_size
-        # hovering = self._hovering
-        # left_button = self._left_button_clicked
-        # middle_button = self._middle_button_clicked
-        # right_button = self._right_button_clicked
 
     def fill(self, color: RGBA) -> None:
         filled_color = imgui.get_color_u32_rgba(*color)
@@ -126,21 +110,41 @@ class IntegratedCanvas(BaseCanvas, WidgetInterface):
             img_color,
         )
 
-    def draw_node(self, node: Node) -> None:
-        node_roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
-        x1, y1, x2, y2 = node_roi
+    def is_selected_node(self, node: Node) -> bool:
+        if not self._left_button_clicked:
+            return False
+
+        roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
+        return imgui.is_mouse_hovering_rect(*roi)
+
+    @staticmethod
+    def get_node_outline_color(selected=False, hovering=False):
+        if selected:
+            return imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
+        elif hovering:
+            return imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
+        else:
+            return imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
+
+    # def get_node_state(self, node: Node) -> None:
+    #     screen_roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
+    #     hovering = imgui.is_mouse_hovering_rect(*screen_roi)
+    #     selected = hovering and self._left_button_clicked
+
+    def draw_node(self, node: Node, selected_node: Optional[Node] = None) -> None:
+        roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
         rounding = node.rounding
         flags = node.flags
         thickness = node.thickness
-        outline_color = imgui.get_color_u32_rgba(0.2, 0.2, 0.2, 1.0)
-        node_color = imgui.get_color_u32_rgba(*node.color)
-        self._draw_list.add_rect_filled(x1, y1, x2, y2, outline_color, rounding, flags)
-        self._draw_list.add_rect(x1, y1, x2, y2, node_color, rounding, flags, thickness)
+        fill_color = imgui.get_color_u32_rgba(*node.color)
+        self._draw_list.add_rect_filled(*roi, fill_color, rounding, flags)
 
-    def find_hovering_nodes(self, nodes: Sequence[Node]) -> List[Node]:
-        result = list()
-        for node in nodes:
-            roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
-            if imgui.is_mouse_hovering_rect(*roi):
-                result.append(node)
-        return result
+        if node == selected_node:
+            selected_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
+            self._draw_list.add_rect(*roi, selected_color, rounding, flags, thickness)
+        elif imgui.is_mouse_hovering_rect(*roi):
+            hovering_color = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
+            self._draw_list.add_rect(*roi, hovering_color, rounding, flags, thickness)
+        else:
+            outline_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
+            self._draw_list.add_rect(*roi, outline_color, rounding, flags, thickness)

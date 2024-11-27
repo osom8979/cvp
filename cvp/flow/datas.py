@@ -105,6 +105,13 @@ class NodeTemplate:
 
 
 @dataclass
+class NodeState:
+    screen_roi: ROI = field(default_factory=lambda: (0.0, 0.0, 0.0, 0.0))
+    selected: bool = False
+    hovering: bool = False
+
+
+@dataclass
 class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
@@ -116,6 +123,16 @@ class Node:
     flags: int = 0
     thickness: float = 1.0
     pins: List[Pin] = field(default_factory=list)
+
+    _state: NodeState = field(default_factory=NodeState)
+
+    @property
+    def state(self) -> NodeState:
+        return self._state
+
+    @state.setter
+    def state(self, value: NodeState) -> None:
+        self._state = value
 
 
 @dataclass

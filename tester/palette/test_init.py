@@ -6,6 +6,7 @@ from cvp.palette import (
     basic_palette,
     css4_palette,
     extended_palette,
+    find_named_color,
     flat_palette,
     registered_color_count,
     registered_palette_keys,
@@ -50,6 +51,14 @@ class ModulesTestCase(TestCase):
             )
         )
         self.assertEqual(expect_count, registered_color_count())
+
+    def test_find_named_color(self):
+        from cvp.palette import basic, extended, xkcd
+
+        self.assertTupleEqual(basic.WHITE, find_named_color("basic:white"))
+        self.assertTupleEqual(xkcd.NASTY_GREEN, find_named_color("xkcd: nasty green"))
+        self.assertTupleEqual(extended.BEIGE, find_named_color("extended : beige"))
+        self.assertTupleEqual(extended.DIMGRAY, find_named_color(" dimgray "))
 
 
 if __name__ == "__main__":

@@ -285,13 +285,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         assert isinstance(ch, float)
         mouse_pos = mx, my
         canvas_pos = cx, cy
-        canvas_size = cw, ch
+        # canvas_size = cw, ch
 
         self._canvas.next_state()
-        self._canvas.do_control(
-            cursor_screen_pos=canvas_pos,
-            content_region_available=canvas_size,
-        )
+        self._canvas.do_button_control()
         self._canvas.fill(self._clear_color)
 
         graph = self.current_graph

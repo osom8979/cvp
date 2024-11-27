@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # https://en.wikipedia.org/wiki/Web_colors#Extended_colors
+# Extended colors are the result of merging specifications from HTML 4.01, CSS 2.0,
+# SVG 1.0 and CSS3 User Interfaces (CSS3 UI).
 
 # Pink colors
 MEDIUMVIOLETRED = 0.780392, 0.082353, 0.521569
