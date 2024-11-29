@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from math import fmod
-from typing import Final, Optional, Tuple
+from typing import Final, Optional
 
 import imgui
 
 from cvp.flow.datas import Canvas as CanvasProps
 from cvp.imgui.drag_float2 import drag_float2
+from cvp.imgui.draw_list import create_empty_draw_list, get_window_draw_list
 from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
@@ -20,6 +21,11 @@ BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
 class CanvasController:
     def __init__(self, canvas_props: Optional[CanvasProps] = None):
         self.canvas_props = canvas_props if canvas_props else CanvasProps()
+
+        self.draw_list = create_empty_draw_list()
+        self.mouse_pos = 0.0, 0.0
+        self.canvas_pos = 0.0, 0.0
+        self.canvas_size = 0.0, 0.0
 
         self.pan_label = "Pan"
         self.pan_speed = 0.1
@@ -64,6 +70,20 @@ class CanvasController:
         self.hovering = False
         self.activated = False
         self.dragging = False
+
+    @property
+    def canvas_roi(self):
+        return (
+            self.canvas_pos[0],
+            self.canvas_pos[1],
+            self.canvas_pos[0] + self.canvas_size[0],
+            self.canvas_pos[1] + self.canvas_size[1],
+        )
+
+    def point_in_canvas_rect(self, point: Point) -> bool:
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
+        return cx <= point[0] <= cx + cw and cy <= point[1] <= cy + ch
 
     @property
     def pan_x(self) -> float:
@@ -170,52 +190,42 @@ class CanvasController:
             self.input_local_pos()
             self.input_canvas_pos()
 
-    def canvas_to_screen_coords(
-        self,
-        canvas_point: Point,
-        cursor_screen_pos: Optional[Point] = None,
-    ) -> Point:
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        assert cursor_screen_pos is not None
-        cx, cy = cursor_screen_pos
+    def next_state(self):
+        mx, my = imgui.get_mouse_pos()
+        cx, cy = imgui.get_cursor_screen_pos()
+        cw, ch = imgui.get_content_region_available()
+        assert isinstance(mx, float)
+        assert isinstance(my, float)
         assert isinstance(cx, float)
         assert isinstance(cy, float)
+        assert isinstance(cw, float)
+        assert isinstance(ch, float)
+        self.draw_list = get_window_draw_list()
+        self.mouse_pos = mx, my
+        self.canvas_pos = cx, cy
+        self.canvas_size = cw, ch
+
+    def canvas_to_screen_coords(self, canvas_point: Point) -> Point:
+        cx, cy = self.canvas_pos
         x = cx + (canvas_point[0] + self.pan_x) * self.zoom
         y = cy + (canvas_point[1] + self.pan_y) * self.zoom
         return x, y
 
-    def local_origin_to_screen_coords(
-        self,
-        cursor_screen_pos: Optional[Point] = None,
-    ) -> Point:
-        return self.canvas_to_screen_coords((0.0, 0.0), cursor_screen_pos)
+    def local_origin_to_screen_coords(self) -> Point:
+        return self.canvas_to_screen_coords((0.0, 0.0))
 
-    def canvas_to_screen_roi(
-        self,
-        canvas_roi: ROI,
-        cursor_screen_pos: Optional[Point] = None,
-    ) -> ROI:
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        assert cursor_screen_pos is not None
+    def mouse_to_screen_coords(self) -> Point:
+        return self.canvas_to_screen_coords(self.mouse_pos)
+
+    def canvas_to_screen_roi(self, canvas_roi: ROI) -> ROI:
         canvas_p1 = canvas_roi[0], canvas_roi[1]
         canvas_p2 = canvas_roi[2], canvas_roi[3]
-        p1 = self.canvas_to_screen_coords(canvas_p1, cursor_screen_pos)
-        p2 = self.canvas_to_screen_coords(canvas_p2, cursor_screen_pos)
+        p1 = self.canvas_to_screen_coords(canvas_p1)
+        p2 = self.canvas_to_screen_coords(canvas_p2)
         return p1[0], p1[1], p2[0], p2[1]
 
-    def screen_to_canvas_coords(
-        self,
-        screen_point: Point,
-        cursor_screen_pos: Optional[Point] = None,
-    ) -> Point:
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        assert cursor_screen_pos is not None
-        cx, cy = cursor_screen_pos
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
+    def screen_to_canvas_coords(self, screen_point: Point) -> Point:
+        cx, cy = self.canvas_pos
         x = (screen_point[0] - cx) / self.zoom - self.pan_x
         y = (screen_point[1] - cy) / self.zoom - self.pan_y
         return x, y
@@ -232,25 +242,9 @@ class CanvasController:
     def is_dragging_for_pan(self) -> bool:
         return imgui.is_mouse_dragging(self.control_button, self.lock_threshold_for_pan)
 
-    def do_control(
-        self,
-        cursor_screen_pos: Optional[Tuple[float, float]] = None,
-        content_region_available: Optional[Tuple[float, float]] = None,
-    ) -> None:
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        if content_region_available is None:
-            content_region_available = imgui.get_content_region_available()
-
-        assert cursor_screen_pos is not None
-        assert content_region_available is not None
-        cx, cy = cursor_screen_pos
-        cw, ch = content_region_available
-
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
-        assert isinstance(cw, float)
-        assert isinstance(ch, float)
+    def do_control(self) -> None:
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
 
         # Using `imgui.invisible_button()` as a convenience
         # 1) it will advance the layout cursor and
@@ -289,30 +283,13 @@ class CanvasController:
             self.local_pos_x = mx - cx
             self.local_pos_y = my - cy
 
-            canvas_pos = self.screen_to_canvas_coords((mx, my), cursor_screen_pos)
+            canvas_pos = self.screen_to_canvas_coords((mx, my))
             self.canvas_pos_x = canvas_pos[0]
             self.canvas_pos_y = canvas_pos[1]
 
-    def vertical_grid_lines(
-        self,
-        step: float,
-        cursor_screen_pos: Optional[Tuple[float, float]] = None,
-        content_region_available: Optional[Tuple[float, float]] = None,
-    ):
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        if content_region_available is None:
-            content_region_available = imgui.get_content_region_available()
-
-        assert cursor_screen_pos is not None
-        assert content_region_available is not None
-        cx, cy = cursor_screen_pos
-        cw, ch = content_region_available
-
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
-        assert isinstance(cw, float)
-        assert isinstance(ch, float)
+    def vertical_grid_lines(self, step: float):
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
 
         if step <= 0:
             raise ValueError("The 'step' value must be greater than 0")
@@ -330,26 +307,9 @@ class CanvasController:
             x += step * self.zoom
         return result
 
-    def horizontal_grid_lines(
-        self,
-        step: float,
-        cursor_screen_pos: Optional[Tuple[float, float]] = None,
-        content_region_available: Optional[Tuple[float, float]] = None,
-    ):
-        if cursor_screen_pos is None:
-            cursor_screen_pos = imgui.get_cursor_screen_pos()
-        if content_region_available is None:
-            content_region_available = imgui.get_content_region_available()
-
-        assert cursor_screen_pos is not None
-        assert content_region_available is not None
-        cx, cy = cursor_screen_pos
-        cw, ch = content_region_available
-
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
-        assert isinstance(cw, float)
-        assert isinstance(ch, float)
+    def horizontal_grid_lines(self, step: float):
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
 
         if step <= 0:
             raise ValueError("The 'step' value must be greater than 0")
