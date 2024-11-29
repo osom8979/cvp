@@ -295,44 +295,15 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if graph is None:
             return
 
+        self._canvas.update_nodes_state(graph.nodes)
+
         self._canvas.draw_grid_x(graph.grid_x)
         self._canvas.draw_grid_y(graph.grid_y)
         self._canvas.draw_axis_x(graph.axis_x)
         self._canvas.draw_axis_y(graph.axis_y)
 
-        draw_list = self._canvas.draw_list
-        left_clicked = self.is_mouse_left_button_clicked()
-        hovering_canvas = imgui.is_mouse_hovering_rect(cx, cy, cx + cw, cy + ch)
-        select_node: Optional[Node] = None
-
-        for node in graph.nodes:
-            self._canvas.draw_node(node)
-
-            node_roi = self._canvas.canvas_to_screen_roi(node.roi, canvas_pos)
-            x1, y1, x2, y2 = node_roi
-            hovering = imgui.is_mouse_hovering_rect(x1, y1, x2, y2)
-            if hovering:
-                select_node = node
-
-        if left_clicked:
-            if select_node is not None:
-                self._node = select_node
-                self._node_path = select_node.name
-            elif hovering_canvas:
-                self._node = None
-                self._node_path = str()
-
-        if self._node is not None:
-            node_roi = self._canvas.canvas_to_screen_roi(self._node.roi, canvas_pos)
-            x1, y1, x2, y2 = node_roi
-            rounding = self._node.rounding
-            flags = self._node.flags
-            thickness = self._node.thickness + 1
-            select_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
-            draw_list.add_rect(x1, y1, x2, y2, select_color, rounding, flags, thickness)
-
-        # for arc in graph.arcs:
-        #     pass
+        self._canvas.draw_nodes(graph.nodes, graph.style)
+        self._canvas.draw_arcs(graph.arcs, graph.style)
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
             if drag_drop_target.hovered:

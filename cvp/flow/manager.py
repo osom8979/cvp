@@ -155,9 +155,6 @@ class FlowManager(OrderedDict[str, Graph]):
         node_docs = node_template.docs
         node_icon = node_template.icon
         node_color = node_template.color
-        node_rounding = node_template.rounding
-        node_flags = node_template.flags
-        node_thickness = node_template.thickness
 
         node_pins = list()
         for pin_template in node_template.pins:
@@ -177,9 +174,6 @@ class FlowManager(OrderedDict[str, Graph]):
             icon=node_icon,
             roi=(x1, y1, x2, y2),
             color=deepcopy(node_color),
-            rounding=node_rounding,
-            flags=node_flags,
-            thickness=node_thickness,
             pins=node_pins,
         )
         graph.nodes.append(node)

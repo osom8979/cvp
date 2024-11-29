@@ -5,8 +5,8 @@ from enum import StrEnum, auto, unique
 from typing import List
 from uuid import uuid4
 
-from cvp.palette.basic import WHITE
-from cvp.types.colors import RGBA
+from cvp.palette.basic import RED, WHITE, YELLOW
+from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI
 
 
@@ -97,9 +97,6 @@ class NodeTemplate:
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
     color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
-    rounding: float = 0.0
-    flags: int = 0
-    thickness: float = 1.0
     pins: List[PinTemplate] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
 
@@ -119,9 +116,6 @@ class Node:
     icon: str = field(default_factory=str)
     roi: ROI = field(default_factory=lambda: (0.0, 0.0, 160.0, 60.0))
     color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
-    rounding: float = 1.0
-    flags: int = 0
-    thickness: float = 1.0
     pins: List[Pin] = field(default_factory=list)
 
     _state: NodeState = field(default_factory=NodeState)
@@ -170,6 +164,45 @@ class Axis:
 
 
 @dataclass
+class Stroke:
+    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    thickness: float = 1.0
+    rounding: float = 1.0
+    flags: int = 0
+
+    @classmethod
+    def from_rgb(cls, rgb: RGB, thickness=1.0, rounding=1.0, flags=0):
+        return cls((rgb[0], rgb[1], rgb[2], 1.0), thickness, rounding, flags)
+
+    @classmethod
+    def default_selected(cls):
+        return cls.from_rgb(RED, thickness=2.0)
+
+    @classmethod
+    def default_hovering(cls):
+        return cls.from_rgb(YELLOW, thickness=1.5)
+
+    @classmethod
+    def default_normal(cls):
+        return cls.from_rgb(WHITE, thickness=1.0)
+
+
+@dataclass
+class Style:
+    selected_node: Stroke = field(default_factory=lambda: Stroke.default_selected())
+    hovering_node: Stroke = field(default_factory=lambda: Stroke.default_hovering())
+    normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
+
+    def get_node_stroke(self, selected=False, hovering=False):
+        if selected:
+            return self.selected_node
+        elif hovering:
+            return self.hovering_node
+        else:
+            return self.normal_node
+
+
+@dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = field(default_factory=str)
@@ -184,3 +217,4 @@ class Graph:
     grid_y: Grid = field(default_factory=Grid)
     axis_x: Axis = field(default_factory=Axis)
     axis_y: Axis = field(default_factory=Axis)
+    style: Style = field(default_factory=Style)

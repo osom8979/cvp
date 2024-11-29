@@ -57,6 +57,10 @@ class CanvasController:
         self.control_button = imgui.MOUSE_BUTTON_LEFT
         self.control_threshold = -1.0
 
+        self.left_button_clicked = False
+        self.middle_button_clicked = False
+        self.right_button_clicked = False
+
         self.hovering = False
         self.activated = False
         self.dragging = False
@@ -252,6 +256,10 @@ class CanvasController:
         # 1) it will advance the layout cursor and
         # 2) allows us to use `is_item_hovered()`/`is_item_active()`
         imgui.invisible_button("##ControlButton", cw, ch, self.control_button_flags)
+
+        self.left_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_LEFT)
+        self.middle_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_MIDDLE)
+        self.right_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_RIGHT)
 
         self.hovering = imgui.is_item_hovered()
         self.activated = imgui.is_item_active()

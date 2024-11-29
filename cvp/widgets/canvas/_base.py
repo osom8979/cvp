@@ -17,14 +17,10 @@ class BaseCanvas(CanvasController):
 
     def __init__(self, canvas_props: Optional[CanvasProps] = None):
         super().__init__(canvas_props)
+        self._draw_list = create_empty_draw_list()
         self._mouse_pos = 0.0, 0.0
         self._canvas_pos = 0.0, 0.0
         self._canvas_size = 0.0, 0.0
-        self._hovering = False
-        self._left_button_clicked = False
-        self._middle_button_clicked = False
-        self._right_button_clicked = False
-        self._draw_list = create_empty_draw_list()
 
     @property
     def mouse_pos(self):
@@ -51,6 +47,11 @@ class BaseCanvas(CanvasController):
     def draw_list(self):
         return self._draw_list
 
+    def point_in_canvas_rect(self, point: Point) -> bool:
+        cx, cy = self._canvas_pos
+        cw, ch = self._canvas_size
+        return cx <= point[0] <= cx + cw and cy <= point[1] <= cy + ch
+
     def next_state(self):
         mx, my = imgui.get_mouse_pos()
         cx, cy = imgui.get_cursor_screen_pos()
@@ -61,14 +62,10 @@ class BaseCanvas(CanvasController):
         assert isinstance(cy, float)
         assert isinstance(cw, float)
         assert isinstance(ch, float)
+        self._draw_list = get_window_draw_list()
         self._mouse_pos = mx, my
         self._canvas_pos = cx, cy
         self._canvas_size = cw, ch
-        self._hovering = cx <= mx <= cx + cw and cy <= my <= cy + ch
-        self._left_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_LEFT)
-        self._middle_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_MIDDLE)
-        self._right_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_RIGHT)
-        self._draw_list = get_window_draw_list()
 
     def do_button_control(self) -> None:
         self.do_control(self._canvas_pos, self._canvas_size)

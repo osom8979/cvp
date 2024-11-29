@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional
+from typing import Optional, Sequence
 
 import imgui
 
-from cvp.flow.datas import Axis
+from cvp.flow.datas import Arc, Axis
 from cvp.flow.datas import Canvas as CanvasProps
-from cvp.flow.datas import Grid, Node
+from cvp.flow.datas import Grid, Node, Style
 from cvp.gl.texture import Texture
 from cvp.types.colors import RGBA
 from cvp.widgets.canvas._base import BaseCanvas
@@ -111,40 +111,49 @@ class IntegratedCanvas(BaseCanvas):
         )
 
     def is_selected_node(self, node: Node) -> bool:
-        if not self._left_button_clicked:
+        if not self.left_button_clicked:
             return False
 
         roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
         return imgui.is_mouse_hovering_rect(*roi)
 
-    @staticmethod
-    def get_node_outline_color(selected=False, hovering=False):
-        if selected:
-            return imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
-        elif hovering:
-            return imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
-        else:
-            return imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
+    def update_nodes_state(self, nodes: Sequence[Node]) -> None:
+        for node in nodes:
+            node_roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
+            node.state.screen_roi = node_roi
+            node.state.hovering = imgui.is_mouse_hovering_rect(*node_roi)
 
-    # def get_node_state(self, node: Node) -> None:
-    #     screen_roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
-    #     hovering = imgui.is_mouse_hovering_rect(*screen_roi)
-    #     selected = hovering and self._left_button_clicked
+        if self.hovering and self.left_button_clicked:
+            any_selected = False
+            for node in nodes:
+                if node.state.hovering:
+                    node.state.selected = not node.state.selected
+                    any_selected = True
+                    break
+            if not any_selected:
+                for node in nodes:
+                    node.state.selected = False
 
-    def draw_node(self, node: Node, selected_node: Optional[Node] = None) -> None:
+    def draw_nodes(self, nodes: Sequence[Node], style: Style) -> None:
+        for node in nodes:
+            self.draw_node(node, style)
+
+    def draw_node(self, node: Node, style: Style) -> None:
         roi = self.canvas_to_screen_roi(node.roi, self._canvas_pos)
-        rounding = node.rounding
-        flags = node.flags
-        thickness = node.thickness
-        fill_color = imgui.get_color_u32_rgba(*node.color)
-        self._draw_list.add_rect_filled(*roi, fill_color, rounding, flags)
+        stroke = style.get_node_stroke(node.state.selected, node.state.hovering)
 
-        if node == selected_node:
-            selected_color = imgui.get_color_u32_rgba(1.0, 0.0, 0.0, 1.0)
-            self._draw_list.add_rect(*roi, selected_color, rounding, flags, thickness)
-        elif imgui.is_mouse_hovering_rect(*roi):
-            hovering_color = imgui.get_color_u32_rgba(1.0, 1.0, 0.0, 1.0)
-            self._draw_list.add_rect(*roi, hovering_color, rounding, flags, thickness)
-        else:
-            outline_color = imgui.get_color_u32_rgba(1.0, 1.0, 1.0, 1.0)
-            self._draw_list.add_rect(*roi, outline_color, rounding, flags, thickness)
+        fill_color = imgui.get_color_u32_rgba(*node.color)
+        stroke_color = imgui.get_color_u32_rgba(*stroke.color)
+        thickness = stroke.thickness
+        rounding = stroke.rounding
+        flags = stroke.flags
+
+        self._draw_list.add_rect_filled(*roi, fill_color, rounding, flags)
+        self._draw_list.add_rect(*roi, stroke_color, rounding, flags, thickness)
+
+    def draw_arcs(self, arcs: Sequence[Arc], style: Style) -> None:
+        for arc in arcs:
+            self.draw_arc(arc, style)
+
+    def draw_arc(self, arc: Arc, style: Style) -> None:
+        pass
