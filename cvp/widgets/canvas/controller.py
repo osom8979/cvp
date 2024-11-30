@@ -67,33 +67,78 @@ class CanvasController:
         self.canvas_pos_flags = imgui.INPUT_TEXT_READ_ONLY
 
         self.has_context_menu = False
-        self.control_button_flags = ALL_BUTTON_FLAGS
+        self.control_identifier = "ControlInvisibleButton"
+        self.control_flags = ALL_BUTTON_FLAGS
         self.control_lock_threshold = -1.0
 
         self.left_clicked = False
         self.middle_clicked = False
         self.right_clicked = False
 
+        self.prev_left_dragging = False
+        self.prev_middle_dragging = False
+        self.prev_right_dragging = False
+
         self.left_dragging = False
         self.middle_dragging = False
         self.right_dragging = False
 
+        self.left_down = False
+        self.middle_down = False
+        self.right_down = False
+
+        self.left_up = False
+        self.middle_up = False
+        self.right_up = False
+
         self.ctrl_down = False
         self.alt_down = False
         self.shift_down = False
-        self.super_down = False
 
         self.hovering = False
-        self.activated = False
+        self.deactivated = False
+        self.activating = False
+
+    @property
+    def is_pan_mode(self) -> bool:
+        # Pressing the ALT button switches to 'Canvas Pan Mode'
+        return self.alt_down
+
+    @property
+    def mx(self):
+        return self.mouse_pos[0]
+
+    @property
+    def my(self):
+        return self.mouse_pos[1]
+
+    @property
+    def cx(self):
+        return self.canvas_pos[0]
+
+    @property
+    def cy(self):
+        return self.canvas_pos[1]
+
+    @property
+    def cw(self):
+        return self.canvas_size[0]
+
+    @property
+    def ch(self):
+        return self.canvas_size[1]
+
+    @property
+    def p1(self):
+        return self.cx, self.cy
+
+    @property
+    def p2(self):
+        return self.cx + self.cw, self.cy + self.ch
 
     @property
     def canvas_roi(self):
-        return (
-            self.canvas_pos[0],
-            self.canvas_pos[1],
-            self.canvas_pos[0] + self.canvas_size[0],
-            self.canvas_pos[1] + self.canvas_size[1],
-        )
+        return self.cx, self.cy, self.cx + self.cw, self.cy + self.ch
 
     @property
     def pan_x(self) -> float:
@@ -112,6 +157,15 @@ class CanvasController:
         self.canvas_props.pan_y = value
 
     @property
+    def pan(self) -> Point:
+        return self.pan_x, self.pan_y
+
+    @pan.setter
+    def pan(self, value: Point) -> None:
+        self.pan_x = value[0]
+        self.pan_y = value[1]
+
+    @property
     def zoom(self) -> float:
         return self.canvas_props.zoom
 
@@ -126,6 +180,34 @@ class CanvasController:
     @alpha.setter
     def alpha(self, value: float) -> None:
         self.canvas_props.alpha = value
+
+    def as_unformatted_text(self):
+        return (
+            f"Pen: {self.pan_x:.02f}, {self.pan_y:.02f}\n"
+            f"Zoom: {self.zoom:.02f}\n"
+            f"Alpha: {self.alpha:.02f}\n"
+            f"Mouse pos: {self.mx:.02f}, {self.my:.02f}\n"
+            f"Canvas pos: {self.cx:.02f}, {self.cy:.02f}\n"
+            f"Canvas size: {self.cw:.02f}, {self.ch:.02f}\n"
+            f"Left clicked: {self.left_clicked}\n"
+            f"Middle clicked: {self.middle_clicked}\n"
+            f"Right clicked: {self.right_clicked}\n"
+            f"Left dragging: {self.left_dragging}\n"
+            f"Middle dragging: {self.middle_dragging}\n"
+            f"Right dragging: {self.right_dragging}\n"
+            f"Left down: {self.left_down}\n"
+            f"Middle down: {self.middle_down}\n"
+            f"Right down: {self.right_down}\n"
+            f"Left up: {self.left_up}\n"
+            f"Middle up: {self.middle_up}\n"
+            f"Right up: {self.right_up}\n"
+            f"Ctrl down: {self.ctrl_down}\n"
+            f"Alt down: {self.alt_down}\n"
+            f"Shift down: {self.shift_down}\n"
+            f"Hovering: {self.hovering}\n"
+            f"Activated: {self.activating}\n"
+            f"Deactivated: {self.deactivated}\n"
+        )
 
     def reset(self):
         self.pan_x = 0.0
@@ -192,23 +274,33 @@ class CanvasController:
             self.canvas_pos_flags,
         )
 
-    def render_controllers(self, dryrun=False) -> None:
+    def tree_debugging(self) -> None:
+        if imgui.tree_node("Debugging"):
+            try:
+                message = self.as_unformatted_text()
+                imgui.text_unformatted(message.strip())
+            finally:
+                imgui.tree_pop()
+
+    def render_controllers(self, dryrun=False, debugging=False) -> None:
         self.drag_pan(dryrun=dryrun)
         self.slider_zoom(dryrun=dryrun)
         self.slider_alpha(dryrun=dryrun)
         with style_disable_input():
             self.input_local_pos()
             self.input_canvas_pos()
+        if debugging:
+            self.tree_debugging()
 
     def point_in_canvas_rect(self, point: Point) -> bool:
+        x, y = point
         cx, cy = self.canvas_pos
         cw, ch = self.canvas_size
-        return cx <= point[0] <= cx + cw and cy <= point[1] <= cy + ch
+        return cx <= x <= cx + cw and cy <= y <= cy + ch
 
-    def canvas_to_screen_coords(self, canvas_point: Point) -> Point:
-        cx, cy = self.canvas_pos
-        x = cx + (canvas_point[0] + self.pan_x) * self.zoom
-        y = cy + (canvas_point[1] + self.pan_y) * self.zoom
+    def canvas_to_screen_coords(self, point: Point) -> Point:
+        x = self.cx + (point[0] + self.pan_x) * self.zoom
+        y = self.cy + (point[1] + self.pan_y) * self.zoom
         return x, y
 
     def local_origin_to_screen_coords(self) -> Point:
@@ -217,18 +309,18 @@ class CanvasController:
     def mouse_to_screen_coords(self) -> Point:
         return self.canvas_to_screen_coords(self.mouse_pos)
 
-    def canvas_to_screen_roi(self, canvas_roi: ROI) -> ROI:
-        canvas_p1 = canvas_roi[0], canvas_roi[1]
-        canvas_p2 = canvas_roi[2], canvas_roi[3]
-        p1 = self.canvas_to_screen_coords(canvas_p1)
-        p2 = self.canvas_to_screen_coords(canvas_p2)
+    def canvas_to_screen_roi(self, roi: ROI) -> ROI:
+        p1 = self.canvas_to_screen_coords((roi[0], roi[1]))
+        p2 = self.canvas_to_screen_coords((roi[2], roi[3]))
         return p1[0], p1[1], p2[0], p2[1]
 
-    def screen_to_canvas_coords(self, screen_point: Point) -> Point:
-        cx, cy = self.canvas_pos
-        x = (screen_point[0] - cx) / self.zoom - self.pan_x
-        y = (screen_point[1] - cy) / self.zoom - self.pan_y
+    def screen_to_canvas_coords(self, point: Point) -> Point:
+        x = (point[0] - self.cx) / self.zoom - self.pan_x
+        y = (point[1] - self.cy) / self.zoom - self.pan_y
         return x, y
+
+    def mouse_to_canvas_coords(self) -> Point:
+        return self.screen_to_canvas_coords(self.mouse_pos)
 
     @property
     def lock_threshold(self) -> float:
@@ -243,9 +335,6 @@ class CanvasController:
         return imgui.is_mouse_dragging(button, self.lock_threshold)
 
     def vertical_grid_lines(self, step: float):
-        cx, cy = self.canvas_pos
-        cw, ch = self.canvas_size
-
         if step <= 0:
             raise ValueError("The 'step' value must be greater than 0")
         if self.zoom <= 0:
@@ -253,19 +342,16 @@ class CanvasController:
 
         result = list()
         x = fmod(self.pan_x * self.zoom, step * self.zoom)
-        while x < cw:
-            x1 = cx + x
-            y1 = cy
-            x2 = cx + x
-            y2 = cy + ch
+        while x < self.cw:
+            x1 = self.cx + x
+            y1 = self.cy
+            x2 = self.cx + x
+            y2 = self.cy + self.ch
             result.append((x1, y1, x2, y2))
             x += step * self.zoom
         return result
 
     def horizontal_grid_lines(self, step: float):
-        cx, cy = self.canvas_pos
-        cw, ch = self.canvas_size
-
         if step <= 0:
             raise ValueError("The 'step' value must be greater than 0")
         if self.zoom <= 0:
@@ -273,11 +359,11 @@ class CanvasController:
 
         result = list()
         y = fmod(self.pan_y * self.zoom, step * self.zoom)
-        while y < ch:
-            x1 = cx
-            y1 = cy + y
-            x2 = cx + cw
-            y2 = cy + y
+        while y < self.ch:
+            x1 = self.cx
+            y1 = self.cy + y
+            x2 = self.cx + self.cw
+            y2 = self.cy + y
             result.append((x1, y1, x2, y2))
             y += step * self.zoom
         return result
@@ -304,30 +390,48 @@ class CanvasController:
         # Using `imgui.invisible_button()` as a convenience
         # 1) it will advance the layout cursor and
         # 2) allows us to use `is_item_hovered()`/`is_item_active()`
-        imgui.invisible_button("##ControlButton", cw, ch, self.control_button_flags)
+        imgui.invisible_button(self.control_identifier, cw, ch, self.control_flags)
 
         self.left_clicked = imgui.is_mouse_clicked(BUTTON_LEFT)
         self.middle_clicked = imgui.is_mouse_clicked(BUTTON_MIDDLE)
         self.right_clicked = imgui.is_mouse_clicked(BUTTON_RIGHT)
 
-        self.left_dragging = self.is_mouse_dragging(BUTTON_LEFT)
-        self.middle_dragging = self.is_mouse_dragging(BUTTON_MIDDLE)
-        self.right_dragging = self.is_mouse_dragging(BUTTON_RIGHT)
+        _left_dragging = self.is_mouse_dragging(BUTTON_LEFT)
+        _middle_dragging = self.is_mouse_dragging(BUTTON_MIDDLE)
+        _right_dragging = self.is_mouse_dragging(BUTTON_RIGHT)
+        self.prev_left_dragging = self.left_dragging
+        self.prev_middle_dragging = self.middle_dragging
+        self.prev_right_dragging = self.right_dragging
+        self.left_dragging = _left_dragging
+        self.middle_dragging = _middle_dragging
+        self.right_dragging = _right_dragging
+
+        _left_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_LEFT])
+        _middle_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_MIDDLE])
+        _right_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_RIGHT])
+        self.left_up = self.left_down and not _left_down
+        self.middle_up = self.middle_down and not _middle_down
+        self.right_up = self.right_down and not _right_down
+        self.left_down = _left_down
+        self.middle_down = _middle_down
+        self.right_down = _right_down
 
         self.ctrl_down = io.key_ctrl
         self.alt_down = io.key_alt
         self.shift_down = io.key_shift
-        self.super_down = io.key_super
 
         self.hovering = imgui.is_item_hovered()
-        self.activated = imgui.is_item_active()
+        _activated = imgui.is_item_active()
+        self.deactivated = self.activating and not _activated
+        self.activating = _activated
 
-        if self.activated and self.middle_dragging:
-            self.pan_x += io.mouse_delta.x / self.zoom
-            self.pan_y += io.mouse_delta.y / self.zoom
-        elif self.activated and self.alt_down and self.left_dragging:
-            self.pan_x += io.mouse_delta.x / self.zoom
-            self.pan_y += io.mouse_delta.y / self.zoom
+        if self.activating:
+            if self.middle_dragging:
+                self.pan_x += io.mouse_delta.x / self.zoom
+                self.pan_y += io.mouse_delta.y / self.zoom
+            elif self.alt_down and self.left_dragging:
+                self.pan_x += io.mouse_delta.x / self.zoom
+                self.pan_y += io.mouse_delta.y / self.zoom
 
         if self.hovering and io.mouse_wheel != 0:
             if io.mouse_wheel > 0:

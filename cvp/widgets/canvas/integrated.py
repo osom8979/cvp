@@ -143,13 +143,48 @@ class IntegratedCanvas(CanvasController):
                 node.state.selected = not node.state.selected
                 break
 
+    def _update_nodes_for_moving(self, nodes: Sequence[Node]) -> None:
+        io = imgui.get_io()
+        dx = io.mouse_delta.x / self.zoom
+        dy = io.mouse_delta.y / self.zoom
+
+        for node in nodes:
+            if not node.state.selected:
+                continue
+
+            x1, y1, x2, y2 = node.roi
+            x1 += dx
+            y1 += dy
+            x2 += dx
+            y2 += dy
+            node.roi = x1, y1, x2, y2
+
     def update_nodes_state(self, nodes: Sequence[Node]) -> None:
+        any_selected_hovering = False
+
         for node in nodes:
             node_roi = self.canvas_to_screen_roi(node.roi)
             node.state.screen_roi = node_roi
             node.state.hovering = imgui.is_mouse_hovering_rect(*node_roi)
+            if node.state.hovering and node.state.selected:
+                any_selected_hovering = True
 
-        if self.hovering and self.left_clicked:
+        if self.is_pan_mode:
+            # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
+            return
+
+        node_moving = any_selected_hovering and self.activating and self.left_dragging
+        if node_moving:
+            self._update_nodes_for_moving(nodes)
+            return
+
+        if self.prev_left_dragging:
+            # When the node drag (movement) is finished, the mouse up event is
+            # necessarily fired. Therefore, we check the drag state of the previous
+            # frame to prevent the node from being selected.
+            return
+
+        if self.left_up:
             if self.ctrl_down:
                 self._update_nodes_for_multiple_select(nodes)
             else:

@@ -7,7 +7,6 @@ import imgui
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
-from cvp.flow.datas import Node
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.menu_item_ex import menu_item
@@ -82,7 +81,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._prev_cursor = None
         self._graph_path = str()
         self._node_path = str()
-        self._node: Optional[Node] = None
 
         self._clear_color = 0.5, 0.5, 0.5, 1.0
 
@@ -241,7 +239,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
-        self._canvas.render_controllers()
+        self._canvas.render_controllers(debugging=self.context.debug)
         imgui.spacing()
 
         self._right_tabs.do_process(self._node_path)
@@ -273,11 +271,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             imgui.pop_style_var()
 
     def on_canvas(self) -> None:
-        mx, my = imgui.get_mouse_pos()
-        assert isinstance(mx, float)
-        assert isinstance(my, float)
-        mouse_pos = mx, my
-
         self._canvas.control()
         self._canvas.fill(self._clear_color)
 
@@ -298,7 +291,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    x1, y1 = self._canvas.screen_to_canvas_coords(mouse_pos)
+                    x1, y1 = self._canvas.mouse_to_canvas_coords()
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
