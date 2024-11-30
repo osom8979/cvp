@@ -13,9 +13,17 @@ from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
 from cvp.types.shapes import ROI, Point
 
-BUTTON_LEFT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
-BUTTON_MIDDLE: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
-BUTTON_RIGHT: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
+_BUTTON_LEFT_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
+_BUTTON_MIDDLE_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
+_BUTTON_RIGHT_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
+
+ALL_BUTTON_FLAGS: Final[int] = (
+    _BUTTON_LEFT_FLAG | _BUTTON_MIDDLE_FLAG | _BUTTON_RIGHT_FLAG
+)
+
+BUTTON_LEFT: Final[int] = imgui.MOUSE_BUTTON_LEFT
+BUTTON_MIDDLE: Final[int] = imgui.MOUSE_BUTTON_MIDDLE
+BUTTON_RIGHT: Final[int] = imgui.MOUSE_BUTTON_RIGHT
 
 
 class CanvasController:
@@ -59,17 +67,24 @@ class CanvasController:
         self.canvas_pos_flags = imgui.INPUT_TEXT_READ_ONLY
 
         self.has_context_menu = False
-        self.control_button_flags = BUTTON_LEFT | BUTTON_MIDDLE | BUTTON_RIGHT
-        self.control_button = imgui.MOUSE_BUTTON_LEFT
-        self.control_threshold = -1.0
+        self.control_button_flags = ALL_BUTTON_FLAGS
+        self.control_lock_threshold = -1.0
 
-        self.left_button_clicked = False
-        self.middle_button_clicked = False
-        self.right_button_clicked = False
+        self.left_clicked = False
+        self.middle_clicked = False
+        self.right_clicked = False
+
+        self.left_dragging = False
+        self.middle_dragging = False
+        self.right_dragging = False
+
+        self.ctrl_down = False
+        self.alt_down = False
+        self.shift_down = False
+        self.super_down = False
 
         self.hovering = False
         self.activated = False
-        self.dragging = False
 
     @property
     def canvas_roi(self):
@@ -79,11 +94,6 @@ class CanvasController:
             self.canvas_pos[0] + self.canvas_size[0],
             self.canvas_pos[1] + self.canvas_size[1],
         )
-
-    def point_in_canvas_rect(self, point: Point) -> bool:
-        cx, cy = self.canvas_pos
-        cw, ch = self.canvas_size
-        return cx <= point[0] <= cx + cw and cy <= point[1] <= cy + ch
 
     @property
     def pan_x(self) -> float:
@@ -190,20 +200,10 @@ class CanvasController:
             self.input_local_pos()
             self.input_canvas_pos()
 
-    def next_state(self):
-        mx, my = imgui.get_mouse_pos()
-        cx, cy = imgui.get_cursor_screen_pos()
-        cw, ch = imgui.get_content_region_available()
-        assert isinstance(mx, float)
-        assert isinstance(my, float)
-        assert isinstance(cx, float)
-        assert isinstance(cy, float)
-        assert isinstance(cw, float)
-        assert isinstance(ch, float)
-        self.draw_list = get_window_draw_list()
-        self.mouse_pos = mx, my
-        self.canvas_pos = cx, cy
-        self.canvas_size = cw, ch
+    def point_in_canvas_rect(self, point: Point) -> bool:
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
+        return cx <= point[0] <= cx + cw and cy <= point[1] <= cy + ch
 
     def canvas_to_screen_coords(self, canvas_point: Point) -> Point:
         cx, cy = self.canvas_pos
@@ -231,61 +231,16 @@ class CanvasController:
         return x, y
 
     @property
-    def lock_threshold_for_pan(self) -> float:
+    def lock_threshold(self) -> float:
         """
         Pan (we use a zero mouse threshold when there's no context menu)
         You may decide to make that threshold dynamic based on whether
         the mouse is hovering something etc.
         """
-        return self.control_threshold if self.has_context_menu else 0.0
+        return self.control_lock_threshold if self.has_context_menu else -1.0
 
-    def is_dragging_for_pan(self) -> bool:
-        return imgui.is_mouse_dragging(self.control_button, self.lock_threshold_for_pan)
-
-    def do_control(self) -> None:
-        cx, cy = self.canvas_pos
-        cw, ch = self.canvas_size
-
-        # Using `imgui.invisible_button()` as a convenience
-        # 1) it will advance the layout cursor and
-        # 2) allows us to use `is_item_hovered()`/`is_item_active()`
-        imgui.invisible_button("##ControlButton", cw, ch, self.control_button_flags)
-
-        self.left_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_LEFT)
-        self.middle_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_MIDDLE)
-        self.right_button_clicked = imgui.is_mouse_clicked(imgui.MOUSE_BUTTON_RIGHT)
-
-        self.hovering = imgui.is_item_hovered()
-        self.activated = imgui.is_item_active()
-        self.dragging = self.is_dragging_for_pan()
-
-        io = imgui.get_io()
-        if self.activated:
-            if self.dragging:
-                self.pan_x += io.mouse_delta.x / self.zoom
-                self.pan_y += io.mouse_delta.y / self.zoom
-
-        if self.hovering and io.mouse_wheel != 0:
-            if io.mouse_wheel > 0:
-                self.zoom += self.zoom_step
-            elif io.mouse_wheel < 0:
-                self.zoom -= self.zoom_step
-
-        if self.zoom > self.zoom_max:
-            self.zoom = self.zoom_max
-        elif self.zoom < self.zoom_min:
-            self.zoom = self.zoom_min
-
-        if self.hovering:
-            mx, my = imgui.get_mouse_pos()
-            assert isinstance(mx, float)
-            assert isinstance(my, float)
-            self.local_pos_x = mx - cx
-            self.local_pos_y = my - cy
-
-            canvas_pos = self.screen_to_canvas_coords((mx, my))
-            self.canvas_pos_x = canvas_pos[0]
-            self.canvas_pos_y = canvas_pos[1]
+    def is_mouse_dragging(self, button: int) -> bool:
+        return imgui.is_mouse_dragging(button, self.lock_threshold)
 
     def vertical_grid_lines(self, step: float):
         cx, cy = self.canvas_pos
@@ -326,3 +281,72 @@ class CanvasController:
             result.append((x1, y1, x2, y2))
             y += step * self.zoom
         return result
+
+    def control(self) -> None:
+        mx, my = imgui.get_mouse_pos()
+        cx, cy = imgui.get_cursor_screen_pos()
+        cw, ch = imgui.get_content_region_available()
+        assert isinstance(mx, float)
+        assert isinstance(my, float)
+        assert isinstance(cx, float)
+        assert isinstance(cy, float)
+        assert isinstance(cw, float)
+        assert isinstance(ch, float)
+        self.draw_list = get_window_draw_list()
+        self.mouse_pos = mx, my
+        self.canvas_pos = cx, cy
+        self.canvas_size = cw, ch
+
+        cx, cy = self.canvas_pos
+        cw, ch = self.canvas_size
+        io = imgui.get_io()
+
+        # Using `imgui.invisible_button()` as a convenience
+        # 1) it will advance the layout cursor and
+        # 2) allows us to use `is_item_hovered()`/`is_item_active()`
+        imgui.invisible_button("##ControlButton", cw, ch, self.control_button_flags)
+
+        self.left_clicked = imgui.is_mouse_clicked(BUTTON_LEFT)
+        self.middle_clicked = imgui.is_mouse_clicked(BUTTON_MIDDLE)
+        self.right_clicked = imgui.is_mouse_clicked(BUTTON_RIGHT)
+
+        self.left_dragging = self.is_mouse_dragging(BUTTON_LEFT)
+        self.middle_dragging = self.is_mouse_dragging(BUTTON_MIDDLE)
+        self.right_dragging = self.is_mouse_dragging(BUTTON_RIGHT)
+
+        self.ctrl_down = io.key_ctrl
+        self.alt_down = io.key_alt
+        self.shift_down = io.key_shift
+        self.super_down = io.key_super
+
+        self.hovering = imgui.is_item_hovered()
+        self.activated = imgui.is_item_active()
+
+        if self.activated and self.middle_dragging:
+            self.pan_x += io.mouse_delta.x / self.zoom
+            self.pan_y += io.mouse_delta.y / self.zoom
+        elif self.activated and self.alt_down and self.left_dragging:
+            self.pan_x += io.mouse_delta.x / self.zoom
+            self.pan_y += io.mouse_delta.y / self.zoom
+
+        if self.hovering and io.mouse_wheel != 0:
+            if io.mouse_wheel > 0:
+                self.zoom += self.zoom_step
+            elif io.mouse_wheel < 0:
+                self.zoom -= self.zoom_step
+
+        if self.zoom > self.zoom_max:
+            self.zoom = self.zoom_max
+        elif self.zoom < self.zoom_min:
+            self.zoom = self.zoom_min
+
+        if self.hovering:
+            mx, my = imgui.get_mouse_pos()
+            assert isinstance(mx, float)
+            assert isinstance(my, float)
+            self.local_pos_x = mx - cx
+            self.local_pos_y = my - cy
+
+            canvas_pos = self.screen_to_canvas_coords((mx, my))
+            self.canvas_pos_x = canvas_pos[0]
+            self.canvas_pos_y = canvas_pos[1]

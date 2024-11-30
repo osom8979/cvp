@@ -259,7 +259,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self.begin_child_canvas()
         try:
             self.on_canvas()
-            self.on_popup_menu()
         finally:
             imgui.end_child()
 
@@ -279,8 +278,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         assert isinstance(my, float)
         mouse_pos = mx, my
 
-        self._canvas.next_state()
-        self._canvas.do_control()
+        self._canvas.control()
         self._canvas.fill(self._clear_color)
 
         graph = self.current_graph
@@ -288,12 +286,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             return
 
         self._canvas.update_nodes_state(graph.nodes)
-
         self._canvas.draw_grid_x(graph.grid_x)
         self._canvas.draw_grid_y(graph.grid_y)
         self._canvas.draw_axis_x(graph.axis_x)
         self._canvas.draw_axis_y(graph.axis_y)
-
         self._canvas.draw_nodes(graph.nodes, graph.style)
         self._canvas.draw_arcs(graph.arcs, graph.style)
 
@@ -307,12 +303,9 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
 
-    def on_popup_menu(self):
-        if not imgui.begin_popup_context_window().opened:
-            return
-
-        try:
-            if menu_item("Reset"):
-                self._canvas.reset()
-        finally:
-            imgui.end_popup()
+        if imgui.begin_popup_context_window().opened:
+            try:
+                if menu_item("Reset"):
+                    self._canvas.reset()
+            finally:
+                imgui.end_popup()

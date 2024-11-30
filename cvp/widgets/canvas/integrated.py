@@ -107,11 +107,41 @@ class IntegratedCanvas(CanvasController):
         )
 
     def is_selected_node(self, node: Node) -> bool:
-        if not self.left_button_clicked:
+        if not self.left_clicked:
             return False
 
         roi = self.canvas_to_screen_roi(node.roi)
         return imgui.is_mouse_hovering_rect(*roi)
+
+    @staticmethod
+    def _find_hovering_single_node(nodes: Sequence[Node]) -> Optional[Node]:
+        for node in nodes:
+            if node.state.hovering:
+                return node
+        return None
+
+    @staticmethod
+    def _update_nodes_single_select(nodes: Sequence[Node], selected_node: Node) -> None:
+        for node in nodes:
+            node.state.selected = selected_node == node
+
+    @staticmethod
+    def _update_nodes_all_unselect(nodes: Sequence[Node]) -> None:
+        for node in nodes:
+            node.state.selected = False
+
+    def _update_nodes_for_single_select(self, nodes: Sequence[Node]) -> None:
+        if selected_node := self._find_hovering_single_node(nodes):
+            self._update_nodes_single_select(nodes, selected_node)
+        else:
+            self._update_nodes_all_unselect(nodes)
+
+    @staticmethod
+    def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
+        for node in nodes:
+            if node.state.hovering:
+                node.state.selected = not node.state.selected
+                break
 
     def update_nodes_state(self, nodes: Sequence[Node]) -> None:
         for node in nodes:
@@ -119,16 +149,11 @@ class IntegratedCanvas(CanvasController):
             node.state.screen_roi = node_roi
             node.state.hovering = imgui.is_mouse_hovering_rect(*node_roi)
 
-        if self.hovering and self.left_button_clicked:
-            any_selected = False
-            for node in nodes:
-                if node.state.hovering:
-                    node.state.selected = not node.state.selected
-                    any_selected = True
-                    break
-            if not any_selected:
-                for node in nodes:
-                    node.state.selected = False
+        if self.hovering and self.left_clicked:
+            if self.ctrl_down:
+                self._update_nodes_for_multiple_select(nodes)
+            else:
+                self._update_nodes_for_single_select(nodes)
 
     def draw_nodes(self, nodes: Sequence[Node], style: Style) -> None:
         for node in nodes:
