@@ -7,7 +7,8 @@ import imgui
 
 from cvp.flow.datas import Canvas as CanvasProps
 from cvp.imgui.drag_float2 import drag_float2
-from cvp.imgui.draw_list import create_empty_draw_list, get_window_draw_list
+from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
+from cvp.imgui.draw_list.types import DrawList
 from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
@@ -30,7 +31,7 @@ class CanvasController:
     def __init__(self, canvas_props: Optional[CanvasProps] = None):
         self.canvas_props = canvas_props if canvas_props else CanvasProps()
 
-        self.draw_list = create_empty_draw_list()
+        self.draw_list = DrawList()
         self.mouse_pos = 0.0, 0.0
         self.canvas_pos = 0.0, 0.0
         self.canvas_size = 0.0, 0.0

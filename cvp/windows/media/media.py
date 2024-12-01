@@ -8,7 +8,7 @@ from OpenGL import GL
 
 from cvp.config.sections.media import MediaWindowConfig
 from cvp.context.context import Context
-from cvp.imgui.draw_list import get_window_draw_list
+from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
 from cvp.imgui.menu_item_ex import menu_item
 from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override

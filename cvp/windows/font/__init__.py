@@ -9,7 +9,7 @@ from cvp.config.sections.font import FontManagerConfig
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.clipboard import put_clipboard_text
-from cvp.imgui.draw_list import get_window_draw_list
+from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.input_text_disabled import input_text_disabled
