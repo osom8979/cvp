@@ -9,6 +9,7 @@ from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
+from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.menu_item_ex import menu_item
 from cvp.imgui.push_style_var import style_item_spacing
 from cvp.imgui.text_centered import text_centered
@@ -44,7 +45,7 @@ CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_R
 class FlowWindow(AuiWindow[FlowAuiConfig]):
     _prev_cursor: Optional[str]
 
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, fonts: FontMapper):
         min_width = MIN_WINDOW_WIDTH
         min_height = MIN_WINDOW_HEIGHT
         modifiable_title = False
@@ -72,7 +73,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             padding_height=padding_height,
         )
 
-        self._canvas = IntegratedCanvas()
+        self._canvas = IntegratedCanvas(fonts)
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context)
         self._right_tabs = FlowRightTabs(context)

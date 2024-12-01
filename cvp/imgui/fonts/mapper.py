@@ -98,3 +98,18 @@ class FontMapper(OrderedDict[str, Font]):
     @staticmethod
     def set_font_global_scale(scale: float) -> None:
         imgui.get_io().font_global_scale = scale
+
+    def get_font(self, name: str, size: int):
+        return self.__getitem__(self.gen_font_key(name, size))
+
+    def get_jbm_font(self, size: int):
+        return self.get_font(FONT_FILENAME_JBM_NL_NFM_R, size)
+
+    def get_ngc_font(self, size: int):
+        return self.get_font(FONT_FILENAME_NGC, size)
+
+    def get_ngc_b_font(self, size: int):
+        return self.get_font(FONT_FILENAME_NGC_B, size)
+
+    def get_mdi_font(self, size: int):
+        return self.get_font(FONT_FILENAME_MDI, size)

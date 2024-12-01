@@ -5,7 +5,7 @@ from enum import StrEnum, auto, unique
 from typing import List
 from uuid import uuid4
 
-from cvp.palette.basic import RED, WHITE, YELLOW
+from cvp.palette.basic import BLACK, RED, WHITE, YELLOW
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI
 
@@ -192,6 +192,8 @@ class Style:
     selected_node: Stroke = field(default_factory=lambda: Stroke.default_selected())
     hovering_node: Stroke = field(default_factory=lambda: Stroke.default_hovering())
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
+
+    node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
 
     def get_node_stroke(self, selected=False, hovering=False):
         if selected:

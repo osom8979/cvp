@@ -8,6 +8,9 @@ from cvp.palette.basic import RED, WHITE
 from cvp.types.colors import RGBA
 from cvp.variables import (
     DEFAULT_API_SELECT_WIDTH,
+    DEFAULT_FONT_ICON_PIXELS,
+    DEFAULT_FONT_REGULAR_PIXELS,
+    DEFAULT_FONT_SCALE,
     MAX_API_SELECT_WIDTH,
     MIN_API_SELECT_WIDTH,
 )
@@ -16,9 +19,9 @@ from cvp.variables import (
 @dataclass
 class FontConfig:
     family: str = field(default_factory=str)
-    scale: float = 1.0
-    regular_pixels: int = 14
-    icon_pixels: int = 22
+    scale: float = DEFAULT_FONT_SCALE
+    regular_pixels: int = DEFAULT_FONT_REGULAR_PIXELS
+    icon_pixels: int = DEFAULT_FONT_ICON_PIXELS
 
     @property
     def regular_font_size_pixels(self):
