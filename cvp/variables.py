@@ -11,7 +11,8 @@ DEFAULT_THEME: Final[str] = "dark"
 
 DEFAULT_FONT_SCALE: Final[float] = 1.0
 DEFAULT_NORMAL_FONT_SIZE: Final[int] = 14
-DEFAULT_MEDIUM_FONT_SIZE: Final[int] = 18
+DEFAULT_MEDIUM_FONT_SIZE: Final[int] = 22
+DEFAULT_LARGE_FONT_SIZE: Final[int] = 30
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
 CHECKSUM_DELIMITER: Final[str] = ":"

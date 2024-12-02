@@ -26,6 +26,8 @@ from cvp.imgui.fonts.font import Font
 
 class FontMapper(OrderedDict[str, Font]):
     __normal_font_name__: Final[str] = "Normal"
+    __medium_font_name__: Final[str] = "Medium"
+    __large_font_name__: Final[str] = "Large"
 
     def close(self):
         for font in self.values():
@@ -35,13 +37,34 @@ class FontMapper(OrderedDict[str, Font]):
     def gen_font_key(name: str, size: int) -> str:
         return f"{name}, {size}px"
 
-    def add_normal_font(self, size: int, *, use_texture=False):
-        if self.__contains__(self.__normal_font_name__):
-            raise KeyError(f"Already exists font key: {self.__normal_font_name__}")
+    def add_mixed_font(self, name: str, size: int, *, use_texture=False):
+        if self.__contains__(name):
+            raise KeyError(f"Already exists font key: {name}")
 
-        font = add_mixed_font(self.__normal_font_name__, size, use_texture=use_texture)
-        self.__setitem__(self.__normal_font_name__, font)
+        font = add_mixed_font(name, size, use_texture=use_texture)
+        self.__setitem__(name, font)
         return font
+
+    def add_mixed_normal_font(self, size: int, *, use_texture=False):
+        return self.add_mixed_font(
+            name=self.__normal_font_name__,
+            size=size,
+            use_texture=use_texture,
+        )
+
+    def add_mixed_medium_font(self, size: int, *, use_texture=False):
+        return self.add_mixed_font(
+            name=self.__medium_font_name__,
+            size=size,
+            use_texture=use_texture,
+        )
+
+    def add_mixed_large_font(self, size: int, *, use_texture=False):
+        return self.add_mixed_font(
+            name=self.__large_font_name__,
+            size=size,
+            use_texture=use_texture,
+        )
 
     def add_jbm_font(self, size: int, *, use_texture=False):
         key = self.gen_font_key(FONT_FILENAME_JBM_NL_NFM_R, size)
@@ -122,6 +145,34 @@ class FontMapper(OrderedDict[str, Font]):
             use_texture=use_texture,
         )
 
+    def add_medium_ttf(
+        self,
+        filepath: Union[str, PathLike[str]],
+        size: int,
+        *,
+        use_texture=False,
+    ):
+        return self.add_ttf(
+            filepath=filepath,
+            size=size,
+            name=self.__medium_font_name__,
+            use_texture=use_texture,
+        )
+
+    def add_large_ttf(
+        self,
+        filepath: Union[str, PathLike[str]],
+        size: int,
+        *,
+        use_texture=False,
+    ):
+        return self.add_ttf(
+            filepath=filepath,
+            size=size,
+            name=self.__large_font_name__,
+            use_texture=use_texture,
+        )
+
     @staticmethod
     def get_font_global_scale() -> float:
         return imgui.get_io().font_global_scale
@@ -133,3 +184,11 @@ class FontMapper(OrderedDict[str, Font]):
     @property
     def normal(self):
         return self.__getitem__(self.__normal_font_name__)
+
+    @property
+    def medium(self):
+        return self.__getitem__(self.__medium_font_name__)
+
+    @property
+    def large(self):
+        return self.__getitem__(self.__large_font_name__)
