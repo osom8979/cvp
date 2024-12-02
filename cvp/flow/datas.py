@@ -2,32 +2,12 @@
 
 from dataclasses import dataclass, field
 from enum import StrEnum, auto, unique
-from typing import Final, List
+from typing import List
 from uuid import uuid4
 
 from cvp.palette.basic import BLACK, RED, WHITE, YELLOW
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI
-
-MDI_ARROW_RIGHT_BOLD_CIRCLE: Final[str] = "\U000F0056"
-MDI_ARROW_RIGHT_BOLD_CIRCLE_OUTLINE: Final[str] = "\U000F0057"
-MDI_ARROW_RIGHT_CIRCLE_OUTLINE: Final[str] = "\U000F0CE0"
-MDI_ARROW_RIGHT_CIRCLE: Final[str] = "\U000F0CDF"
-MDI_CIRCLE: Final[str] = "\U000F0765"
-MDI_CIRCLE_OUTLINE: Final[str] = "\U000F0766"
-MDI_CIRCLE_SLICE_1: Final[str] = "\U000F0A9E"
-MDI_CIRCLE_SLICE_2: Final[str] = "\U000F0A9F"
-MDI_CIRCLE_SLICE_3: Final[str] = "\U000F0AA0"
-MDI_CIRCLE_SLICE_4: Final[str] = "\U000F0AA1"
-MDI_CIRCLE_SLICE_5: Final[str] = "\U000F0AA2"
-MDI_CIRCLE_SLICE_6: Final[str] = "\U000F0AA3"
-MDI_CIRCLE_SLICE_7: Final[str] = "\U000F0AA4"
-MDI_CIRCLE_SLICE_8: Final[str] = "\U000F0AA5"
-
-NF_FA_ARROW_RIGHT_BOLD_CIRCLE: Final[str] = "\U000F0056"
-NF_FA_ARROW_RIGHT_BOLD_CIRCLE_OUTLINE: Final[str] = "\U000F0057"
-NF_FA_CIRCLE: Final[str] = "\U0000F111"
-NF_FA_CIRCLE_O: Final[str] = "\U0000F10C"
 
 
 @unique
@@ -215,11 +195,6 @@ class Style:
 
     node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_pin_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
-
-    flow_pin_n_icon: str = NF_FA_ARROW_RIGHT_BOLD_CIRCLE_OUTLINE
-    flow_pin_y_icon: str = NF_FA_ARROW_RIGHT_BOLD_CIRCLE
-    data_pin_n_icon: str = NF_FA_CIRCLE_O
-    data_pin_y_icon: str = NF_FA_CIRCLE
 
     def get_node_stroke(self, selected=False, hovering=False):
         if selected:

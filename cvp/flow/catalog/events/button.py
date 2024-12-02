@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from cvp.flow.datas import NodeTemplate, PinTemplate
+from cvp.flow.datas import Action, NodeTemplate, PinTemplate, Stream
+from cvp.fonts.glyphs.mdi import MOVIE_OPEN_PLAY
 
 
 class ButtonEventNode(NodeTemplate):
@@ -8,6 +9,12 @@ class ButtonEventNode(NodeTemplate):
         super().__init__(
             name=type(self).__name__,
             docs="Button Event Node",
-            pins=[PinTemplate()],
+            icon=MOVIE_OPEN_PLAY,
+            pins=[
+                PinTemplate(name="InFlow", action=Action.flow, stream=Stream.input),
+                PinTemplate(name="OutFlow", action=Action.flow, stream=Stream.output),
+                PinTemplate(name="InData", action=Action.data, stream=Stream.input),
+                PinTemplate(name="OutData", action=Action.data, stream=Stream.output),
+            ],
             tags=["event"],
         )

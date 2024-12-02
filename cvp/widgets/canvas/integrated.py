@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Sequence
+from typing import Final, Optional, Sequence
 
 import imgui
 
-from cvp.flow.datas import Arc, Axis
+from cvp.flow.datas import Action, Arc, Axis
 from cvp.flow.datas import Canvas as CanvasProps
-from cvp.flow.datas import Grid, Node, Style
+from cvp.flow.datas import Grid, Node, Stream, Style
+from cvp.fonts.glyphs.mdi import (
+    MDI_ARROW_RIGHT_CIRCLE,
+    MDI_ARROW_RIGHT_CIRCLE_OUTLINE,
+    MDI_CIRCLE,
+    MDI_CIRCLE_OUTLINE,
+)
 from cvp.gl.texture import Texture
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.colors import RGBA
 from cvp.widgets.canvas.controller import CanvasController
+
+FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE_OUTLINE
+FLOW_PIN_Y_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE
+DATA_PIN_N_ICON: Final[str] = MDI_CIRCLE_OUTLINE
+DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class IntegratedCanvas(CanvasController):
@@ -204,6 +215,51 @@ class IntegratedCanvas(CanvasController):
         roi = self.canvas_to_screen_roi(node.roi)
         stroke = style.get_node_stroke(node.state.selected, node.state.hovering)
 
+        _imgui_style = imgui.get_style()
+        frame_padding = _imgui_style.frame_padding
+        window_padding = _imgui_style.window_padding
+        item_spacing = _imgui_style.item_spacing
+        item_inner_spacing = _imgui_style.item_inner_spacing
+
+        node_name_w, node_name_h = imgui.calc_text_size(node.name)
+        flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)
+        flow_y_w, flow_y_h = imgui.calc_text_size(FLOW_PIN_Y_ICON)
+        data_n_w, data_n_h = imgui.calc_text_size(DATA_PIN_N_ICON)
+        data_y_w, data_y_h = imgui.calc_text_size(DATA_PIN_Y_ICON)
+        fw = max(flow_y_w, flow_n_w)
+        fh = max(flow_y_h, flow_n_h)
+        dw = max(data_y_w, data_n_w)
+        dh = max(data_y_h, data_n_h)
+
+        flow_inputs = list()
+        data_inputs = list()
+
+        flow_outputs = list()
+        data_outputs = list()
+
+        input_name_width = 0
+        output_name_width = 0
+
+        for pin in node.pins:
+            pin_name_w, pin_name_h = imgui.calc_text_size(pin.name)
+            if pin.action == Action.flow and pin.stream == Stream.input:
+                flow_inputs.append(pin)
+                input_name_width = max(input_name_width, pin_name_w)
+            elif pin.action == Action.flow and pin.stream == Stream.output:
+                flow_outputs.append(pin)
+                output_name_width = max(output_name_width, pin_name_w)
+            elif pin.action == Action.data and pin.stream == Stream.input:
+                data_inputs.append(pin)
+                input_name_width = max(input_name_width, pin_name_w)
+            elif pin.action == Action.data and pin.stream == Stream.output:
+                data_outputs.append(pin)
+                output_name_width = max(output_name_width, pin_name_w)
+            else:
+                pass
+
+        flow_lines = max(len(flow_inputs), len(flow_outputs))
+        data_lines = max(len(data_inputs), len(data_outputs))
+
         fill_color = imgui.get_color_u32_rgba(*node.color)
         stroke_color = imgui.get_color_u32_rgba(*stroke.color)
         thickness = stroke.thickness
@@ -213,27 +269,20 @@ class IntegratedCanvas(CanvasController):
         self.draw_list.add_rect_filled(*roi, fill_color, rounding, flags)
         self.draw_list.add_rect(*roi, stroke_color, rounding, flags, thickness)
 
-        name_size = imgui.calc_text_size(node.name)
-
         x1, y1, x2, y2 = roi
         label_color = imgui.get_color_u32_rgba(*style.node_name_color)
         self.draw_list.add_text(x1, y1, label_color, node.name)
 
-        flow_y_size = imgui.calc_text_size(style.flow_pin_y_icon)
-        flow_n_size = imgui.calc_text_size(style.flow_pin_n_icon)
-        data_y_size = imgui.calc_text_size(style.data_pin_y_icon)
-        data_n_size = imgui.calc_text_size(style.data_pin_n_icon)
-        assert flow_y_size == flow_n_size
-        assert data_y_size == data_n_size
-        x2 -= flow_n_size[0]
+        x2 -= fw
 
-        y1 += name_size[1]
-        self.draw_list.add_text(x1, y1, label_color, style.flow_pin_y_icon)
-        self.draw_list.add_text(x2, y1, label_color, style.flow_pin_n_icon)
+        with self.fonts.normal_icon:
+            y1 += node_name_h
+            self.draw_list.add_text(x1, y1, label_color, FLOW_PIN_N_ICON)
+            self.draw_list.add_text(x2, y1, label_color, FLOW_PIN_Y_ICON)
 
-        y1 += data_y_size[1]
-        self.draw_list.add_text(x1, y1, label_color, style.data_pin_y_icon)
-        self.draw_list.add_text(x2, y1, label_color, style.data_pin_n_icon)
+            y1 += dh
+            self.draw_list.add_text(x1, y1, label_color, DATA_PIN_N_ICON)
+            self.draw_list.add_text(x2, y1, label_color, DATA_PIN_Y_ICON)
 
     def draw_arcs(self, arcs: Sequence[Arc], style: Style) -> None:
         for arc in arcs:
