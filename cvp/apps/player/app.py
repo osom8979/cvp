@@ -205,17 +205,18 @@ class PlayerApplication:
         self._renderer = PygameRenderer()
 
         io.fonts.clear()
-        regular_font_size_pixels = self.config.font.regular_font_size_pixels
-        self._fonts.add_jbm_font(regular_font_size_pixels)
-        self._fonts.add_ngc_font(regular_font_size_pixels)
-        self._fonts.add_ngc_b_font(regular_font_size_pixels)
-        self._fonts.add_mdi_font(self.config.font.icon_font_size_pixels)
+        normal_size_pixels = self.config.font.normal_size_pixels
 
-        user_font = self.config.font.family
-        if user_font and os.path.isfile(user_font):
-            self._fonts.add_ttf(user_font, regular_font_size_pixels)
+        user_font = self.config.font.user_font
+        if os.path.isfile(user_font):
+            self._fonts.add_normal_ttf(user_font, normal_size_pixels)
+        else:
+            self._fonts.add_normal_font(normal_size_pixels)
 
-        io.font_global_scale /= self.config.font.scale
+        # For glyph reference only
+        self._fonts.add_all_fonts(normal_size_pixels)
+
+        io.font_global_scale = self.config.font.scale
         self._renderer.refresh_font_texture()
 
         theme = self.config.appearance.theme

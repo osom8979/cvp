@@ -10,8 +10,8 @@ LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 DEFAULT_THEME: Final[str] = "dark"
 
 DEFAULT_FONT_SCALE: Final[float] = 1.0
-DEFAULT_FONT_REGULAR_PIXELS: Final[int] = 14
-DEFAULT_FONT_ICON_PIXELS: Final[int] = 22
+DEFAULT_NORMAL_FONT_SIZE: Final[int] = 14
+DEFAULT_MEDIUM_FONT_SIZE: Final[int] = 18
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
 CHECKSUM_DELIMITER: Final[str] = ":"
