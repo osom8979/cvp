@@ -213,8 +213,9 @@ class PlayerApplication:
         else:
             self._fonts.add_normal_font(normal_size_pixels)
 
-        # For glyph reference only
-        self._fonts.add_all_fonts(normal_size_pixels)
+        if self.config.font.load_all:
+            # For glyph reference only
+            self._fonts.add_all_fonts(normal_size_pixels)
 
         io.font_global_scale = self.config.font.scale
         self._renderer.refresh_font_texture()
