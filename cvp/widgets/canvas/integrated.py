@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional, Sequence
+from typing import Optional, Sequence
 
 import imgui
 
@@ -11,12 +11,6 @@ from cvp.gl.texture import Texture
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.colors import RGBA
 from cvp.widgets.canvas.controller import CanvasController
-
-NF_FA_ARROW_RIGHT_BOLD_CIRCLE: Final[str] = "\U000F0056"
-NF_FA_ARROW_RIGHT_BOLD_CIRCLE_OUTLINE: Final[str] = "\U000F0057"
-
-NF_FA_CIRCLE: Final[str] = "\U0000F111"
-NF_FA_CIRCLE_O: Final[str] = "\U0000F10C"
 
 
 class IntegratedCanvas(CanvasController):
@@ -225,26 +219,21 @@ class IntegratedCanvas(CanvasController):
         label_color = imgui.get_color_u32_rgba(*style.node_name_color)
         self.draw_list.add_text(x1, y1, label_color, node.name)
 
-        flow_y = NF_FA_ARROW_RIGHT_BOLD_CIRCLE
-        flow_n = NF_FA_ARROW_RIGHT_BOLD_CIRCLE_OUTLINE
-        data_y = NF_FA_CIRCLE
-        data_n = NF_FA_CIRCLE_O
-
-        flow_y_size = imgui.calc_text_size(flow_y)
-        flow_n_size = imgui.calc_text_size(flow_n)
-        data_y_size = imgui.calc_text_size(data_y)
-        data_n_size = imgui.calc_text_size(data_n)
+        flow_y_size = imgui.calc_text_size(style.flow_pin_y_icon)
+        flow_n_size = imgui.calc_text_size(style.flow_pin_n_icon)
+        data_y_size = imgui.calc_text_size(style.data_pin_y_icon)
+        data_n_size = imgui.calc_text_size(style.data_pin_n_icon)
         assert flow_y_size == flow_n_size
         assert data_y_size == data_n_size
         x2 -= flow_n_size[0]
 
         y1 += name_size[1]
-        self.draw_list.add_text(x1, y1, label_color, flow_y)
-        self.draw_list.add_text(x2, y1, label_color, flow_n)
+        self.draw_list.add_text(x1, y1, label_color, style.flow_pin_y_icon)
+        self.draw_list.add_text(x2, y1, label_color, style.flow_pin_n_icon)
 
         y1 += data_y_size[1]
-        self.draw_list.add_text(x1, y1, label_color, data_y)
-        self.draw_list.add_text(x2, y1, label_color, data_n)
+        self.draw_list.add_text(x1, y1, label_color, style.data_pin_y_icon)
+        self.draw_list.add_text(x2, y1, label_color, style.data_pin_n_icon)
 
     def draw_arcs(self, arcs: Sequence[Arc], style: Style) -> None:
         for arc in arcs:
