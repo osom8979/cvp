@@ -15,7 +15,7 @@ from pygame.event import Event, event_name
 from pygame.image import load as load_image
 from pygame.key import ScancodeWrapper, get_pressed
 
-from cvp.assets import get_default_icon_path
+from cvp.assets.icons import get_default_icon_path
 from cvp.config.sections.proxies.graphic import ForceEglProxy, UseAccelerateProxy
 from cvp.context.autofixer import AutoFixer
 from cvp.context.context import Context

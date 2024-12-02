@@ -2,7 +2,7 @@
 
 import os
 
-from cvp.assets import (
+from cvp.assets.fonts import (
     get_jbm_nl_nfm_r_font_path,
     get_mdi_font_path,
     get_ngc_b_font_path,

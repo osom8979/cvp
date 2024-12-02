@@ -75,6 +75,6 @@ class ZeepFileCache(ZeepCacheBase):
 
     @classmethod
     def with_package_asset(cls):
-        from cvp.assets import get_wsdl_dir
+        from cvp.assets.wsdl import get_wsdl_dir
 
         return cls(get_wsdl_dir(), readonly=True)

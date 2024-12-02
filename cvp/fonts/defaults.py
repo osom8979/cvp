@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from cvp.assets import (
+from cvp.assets.fonts import (
     get_jbm_nl_nfm_r_font_path,
     get_jbm_nl_nfm_r_font_ranges_path,
     get_mdi_font_path,

@@ -4,7 +4,7 @@ from os import PathLike
 from shutil import copytree
 from typing import Union
 
-from cvp.assets import get_wsdl_path
+from cvp.assets.wsdl import get_wsdl_dir
 from cvp.system.path import PathFlavour
 
 
@@ -13,4 +13,4 @@ class Wsdl(PathFlavour):
         super().__init__(path)
 
     def copy_asset_files(self):
-        return copytree(get_wsdl_path(), self, dirs_exist_ok=True)
+        return copytree(get_wsdl_dir(), self, dirs_exist_ok=True)

@@ -7,7 +7,7 @@ from typing import Optional, Union
 
 import imgui
 
-from cvp.assets import (
+from cvp.assets.fonts import (
     FONT_FILENAME_JBM_NL_NFM_R,
     FONT_FILENAME_MDI,
     FONT_FILENAME_NGC,
