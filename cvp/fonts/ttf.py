@@ -93,3 +93,11 @@ class TTF:
 
     def read_default_ranges(self) -> List[CodepointRange]:
         return read_ranges(self.get_default_ranges_path())
+
+    def write_glyphs(self, path: Union[str, PathLike[str]]) -> int:
+        path = path if isinstance(path, Path) else Path(path)
+        assert isinstance(path, Path)
+        buffer = StringIO()
+        for codepoint, glyph_name in self.get_character_map().items():
+            buffer.write(f"0x{codepoint:06x} {glyph_name}\n")
+        return path.write_text(buffer.getvalue())

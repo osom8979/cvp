@@ -3,6 +3,7 @@
 from cvp.assets.fonts import (
     get_jbm_nl_nfm_r_font_path,
     get_jbm_nl_nfm_r_font_ranges_path,
+    get_mdi_font_glyphs_path,
     get_mdi_font_path,
     get_mdi_font_ranges_path,
     get_ngc_b_font_path,
@@ -45,8 +46,7 @@ def write_default_font_ranges(*, printer=print, verbose=False) -> None:
 
 
 def _write_default_font_glyphs() -> None:
-    # TODO
-    pass
+    create_mdi_ttf().write_glyphs(get_mdi_font_glyphs_path())
 
 
 def write_default_font_glyphs(*, printer=print, verbose=False) -> None:
