@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from math import fmod
-from typing import Final, Optional
+from typing import Final, NamedTuple
 
 import imgui
 
-from cvp.flow.datas import Canvas as CanvasProps
 from cvp.imgui.drag_float2 import drag_float2
 from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
 from cvp.imgui.draw_list.types import DrawList
@@ -24,9 +23,25 @@ BUTTON_MIDDLE: Final[int] = imgui.MOUSE_BUTTON_MIDDLE
 BUTTON_RIGHT: Final[int] = imgui.MOUSE_BUTTON_RIGHT
 
 
+class ControllerResult(NamedTuple):
+    changed: bool
+    pan_x: float = 0.0
+    pan_y: float = 0.0
+    zoom: float = 1.0
+
+    def __bool__(self) -> bool:
+        return self.changed
+
+    @property
+    def pan(self):
+        return self.pan_x, self.pan_y
+
+
 class CanvasController:
-    def __init__(self, canvas_props: Optional[CanvasProps] = None):
-        self.canvas_props = canvas_props if canvas_props else CanvasProps()
+    def __init__(self):
+        self.pan_x = 0.0
+        self.pan_y = 0.0
+        self.zoom = 1.0
 
         self.draw_list = DrawList()
         self.mouse_pos = 0.0, 0.0
@@ -139,22 +154,6 @@ class CanvasController:
         return self.cx, self.cy, self.cx + self.cw, self.cy + self.ch
 
     @property
-    def pan_x(self) -> float:
-        return self.canvas_props.pan_x
-
-    @pan_x.setter
-    def pan_x(self, value: float) -> None:
-        self.canvas_props.pan_x = value
-
-    @property
-    def pan_y(self) -> float:
-        return self.canvas_props.pan_y
-
-    @pan_y.setter
-    def pan_y(self, value: float) -> None:
-        self.canvas_props.pan_y = value
-
-    @property
     def pan(self) -> Point:
         return self.pan_x, self.pan_y
 
@@ -162,14 +161,6 @@ class CanvasController:
     def pan(self, value: Point) -> None:
         self.pan_x = value[0]
         self.pan_y = value[1]
-
-    @property
-    def zoom(self) -> float:
-        return self.canvas_props.zoom
-
-    @zoom.setter
-    def zoom(self, value: float) -> None:
-        self.canvas_props.zoom = value
 
     def as_unformatted_text(self):
         return (
@@ -258,14 +249,19 @@ class CanvasController:
             finally:
                 imgui.tree_pop()
 
-    def render_controllers(self, dryrun=False, debugging=False) -> None:
-        self.drag_pan(dryrun=dryrun)
-        self.slider_zoom(dryrun=dryrun)
+    def render_controllers(self, dryrun=False, debugging=False) -> ControllerResult:
+        pan_result = self.drag_pan(dryrun=dryrun)
+        zoom_result = self.slider_zoom(dryrun=dryrun)
+
         with style_disable_input():
             self.input_local_pos()
             self.input_canvas_pos()
+
         if debugging:
             self.tree_debugging()
+
+        changed = pan_result.clicked and zoom_result.changed
+        return ControllerResult(changed, self.pan_x, self.pan_y, self.zoom)
 
     def point_in_canvas_rect(self, point: Point) -> bool:
         x, y = point

@@ -25,12 +25,8 @@ DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class GraphCanvas(CanvasController):
-    def __init__(
-        self,
-        fonts: FontMapper,
-        canvas_props: Optional[CanvasProps] = None,
-    ):
-        super().__init__(canvas_props)
+    def __init__(self, fonts: FontMapper):
+        super().__init__()
         self.fonts = fonts
 
     def fill(self, color: RGBA) -> None:

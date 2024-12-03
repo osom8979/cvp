@@ -178,7 +178,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if graph is None:
             return
 
-        self._canvas.canvas_props = graph.canvas
+        # TODO: Initialize canvas properties
 
     def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
@@ -240,7 +240,12 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
-        self._canvas.render_controllers(debugging=self.context.debug)
+        control_result = self._canvas.render_controllers(debugging=self.context.debug)
+        current_graph = self.current_graph
+        if current_graph is not None and control_result:
+            current_graph.canvas.pan_x = control_result.pan_x
+            current_graph.canvas.pan_y = control_result.pan_y
+            current_graph.canvas.zoom = control_result.zoom
         imgui.spacing()
 
         self._right_tabs.do_process(self._node_path)
