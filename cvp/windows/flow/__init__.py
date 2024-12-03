@@ -73,6 +73,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             padding_height=padding_height,
         )
 
+        self._fonts = fonts
         self._canvas = GraphCanvas(fonts)
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context)

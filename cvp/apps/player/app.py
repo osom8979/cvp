@@ -31,6 +31,7 @@ from cvp.renderer.window.mapper import WindowMapper
 from cvp.renderer.world.world import World
 from cvp.windows.flow import FlowWindow
 from cvp.windows.font import FontManager
+from cvp.windows.games.tetrix import TetrixWindow
 from cvp.windows.labeling import LabelingWindow
 from cvp.windows.layout import LayoutManager
 from cvp.windows.media import MediaManager
@@ -64,6 +65,7 @@ class PlayerApplication:
         self._pref_manager = PreferenceManager(self._context)
         self._process_manager = ProcessManager(self._context)
         self._stitching = StitchingWindow(self._context)
+        self._tetrix = TetrixWindow(self._context)
         self._toast = ToastWindow(self._context)
         self._window_manager = WindowManager(self._context, self._windows)
         self._wsd_manager = WsdManager(self._context)
@@ -248,6 +250,7 @@ class PlayerApplication:
             self._pref_manager,
             self._process_manager,
             self._stitching,
+            self._tetrix,
             self._toast,
             self._window_manager,
             self._wsd_manager,
@@ -395,6 +398,11 @@ class PlayerApplication:
             self._process_manager.flip_opened()
         if imgui.menu_item("Window", None, self._window_manager.opened)[0]:
             self._window_manager.flip_opened()
+
+        imgui.separator()
+        imgui.menu_item("Game", None, False, False)
+        if imgui.menu_item("TetriX", None, self._tetrix.opened)[0]:
+            self._tetrix.flip_opened()
 
         imgui.separator()
 

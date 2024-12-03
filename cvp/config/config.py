@@ -26,6 +26,7 @@ from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.config.sections.preference import PreferenceManagerConfig as PrefManagerConfig
 from cvp.config.sections.process import ProcessManagerConfig
 from cvp.config.sections.stitching import StitchingAuiConfig
+from cvp.config.sections.tetrix import TetrixWindowConfig
 from cvp.config.sections.toast import ToastWindowConfig
 from cvp.config.sections.window import WindowManagerConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
@@ -60,6 +61,7 @@ class Config:
     preference_manager: PrefManagerConfig = field(default_factory=PrefManagerConfig)
     process_manager: ProcessManagerConfig = field(default_factory=ProcessManagerConfig)
     stitching_aui: StitchingAuiConfig = field(default_factory=StitchingAuiConfig)
+    tetrix_window: TetrixWindowConfig = field(default_factory=TetrixWindowConfig)
     toast_window: ToastWindowConfig = field(default_factory=ToastWindowConfig)
     window_manager: WindowManagerConfig = field(default_factory=WindowManagerConfig)
     wsd_manager: WsdManagerConfig = field(default_factory=WsdManagerConfig)
