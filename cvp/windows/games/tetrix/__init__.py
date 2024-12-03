@@ -6,7 +6,14 @@ from typing import Final, Sequence, Tuple
 import imgui
 import numpy as np
 
-from cvp.config.sections.tetrix import TetrixWindowConfig
+from cvp.config.sections.tetrix import (
+    DEFAULT_BOARD_COLS,
+    DEFAULT_BOARD_ROWS,
+    DEFAULT_CELL_PIXELS,
+    DEFAULT_DROP_INTERVAL_INIT,
+    DEFAULT_DROP_INTERVAL_STEP,
+    TetrixWindowConfig,
+)
 from cvp.context.context import Context
 from cvp.imgui.button import button
 from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
@@ -15,6 +22,22 @@ from cvp.imgui.text_centered import text_centered
 from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
 from cvp.types.shapes import ROI
+
+SINGLE_LINE_CLEAR_SCORE: Final[int] = 100
+DOUBLE_LINE_CLEAR_SCORE: Final[int] = 300
+TRIPLE_LINE_CLEAR_SCORE: Final[int] = 500
+TETRIX_LINE_CLEAR_SCORE: Final[int] = 800
+LINE_CLEAR_SCORES: Final[Sequence[int]] = (
+    SINGLE_LINE_CLEAR_SCORE,
+    DOUBLE_LINE_CLEAR_SCORE,
+    TRIPLE_LINE_CLEAR_SCORE,
+    TETRIX_LINE_CLEAR_SCORE,
+)
+
+T_SPIN_SCORE: Final[int] = 800
+T_SPIN_SINGLE_SCORE: Final[int] = 800
+T_SPIN_DOUBLE_SCORE: Final[int] = 1200
+T_SPIN_TRIPLE_SCORE: Final[int] = 1600
 
 BlockShapeType = Sequence[Sequence[int]]
 
@@ -42,23 +65,31 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         super().__init__(
             context=context,
             window_config=context.config.tetrix_window,
-            title="Media",
+            title="Tetrix",
             closable=True,
             flags=None,
-            modifiable_title=True,
+            modifiable_title=False,
         )
+
+        config = context.config.tetrix_window
+        assert DEFAULT_BOARD_ROWS <= config.board_rows
+        assert DEFAULT_BOARD_COLS <= config.board_cols
+        assert DEFAULT_CELL_PIXELS <= config.cell_pixels
+        assert DEFAULT_DROP_INTERVAL_INIT <= config.drop_interval_init
+        assert DEFAULT_DROP_INTERVAL_STEP <= config.drop_interval_step
+
+        rows = config.board_rows
+        cols = config.board_cols
+        self._board = np.zeros((rows, cols), dtype=int)
+
         self._blocks = BLOCKS
-        self._width = context.config.tetrix_window.board_width
-        self._height = context.config.tetrix_window.board_height
-        self._board = np.zeros((self._height, self._width), dtype=int)
-        self._current_piece = self._blocks[0]
+        self._current_block = self._blocks[0]
         self._current_pos = [0, 0]
         self._game_over = True
-        self._score = 0
+        self._current_score = 0
         self._current_time = 0.0
         self._last_drop_time = 0.0
-        self._drop_interval = 0.5
-        self._cell_size = 20
+        self._drop_interval = config.drop_interval_init
         self.new_piece()
 
     @property
@@ -66,8 +97,8 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         return imgui.get_style().window_padding
 
     @property
-    def cell_size(self):
-        return self._cell_size
+    def cell_pixels(self):
+        return self.window_config.cell_pixels
 
     @property
     def current_y(self):
@@ -105,23 +136,45 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
     def high_score(self, value: int) -> None:
         self.window_config.high_score = value
 
+    @property
+    def cols(self):
+        return self._board.shape[1]
+
+    @property
+    def rows(self):
+        return self._board.shape[0]
+
     def get_cell(self, x: int, y: int) -> int:
         return self._board[y][x]
 
     def set_cell(self, x: int, y: int, value: int) -> None:
         self._board[y][x] = value
 
+    def clear_board(self) -> None:
+        rows = self.window_config.tetrix_window.board_rows
+        cols = self.window_config.tetrix_window.board_cols
+        self._board = np.zeros((rows, cols), dtype=int)
+
+    def clear_state(self) -> None:
+        self._board = np.zeros((self.rows, self.cols), dtype=int)
+        self._current_pos = [0, 0]
+        self._game_over = True
+        self._current_score = 0
+        self._current_time = 0.0
+        self._last_drop_time = 0.0
+        self.new_piece()
+
     def new_piece(self):
-        self._current_piece = choice(BLOCKS)
-        self._current_pos = [0, self._width // 2 - len(self._current_piece[0]) // 2]
+        self._current_block = choice(BLOCKS)
+        self._current_pos = [0, self.cols // 2 - len(self._current_block[0]) // 2]
 
         if not self.is_valid_move(0, 0):
             self._game_over = True
-            if self.high_score < self._score:
-                self.high_score = self._score
+            if self.high_score < self._current_score:
+                self.high_score = self._current_score
 
-    def is_valid_move(self, dy, dx):
-        for y, row in enumerate(self._current_piece):
+    def is_valid_move(self, dy: int, dx: int):
+        for y, row in enumerate(self._current_block):
             for x, cell in enumerate(row):
                 if not cell:
                     continue
@@ -130,9 +183,9 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
                 new_x = self.current_x + x + dx
 
                 if (
-                    new_y >= self._height
+                    new_y >= self.rows
                     or new_x < 0
-                    or new_x >= self._width
+                    or new_x >= self.cols
                     or (new_y >= 0 and self.get_cell(new_x, new_y))
                 ):
                     return False
@@ -148,14 +201,14 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
 
     def rotate(self):
         if not self._game_over:
-            rotated = list(zip(*self._current_piece[::-1]))
-            original_piece = self._current_piece
-            self._current_piece = rotated
+            rotated = list(zip(*self._current_block[::-1]))
+            original_piece = self._current_block
+            self._current_block = rotated
 
             if not self.is_valid_move(0, 0):
-                self._current_piece = original_piece
+                self._current_block = original_piece
 
-    def drop(self):
+    def soft_drop(self):
         if not self._game_over and self.is_valid_move(1, 0):
             self._current_pos[0] += 1
         else:
@@ -163,44 +216,47 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
             self.clear_lines()
             self.new_piece()
 
+    def hard_drop(self):
+        pass
+
     def lock_piece(self):
-        for y, row in enumerate(self._current_piece):
+        for y, row in enumerate(self._current_block):
             for x, cell in enumerate(row):
                 if cell:
                     ny = self._current_pos[0] + y
                     nx = self._current_pos[1] + x
-                    if 0 <= ny < self._height and 0 <= nx < self._width:
+                    if 0 <= ny < self.rows and 0 <= nx < self.cols:
                         self._board[ny][nx] = 1
 
     def clear_lines(self):
         lines_cleared = 0
-        y = self._height - 1
+        y = self.rows - 1
         while y >= 0:
             if all(self._board[y]):
                 self._board = np.delete(self._board, y, axis=0)
-                self._board = np.vstack([np.zeros(self._width, dtype=int), self._board])
+                self._board = np.vstack([np.zeros(self.cols, dtype=int), self._board])
                 lines_cleared += 1
             else:
                 y -= 1
 
         if lines_cleared > 0:
-            self._score += [0, 40, 100, 300, 1200][lines_cleared]
+            self._current_score += [0, 40, 100, 300, 1200][lines_cleared]
 
     @override
     def on_process(self) -> None:
-        imgui.text(f"Score: {self._score}")
+        imgui.text(f"Score: {self._current_score}")
         imgui.same_line()
         imgui.text(f"High: {self.high_score}")
 
         if button("Start", disabled=not self._game_over):
-            self._score = 0
+            self._current_score = 0
             self._board[::] = 0
             self._game_over = False
             self._current_pos = [0, 0]
         imgui.same_line()
         if button("Stop", disabled=self._game_over):
-            if self.high_score < self._score:
-                self.high_score = self._score
+            if self.high_score < self._current_score:
+                self.high_score = self._current_score
             self._game_over = True
         imgui.separator()
 
@@ -226,7 +282,7 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
     def process_auto_drop(self) -> None:
         self._current_time = imgui.get_time()
         if self._current_time - self._last_drop_time > self._drop_interval:
-            self.drop()
+            self.soft_drop()
             self._last_drop_time = self._current_time
 
     def process_key_events(self) -> None:
@@ -236,23 +292,25 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         if imgui.is_key_pressed(kmap[imgui.KEY_RIGHT_ARROW]):
             self.move(1)
         if imgui.is_key_pressed(kmap[imgui.KEY_DOWN_ARROW]):
-            self.drop()
+            self.soft_drop()
         if imgui.is_key_pressed(kmap[imgui.KEY_UP_ARROW]):
             self.rotate()
+        if imgui.is_key_pressed(kmap[imgui.KEY_SPACE]):
+            self.hard_drop()
 
     def draw_bord(self, draw_list: DrawList, canvas_roi: ROI) -> None:
         fixed_block_color = self.fixed_block_color
         outline_color = self.outline_color
         cx = canvas_roi[0] + self.window_padding[0]
         cy = canvas_roi[1] + self.window_padding[1]
-        cell_size = self.cell_size
+        cell_pixels = self.cell_pixels
 
-        for y in range(self._height):
-            for x in range(self._width):
-                x1 = cx + x * cell_size
-                y1 = cy + y * cell_size
-                x2 = x1 + cell_size
-                y2 = y1 + cell_size
+        for y in range(self.rows):
+            for x in range(self.cols):
+                x1 = cx + x * cell_pixels
+                y1 = cy + y * cell_pixels
+                x2 = x1 + cell_pixels
+                y2 = y1 + cell_pixels
 
                 if self.get_cell(x, y):
                     draw_list.add_rect_filled(x1, y1, x2, y2, fixed_block_color)
@@ -266,18 +324,18 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         block_color = self.current_block_color
         cx = canvas_roi[0] + self.window_padding[0]
         cy = canvas_roi[1] + self.window_padding[1]
-        cell_size = self.cell_size
+        cell_pixels = self.cell_pixels
         current_x = self.current_x
         current_y = self.current_y
 
-        for y, row in enumerate(self._current_piece):
+        for y, row in enumerate(self._current_block):
             for x, cell in enumerate(row):
                 if not cell:
                     continue
 
-                x1 = cx + (current_x + x) * cell_size
-                y1 = cy + (current_y + y) * cell_size
-                x2 = x1 + cell_size
-                y2 = y1 + cell_size
+                x1 = cx + (current_x + x) * cell_pixels
+                y1 = cy + (current_y + y) * cell_pixels
+                x2 = x1 + cell_pixels
+                y2 = y1 + cell_pixels
 
                 draw_list.add_rect_filled(x1, y1, x2, y2, block_color)
