@@ -145,7 +145,6 @@ class Canvas:
     pan_x: float = 0.0
     pan_y: float = 0.0
     zoom: float = 1.0
-    alpha: float = 1.0
 
 
 @dataclass

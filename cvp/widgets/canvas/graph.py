@@ -16,7 +16,7 @@ from cvp.fonts.glyphs.mdi import (
 from cvp.gl.texture import Texture
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.colors import RGBA
-from cvp.widgets.canvas.controller import CanvasController
+from cvp.widgets.canvas.base.controller import CanvasController
 
 FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE_OUTLINE
 FLOW_PIN_Y_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE
@@ -24,7 +24,7 @@ DATA_PIN_N_ICON: Final[str] = MDI_CIRCLE_OUTLINE
 DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
-class IntegratedCanvas(CanvasController):
+class GraphCanvas(CanvasController):
     def __init__(
         self,
         fonts: FontMapper,

@@ -14,13 +14,10 @@ from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
 from cvp.types.shapes import ROI, Point
 
-_BUTTON_LEFT_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
-_BUTTON_MIDDLE_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
-_BUTTON_RIGHT_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
-
-ALL_BUTTON_FLAGS: Final[int] = (
-    _BUTTON_LEFT_FLAG | _BUTTON_MIDDLE_FLAG | _BUTTON_RIGHT_FLAG
-)
+LBUTTON_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
+MBUTTON_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
+RBUTTON_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_RIGHT
+ALL_BUTTON_FLAGS: Final[int] = LBUTTON_FLAG | MBUTTON_FLAG | RBUTTON_FLAG
 
 BUTTON_LEFT: Final[int] = imgui.MOUSE_BUTTON_LEFT
 BUTTON_MIDDLE: Final[int] = imgui.MOUSE_BUTTON_MIDDLE
@@ -174,19 +171,10 @@ class CanvasController:
     def zoom(self, value: float) -> None:
         self.canvas_props.zoom = value
 
-    @property
-    def alpha(self) -> float:
-        return self.canvas_props.alpha
-
-    @alpha.setter
-    def alpha(self, value: float) -> None:
-        self.canvas_props.alpha = value
-
     def as_unformatted_text(self):
         return (
             f"Pen: {self.pan_x:.02f}, {self.pan_y:.02f}\n"
             f"Zoom: {self.zoom:.02f}\n"
-            f"Alpha: {self.alpha:.02f}\n"
             f"Mouse pos: {self.mx:.02f}, {self.my:.02f}\n"
             f"Canvas pos: {self.cx:.02f}, {self.cy:.02f}\n"
             f"Canvas size: {self.cw:.02f}, {self.ch:.02f}\n"
@@ -214,7 +202,6 @@ class CanvasController:
         self.pan_x = 0.0
         self.pan_y = 0.0
         self.zoom = 1.0
-        self.alpha = 1.0
 
     def drag_pan(self, dryrun=False):
         result = drag_float2(
@@ -243,18 +230,6 @@ class CanvasController:
         )
         if not dryrun and result:
             self.zoom = result.value
-        return result
-
-    def slider_alpha(self, dryrun=False):
-        result = slider_float(
-            self.alpha_label,
-            self.alpha,
-            self.alpha_min,
-            self.alpha_max,
-            self.alpha_fmt,
-        )
-        if not dryrun and result:
-            self.alpha = result.value
         return result
 
     def input_local_pos(self):
@@ -286,7 +261,6 @@ class CanvasController:
     def render_controllers(self, dryrun=False, debugging=False) -> None:
         self.drag_pan(dryrun=dryrun)
         self.slider_zoom(dryrun=dryrun)
-        self.slider_alpha(dryrun=dryrun)
         with style_disable_input():
             self.input_local_pos()
             self.input_canvas_pos()
