@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Final, Optional, Sequence
+from weakref import ReferenceType, ref
 
 import imgui
 
@@ -23,10 +24,27 @@ DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class GraphCanvas(CanvasController):
+    _graph: ReferenceType[Graph]
+    _fonts: ReferenceType[FontMapper]
+
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
-        self.graph = graph
-        self.fonts = fonts
+        self._graph = ref(graph)
+        self._fonts = ref(fonts)
+
+    @property
+    def graph(self) -> Graph:
+        graph = self._graph()
+        if graph is None:
+            raise ReferenceError("The graph instance has expired")
+        return graph
+
+    @property
+    def fonts(self) -> FontMapper:
+        fonts = self._fonts()
+        if fonts is None:
+            raise ReferenceError("The fonts instance has expired")
+        return fonts
 
     def process_controllers(self, debugging=False) -> None:
         if result := self.render_controllers(debugging=debugging):
@@ -35,7 +53,8 @@ class GraphCanvas(CanvasController):
             self.graph.canvas.zoom = result.zoom
 
     def fill(self) -> None:
-        color = imgui.get_color_u32_rgba(*self.graph.color)
+        graph = self.graph
+        color = imgui.get_color_u32_rgba(*graph.color)
         self.draw_list.add_rect_filled(*self.canvas_roi, color)
 
     def draw_grid_x(self, grid_x: Grid) -> None:
@@ -210,21 +229,16 @@ class GraphCanvas(CanvasController):
         for node in nodes:
             self.draw_node(node, style)
 
-    def draw_node(self, node: Node, style: Style) -> None:
+    def draw_node(self, node: Node, style: Style, debug=True) -> None:
         roi = self.canvas_to_screen_roi(node.roi)
         stroke = style.get_node_stroke(node.state.selected, node.state.hovering)
 
-        _imgui_style = imgui.get_style()
-        frame_padding = _imgui_style.frame_padding
-        window_padding = _imgui_style.window_padding
-        item_spacing = _imgui_style.item_spacing
-        item_inner_spacing = _imgui_style.item_inner_spacing
+        with self.fonts.normal_icon:
+            flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)
+            flow_y_w, flow_y_h = imgui.calc_text_size(FLOW_PIN_Y_ICON)
+            data_n_w, data_n_h = imgui.calc_text_size(DATA_PIN_N_ICON)
+            data_y_w, data_y_h = imgui.calc_text_size(DATA_PIN_Y_ICON)
 
-        node_name_w, node_name_h = imgui.calc_text_size(node.name)
-        flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)
-        flow_y_w, flow_y_h = imgui.calc_text_size(FLOW_PIN_Y_ICON)
-        data_n_w, data_n_h = imgui.calc_text_size(DATA_PIN_N_ICON)
-        data_y_w, data_y_h = imgui.calc_text_size(DATA_PIN_Y_ICON)
         fw = max(flow_y_w, flow_n_w)
         fh = max(flow_y_h, flow_n_h)
         dw = max(data_y_w, data_n_w)
@@ -236,25 +250,25 @@ class GraphCanvas(CanvasController):
         flow_outputs = list()
         data_outputs = list()
 
-        input_name_width = 0
-        output_name_width = 0
+        input_name_w = 0
+        output_name_w = 0
 
         for pin in node.pins:
             pin_name_w, pin_name_h = imgui.calc_text_size(pin.name)
             if pin.action == Action.flow and pin.stream == Stream.input:
                 flow_inputs.append(pin)
-                input_name_width = max(input_name_width, pin_name_w)
+                input_name_w = max(input_name_w, pin_name_w)
             elif pin.action == Action.flow and pin.stream == Stream.output:
                 flow_outputs.append(pin)
-                output_name_width = max(output_name_width, pin_name_w)
+                output_name_w = max(output_name_w, pin_name_w)
             elif pin.action == Action.data and pin.stream == Stream.input:
                 data_inputs.append(pin)
-                input_name_width = max(input_name_width, pin_name_w)
+                input_name_w = max(input_name_w, pin_name_w)
             elif pin.action == Action.data and pin.stream == Stream.output:
                 data_outputs.append(pin)
-                output_name_width = max(output_name_width, pin_name_w)
+                output_name_w = max(output_name_w, pin_name_w)
             else:
-                pass
+                assert pin.action == Action.none
 
         flow_lines = max(len(flow_inputs), len(flow_outputs))
         data_lines = max(len(data_inputs), len(data_outputs))
@@ -265,23 +279,83 @@ class GraphCanvas(CanvasController):
         rounding = stroke.rounding
         flags = stroke.flags
 
+        isw = self.item_spacing[0]
+        ish = self.item_spacing[1]
+
+        node_name_w, node_name_h = imgui.calc_text_size(node.name)
+        # w: width
+        # u: user
+        # t: top
+        # f: flow
+        # d: data
+        wu = roi[2] - roi[0]
+        wt = isw + node_name_w + isw
+        wf = isw + fw + isw + input_name_w + isw + output_name_w + isw + fw + isw
+        wd = isw + dw + isw + input_name_w + isw + output_name_w + isw + dw + isw
+        node_width = max((wu, wt, wf, wd))
+        x1, y1, x2, y2 = roi
+        x2 = x1 + node_width
+        roi = x1, y1, x2, y2
+
         self.draw_list.add_rect_filled(*roi, fill_color, rounding, flags)
         self.draw_list.add_rect(*roi, stroke_color, rounding, flags, thickness)
 
-        x1, y1, x2, y2 = roi
         label_color = imgui.get_color_u32_rgba(*style.node_name_color)
-        self.draw_list.add_text(x1, y1, label_color, node.name)
+        self.draw_list.add_text(x1 + isw, y1 + ish, label_color, node.name)
 
-        x2 -= fw
+        node_name_roi = x1, y1, x2, y1 + ish + node_name_h + ish
+
+        flow_h = ish + (fh + ish) * flow_lines
+        flow_pin_roi = x1, node_name_roi[3], x2, node_name_roi[3] + flow_h
+
+        data_h = ish + (dh + ish) * data_lines
+        data_pin_roi = x1, flow_pin_roi[3], x2, flow_pin_roi[3] + data_h
+
+        if debug:
+            self.draw_list.add_rect(*node_name_roi, label_color)
+            self.draw_list.add_rect(*flow_pin_roi, label_color)
+            self.draw_list.add_rect(*data_pin_roi, label_color)
 
         with self.fonts.normal_icon:
-            y1 += node_name_h
-            self.draw_list.add_text(x1, y1, label_color, FLOW_PIN_N_ICON)
-            self.draw_list.add_text(x2, y1, label_color, FLOW_PIN_Y_ICON)
+            for i, pin in enumerate(flow_inputs):
+                x1 = flow_pin_roi[0] + isw
+                y1 = flow_pin_roi[1] + ish + (fh + ish) * i
+                self.draw_list.add_text(x1, y1, label_color, FLOW_PIN_N_ICON)
+                with self.fonts.normal_text:
+                    self.draw_list.add_text(x1 + fw + isw, y1, label_color, pin.name)
 
-            y1 += dh
-            self.draw_list.add_text(x1, y1, label_color, DATA_PIN_N_ICON)
-            self.draw_list.add_text(x2, y1, label_color, DATA_PIN_Y_ICON)
+            for i, pin in enumerate(data_inputs):
+                x1 = data_pin_roi[0] + isw
+                y1 = data_pin_roi[1] + ish + (dh + ish) * i
+                self.draw_list.add_text(x1, y1, label_color, DATA_PIN_N_ICON)
+                with self.fonts.normal_text:
+                    self.draw_list.add_text(x1 + dw + isw, y1, label_color, pin.name)
+
+            for i, pin in enumerate(flow_outputs):
+                x1 = flow_pin_roi[2] - isw - fw
+                y1 = flow_pin_roi[1] + ish + (fh + ish) * i
+                self.draw_list.add_text(x1, y1, label_color, FLOW_PIN_Y_ICON)
+                with self.fonts.normal_text:
+                    pin_name_w, pin_name_h = imgui.calc_text_size(pin.name)
+                    self.draw_list.add_text(
+                        x1 - isw - pin_name_w,
+                        y1,
+                        label_color,
+                        pin.name,
+                    )
+
+            for i, pin in enumerate(data_outputs):
+                x1 = data_pin_roi[2] - isw - dw
+                y1 = data_pin_roi[1] + ish + (dh + ish) * i
+                self.draw_list.add_text(x1, y1, label_color, DATA_PIN_Y_ICON)
+                with self.fonts.normal_text:
+                    pin_name_w, pin_name_h = imgui.calc_text_size(pin.name)
+                    self.draw_list.add_text(
+                        x1 - isw - pin_name_w,
+                        y1,
+                        label_color,
+                        pin.name,
+                    )
 
     def draw_arcs(self, arcs: Sequence[Arc], style: Style) -> None:
         for arc in arcs:

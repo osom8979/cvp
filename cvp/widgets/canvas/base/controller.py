@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import fmod
-from typing import Final, NamedTuple
+from typing import Final, NamedTuple, Tuple
 
 import imgui
 
@@ -116,6 +116,22 @@ class CanvasController:
     def is_pan_mode(self) -> bool:
         # Pressing the ALT button switches to 'Canvas Pan Mode'
         return self.alt_down
+
+    @property
+    def frame_padding(self) -> Tuple[int, int]:
+        return imgui.get_style().frame_padding
+
+    @property
+    def window_padding(self) -> Tuple[int, int]:
+        return imgui.get_style().window_padding
+
+    @property
+    def item_spacing(self) -> Tuple[int, int]:
+        return imgui.get_style().item_spacing
+
+    @property
+    def item_inner_spacing(self) -> Tuple[int, int]:
+        return imgui.get_style().item_inner_spacing
 
     @property
     def mx(self):

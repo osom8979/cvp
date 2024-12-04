@@ -65,7 +65,7 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         super().__init__(
             context=context,
             window_config=context.config.tetrix_window,
-            title="Tetrix",
+            title="TetriX",
             closable=True,
             flags=None,
             modifiable_title=False,
