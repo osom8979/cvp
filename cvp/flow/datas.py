@@ -210,7 +210,7 @@ class Graph:
     name: str = field(default_factory=str)
     docs: str = field(default_factory=str)
     icon: str = field(default_factory=str)
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    color: RGBA = field(default_factory=lambda: (0.5, 0.5, 0.5, 1.0))
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)

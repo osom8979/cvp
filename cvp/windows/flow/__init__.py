@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional
+from typing import Dict, Final, Optional
 
 import imgui
 
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
+from cvp.flow.datas import Graph
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.fonts.mapper import FontMapper
@@ -43,6 +44,7 @@ CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_R
 
 
 class FlowWindow(AuiWindow[FlowAuiConfig]):
+    _canvases: Dict[str, GraphCanvas]
     _prev_cursor: Optional[str]
 
     def __init__(self, context: Context, fonts: FontMapper):
@@ -74,7 +76,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         )
 
         self._fonts = fonts
-        self._canvas = GraphCanvas(fonts)
+        self._canvases = dict()
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context)
         self._right_tabs = FlowRightTabs(context)
@@ -83,8 +85,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._prev_cursor = None
         self._graph_path = str()
         self._node_path = str()
-
-        self._clear_color = 0.5, 0.5, 0.5, 1.0
 
         self._split_tree = SplitTreeProxy(context.config.flow_aui)
         self._tree_splitter = Splitter.from_horizontal(
@@ -126,8 +126,23 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self.window_config.split_tree = value
 
     @property
-    def current_graph(self):
+    def current_graph(self) -> Optional[Graph]:
         return self.context.fm.current_graph
+
+    @property
+    def current_canvas(self) -> Optional[GraphCanvas]:
+        graph = self.current_graph
+        if graph is None:
+            return None
+
+        canvas = self._canvases.get(graph.uuid)
+        if canvas is None:
+            canvas = GraphCanvas(graph, self._fonts)
+            self._canvases[graph.uuid] = canvas
+
+        assert canvas is not None
+        assert isinstance(canvas, GraphCanvas)
+        return canvas
 
     def on_new_graph_popup(self, name: str) -> None:
         graph = self.context.fm.create_graph(name, append=True, open=True)
@@ -241,14 +256,9 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
-        control_result = self._canvas.render_controllers(debugging=self.context.debug)
-        current_graph = self.current_graph
-        if current_graph is not None and control_result:
-            current_graph.canvas.pan_x = control_result.pan_x
-            current_graph.canvas.pan_y = control_result.pan_y
-            current_graph.canvas.zoom = control_result.zoom
+        if canvas := self.current_canvas:
+            canvas.process_controllers(debugging=self.context.debug)
         imgui.spacing()
-
         self._right_tabs.do_process(self._node_path)
 
     @override
@@ -278,27 +288,29 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             imgui.pop_style_var()
 
     def on_canvas(self) -> None:
-        self._canvas.control()
-        self._canvas.fill(self._clear_color)
-
-        graph = self.current_graph
-        if graph is None:
+        canvas = self.current_canvas
+        if canvas is None:
             return
 
-        self._canvas.update_nodes_state(graph.nodes)
-        self._canvas.draw_grid_x(graph.grid_x)
-        self._canvas.draw_grid_y(graph.grid_y)
-        self._canvas.draw_axis_x(graph.axis_x)
-        self._canvas.draw_axis_y(graph.axis_y)
-        self._canvas.draw_nodes(graph.nodes, graph.style)
-        self._canvas.draw_arcs(graph.arcs, graph.style)
+        graph = self.current_graph
+        assert graph is not None
+
+        canvas.control()
+        canvas.fill()
+        canvas.update_nodes_state(graph.nodes)
+        canvas.draw_grid_x(graph.grid_x)
+        canvas.draw_grid_y(graph.grid_y)
+        canvas.draw_axis_x(graph.axis_x)
+        canvas.draw_axis_y(graph.axis_y)
+        canvas.draw_nodes(graph.nodes, graph.style)
+        canvas.draw_arcs(graph.arcs, graph.style)
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
             if drag_drop_target.hovered:
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    x1, y1 = self._canvas.mouse_to_canvas_coords()
+                    x1, y1 = canvas.mouse_to_canvas_coords()
                     x2 = x1 + 100
                     y2 = y1 + 100
                     self.context.fm.add_node(node_path, x1, y1, x2, y2)
@@ -306,6 +318,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if imgui.begin_popup_context_window().opened:
             try:
                 if menu_item("Reset"):
-                    self._canvas.reset()
+                    canvas.reset()
             finally:
                 imgui.end_popup()

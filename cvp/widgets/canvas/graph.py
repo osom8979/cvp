@@ -4,9 +4,7 @@ from typing import Final, Optional, Sequence
 
 import imgui
 
-from cvp.flow.datas import Action, Arc, Axis
-from cvp.flow.datas import Canvas as CanvasProps
-from cvp.flow.datas import Grid, Node, Stream, Style
+from cvp.flow.datas import Action, Arc, Axis, Graph, Grid, Node, Stream, Style
 from cvp.fonts.glyphs.mdi import (
     MDI_ARROW_RIGHT_CIRCLE,
     MDI_ARROW_RIGHT_CIRCLE_OUTLINE,
@@ -25,15 +23,20 @@ DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class GraphCanvas(CanvasController):
-    def __init__(self, fonts: FontMapper):
+    def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
+        self.graph = graph
         self.fonts = fonts
 
-    def fill(self, color: RGBA) -> None:
-        filled_color = imgui.get_color_u32_rgba(*color)
-        cx, cy = self.canvas_pos
-        cw, ch = self.canvas_size
-        self.draw_list.add_rect_filled(cx, cy, cx + cw, cy + cy, filled_color)
+    def process_controllers(self, debugging=False) -> None:
+        if result := self.render_controllers(debugging=debugging):
+            self.graph.canvas.pan_x = result.pan_x
+            self.graph.canvas.pan_y = result.pan_y
+            self.graph.canvas.zoom = result.zoom
+
+    def fill(self) -> None:
+        color = imgui.get_color_u32_rgba(*self.graph.color)
+        self.draw_list.add_rect_filled(*self.canvas_roi, color)
 
     def draw_grid_x(self, grid_x: Grid) -> None:
         if not grid_x.visible:
