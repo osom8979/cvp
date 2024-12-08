@@ -15,6 +15,7 @@ from cvp.config.sections.display import DisplayConfig
 from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.font import FontConfig, FontManagerConfig
+from cvp.config.sections.glyphos import GlyphosWindowConfig
 from cvp.config.sections.graphic import GraphicConfig
 from cvp.config.sections.keyring import KeyringConfig
 from cvp.config.sections.labeling import LabelingAuiConfig
@@ -47,6 +48,7 @@ class Config:
     flow_aui: FlowAuiConfig = field(default_factory=FlowAuiConfig)
     font: FontConfig = field(default_factory=FontConfig)
     font_manager: FontManagerConfig = field(default_factory=FontManagerConfig)
+    glyphos_window: GlyphosWindowConfig = field(default_factory=GlyphosWindowConfig)
     graphic: GraphicConfig = field(default_factory=GraphicConfig)
     keyring: KeyringConfig = field(default_factory=KeyringConfig)
     labeling_aui: LabelingAuiConfig = field(default_factory=LabelingAuiConfig)
