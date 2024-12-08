@@ -15,7 +15,8 @@ from cvp.config.sections.display import DisplayConfig
 from cvp.config.sections.ffmpeg import FFmpegConfig
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.font import FontConfig, FontManagerConfig
-from cvp.config.sections.glyphos import GlyphosWindowConfig
+from cvp.config.sections.games.glyph_world import GlyphWorldWindowConfig
+from cvp.config.sections.games.tetrix import TetrixWindowConfig
 from cvp.config.sections.graphic import GraphicConfig
 from cvp.config.sections.keyring import KeyringConfig
 from cvp.config.sections.labeling import LabelingAuiConfig
@@ -27,7 +28,6 @@ from cvp.config.sections.overlay import OverlayWindowConfig
 from cvp.config.sections.preference import PreferenceManagerConfig as PrefManagerConfig
 from cvp.config.sections.process import ProcessManagerConfig
 from cvp.config.sections.stitching import StitchingAuiConfig
-from cvp.config.sections.tetrix import TetrixWindowConfig
 from cvp.config.sections.toast import ToastWindowConfig
 from cvp.config.sections.window import WindowManagerConfig
 from cvp.config.sections.wsd import WsdConfig, WsdManagerConfig
@@ -48,7 +48,9 @@ class Config:
     flow_aui: FlowAuiConfig = field(default_factory=FlowAuiConfig)
     font: FontConfig = field(default_factory=FontConfig)
     font_manager: FontManagerConfig = field(default_factory=FontManagerConfig)
-    glyphos_window: GlyphosWindowConfig = field(default_factory=GlyphosWindowConfig)
+    glyph_world_window: GlyphWorldWindowConfig = field(
+        default_factory=GlyphWorldWindowConfig,
+    )
     graphic: GraphicConfig = field(default_factory=GraphicConfig)
     keyring: KeyringConfig = field(default_factory=KeyringConfig)
     labeling_aui: LabelingAuiConfig = field(default_factory=LabelingAuiConfig)

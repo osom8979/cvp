@@ -6,7 +6,7 @@ from typing import Final, Sequence, Tuple
 import imgui
 import numpy as np
 
-from cvp.config.sections.tetrix import (
+from cvp.config.sections.games.tetrix import (
     DEFAULT_BOARD_COLS,
     DEFAULT_BOARD_ROWS,
     DEFAULT_CELL_PIXELS,
