@@ -5,13 +5,14 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Action, Arc, Graph, Node, Stream
+from cvp.flow.datas import Action, Arc, FontSize, Graph, Node, Stream, Stroke, Style
 from cvp.fonts.glyphs.mdi import (
     MDI_ARROW_RIGHT_CIRCLE,
     MDI_ARROW_RIGHT_CIRCLE_OUTLINE,
     MDI_CIRCLE,
     MDI_CIRCLE_OUTLINE,
 )
+from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.override import override
@@ -49,6 +50,48 @@ class GraphCanvas(CanvasController, WidgetInterface):
             raise ReferenceError("The fonts instance has expired")
         return self._fonts
 
+    @property
+    def opened(self) -> bool:
+        return self._graph is not None and self._fonts is not None
+
+    def open(self) -> None:
+        if self._graph is not None:
+            raise ValueError("Graph already open")
+        if self._fonts is not None:
+            raise ValueError("Fonts already open")
+
+        assert self._graph is None
+        assert self._fonts is None
+        self._graph = self._graph_ref()
+        self._fonts = self._fonts_ref()
+
+        if self._graph is None:
+            self._fonts = None
+            raise ReferenceError("The graph instance has expired")
+
+        if self._fonts is None:
+            self._graph = None
+            raise ReferenceError("The fonts instance has expired")
+
+        assert self._graph is not None
+        assert self._fonts is not None
+
+    def close(self) -> None:
+        if self._graph is None:
+            raise ValueError("Graph instance has expired")
+        if self._fonts is None:
+            raise ValueError("Fonts instance has expired")
+
+        self._graph = None
+        self._fonts = None
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     def do_process_controllers(self, debugging=False) -> None:
         if result := self.render_controllers(debugging=debugging):
             self.graph.canvas.pan_x = result.pan_x
@@ -56,13 +99,11 @@ class GraphCanvas(CanvasController, WidgetInterface):
             self.graph.canvas.zoom = result.zoom
 
     def do_process(self) -> None:
-        self._graph = self._graph_ref()
-        self._fonts = self._fonts_ref()
+        self.open()
         try:
             self.on_process()
         finally:
-            self._graph = None
-            self._fonts = None
+            self.close()
 
     @override
     def on_process(self) -> None:
@@ -262,8 +303,8 @@ class GraphCanvas(CanvasController, WidgetInterface):
         for node in self.graph.nodes:
             self.draw_node(node)
 
-    def get_node_stroke(self, node: Node):
-        style = self.graph.style
+    @staticmethod
+    def get_node_stroke(node: Node, style: Style) -> Stroke:
         if node.state.selected:
             return style.selected_node
         elif node.state.hovering:
@@ -271,7 +312,40 @@ class GraphCanvas(CanvasController, WidgetInterface):
         else:
             return style.normal_node
 
-    def update_node_geometry(self, node: Node) -> None:
+    @staticmethod
+    def get_title_font(fonts: FontMapper, style: Style) -> Font:
+        if style.title_size == FontSize.normal:
+            return fonts.normal_text
+        elif style.title_size == FontSize.medium:
+            return fonts.normal_text
+        elif style.title_size == FontSize.large:
+            return fonts.normal_text
+        else:
+            assert False, "Inaccessible section"
+
+    @staticmethod
+    def get_text_font(fonts: FontMapper, style: Style) -> Font:
+        if style.text_size == FontSize.normal:
+            return fonts.normal_text
+        elif style.text_size == FontSize.medium:
+            return fonts.medium_text
+        elif style.text_size == FontSize.large:
+            return fonts.large_text
+        else:
+            assert False, "Inaccessible section"
+
+    @staticmethod
+    def get_icon_font(fonts: FontMapper, style: Style) -> Font:
+        if style.icon_size == FontSize.normal:
+            return fonts.normal_icon
+        elif style.icon_size == FontSize.medium:
+            return fonts.medium_icon
+        elif style.icon_size == FontSize.large:
+            return fonts.large_icon
+        else:
+            assert False, "Inaccessible section"
+
+    def update_node_rois(self, node: Node) -> None:
         graph = self._graph_ref()
         fonts = self._fonts_ref()
 
@@ -280,11 +354,16 @@ class GraphCanvas(CanvasController, WidgetInterface):
         if fonts is None:
             raise ReferenceError("The fonts instance has expired")
 
-        with fonts.normal_icon:
-            flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)
-            flow_y_w, flow_y_h = imgui.calc_text_size(FLOW_PIN_Y_ICON)
-            data_n_w, data_n_h = imgui.calc_text_size(DATA_PIN_N_ICON)
-            data_y_w, data_y_h = imgui.calc_text_size(DATA_PIN_Y_ICON)
+        assert isinstance(graph, Graph)
+        assert isinstance(fonts, FontMapper)
+        icon_font = self.get_icon_font(fonts, graph.style)
+        text_font = self.get_text_font(fonts, graph.style)
+
+        with icon_font:
+            flow_n_w, flow_n_h = imgui.calc_text_size(graph.style.flow_pin_n_icon)
+            flow_y_w, flow_y_h = imgui.calc_text_size(graph.style.flow_pin_y_icon)
+            data_n_w, data_n_h = imgui.calc_text_size(graph.style.data_pin_n_icon)
+            data_y_w, data_y_h = imgui.calc_text_size(graph.style.data_pin_y_icon)
 
         iw = max(flow_y_w, flow_n_w, data_y_w, data_n_w)
         ih = max(flow_y_h, flow_n_h, data_y_h, data_n_h)
@@ -294,10 +373,9 @@ class GraphCanvas(CanvasController, WidgetInterface):
         for pin in node.data_pins:
             pin.icon_size = iw, ih
 
-        with fonts.normal_text:
+        with text_font:
             for pin in node.pins:
                 pin.name_size = imgui.calc_text_size(pin.name)
-
             input_name_sizes = [p.name_size for p in node.input_pins]
             output_name_sizes = [p.name_size for p in node.output_pins]
 
@@ -310,7 +388,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
         isw, ish = graph.style.item_spacing
         center_padding = isw * 3
 
-        with fonts.normal_text:
+        with text_font:
             node_name_w, node_name_h = imgui.calc_text_size(node.name)
 
         wt = isw + node_name_w + isw
@@ -364,7 +442,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
     def draw_node(self, node: Node, debug=True) -> None:
         roi = self.canvas_to_screen_roi(node.roi)
         style = self.graph.style
-        stroke = self.get_node_stroke(node)
+        stroke = self.get_node_stroke(node, style)
 
         with self.fonts.normal_icon:
             flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)

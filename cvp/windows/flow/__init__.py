@@ -302,7 +302,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                     mouse_pos = canvas.mouse_to_canvas_coords()
                     node = self.context.fm.add_node(node_path)
                     node.pos = mouse_pos
-                    canvas.update_node_geometry(node)
+                    canvas.update_node_rois(node)
 
         if imgui.begin_popup_context_window().opened:
             try:
