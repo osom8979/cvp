@@ -5,7 +5,7 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Action, Arc, Axis, Graph, Grid, Node, Stream, Style
+from cvp.flow.datas import Action, Arc, Graph, Node, Stream
 from cvp.fonts.glyphs.mdi import (
     MDI_ARROW_RIGHT_CIRCLE,
     MDI_ARROW_RIGHT_CIRCLE_OUTLINE,
@@ -14,7 +14,9 @@ from cvp.fonts.glyphs.mdi import (
 )
 from cvp.gl.texture import Texture
 from cvp.imgui.fonts.mapper import FontMapper
+from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.colors import RGBA
+from cvp.types.override import override
 from cvp.widgets.canvas.base.controller import CanvasController
 
 FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE_OUTLINE
@@ -23,7 +25,7 @@ DATA_PIN_N_ICON: Final[str] = MDI_CIRCLE_OUTLINE
 DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
-class GraphCanvas(CanvasController):
+class GraphCanvas(CanvasController, WidgetInterface):
     _graph: ReferenceType[Graph]
     _fonts: ReferenceType[FontMapper]
 
@@ -52,12 +54,25 @@ class GraphCanvas(CanvasController):
             self.graph.canvas.pan_y = result.pan_y
             self.graph.canvas.zoom = result.zoom
 
+    @override
+    def on_process(self) -> None:
+        self.control()
+        self.fill()
+        self.update_nodes_state()
+        self.draw_grid_x()
+        self.draw_grid_y()
+        self.draw_axis_x()
+        self.draw_axis_y()
+        self.draw_nodes()
+        self.draw_arcs()
+
     def fill(self) -> None:
         graph = self.graph
         color = imgui.get_color_u32_rgba(*graph.color)
         self.draw_list.add_rect_filled(*self.canvas_roi, color)
 
-    def draw_grid_x(self, grid_x: Grid) -> None:
+    def draw_grid_x(self) -> None:
+        grid_x = self.graph.grid_x
         if not grid_x.visible:
             return
 
@@ -70,7 +85,8 @@ class GraphCanvas(CanvasController):
             x1, y1, x2, y2 = line
             self.draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-    def draw_grid_y(self, grid_y: Grid) -> None:
+    def draw_grid_y(self) -> None:
+        grid_y = self.graph.grid_y
         if not grid_y.visible:
             return
 
@@ -83,7 +99,8 @@ class GraphCanvas(CanvasController):
             x1, y1, x2, y2 = line
             self.draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-    def draw_axis_x(self, axis_x: Axis) -> None:
+    def draw_axis_x(self) -> None:
+        axis_x = self.graph.axis_x
         if not axis_x.visible:
             return
 
@@ -99,7 +116,8 @@ class GraphCanvas(CanvasController):
         y2 = origin_y
         self.draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-    def draw_axis_y(self, axis_y: Axis) -> None:
+    def draw_axis_y(self) -> None:
+        axis_y = self.graph.axis_y
         if not axis_y.visible:
             return
 
@@ -194,7 +212,8 @@ class GraphCanvas(CanvasController):
             y2 += dy
             node.roi = x1, y1, x2, y2
 
-    def update_nodes_state(self, nodes: Sequence[Node]) -> None:
+    def update_nodes_state(self) -> None:
+        nodes = self.graph.nodes
         any_selected_hovering = False
 
         for node in nodes:
@@ -225,12 +244,13 @@ class GraphCanvas(CanvasController):
             else:
                 self._update_nodes_for_single_select(nodes)
 
-    def draw_nodes(self, nodes: Sequence[Node], style: Style) -> None:
-        for node in nodes:
-            self.draw_node(node, style)
+    def draw_nodes(self) -> None:
+        for node in self.graph.nodes:
+            self.draw_node(node)
 
-    def draw_node(self, node: Node, style: Style, debug=True) -> None:
+    def draw_node(self, node: Node, debug=True) -> None:
         roi = self.canvas_to_screen_roi(node.roi)
+        style = self.graph.style
         stroke = style.get_node_stroke(node.state.selected, node.state.hovering)
 
         with self.fonts.normal_icon:
@@ -357,9 +377,9 @@ class GraphCanvas(CanvasController):
                         pin.name,
                     )
 
-    def draw_arcs(self, arcs: Sequence[Arc], style: Style) -> None:
-        for arc in arcs:
-            self.draw_arc(arc, style)
+    def draw_arcs(self) -> None:
+        for arc in self.graph.arcs:
+            self.draw_arc(arc)
 
-    def draw_arc(self, arc: Arc, style: Style) -> None:
+    def draw_arc(self, arc: Arc) -> None:
         pass

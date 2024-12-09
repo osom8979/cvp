@@ -295,15 +295,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         graph = self.current_graph
         assert graph is not None
 
-        canvas.control()
-        canvas.fill()
-        canvas.update_nodes_state(graph.nodes)
-        canvas.draw_grid_x(graph.grid_x)
-        canvas.draw_grid_y(graph.grid_y)
-        canvas.draw_axis_x(graph.axis_x)
-        canvas.draw_axis_y(graph.axis_y)
-        canvas.draw_nodes(graph.nodes, graph.style)
-        canvas.draw_arcs(graph.arcs, graph.style)
+        canvas.on_process()
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
             if drag_drop_target.hovered:

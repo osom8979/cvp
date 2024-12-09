@@ -406,7 +406,7 @@ class PlayerApplication:
         imgui.menu_item("Game", None, False, False)
         if imgui.menu_item("TetriX", None, self._tetrix.opened)[0]:
             self._tetrix.flip_opened()
-        if imgui.menu_item("Glyphos", None, self._glyph_world.opened)[0]:
+        if imgui.menu_item("GlyphWorld", None, self._glyph_world.opened)[0]:
             self._glyph_world.flip_opened()
 
         imgui.separator()
