@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from enum import StrEnum, auto, unique
-from typing import List
+from enum import IntEnum, StrEnum, auto, unique
+from typing import Final, List
 from uuid import uuid4
 
 from cvp.palette.basic import BLACK, RED, WHITE, YELLOW
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI
+
+_EMPTY_TEXT: Final[str] = ""
+_WHITE_RGBA: Final[RGBA] = WHITE[0], WHITE[1], WHITE[2], 1.0
+_EMPTY_ROI: Final[ROI] = 0.0, 0.0, 0.0, 0.0
+_DEFAULT_NODE_WIDTH: Final[float] = 160.0
+_DEFAULT_NODE_HEIGHT: Final[float] = 60.0
+_DEFAULT_NODE_ROI: Final[ROI] = 0.0, 0.0, _DEFAULT_NODE_WIDTH, _DEFAULT_NODE_HEIGHT
+_DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
+_DEFAULT_AXIS_COLOR: Final[RGBA] = 1.0, 0.0, 0.0, 0.6
+_DEFAULT_GRAPH_COLOR: Final[RGBA] = 0.5, 0.5, 0.5, 1.0
 
 
 @unique
@@ -40,70 +50,77 @@ class Stream(StrEnum):
     output = auto()
 
 
+@unique
+class IconSize(IntEnum):
+    normal = auto()
+    medium = auto()
+    large = auto()
+
+
 @dataclass
 class DataType:
-    name: str = field(default_factory=str)  # Primary Key
-    docs: str = field(default_factory=str)
-    icon: str = field(default_factory=str)
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
-    path: str = field(default_factory=str)
+    name: str = _EMPTY_TEXT  # Primary Key
+    docs: str = _EMPTY_TEXT
+    icon: str = _EMPTY_TEXT
+    color: RGBA = _WHITE_RGBA
+    path: str = _EMPTY_TEXT
 
 
 @dataclass
 class PinTemplate:
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    dtype: str = field(default_factory=str)
-    action: Action = field(default_factory=lambda: Action.none)
-    stream: Stream = field(default_factory=lambda: Stream.input)
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    dtype: str = _EMPTY_TEXT
+    action: Action = Action.none
+    stream: Stream = Stream.input
     required: bool = False
 
 
 @dataclass
 class Pin:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    dtype: str = field(default_factory=str)
-    action: Action = field(default_factory=lambda: Action.none)
-    stream: Stream = field(default_factory=lambda: Stream.input)
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    dtype: str = _EMPTY_TEXT
+    action: Action = Action.none
+    stream: Stream = Stream.input
     required: bool = False
 
 
 @dataclass
 class ArcTemplate:
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    start_node: str = field(default_factory=str)
-    start_pin: str = field(default_factory=str)
-    end_node: str = field(default_factory=str)
-    end_pin: str = field(default_factory=str)
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    start_node: str = _EMPTY_TEXT
+    start_pin: str = _EMPTY_TEXT
+    end_node: str = _EMPTY_TEXT
+    end_pin: str = _EMPTY_TEXT
 
 
 @dataclass
 class Arc:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    start_node: str = field(default_factory=str)
-    start_pin: str = field(default_factory=str)
-    end_node: str = field(default_factory=str)
-    end_pin: str = field(default_factory=str)
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    start_node: str = _EMPTY_TEXT
+    start_pin: str = _EMPTY_TEXT
+    end_node: str = _EMPTY_TEXT
+    end_pin: str = _EMPTY_TEXT
 
 
 @dataclass
 class NodeTemplate:
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    icon: str = field(default_factory=str)
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    icon: str = _EMPTY_TEXT
+    color: RGBA = _WHITE_RGBA
     pins: List[PinTemplate] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
 
 
 @dataclass
 class NodeState:
-    screen_roi: ROI = field(default_factory=lambda: (0.0, 0.0, 0.0, 0.0))
+    screen_roi: ROI = _EMPTY_ROI
     selected: bool = False
     hovering: bool = False
 
@@ -111,11 +128,11 @@ class NodeState:
 @dataclass
 class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    icon: str = field(default_factory=str)
-    roi: ROI = field(default_factory=lambda: (0.0, 0.0, 160.0, 60.0))
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    icon: str = _EMPTY_TEXT
+    roi: ROI = _DEFAULT_NODE_ROI
+    color: RGBA = _WHITE_RGBA
     pins: List[Pin] = field(default_factory=list)
 
     _state: NodeState = field(default_factory=NodeState)
@@ -131,10 +148,10 @@ class Node:
 
 @dataclass
 class GraphTemplate:
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    icon: str = field(default_factory=str)
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    icon: str = _EMPTY_TEXT
+    color: RGBA = _WHITE_RGBA
     nodes: List[NodeTemplate] = field(default_factory=list)
     arcs: List[ArcTemplate] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)
@@ -152,19 +169,19 @@ class Grid:
     visible: bool = True
     step: float = 50.0
     thickness: float = 1.0
-    color: RGBA = field(default_factory=lambda: (0.8, 0.8, 0.8, 0.2))
+    color: RGBA = _DEFAULT_GRID_COLOR
 
 
 @dataclass
 class Axis:
     visible: bool = True
     thickness: float = 1.0
-    color: RGBA = field(default_factory=lambda: (1.0, 0.0, 0.0, 0.6))
+    color: RGBA = _DEFAULT_AXIS_COLOR
 
 
 @dataclass
 class Stroke:
-    color: RGBA = field(default_factory=lambda: (*WHITE, 1.0))
+    color: RGBA = _WHITE_RGBA
     thickness: float = 1.0
     rounding: float = 1.0
     flags: int = 0
@@ -191,26 +208,16 @@ class Style:
     selected_node: Stroke = field(default_factory=lambda: Stroke.default_selected())
     hovering_node: Stroke = field(default_factory=lambda: Stroke.default_hovering())
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
-
     node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_pin_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
-
-    def get_node_stroke(self, selected=False, hovering=False):
-        if selected:
-            return self.selected_node
-        elif hovering:
-            return self.hovering_node
-        else:
-            return self.normal_node
 
 
 @dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = field(default_factory=str)
-    docs: str = field(default_factory=str)
-    icon: str = field(default_factory=str)
-    color: RGBA = field(default_factory=lambda: (0.5, 0.5, 0.5, 1.0))
+    name: str = _EMPTY_TEXT
+    docs: str = _EMPTY_TEXT
+    color: RGBA = _DEFAULT_GRAPH_COLOR
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)

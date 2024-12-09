@@ -12,10 +12,8 @@ from cvp.fonts.glyphs.mdi import (
     MDI_CIRCLE,
     MDI_CIRCLE_OUTLINE,
 )
-from cvp.gl.texture import Texture
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.renderer.widget.interface import WidgetInterface
-from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.widgets.canvas.base.controller import CanvasController
 
@@ -26,43 +24,60 @@ DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class GraphCanvas(CanvasController, WidgetInterface):
-    _graph: ReferenceType[Graph]
-    _fonts: ReferenceType[FontMapper]
+    _graph_ref: ReferenceType[Graph]
+    _fonts_ref: ReferenceType[FontMapper]
+
+    _graph: Optional[Graph]
+    _fonts: Optional[FontMapper]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
-        self._graph = ref(graph)
-        self._fonts = ref(fonts)
+        self._graph_ref = ref(graph)
+        self._fonts_ref = ref(fonts)
+        self._graph = None
+        self._fonts = None
 
     @property
     def graph(self) -> Graph:
-        graph = self._graph()
-        if graph is None:
+        if self._graph is None:
             raise ReferenceError("The graph instance has expired")
-        return graph
+        return self._graph
 
     @property
     def fonts(self) -> FontMapper:
-        fonts = self._fonts()
-        if fonts is None:
+        if self._fonts is None:
             raise ReferenceError("The fonts instance has expired")
-        return fonts
+        return self._fonts
 
-    def process_controllers(self, debugging=False) -> None:
+    def do_process_controllers(self, debugging=False) -> None:
         if result := self.render_controllers(debugging=debugging):
             self.graph.canvas.pan_x = result.pan_x
             self.graph.canvas.pan_y = result.pan_y
             self.graph.canvas.zoom = result.zoom
 
+    def do_process(self) -> None:
+        self._graph = self._graph_ref()
+        self._fonts = self._fonts_ref()
+        try:
+            self.on_process()
+        finally:
+            self._graph = None
+            self._fonts = None
+
     @override
     def on_process(self) -> None:
+        assert self._graph is not None
+        assert self._fonts is not None
+
         self.control()
-        self.fill()
         self.update_nodes_state()
+
+        self.fill()
         self.draw_grid_x()
         self.draw_grid_y()
         self.draw_axis_x()
         self.draw_axis_y()
+
         self.draw_nodes()
         self.draw_arcs()
 
@@ -133,38 +148,37 @@ class GraphCanvas(CanvasController, WidgetInterface):
         y2 = cy + ch
         self.draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
-    def draw_texture(
-        self,
-        texture: Texture,
-        x: float,
-        y: float,
-        color: Optional[RGBA] = None,
-    ) -> None:
-        img_id = texture.texture
-        img_x = x
-        img_y = y
-        img_w = texture.width
-        img_h = texture.height
-        img_roi = img_x, img_y, img_w, img_h
-        img_screen_roi = self.canvas_to_screen_roi(img_roi)
-        img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
-        img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
-        img_color = imgui.get_color_u32_rgba(*color) if color is not None else 0
-        self.draw_list.add_image(
-            img_id,
-            img_screen_p1,
-            img_screen_p2,
-            (0, 0),
-            (1, 1),
-            img_color,
-        )
+    # def draw_texture(
+    #     self,
+    #     texture: Texture,
+    #     x: float,
+    #     y: float,
+    #     color: Optional[RGBA] = None,
+    # ) -> None:
+    #     img_id = texture.texture
+    #     img_x = x
+    #     img_y = y
+    #     img_w = texture.width
+    #     img_h = texture.height
+    #     img_roi = img_x, img_y, img_w, img_h
+    #     img_screen_roi = self.canvas_to_screen_roi(img_roi)
+    #     img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
+    #     img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
+    #     img_color = imgui.get_color_u32_rgba(*color) if color is not None else 0
+    #     self.draw_list.add_image(
+    #         img_id,
+    #         img_screen_p1,
+    #         img_screen_p2,
+    #         (0, 0),
+    #         (1, 1),
+    #         img_color,
+    #     )
 
-    def is_selected_node(self, node: Node) -> bool:
-        if not self.left_clicked:
-            return False
-
-        roi = self.canvas_to_screen_roi(node.roi)
-        return imgui.is_mouse_hovering_rect(*roi)
+    # def is_selected_node(self, node: Node) -> bool:
+    #     if not self.left_clicked:
+    #         return False
+    #     roi = self.canvas_to_screen_roi(node.roi)
+    #     return imgui.is_mouse_hovering_rect(*roi)
 
     @staticmethod
     def _find_hovering_single_node(nodes: Sequence[Node]) -> Optional[Node]:
@@ -248,10 +262,19 @@ class GraphCanvas(CanvasController, WidgetInterface):
         for node in self.graph.nodes:
             self.draw_node(node)
 
+    def get_node_stroke(self, node: Node):
+        style = self.graph.style
+        if node.state.selected:
+            return style.selected_node
+        elif node.state.hovering:
+            return style.hovering_node
+        else:
+            return style.normal_node
+
     def draw_node(self, node: Node, debug=True) -> None:
         roi = self.canvas_to_screen_roi(node.roi)
         style = self.graph.style
-        stroke = style.get_node_stroke(node.state.selected, node.state.hovering)
+        stroke = self.get_node_stroke(node)
 
         with self.fonts.normal_icon:
             flow_n_w, flow_n_h = imgui.calc_text_size(FLOW_PIN_N_ICON)

@@ -257,7 +257,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
         if canvas := self.current_canvas:
-            canvas.process_controllers(debugging=self.context.debug)
+            canvas.do_process_controllers(debugging=self.context.debug)
         imgui.spacing()
         self._right_tabs.do_process(self._node_path)
 
@@ -295,7 +295,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         graph = self.current_graph
         assert graph is not None
 
-        canvas.on_process()
+        canvas.do_process()
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
             if drag_drop_target.hovered:
