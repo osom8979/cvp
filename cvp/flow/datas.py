@@ -7,9 +7,11 @@ from uuid import uuid4
 
 from cvp.palette.basic import BLACK, RED, WHITE, YELLOW
 from cvp.types.colors import RGB, RGBA
-from cvp.types.shapes import ROI
+from cvp.types.shapes import ROI, Point, Size
 
 _EMPTY_TEXT: Final[str] = ""
+_EMPTY_POINT: Final[Point] = 0.0, 0.0
+_EMPTY_SIZE: Final[Size] = 0.0, 0.0
 _WHITE_RGBA: Final[RGBA] = WHITE[0], WHITE[1], WHITE[2], 1.0
 _EMPTY_ROI: Final[ROI] = 0.0, 0.0, 0.0, 0.0
 _DEFAULT_NODE_WIDTH: Final[float] = 160.0
@@ -18,6 +20,7 @@ _DEFAULT_NODE_ROI: Final[ROI] = 0.0, 0.0, _DEFAULT_NODE_WIDTH, _DEFAULT_NODE_HEI
 _DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
 _DEFAULT_AXIS_COLOR: Final[RGBA] = 1.0, 0.0, 0.0, 0.6
 _DEFAULT_GRAPH_COLOR: Final[RGBA] = 0.5, 0.5, 0.5, 1.0
+_DEFAULT_ITEM_SPACING: Final[Size] = 2.0, 2.0
 
 
 @unique
@@ -39,7 +42,6 @@ class Prefix(StrEnum):
 
 @unique
 class Action(StrEnum):
-    none = auto()
     data = auto()
     flow = auto()
 
@@ -71,7 +73,7 @@ class PinTemplate:
     name: str = _EMPTY_TEXT
     docs: str = _EMPTY_TEXT
     dtype: str = _EMPTY_TEXT
-    action: Action = Action.none
+    action: Action = Action.data
     stream: Stream = Stream.input
     required: bool = False
 
@@ -82,9 +84,15 @@ class Pin:
     name: str = _EMPTY_TEXT
     docs: str = _EMPTY_TEXT
     dtype: str = _EMPTY_TEXT
-    action: Action = Action.none
+    action: Action = Action.data
     stream: Stream = Stream.input
     required: bool = False
+
+    icon_pos: Point = _EMPTY_POINT
+    icon_size: Size = _EMPTY_SIZE
+
+    name_pos: Point = _EMPTY_POINT
+    name_size: Size = _EMPTY_SIZE
 
 
 @dataclass
@@ -131,11 +139,31 @@ class Node:
     name: str = _EMPTY_TEXT
     docs: str = _EMPTY_TEXT
     icon: str = _EMPTY_TEXT
-    roi: ROI = _DEFAULT_NODE_ROI
     color: RGBA = _WHITE_RGBA
-    pins: List[Pin] = field(default_factory=list)
+    pos: Point = _EMPTY_POINT
+    size: Size = _EMPTY_SIZE
+
+    flow_inputs: List[Pin] = field(default_factory=list)
+    flow_outputs: List[Pin] = field(default_factory=list)
+
+    data_inputs: List[Pin] = field(default_factory=list)
+    data_outputs: List[Pin] = field(default_factory=list)
 
     _state: NodeState = field(default_factory=NodeState)
+
+    @property
+    def roi(self) -> ROI:
+        return (
+            self.pos[0],
+            self.pos[1],
+            self.pos[0] + self.size[0],
+            self.pos[1] + self.size[1],
+        )
+
+    @roi.setter
+    def roi(self, value: ROI) -> None:
+        self.pos = value[0], value[1]
+        self.size = value[2] - value[0], value[3] - value[1]
 
     @property
     def state(self) -> NodeState:
@@ -144,6 +172,34 @@ class Node:
     @state.setter
     def state(self, value: NodeState) -> None:
         self._state = value
+
+    @property
+    def flow_pins(self) -> List[Pin]:
+        return self.flow_inputs + self.flow_outputs
+
+    @property
+    def data_pins(self) -> List[Pin]:
+        return self.data_inputs + self.data_outputs
+
+    @property
+    def input_pins(self) -> List[Pin]:
+        return self.flow_inputs + self.data_inputs
+
+    @property
+    def output_pins(self) -> List[Pin]:
+        return self.flow_outputs + self.data_outputs
+
+    @property
+    def pins(self) -> List[Pin]:
+        return self.flow_pins + self.data_pins
+
+    @property
+    def flow_lines(self):
+        return max(len(self.flow_inputs), len(self.flow_outputs))
+
+    @property
+    def data_lines(self):
+        return max(len(self.data_inputs), len(self.data_outputs))
 
 
 @dataclass
@@ -210,6 +266,7 @@ class Style:
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
     node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_pin_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
+    item_spacing: Size = _DEFAULT_ITEM_SPACING
 
 
 @dataclass

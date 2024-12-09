@@ -292,9 +292,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if canvas is None:
             return
 
-        graph = self.current_graph
-        assert graph is not None
-
         canvas.do_process()
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
@@ -302,10 +299,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    x1, y1 = canvas.mouse_to_canvas_coords()
-                    x2 = x1 + 100
-                    y2 = y1 + 100
-                    self.context.fm.add_node(node_path, x1, y1, x2, y2)
+                    mouse_pos = canvas.mouse_to_canvas_coords()
+                    node = self.context.fm.add_node(node_path)
+                    node.pos = mouse_pos
+                    canvas.update_node_geometry(node)
 
         if imgui.begin_popup_context_window().opened:
             try:

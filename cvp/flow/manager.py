@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from copy import deepcopy
 from os import PathLike
 from typing import Optional, Union
 
@@ -9,7 +8,7 @@ from type_serialize import deserialize, serialize
 from yaml import dump, full_load
 
 from cvp.flow.catalog import FlowCatalog
-from cvp.flow.datas import Graph, Node, Pin
+from cvp.flow.datas import Action, Graph, Node, Pin, Stream
 from cvp.flow.path import FlowPath
 from cvp.resources.home import HomeDir
 from cvp.strings.is_uuid import is_uuid4
@@ -138,14 +137,7 @@ class FlowManager(OrderedDict[str, Graph]):
     def get_node_template(self, path: Union[str, FlowPath]):
         return self._catalog.get_node_template(path)
 
-    def add_node(
-        self,
-        path: Union[str, FlowPath],
-        x1: float,
-        y1: float,
-        x2: float,
-        y2: float,
-    ) -> None:
+    def add_node(self, path: Union[str, FlowPath]) -> Node:
         graph = self.current_graph
         if graph is None:
             raise LookupError("A graph must be selected")
@@ -156,7 +148,12 @@ class FlowManager(OrderedDict[str, Graph]):
         node_icon = node_template.icon
         node_color = node_template.color
 
-        node_pins = list()
+        flow_inputs = list()
+        flow_outputs = list()
+
+        data_inputs = list()
+        data_outputs = list()
+
         for pin_template in node_template.pins:
             pin = Pin(
                 name=pin_template.name,
@@ -166,14 +163,28 @@ class FlowManager(OrderedDict[str, Graph]):
                 stream=pin_template.stream,
                 required=pin_template.required,
             )
-            node_pins.append(pin)
+
+            if pin.action == Action.flow and pin.stream == Stream.input:
+                flow_inputs.append(pin)
+            elif pin.action == Action.flow and pin.stream == Stream.output:
+                flow_outputs.append(pin)
+            elif pin.action == Action.data and pin.stream == Stream.input:
+                data_inputs.append(pin)
+            elif pin.action == Action.data and pin.stream == Stream.output:
+                data_outputs.append(pin)
+            else:
+                assert False, "Inaccessible section"
 
         node = Node(
             name=node_name,
             docs=node_docs,
             icon=node_icon,
-            roi=(x1, y1, x2, y2),
-            color=deepcopy(node_color),
-            pins=node_pins,
+            color=node_color,
+            flow_inputs=flow_inputs,
+            flow_outputs=flow_outputs,
+            data_inputs=data_inputs,
+            data_outputs=data_outputs,
         )
+
         graph.nodes.append(node)
+        return node
