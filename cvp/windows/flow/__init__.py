@@ -299,10 +299,10 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    mouse_pos = canvas.mouse_to_canvas_coords()
+                    mx, my = canvas.mouse_to_canvas_coords()
                     node = self.context.fm.add_node(node_path)
-                    node.pos = mouse_pos
                     canvas.update_node_rois(node)
+                    node.node_pos = mx, my
 
         if imgui.begin_popup_context_window().opened:
             try:

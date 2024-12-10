@@ -9,7 +9,7 @@ class ButtonEventNode(NodeTemplate):
         super().__init__(
             name=type(self).__name__,
             docs="Button Event Node",
-            icon=MOVIE_OPEN_PLAY,
+            emblem=MOVIE_OPEN_PLAY,
             pins=[
                 PinTemplate(name="InFlow", action=Action.flow, stream=Stream.input),
                 PinTemplate(name="OutFlow", action=Action.flow, stream=Stream.output),

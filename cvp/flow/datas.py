@@ -123,7 +123,7 @@ class Arc:
 class NodeTemplate:
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT
-    icon: str = EMPTY_TEXT
+    emblem: str = EMPTY_TEXT
     color: RGBA = WHITE_RGBA
     pins: List[PinTemplate] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
@@ -141,10 +141,17 @@ class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT
-    icon: str = EMPTY_TEXT
+    emblem: str = EMPTY_TEXT
     color: RGBA = WHITE_RGBA
-    pos: Point = EMPTY_POINT
-    size: Size = EMPTY_SIZE
+
+    emblem_pos: Point = EMPTY_POINT
+    emblem_size: Size = EMPTY_SIZE
+
+    name_pos: Point = EMPTY_POINT
+    name_size: Size = EMPTY_SIZE
+
+    node_pos: Point = EMPTY_POINT
+    node_size: Size = EMPTY_SIZE
 
     flow_inputs: List[Pin] = field(default_factory=list)
     flow_outputs: List[Pin] = field(default_factory=list)
@@ -155,18 +162,16 @@ class Node:
     _state: NodeState = field(default_factory=NodeState)
 
     @property
-    def roi(self) -> ROI:
-        return (
-            self.pos[0],
-            self.pos[1],
-            self.pos[0] + self.size[0],
-            self.pos[1] + self.size[1],
-        )
+    def node_roi(self) -> ROI:
+        x, y = self.node_pos
+        w, h = self.node_size
+        return x, y, x + w, y + h
 
-    @roi.setter
-    def roi(self, value: ROI) -> None:
-        self.pos = value[0], value[1]
-        self.size = value[2] - value[0], value[3] - value[1]
+    @node_roi.setter
+    def node_roi(self, value: ROI) -> None:
+        x1, y1, x2, y2 = value
+        self.node_pos = x1, y1
+        self.node_size = x2 - x1, y2 - y1
 
     @property
     def state(self) -> NodeState:
@@ -267,16 +272,24 @@ class Style:
     selected_node: Stroke = field(default_factory=lambda: Stroke.default_selected())
     hovering_node: Stroke = field(default_factory=lambda: Stroke.default_hovering())
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
+
     node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_pin_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
+    layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
+
     item_spacing: Size = DEFAULT_ITEM_SPACING
+
+    emblem_size: FontSize = FontSize.large
     title_size: FontSize = FontSize.medium
     text_size: FontSize = FontSize.normal
     icon_size: FontSize = FontSize.normal
+
     flow_pin_n_icon: str = FLOW_PIN_N_ICON
     flow_pin_y_icon: str = FLOW_PIN_Y_ICON
     data_pin_n_icon: str = DATA_PIN_N_ICON
     data_pin_y_icon: str = DATA_PIN_Y_ICON
+
+    show_layout: bool = False
 
 
 @dataclass

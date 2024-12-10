@@ -145,7 +145,7 @@ class FlowManager(OrderedDict[str, Graph]):
         node_template = self.get_node_template(path)
         node_name = node_template.name
         node_docs = node_template.docs
-        node_icon = node_template.icon
+        node_emblem = node_template.emblem
         node_color = node_template.color
 
         flow_inputs = list()
@@ -178,7 +178,7 @@ class FlowManager(OrderedDict[str, Graph]):
         node = Node(
             name=node_name,
             docs=node_docs,
-            icon=node_icon,
+            emblem=node_emblem,
             color=node_color,
             flow_inputs=flow_inputs,
             flow_outputs=flow_outputs,
