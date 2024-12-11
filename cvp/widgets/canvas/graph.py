@@ -442,7 +442,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
         fill_color = imgui.get_color_u32_rgba(*node.color)
         stroke_color = imgui.get_color_u32_rgba(*stroke.color)
-        label_color = imgui.get_color_u32_rgba(*style.node_name_color)
+        label_color = imgui.get_color_u32_rgba(*style.normal_color)
         layout_color = imgui.get_color_u32_rgba(*style.layout_color)
 
         thickness = stroke.thickness

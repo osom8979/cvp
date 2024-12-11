@@ -273,8 +273,8 @@ class Style:
     hovering_node: Stroke = field(default_factory=lambda: Stroke.default_hovering())
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
 
-    node_name_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
-    hovering_pin_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
+    normal_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
+    hovering_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
