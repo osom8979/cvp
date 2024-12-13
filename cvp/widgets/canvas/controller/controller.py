@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import fmod
-from typing import Final, NamedTuple, Tuple
+from typing import Final, Tuple
 
 import imgui
 
@@ -12,6 +12,7 @@ from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
 from cvp.types.shapes import ROI, Point
+from cvp.widgets.canvas.controller.result import ControllerResult
 
 LBUTTON_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_LEFT
 MBUTTON_FLAG: Final[int] = imgui.BUTTON_MOUSE_BUTTON_MIDDLE
@@ -21,20 +22,6 @@ ALL_BUTTON_FLAGS: Final[int] = LBUTTON_FLAG | MBUTTON_FLAG | RBUTTON_FLAG
 BUTTON_LEFT: Final[int] = imgui.MOUSE_BUTTON_LEFT
 BUTTON_MIDDLE: Final[int] = imgui.MOUSE_BUTTON_MIDDLE
 BUTTON_RIGHT: Final[int] = imgui.MOUSE_BUTTON_RIGHT
-
-
-class ControllerResult(NamedTuple):
-    changed: bool
-    pan_x: float = 0.0
-    pan_y: float = 0.0
-    zoom: float = 1.0
-
-    def __bool__(self) -> bool:
-        return self.changed
-
-    @property
-    def pan(self):
-        return self.pan_x, self.pan_y
 
 
 class CanvasController:

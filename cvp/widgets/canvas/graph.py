@@ -16,7 +16,7 @@ from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.override import override
-from cvp.widgets.canvas.base.controller import CanvasController
+from cvp.widgets.canvas.controller.controller import CanvasController
 
 FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE_OUTLINE
 FLOW_PIN_Y_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE
