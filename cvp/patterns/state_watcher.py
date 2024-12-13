@@ -1,99 +1,49 @@
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-from typing import Callable, Generic, Optional, final
+from typing import Callable, Generic, Optional, TypeVar
 
-from cvp.patterns.proxy import ValueProxy, ValueT
-from cvp.types.override import override
+_T = TypeVar("_T")
 
 
-class StateObserverInterface(Generic[ValueT], ABC):
-    @abstractmethod
-    def on_update(self, value: ValueT, prev: ValueT) -> Optional[bool]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def update(self) -> bool:
-        raise NotImplementedError
-
-
-class StateObserver(StateObserverInterface[ValueT]):
+class StateWatcher(Generic[_T]):
     def __init__(
         self,
-        proxy: ValueProxy[ValueT],
-        callback: Optional[Callable[[ValueT, ValueT], Optional[bool]]] = None,
-    ) -> None:
-        self._proxy = proxy
-        self._callback = callback
-        self._prev_value = proxy.get()
-
-    @property
-    def proxy(self):
-        return self._proxy
-
-    @property
-    def prev_value(self):
-        return self._prev_value
-
-    @override
-    def on_update(self, value: ValueT, prev: ValueT) -> Optional[bool]:
-        if self._callback is not None:
-            return self._callback(value, prev)
-        else:
-            return False
-
-    @override
-    def update(self) -> bool:
-        next_value = self._proxy.get()
-        if self._prev_value == next_value:
-            return False
-
-        try:
-            return bool(self.on_update(next_value, self._prev_value))
-        finally:
-            self._prev_value = next_value
-
-
-@final
-class OneShotStateObserver(StateObserver[ValueT]):
-    @override
-    def on_update(self, value: ValueT, prev: ValueT) -> Optional[bool]:
-        assert self._callback is not None
-        self._callback(value, prev)
-        return True
-
-
-class StateWatcher:
-    def __init__(self, *observers: StateObserverInterface) -> None:
-        self._observers = set(observers)
+        value: _T,
+        prev: _T,
+        on_change: Optional[Callable[[_T, _T], None]] = None,
+    ):
+        self._changed = False
+        self._prev = prev
+        self._value = value
+        self._on_change = on_change
 
     def __bool__(self):
-        return bool(self._observers)
+        return self._changed
 
-    def __len__(self):
-        return self._observers.__len__()
+    @property
+    def changed(self) -> bool:
+        return self._changed
 
-    def __iter__(self):
-        return self._observers.__iter__()
+    @property
+    def prev(self) -> _T:
+        return self._prev
 
-    def register(self, observer: StateObserverInterface) -> None:
-        self._observers.add(observer)
+    @prev.setter
+    def prev(self, prev: _T) -> None:
+        self._prev = prev
 
-    def oneshot(
-        self,
-        proxy: ValueProxy[ValueT],
-        callback: Callable[[ValueT, ValueT], None],
-    ) -> None:
-        self.register(OneShotStateObserver(proxy, callback))
+    @property
+    def value(self) -> _T:
+        return self._value
 
-    def unregister(self, observer: StateObserverInterface) -> None:
-        self._observers.remove(observer)
+    @value.setter
+    def value(self, value: _T) -> None:
+        self._value = value
 
-    def update(self):
-        consumed_observers = list()
-        for observer in self._observers:
-            if observer.update():
-                consumed_observers.append(observer)
-        for observer in consumed_observers:
-            self._observers.remove(observer)
-        return consumed_observers
+    def update(self, value: _T, *, no_emit=False):
+        self._changed = self._value != value and not no_emit
+        if self._on_change is not None and self._changed:
+            self._on_change(value, self._value)
+        self._prev = self._value
+        self._value = value
+        return self
