@@ -308,6 +308,15 @@ class CanvasController:
     def is_mouse_dragging(self, button: int) -> bool:
         return imgui.is_mouse_dragging(button, self.lock_threshold)
 
+    def is_mouse_button_left_dragging(self) -> bool:
+        return self.is_mouse_dragging(BUTTON_LEFT)
+
+    def is_mouse_button_middle_dragging(self) -> bool:
+        return self.is_mouse_dragging(BUTTON_MIDDLE)
+
+    def is_mouse_button_right_dragging(self) -> bool:
+        return self.is_mouse_dragging(BUTTON_RIGHT)
+
     def vertical_grid_lines(self, step: float):
         if step <= 0:
             raise ValueError("The 'step' value must be greater than 0")
