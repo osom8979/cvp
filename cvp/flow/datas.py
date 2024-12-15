@@ -313,6 +313,9 @@ class Style:
     hovering_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
 
+    pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
+    pin_connection_thickness: float = 2.0
+
     item_spacing: Size = DEFAULT_ITEM_SPACING
 
     emblem_size: FontSize = FontSize.large

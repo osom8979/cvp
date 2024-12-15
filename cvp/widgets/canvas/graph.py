@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
 
+from enum import Enum, auto, unique
 from typing import Optional, Sequence
 from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Arc, FontSize, Graph, Node, Stroke, Style
+from cvp.flow.datas import Arc, FontSize, Graph, Node, Stroke, Style, Pin
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.widgets.canvas.controller.controller import CanvasController
+
+
+@unique
+class DraggingMode(Enum):
+    none = auto()
+    node_moving = auto()
+    pin_connecting = auto()
 
 
 class GraphCanvas(CanvasController):
@@ -18,6 +26,9 @@ class GraphCanvas(CanvasController):
 
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
+
+    _arc_begin_node: Optional[Node]
+    _arc_begin_pin: Optional[Pin]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
@@ -30,7 +41,9 @@ class GraphCanvas(CanvasController):
         self._pan_y.update(graph.canvas.pan_y, no_emit=True)
         self._zoom.update(graph.canvas.zoom, no_emit=True)
 
-        self._node_moving = False
+        self._dragging_mode = DraggingMode.none
+        self._arc_begin_node = None
+        self._arc_begin_pin = None
 
     @property
     def graph(self) -> Graph:
@@ -133,6 +146,8 @@ class GraphCanvas(CanvasController):
             self.draw_nodes()
             self.draw_arcs()
 
+        self.draw_pin_connection()
+
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
         self._draw_list.add_rect_filled(*self.canvas_roi, color)
@@ -216,6 +231,13 @@ class GraphCanvas(CanvasController):
     #     return imgui.is_mouse_hovering_rect(*roi)
 
     @staticmethod
+    def _find_hovering_single_pin(pins: Sequence[Pin]) -> Optional[Pin]:
+        for pin in pins:
+            if pin.hovering:
+                return pin
+        return None
+
+    @staticmethod
     def _find_hovering_single_node(nodes: Sequence[Node]) -> Optional[Node]:
         for node in nodes:
             if node.hovering:
@@ -233,10 +255,10 @@ class GraphCanvas(CanvasController):
             node.selected = False
 
     @staticmethod
-    def _update_nodes_all_unhovering(nodes: Sequence[Node], also_pins=False) -> None:
+    def _update_nodes_all_unhovering(nodes: Sequence[Node], with_pins=False) -> None:
         for node in nodes:
             node.hovering = False
-            if also_pins:
+            if with_pins:
                 for pin in node.pins:
                     pin.hovering = False
 
@@ -267,7 +289,7 @@ class GraphCanvas(CanvasController):
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
 
-        self._update_nodes_all_unhovering(nodes)
+        self._update_nodes_all_unhovering(nodes, with_pins=True)
 
         for node in self.graph.nodes:
             roi = self.canvas_to_screen_roi(node.node_roi)
@@ -288,21 +310,30 @@ class GraphCanvas(CanvasController):
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
 
-        if self.left_dragging:
-            if not self._node_moving and self._left_dragging.changed:
+        if not self.ctrl_down and self.left_dragging:
+            if self._dragging_mode == DraggingMode.none and self._left_dragging.changed:
                 hovering_node = self._find_hovering_single_node(nodes)
                 if hovering_node is not None:
-                    if not hovering_node.selected:
-                        self._update_nodes_all_unselect(nodes)
-                        hovering_node.selected = True
-                    self._node_moving = True
+                    hovering_pin = self._find_hovering_single_pin(hovering_node.pins)
+                    if hovering_pin is not None:
+                        self._dragging_mode = DraggingMode.pin_connecting
+                        self._arc_begin_node = hovering_node
+                        self._arc_begin_pin = hovering_pin
+                    else:
+                        if not hovering_node.selected:
+                            self._update_nodes_all_unselect(nodes)
+                            hovering_node.selected = True
+                        self._dragging_mode = DraggingMode.node_moving
 
-            if self._node_moving:
-                self._update_nodes_for_moving(nodes, self.zoom)
-            return
+            match self._dragging_mode:
+                case DraggingMode.node_moving:
+                    self._update_nodes_for_moving(nodes, self.zoom)
+                    return
+                case DraggingMode.pin_connecting:
+                    pass
 
-        if self._node_moving:
-            self._node_moving = False
+        if self._dragging_mode != DraggingMode.none:
+            self._dragging_mode = DraggingMode.none
 
         if self._left_dragging.prev:
             # When the node drag (movement) is finished, the mouse up event is
@@ -556,3 +587,24 @@ class GraphCanvas(CanvasController):
 
     def draw_arc(self, arc: Arc) -> None:
         pass
+
+    def draw_pin_connection(self) -> None:
+        if self._dragging_mode != DraggingMode.pin_connecting:
+            return
+
+        node = self._arc_begin_node
+        pin = self._arc_begin_pin
+        assert node is not None
+        assert pin is not None
+
+        node_roi = self.canvas_to_screen_roi(node.node_roi)
+        nx = node_roi[0]
+        ny = node_roi[1]
+        zoom = self.zoom
+        x1 = nx + pin.icon_pos[0] * zoom + pin.icon_size[0] * zoom / 2
+        y1 = ny + pin.icon_pos[1] * zoom + pin.icon_size[1] * zoom / 2
+        mx, my = self._mouse_pos
+
+        color = imgui.get_color_u32_rgba(*self.graph.style.pin_connection_color)
+        thickness = self.graph.style.pin_connection_thickness
+        self._draw_list.add_line(x1, y1, mx, my, color, thickness)

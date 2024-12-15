@@ -382,7 +382,7 @@ class CanvasController:
         if isinstance(button, MouseButton):
             button = int(button)
         assert isinstance(button, int)
-        return imgui.is_mouse_dragging(button, self._lock_threshold)
+        return imgui.is_mouse_dragging(button, self.lock_threshold)
 
     def vertical_grid_lines(self, step: float):
         if step <= 0:
