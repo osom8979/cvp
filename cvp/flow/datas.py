@@ -102,6 +102,40 @@ class Pin:
     name_pos: Point = EMPTY_POINT
     name_size: Size = EMPTY_SIZE
 
+    _hovering: bool = False
+
+    @property
+    def icon_roi(self) -> ROI:
+        x, y = self.icon_pos
+        w, h = self.icon_size
+        return x, y, x + w, y + h
+
+    @icon_roi.setter
+    def icon_roi(self, value: ROI) -> None:
+        x1, y1, x2, y2 = value
+        self.icon_pos = x1, y1
+        self.icon_size = x2 - x1, y2 - y1
+
+    @property
+    def name_roi(self) -> ROI:
+        x, y = self.name_pos
+        w, h = self.name_size
+        return x, y, x + w, y + h
+
+    @name_roi.setter
+    def name_roi(self, value: ROI) -> None:
+        x1, y1, x2, y2 = value
+        self.name_pos = x1, y1
+        self.name_size = x2 - x1, y2 - y1
+
+    @property
+    def hovering(self):
+        return self._hovering
+
+    @hovering.setter
+    def hovering(self, value: bool) -> None:
+        self._hovering = value
+
 
 @dataclass
 class ArcTemplate:

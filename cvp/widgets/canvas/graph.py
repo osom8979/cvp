@@ -262,6 +262,17 @@ class GraphCanvas(CanvasController):
         for node in self.graph.nodes:
             roi = self.canvas_to_screen_roi(node.node_roi)
             node.hovering = imgui.is_mouse_hovering_rect(*roi)
+            for pin in node.pins:
+                if node.hovering:
+                    icon_x = node.node_pos[0] + pin.icon_pos[0]
+                    icon_y = node.node_pos[1] + pin.icon_pos[1]
+                    icon_w = pin.icon_size[0]
+                    icon_h = pin.icon_size[1]
+                    icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
+                    icon_roi = self.canvas_to_screen_roi(icon_roi)
+                    pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
+                else:
+                    pin.hovering = False
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
@@ -494,24 +505,26 @@ class GraphCanvas(CanvasController):
 
         with icon_font:
             flow_pin_n_icon = graph.style.flow_pin_n_icon
-            # flow_pin_y_icon = graph.style.flow_pin_y_icon
+            flow_pin_y_icon = graph.style.flow_pin_y_icon
 
             for pin in node.flow_pins:
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
-                self._draw_list.add_text(x1, y1, label_color, flow_pin_n_icon)
+                pin_icon = flow_pin_y_icon if pin.hovering else flow_pin_n_icon
+                self._draw_list.add_text(x1, y1, label_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
             data_pin_n_icon = graph.style.data_pin_n_icon
-            # data_pin_y_icon = graph.style.data_pin_y_icon
+            data_pin_y_icon = graph.style.data_pin_y_icon
 
             for pin in node.data_pins:
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
-                self._draw_list.add_text(x1, y1, label_color, data_pin_n_icon)
+                pin_icon = data_pin_y_icon if pin.hovering else data_pin_n_icon
+                self._draw_list.add_text(x1, y1, label_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
