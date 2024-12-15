@@ -257,7 +257,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
         if canvas := self.current_canvas:
-            canvas.do_process_controllers(debugging=self.context.debug)
+            with canvas:
+                canvas.do_process_controllers(debugging=self.context.debug)
         imgui.spacing()
         self._right_tabs.do_process(self._node_path)
 
@@ -292,7 +293,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if canvas is None:
             return
 
-        canvas.do_process()
+        with canvas:
+            canvas.do_process_canvas()
 
         with imgui.begin_drag_drop_target() as drag_drop_target:
             if drag_drop_target.hovered:
@@ -301,7 +303,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                     node_path = str(payload, encoding="utf-8")
                     mx, my = canvas.mouse_to_canvas_coords()
                     node = self.context.fm.add_node(node_path)
-                    canvas.update_node_rois(node)
+                    with canvas:
+                        canvas.update_node_roi(node)
                     node.node_pos = mx, my
 
         if imgui.begin_popup_context_window().opened:

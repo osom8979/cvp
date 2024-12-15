@@ -93,24 +93,30 @@ class GraphCanvas(CanvasController, WidgetInterface):
         self.close()
 
     def do_process_controllers(self, debugging=False) -> None:
+        assert self._graph is not None
+        assert self._fonts is not None
+
         if result := self.render_controllers(debugging=debugging):
             self.graph.canvas.pan_x = result.pan_x
             self.graph.canvas.pan_y = result.pan_y
             self.graph.canvas.zoom = result.zoom
 
-    def do_process(self) -> None:
-        self.open()
-        try:
-            self.on_process()
-        finally:
-            self.close()
+    def do_process_canvas(self) -> None:
+        assert self._graph is not None
+        assert self._fonts is not None
+
+        self.on_process()
 
     @override
     def on_process(self) -> None:
         assert self._graph is not None
         assert self._fonts is not None
 
-        self.control()
+        if result := self.update_state():
+            self.graph.canvas.pan_x = result.pan_x
+            self.graph.canvas.pan_y = result.pan_y
+            self.graph.canvas.zoom = result.zoom
+
         self.update_nodes_state()
 
         self.fill()
@@ -124,7 +130,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
-        self.draw_list.add_rect_filled(*self.canvas_roi, color)
+        self._draw_list.add_rect_filled(*self.canvas_roi, color)
 
     def draw_grid_x(self) -> None:
         grid_x = self.graph.grid_x
@@ -133,7 +139,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
         color = imgui.get_color_u32_rgba(*grid_x.color)
         for line in self.vertical_grid_lines(grid_x.step):
-            self.draw_list.add_line(*line, color, grid_x.thickness)
+            self._draw_list.add_line(*line, color, grid_x.thickness)
 
     def draw_grid_y(self) -> None:
         grid_y = self.graph.grid_y
@@ -142,7 +148,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
         color = imgui.get_color_u32_rgba(*grid_y.color)
         for line in self.horizontal_grid_lines(grid_y.step):
-            self.draw_list.add_line(*line, color, grid_y.thickness)
+            self._draw_list.add_line(*line, color, grid_y.thickness)
 
     def draw_axis_x(self) -> None:
         axis_x = self.graph.axis_x
@@ -150,15 +156,13 @@ class GraphCanvas(CanvasController, WidgetInterface):
             return
 
         origin_y = self.local_origin_to_screen_coords()[1]
-        cx = self.canvas_pos[0]
-        cw = self.canvas_size[0]
         color = imgui.get_color_u32_rgba(*axis_x.color)
 
-        x1 = cx
+        x1 = self.cx
         y1 = origin_y
-        x2 = cx + cw
+        x2 = self.cx + self.cw
         y2 = origin_y
-        self.draw_list.add_line(x1, y1, x2, y2, color, axis_x.thickness)
+        self._draw_list.add_line(x1, y1, x2, y2, color, axis_x.thickness)
 
     def draw_axis_y(self) -> None:
         axis_y = self.graph.axis_y
@@ -166,15 +170,13 @@ class GraphCanvas(CanvasController, WidgetInterface):
             return
 
         origin_x = self.local_origin_to_screen_coords()[0]
-        cy = self.canvas_pos[1]
-        ch = self.canvas_size[1]
         color = imgui.get_color_u32_rgba(*axis_y.color)
 
         x1 = origin_x
-        y1 = cy
+        y1 = self.cy
         x2 = origin_x
-        y2 = cy + ch
-        self.draw_list.add_line(x1, y1, x2, y2, color, axis_y.thickness)
+        y2 = self.cy + self.ch
+        self._draw_list.add_line(x1, y1, x2, y2, color, axis_y.thickness)
 
     # def draw_texture(
     #     self,
@@ -274,13 +276,13 @@ class GraphCanvas(CanvasController, WidgetInterface):
             self._update_nodes_for_moving(nodes)
             return
 
-        if self.prev_left_dragging:
+        if self._left_dragging.prev:
             # When the node drag (movement) is finished, the mouse up event is
             # necessarily fired. Therefore, we check the drag state of the previous
             # frame to prevent the node from being selected.
             return
 
-        if self.left_up:
+        if self.changed_left_up:
             if self.ctrl_down:
                 self._update_nodes_for_multiple_select(nodes)
             else:
@@ -321,21 +323,15 @@ class GraphCanvas(CanvasController, WidgetInterface):
         else:
             assert False, "Inaccessible section"
 
-    def update_node_rois(self, node: Node) -> None:
-        graph = self._graph_ref()
-        fonts = self._fonts_ref()
+    def update_nodes_rois(self) -> None:
+        for node in self.graph.nodes:
+            self.update_node_roi(node)
 
-        if graph is None:
-            raise ReferenceError("The graph instance has expired")
-        if fonts is None:
-            raise ReferenceError("The fonts instance has expired")
-
-        assert isinstance(graph, Graph)
-        assert isinstance(fonts, FontMapper)
-        emblem_font = self.get_icon_font(fonts, graph.style.emblem_size)
-        title_font = self.get_text_font(fonts, graph.style.title_size)
-        text_font = self.get_text_font(fonts, graph.style.text_size)
-        icon_font = self.get_icon_font(fonts, graph.style.icon_size)
+    def update_node_roi(self, node: Node) -> None:
+        emblem_font = self.get_icon_font(self.fonts, self.graph.style.emblem_size)
+        title_font = self.get_text_font(self.fonts, self.graph.style.title_size)
+        text_font = self.get_text_font(self.fonts, self.graph.style.text_size)
+        icon_font = self.get_icon_font(self.fonts, self.graph.style.icon_size)
 
         with emblem_font:
             node_emblem_w, node_emblem_h = imgui.calc_text_size(node.emblem)
@@ -348,10 +344,10 @@ class GraphCanvas(CanvasController, WidgetInterface):
         title_y_diff = title_h / 2 - node_name_h / 2
 
         with icon_font:
-            flow_n_w, flow_n_h = imgui.calc_text_size(graph.style.flow_pin_n_icon)
-            flow_y_w, flow_y_h = imgui.calc_text_size(graph.style.flow_pin_y_icon)
-            data_n_w, data_n_h = imgui.calc_text_size(graph.style.data_pin_n_icon)
-            data_y_w, data_y_h = imgui.calc_text_size(graph.style.data_pin_y_icon)
+            flow_n_w, flow_n_h = imgui.calc_text_size(self.graph.style.flow_pin_n_icon)
+            flow_y_w, flow_y_h = imgui.calc_text_size(self.graph.style.flow_pin_y_icon)
+            data_n_w, data_n_h = imgui.calc_text_size(self.graph.style.data_pin_n_icon)
+            data_y_w, data_y_h = imgui.calc_text_size(self.graph.style.data_pin_y_icon)
 
         iw = max(flow_y_w, flow_n_w, data_y_w, data_n_w)
         ih = max(flow_y_h, flow_n_h, data_y_h, data_n_h)
@@ -373,7 +369,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
         pin_icon_y_diff = pin_h / 2 - ih / 2
         pin_name_y_diff = pin_h / 2 - pin_name_h / 2
 
-        isw, ish = graph.style.item_spacing
+        isw, ish = self.graph.style.item_spacing
         center_padding = isw * 4
 
         wt = isw + node_emblem_w + isw + node_name_w + isw
@@ -449,8 +445,8 @@ class GraphCanvas(CanvasController, WidgetInterface):
         rounding = stroke.rounding
         flags = stroke.flags
 
-        self.draw_list.add_rect_filled(*node_roi, fill_color, rounding, flags)
-        self.draw_list.add_rect(*node_roi, stroke_color, rounding, flags, thickness)
+        self._draw_list.add_rect_filled(*node_roi, fill_color, rounding, flags)
+        self._draw_list.add_rect(*node_roi, stroke_color, rounding, flags, thickness)
 
         graph = self.graph
         fonts = self.fonts
@@ -469,20 +465,20 @@ class GraphCanvas(CanvasController, WidgetInterface):
         with emblem_font:
             x1 = nx + node.emblem_pos[0]
             y1 = ny + node.emblem_pos[1]
-            self.draw_list.add_text(x1, y1, label_color, node.emblem)
+            self._draw_list.add_text(x1, y1, label_color, node.emblem)
             if graph.style.show_layout:
                 x2 = x1 + node.emblem_size[0]
                 y2 = y1 + node.emblem_size[1]
-                self.draw_list.add_rect(x1, y1, x2, y2, layout_color)
+                self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with title_font:
             x1 = nx + node.name_pos[0]
             y1 = ny + node.name_pos[1]
-            self.draw_list.add_text(x1, y1, label_color, node.name)
+            self._draw_list.add_text(x1, y1, label_color, node.name)
             if graph.style.show_layout:
                 x2 = x1 + node.name_size[0]
                 y2 = y1 + node.name_size[1]
-                self.draw_list.add_rect(x1, y1, x2, y2, layout_color)
+                self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with icon_font:
             flow_pin_n_icon = graph.style.flow_pin_n_icon
@@ -491,11 +487,11 @@ class GraphCanvas(CanvasController, WidgetInterface):
             for pin in node.flow_pins:
                 x1 = nx + pin.icon_pos[0]
                 y1 = ny + pin.icon_pos[1]
-                self.draw_list.add_text(x1, y1, label_color, flow_pin_n_icon)
+                self._draw_list.add_text(x1, y1, label_color, flow_pin_n_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0]
                     y2 = y1 + pin.icon_size[1]
-                    self.draw_list.add_rect(x1, y1, x2, y2, layout_color)
+                    self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
             data_pin_n_icon = graph.style.data_pin_n_icon
             # data_pin_y_icon = graph.style.data_pin_y_icon
@@ -503,21 +499,21 @@ class GraphCanvas(CanvasController, WidgetInterface):
             for pin in node.data_pins:
                 x1 = nx + pin.icon_pos[0]
                 y1 = ny + pin.icon_pos[1]
-                self.draw_list.add_text(x1, y1, label_color, data_pin_n_icon)
+                self._draw_list.add_text(x1, y1, label_color, data_pin_n_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0]
                     y2 = y1 + pin.icon_size[1]
-                    self.draw_list.add_rect(x1, y1, x2, y2, layout_color)
+                    self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with text_font:
             for pin in node.pins:
                 x1 = nx + pin.name_pos[0]
                 y1 = ny + pin.name_pos[1]
-                self.draw_list.add_text(x1, y1, label_color, pin.name)
+                self._draw_list.add_text(x1, y1, label_color, pin.name)
                 if graph.style.show_layout:
                     x2 = x1 + pin.name_size[0]
                     y2 = y1 + pin.name_size[1]
-                    self.draw_list.add_rect(x1, y1, x2, y2, layout_color)
+                    self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
