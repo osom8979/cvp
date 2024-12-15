@@ -181,6 +181,18 @@ class CanvasController:
         return self._right_dragging.value
 
     @property
+    def begined_left_dragging(self):
+        return self._left_dragging.changed and self._left_dragging.value
+
+    @property
+    def begined_middle_dragging(self):
+        return self._middle_dragging.changed and self._middle_dragging.value
+
+    @property
+    def begined_right_dragging(self):
+        return self._right_dragging.changed and self._right_dragging.value
+
+    @property
     def left_down(self):
         return self._left_down.value
 
@@ -231,12 +243,12 @@ class CanvasController:
     @property
     def is_select_mode(self) -> bool:
         # Pressing the CTRL button switches to 'Multi-node selection mode'
-        return self._ctrl_down.value
+        return self.ctrl_down
 
     @property
     def is_pan_mode(self) -> bool:
         # Pressing the ALT button switches to 'Canvas Pan Mode'
-        return self._alt_down.value
+        return self.alt_down
 
     def as_unformatted_text(self):
         return (
@@ -254,8 +266,8 @@ class CanvasController:
             f"Middle down: {self.middle_down}\n"
             f"Right down: {self.right_down}\n"
             f"Ctrl down: {self.ctrl_down}\n"
-            f"Alt down: {self.alt_down}\n"
-            f"Shift down: {self.shift_down}\n"
+            f"Alt down (Pan): {self.alt_down}\n"
+            f"Shift down (Select): {self.shift_down}\n"
         )
 
     def reset(self):

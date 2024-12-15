@@ -130,13 +130,6 @@ class NodeTemplate:
 
 
 @dataclass
-class NodeState:
-    screen_roi: ROI = EMPTY_ROI
-    selected: bool = False
-    hovering: bool = False
-
-
-@dataclass
 class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = EMPTY_TEXT
@@ -159,7 +152,8 @@ class Node:
     data_inputs: List[Pin] = field(default_factory=list)
     data_outputs: List[Pin] = field(default_factory=list)
 
-    _state: NodeState = field(default_factory=NodeState)
+    _selected: bool = False
+    _hovering: bool = False
 
     @property
     def node_roi(self) -> ROI:
@@ -172,14 +166,6 @@ class Node:
         x1, y1, x2, y2 = value
         self.node_pos = x1, y1
         self.node_size = x2 - x1, y2 - y1
-
-    @property
-    def state(self) -> NodeState:
-        return self._state
-
-    @state.setter
-    def state(self, value: NodeState) -> None:
-        self._state = value
 
     @property
     def flow_pins(self) -> List[Pin]:
@@ -208,6 +194,22 @@ class Node:
     @property
     def data_lines(self):
         return max(len(self.data_inputs), len(self.data_outputs))
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value: bool) -> None:
+        self._selected = value
+
+    @property
+    def hovering(self):
+        return self._hovering
+
+    @hovering.setter
+    def hovering(self, value: bool) -> None:
+        self._hovering = value
 
 
 @dataclass

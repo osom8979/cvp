@@ -1,27 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, Optional, Sequence
+from typing import Optional, Sequence
 from weakref import ReferenceType, ref
 
 import imgui
 
 from cvp.flow.datas import Arc, FontSize, Graph, Node, Stroke, Style
-from cvp.fonts.glyphs.mdi import (
-    MDI_ARROW_RIGHT_CIRCLE,
-    MDI_ARROW_RIGHT_CIRCLE_OUTLINE,
-    MDI_CIRCLE,
-    MDI_CIRCLE_OUTLINE,
-)
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.renderer.widget.interface import WidgetInterface
 from cvp.types.override import override
 from cvp.widgets.canvas.controller.controller import CanvasController
-
-FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE_OUTLINE
-FLOW_PIN_Y_ICON: Final[str] = MDI_ARROW_RIGHT_CIRCLE
-DATA_PIN_N_ICON: Final[str] = MDI_CIRCLE_OUTLINE
-DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE
 
 
 class GraphCanvas(CanvasController, WidgetInterface):
@@ -37,6 +26,7 @@ class GraphCanvas(CanvasController, WidgetInterface):
         self._fonts_ref = ref(fonts)
         self._graph = None
         self._fonts = None
+        self._node_moving = False
 
     @property
     def graph(self) -> Graph:
@@ -213,40 +203,35 @@ class GraphCanvas(CanvasController, WidgetInterface):
     @staticmethod
     def _find_hovering_single_node(nodes: Sequence[Node]) -> Optional[Node]:
         for node in nodes:
-            if node.state.hovering:
+            if node.hovering:
                 return node
         return None
 
     @staticmethod
     def _update_nodes_single_select(nodes: Sequence[Node], selected_node: Node) -> None:
         for node in nodes:
-            node.state.selected = selected_node == node
+            node.selected = selected_node == node
 
     @staticmethod
     def _update_nodes_all_unselect(nodes: Sequence[Node]) -> None:
         for node in nodes:
-            node.state.selected = False
-
-    def _update_nodes_for_single_select(self, nodes: Sequence[Node]) -> None:
-        if selected_node := self._find_hovering_single_node(nodes):
-            self._update_nodes_single_select(nodes, selected_node)
-        else:
-            self._update_nodes_all_unselect(nodes)
+            node.selected = False
 
     @staticmethod
     def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
         for node in nodes:
-            if node.state.hovering:
-                node.state.selected = not node.state.selected
+            if node.hovering:
+                node.selected = not node.selected
                 break
 
-    def _update_nodes_for_moving(self, nodes: Sequence[Node]) -> None:
+    @staticmethod
+    def _update_nodes_for_moving(nodes: Sequence[Node], zoom: float) -> None:
         io = imgui.get_io()
-        dx = io.mouse_delta.x / self.zoom
-        dy = io.mouse_delta.y / self.zoom
+        dx = io.mouse_delta.x / zoom
+        dy = io.mouse_delta.y / zoom
 
         for node in nodes:
-            if not node.state.selected:
+            if not node.selected:
                 continue
 
             x1, y1, x2, y2 = node.node_roi
@@ -258,23 +243,30 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
-        any_selected_hovering = False
 
-        for node in nodes:
-            node_roi = self.canvas_to_screen_roi(node.node_roi)
-            node.state.screen_roi = node_roi
-            node.state.hovering = imgui.is_mouse_hovering_rect(*node_roi)
-            if node.state.hovering and node.state.selected:
-                any_selected_hovering = True
+        for node in self.graph.nodes:
+            roi = self.canvas_to_screen_roi(node.node_roi)
+            node.hovering = imgui.is_mouse_hovering_rect(*roi)
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
 
-        node_moving = any_selected_hovering and self.activating and self.left_dragging
-        if node_moving:
-            self._update_nodes_for_moving(nodes)
+        if self.left_dragging:
+            if not self._node_moving and self._left_dragging.changed:
+                hovering_node = self._find_hovering_single_node(nodes)
+                if hovering_node is not None:
+                    if not hovering_node.selected:
+                        self._update_nodes_all_unselect(nodes)
+                        hovering_node.selected = True
+                    self._node_moving = True
+
+            if self._node_moving:
+                self._update_nodes_for_moving(nodes, self.zoom)
             return
+
+        if self._node_moving:
+            self._node_moving = False
 
         if self._left_dragging.prev:
             # When the node drag (movement) is finished, the mouse up event is
@@ -286,7 +278,11 @@ class GraphCanvas(CanvasController, WidgetInterface):
             if self.ctrl_down:
                 self._update_nodes_for_multiple_select(nodes)
             else:
-                self._update_nodes_for_single_select(nodes)
+                if selected_node := self._find_hovering_single_node(nodes):
+                    self._update_nodes_single_select(nodes, selected_node)
+                else:
+                    self._update_nodes_all_unselect(nodes)
+            return
 
     def draw_nodes(self) -> None:
         for node in self.graph.nodes:
@@ -294,9 +290,9 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
-        if node.state.selected:
+        if node.selected:
             return style.selected_node
-        elif node.state.hovering:
+        elif node.hovering:
             return style.hovering_node
         else:
             return style.normal_node
