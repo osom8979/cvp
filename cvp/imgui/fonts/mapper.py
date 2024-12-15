@@ -183,3 +183,11 @@ class FontMapper(OrderedDict[str, Font]):
     @staticmethod
     def set_font_global_scale(scale: float) -> None:
         imgui.get_io().font_global_scale = scale
+
+    @property
+    def font_global_scale(self) -> float:
+        return self.get_font_global_scale()
+
+    @font_global_scale.setter
+    def font_global_scale(self, scale: float) -> None:
+        self.set_font_global_scale(scale)

@@ -270,11 +270,6 @@ class CanvasController:
             f"Shift down (Select): {self.shift_down}\n"
         )
 
-    def reset(self):
-        self.pan_x = 0.0
-        self.pan_y = 0.0
-        self.zoom = 1.0
-
     def drag_pan(self, dryrun=False):
         result = drag_float2(
             self._pan_label,

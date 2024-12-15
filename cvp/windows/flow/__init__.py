@@ -301,15 +301,18 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                 payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
                 if payload is not None:
                     node_path = str(payload, encoding="utf-8")
-                    mx, my = canvas.mouse_to_canvas_coords()
                     node = self.context.fm.add_node(node_path)
                     with canvas:
                         canvas.update_node_roi(node)
-                    node.node_pos = mx, my
+                    node.node_pos = canvas.mouse_to_canvas_coords()
 
         if imgui.begin_popup_context_window().opened:
             try:
                 if menu_item("Reset"):
-                    canvas.reset()
+                    with canvas:
+                        canvas.reset_controllers()
             finally:
                 imgui.end_popup()
+
+        with canvas:
+            canvas.draw_graph()

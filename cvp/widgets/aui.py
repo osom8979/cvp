@@ -82,6 +82,12 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         self._split_right = AuiRightProxy(window_config)
         self._split_bottom = AuiBottomProxy(window_config)
 
+        self._left_child_id = "ChildLeft"
+        self._right_child_id = "ChildRight"
+        self._center_child_id = "ChildCenter"
+        self._main_child_id = "ChildMain"
+        self._bottom_child_id = "ChildBottom"
+
         self._left_splitter = Splitter.from_vertical(
             "## VSplitterLeft",
             value_proxy=self._split_left,
@@ -157,7 +163,7 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         top = imgui.get_cursor_pos_y()
 
         imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + pw)
-        with begin_child("## ChildSidebarLeft", self.split_left):
+        with begin_child(f"##{self._left_child_id}", self.split_left):
             with style_item_spacing(0, 0):
                 imgui.dummy(0, ph)
             self.on_process_sidebar_left()
@@ -171,18 +177,25 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         with style_item_spacing(-1, 0):
             imgui.same_line()
 
-        with begin_child("## ChildCenter", -self.split_right - pw):
-            original_spacing = imgui.get_style().item_spacing
+        main_x: float
+        main_y: float
+        main_w: float
+        main_h: float
+
+        with begin_child(f"##{self._center_child_id}", -self.split_right - pw):
             with style_item_spacing(0, -1):
-                with begin_child("## ChildMain", 0.0, -self.split_bottom):
-                    with style_item_spacing(*original_spacing):
-                        self.on_process_main()
+                with begin_child(f"##{self._main_child_id}", 0.0, -self.split_bottom):
+                    main_x, main_y = imgui.get_window_position()
+                    main_w, main_h = imgui.get_window_size()
+                    # [IMPORTANT]
+                    # When the font scale is changed, it affects other children.
+                    # Therefore, the 'main_child' must be rendered last.
 
             with style_item_spacing(0, -1):
                 self._bottom_splitter.do_process()
 
             imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + pw)
-            with begin_child("## ChildBottom", -pw):
+            with begin_child(f"##{self._bottom_child_id}", -pw):
                 with style_item_spacing(0, 0):
                     imgui.dummy(0, ph)
                 self.on_process_bottom()
@@ -196,10 +209,15 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         with style_item_spacing(pw, 0):
             imgui.same_line()
 
-        with begin_child("## ChildSidebarRight", -pw):
+        with begin_child(f"##{self._right_child_id}", -pw):
             with style_item_spacing(0, 0):
                 imgui.dummy(0, ph)
             self.on_process_sidebar_right()
+
+        imgui.set_next_window_position(main_x, main_y)
+        with begin_child(f"##{self._main_child_id}", main_w, main_h):
+            # This is where the actual rendering of main_child occurs.
+            self.on_process_main()
 
     @override
     def on_process_sidebar_left(self) -> None:

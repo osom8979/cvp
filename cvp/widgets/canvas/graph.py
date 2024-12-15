@@ -6,14 +6,13 @@ from weakref import ReferenceType, ref
 import imgui
 
 from cvp.flow.datas import Arc, FontSize, Graph, Node, Stroke, Style
+from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
-from cvp.renderer.widget.interface import WidgetInterface
-from cvp.types.override import override
 from cvp.widgets.canvas.controller.controller import CanvasController
 
 
-class GraphCanvas(CanvasController, WidgetInterface):
+class GraphCanvas(CanvasController):
     _graph_ref: ReferenceType[Graph]
     _fonts_ref: ReferenceType[FontMapper]
 
@@ -26,6 +25,11 @@ class GraphCanvas(CanvasController, WidgetInterface):
         self._fonts_ref = ref(fonts)
         self._graph = None
         self._fonts = None
+
+        self._pan_x.update(graph.canvas.pan_x, no_emit=True)
+        self._pan_y.update(graph.canvas.pan_y, no_emit=True)
+        self._zoom.update(graph.canvas.zoom, no_emit=True)
+
         self._node_moving = False
 
     @property
@@ -82,32 +86,42 @@ class GraphCanvas(CanvasController, WidgetInterface):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
+    def reset_controllers(self):
+        self.pan_x = 0.0
+        self.pan_y = 0.0
+        self.zoom = 1.0
+
+        if self._graph is not None:
+            canvas = self._graph.canvas
+            canvas.pan_x = 0.0
+            canvas.pan_y = 0.0
+            canvas.zoom = 1.0
+
     def do_process_controllers(self, debugging=False) -> None:
         assert self._graph is not None
         assert self._fonts is not None
 
         if result := self.render_controllers(debugging=debugging):
-            self.graph.canvas.pan_x = result.pan_x
-            self.graph.canvas.pan_y = result.pan_y
-            self.graph.canvas.zoom = result.zoom
+            canvas = self.graph.canvas
+            canvas.pan_x = result.pan_x
+            canvas.pan_y = result.pan_y
+            canvas.zoom = result.zoom
 
     def do_process_canvas(self) -> None:
         assert self._graph is not None
         assert self._fonts is not None
 
-        self.on_process()
-
-    @override
-    def on_process(self) -> None:
-        assert self._graph is not None
-        assert self._fonts is not None
-
         if result := self.update_state():
-            self.graph.canvas.pan_x = result.pan_x
-            self.graph.canvas.pan_y = result.pan_y
-            self.graph.canvas.zoom = result.zoom
+            canvas = self.graph.canvas
+            canvas.pan_x = result.pan_x
+            canvas.pan_y = result.pan_y
+            canvas.zoom = result.zoom
 
         self.update_nodes_state()
+
+    def draw_graph(self) -> None:
+        assert self._graph is not None
+        assert self._fonts is not None
 
         self.fill()
         self.draw_grid_x()
@@ -115,8 +129,9 @@ class GraphCanvas(CanvasController, WidgetInterface):
         self.draw_axis_x()
         self.draw_axis_y()
 
-        self.draw_nodes()
-        self.draw_arcs()
+        with font_global_scale(self.zoom):
+            self.draw_nodes()
+            self.draw_arcs()
 
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
@@ -457,23 +472,24 @@ class GraphCanvas(CanvasController, WidgetInterface):
 
         nx = node_roi[0]
         ny = node_roi[1]
+        zoom = self.zoom
 
         with emblem_font:
-            x1 = nx + node.emblem_pos[0]
-            y1 = ny + node.emblem_pos[1]
+            x1 = nx + node.emblem_pos[0] * zoom
+            y1 = ny + node.emblem_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.emblem)
             if graph.style.show_layout:
-                x2 = x1 + node.emblem_size[0]
-                y2 = y1 + node.emblem_size[1]
+                x2 = x1 + node.emblem_size[0] * zoom
+                y2 = y1 + node.emblem_size[1] * zoom
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with title_font:
-            x1 = nx + node.name_pos[0]
-            y1 = ny + node.name_pos[1]
+            x1 = nx + node.name_pos[0] * zoom
+            y1 = ny + node.name_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.name)
             if graph.style.show_layout:
-                x2 = x1 + node.name_size[0]
-                y2 = y1 + node.name_size[1]
+                x2 = x1 + node.name_size[0] * zoom
+                y2 = y1 + node.name_size[1] * zoom
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with icon_font:
@@ -481,34 +497,34 @@ class GraphCanvas(CanvasController, WidgetInterface):
             # flow_pin_y_icon = graph.style.flow_pin_y_icon
 
             for pin in node.flow_pins:
-                x1 = nx + pin.icon_pos[0]
-                y1 = ny + pin.icon_pos[1]
+                x1 = nx + pin.icon_pos[0] * zoom
+                y1 = ny + pin.icon_pos[1] * zoom
                 self._draw_list.add_text(x1, y1, label_color, flow_pin_n_icon)
                 if graph.style.show_layout:
-                    x2 = x1 + pin.icon_size[0]
-                    y2 = y1 + pin.icon_size[1]
+                    x2 = x1 + pin.icon_size[0] * zoom
+                    y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
             data_pin_n_icon = graph.style.data_pin_n_icon
             # data_pin_y_icon = graph.style.data_pin_y_icon
 
             for pin in node.data_pins:
-                x1 = nx + pin.icon_pos[0]
-                y1 = ny + pin.icon_pos[1]
+                x1 = nx + pin.icon_pos[0] * zoom
+                y1 = ny + pin.icon_pos[1] * zoom
                 self._draw_list.add_text(x1, y1, label_color, data_pin_n_icon)
                 if graph.style.show_layout:
-                    x2 = x1 + pin.icon_size[0]
-                    y2 = y1 + pin.icon_size[1]
+                    x2 = x1 + pin.icon_size[0] * zoom
+                    y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with text_font:
             for pin in node.pins:
-                x1 = nx + pin.name_pos[0]
-                y1 = ny + pin.name_pos[1]
+                x1 = nx + pin.name_pos[0] * zoom
+                y1 = ny + pin.name_pos[1] * zoom
                 self._draw_list.add_text(x1, y1, label_color, pin.name)
                 if graph.style.show_layout:
-                    x2 = x1 + pin.name_size[0]
-                    y2 = y1 + pin.name_size[1]
+                    x2 = x1 + pin.name_size[0] * zoom
+                    y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
     def draw_arcs(self) -> None:
