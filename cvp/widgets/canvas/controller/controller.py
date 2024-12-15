@@ -265,9 +265,9 @@ class CanvasController:
             f"Left down: {self.left_down}\n"
             f"Middle down: {self.middle_down}\n"
             f"Right down: {self.right_down}\n"
-            f"Ctrl down: {self.ctrl_down}\n"
+            f"Ctrl down (Select): {self.ctrl_down}\n"
             f"Alt down (Pan): {self.alt_down}\n"
-            f"Shift down (Select): {self.shift_down}\n"
+            f"Shift down: {self.shift_down}\n"
         )
 
     def drag_pan(self, dryrun=False):

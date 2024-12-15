@@ -233,6 +233,14 @@ class GraphCanvas(CanvasController):
             node.selected = False
 
     @staticmethod
+    def _update_nodes_all_unhovering(nodes: Sequence[Node], also_pins=False) -> None:
+        for node in nodes:
+            node.hovering = False
+            if also_pins:
+                for pin in node.pins:
+                    pin.hovering = False
+
+    @staticmethod
     def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
         for node in nodes:
             if node.hovering:
@@ -259,20 +267,22 @@ class GraphCanvas(CanvasController):
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
 
+        self._update_nodes_all_unhovering(nodes)
+
         for node in self.graph.nodes:
             roi = self.canvas_to_screen_roi(node.node_roi)
             node.hovering = imgui.is_mouse_hovering_rect(*roi)
+            if not node.hovering:
+                continue
             for pin in node.pins:
-                if node.hovering:
-                    icon_x = node.node_pos[0] + pin.icon_pos[0]
-                    icon_y = node.node_pos[1] + pin.icon_pos[1]
-                    icon_w = pin.icon_size[0]
-                    icon_h = pin.icon_size[1]
-                    icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
-                    icon_roi = self.canvas_to_screen_roi(icon_roi)
-                    pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
-                else:
-                    pin.hovering = False
+                icon_x = node.node_pos[0] + pin.icon_pos[0]
+                icon_y = node.node_pos[1] + pin.icon_pos[1]
+                icon_w = pin.icon_size[0]
+                icon_h = pin.icon_size[1]
+                icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
+                icon_roi = self.canvas_to_screen_roi(icon_roi)
+                pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
+            break
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
@@ -309,10 +319,6 @@ class GraphCanvas(CanvasController):
                 else:
                     self._update_nodes_all_unselect(nodes)
             return
-
-    def draw_nodes(self) -> None:
-        for node in self.graph.nodes:
-            self.draw_node(node)
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -452,6 +458,10 @@ class GraphCanvas(CanvasController):
             name_x = icon_x - isw - pin.name_size[0]
             name_y = icon_y + pin_name_y_diff
             pin.name_pos = name_x, name_y
+
+    def draw_nodes(self) -> None:
+        for node in reversed(self.graph.nodes):
+            self.draw_node(node)
 
     def draw_node(self, node: Node) -> None:
         node_roi = self.canvas_to_screen_roi(node.node_roi)
