@@ -55,10 +55,9 @@ class CanvasController:
         self._canvas_pos_fmt = "%.3f"
         self._canvas_pos_flags = imgui.INPUT_TEXT_READ_ONLY
 
-        self._has_context_menu = False
         self._control_identifier = type(self).__name__
         self._control_flags = int(ALL_BUTTON_FLAGS)
-        self._lock_threshold = -1.0
+        self._mouse_dragging_threshold = -1.0
 
         self._activating = StateWatcher(False, False)
         self._hovering = StateWatcher(False, False)
@@ -181,15 +180,15 @@ class CanvasController:
         return self._right_dragging.value
 
     @property
-    def begined_left_dragging(self):
+    def beginning_left_dragging(self):
         return self._left_dragging.changed and self._left_dragging.value
 
     @property
-    def begined_middle_dragging(self):
+    def beginning_middle_dragging(self):
         return self._middle_dragging.changed and self._middle_dragging.value
 
     @property
-    def begined_right_dragging(self):
+    def beginning_right_dragging(self):
         return self._right_dragging.changed and self._right_dragging.value
 
     @property
@@ -240,16 +239,6 @@ class CanvasController:
     def changed_right_up(self) -> bool:
         return self._right_down.changed and not self._right_down.value
 
-    @property
-    def is_select_mode(self) -> bool:
-        # Pressing the CTRL button switches to 'Multi-node selection mode'
-        return self.ctrl_down
-
-    @property
-    def is_pan_mode(self) -> bool:
-        # Pressing the ALT button switches to 'Canvas Pan Mode'
-        return self.alt_down
-
     def as_unformatted_text(self):
         return (
             f"Pen: {self.pan_x:.02f}, {self.pan_y:.02f}\n"
@@ -265,9 +254,9 @@ class CanvasController:
             f"Left down: {self.left_down}\n"
             f"Middle down: {self.middle_down}\n"
             f"Right down: {self.right_down}\n"
-            f"Ctrl down (Select): {self.ctrl_down}\n"
-            f"Alt down (Pan): {self.alt_down}\n"
             f"Shift down: {self.shift_down}\n"
+            f"Ctrl down: {self.ctrl_down}\n"
+            f"Alt down: {self.alt_down}\n"
         )
 
     def drag_pan(self, dryrun=False):
@@ -369,20 +358,12 @@ class CanvasController:
     def mouse_to_canvas_coords(self) -> Point:
         return self.screen_to_canvas_coords(self._mouse_pos)
 
-    @property
-    def lock_threshold(self) -> float:
-        """
-        Pan (we use a zero mouse threshold when there's no context menu)
-        You may decide to make that threshold dynamic based on whether
-        the mouse is hovering something etc.
-        """
-        return self._lock_threshold if self._has_context_menu else 0.0
-
     def is_mouse_dragging(self, button: Union[int, MouseButton]) -> bool:
         if isinstance(button, MouseButton):
             button = int(button)
         assert isinstance(button, int)
-        return imgui.is_mouse_dragging(button, self.lock_threshold)
+        assert self._mouse_dragging_threshold != 0.0
+        return imgui.is_mouse_dragging(button, self._mouse_dragging_threshold)
 
     def vertical_grid_lines(self, step: float):
         if step <= 0:

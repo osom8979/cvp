@@ -6,10 +6,11 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Arc, FontSize, Graph, Node, Stroke, Style, Pin
+from cvp.flow.datas import Arc, FontSize, Graph, Node, Pin, Stroke, Style
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
+from cvp.types.override import override
 from cvp.widgets.canvas.controller.controller import CanvasController
 
 
@@ -27,8 +28,8 @@ class GraphCanvas(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
-    _arc_begin_node: Optional[Node]
-    _arc_begin_pin: Optional[Pin]
+    _connecting_node: Optional[Node]
+    _connecting_pin: Optional[Pin]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
@@ -37,13 +38,45 @@ class GraphCanvas(CanvasController):
         self._graph = None
         self._fonts = None
 
+        self._dragging_mode = DraggingMode.none
+        self._connecting_node = None
+        self._connecting_pin = None
+
         self._pan_x.update(graph.canvas.pan_x, no_emit=True)
         self._pan_y.update(graph.canvas.pan_y, no_emit=True)
         self._zoom.update(graph.canvas.zoom, no_emit=True)
 
-        self._dragging_mode = DraggingMode.none
-        self._arc_begin_node = None
-        self._arc_begin_pin = None
+    @property
+    def is_select_mode(self) -> bool:
+        # Pressing the CTRL button switches to 'Multi-node selection mode'
+        return self.ctrl_down
+
+    @property
+    def is_pan_mode(self) -> bool:
+        # Pressing the ALT button switches to 'Canvas Pan Mode'
+        return self.alt_down
+
+    @property
+    def is_none_dragging_mode(self) -> bool:
+        return self._dragging_mode == DraggingMode.none
+
+    @property
+    def is_node_moving_mode(self) -> bool:
+        return self._dragging_mode == DraggingMode.node_moving
+
+    @property
+    def is_pin_connecting_mode(self) -> bool:
+        return self._dragging_mode == DraggingMode.pin_connecting
+
+    @override
+    def as_unformatted_text(self):
+        node_name = self._connecting_node.name if self._connecting_node else "None"
+        pin_name = self._connecting_pin.name if self._connecting_pin else "None"
+        return super().as_unformatted_text() + (
+            f"Dragging mode: {self._dragging_mode.name}\n"
+            f"Arc begin node: {node_name}\n"
+            f"Arc begin pin: {pin_name}\n"
+        )
 
     @property
     def graph(self) -> Graph:
@@ -255,19 +288,11 @@ class GraphCanvas(CanvasController):
             node.selected = False
 
     @staticmethod
-    def _update_nodes_all_unhovering(nodes: Sequence[Node], with_pins=False) -> None:
-        for node in nodes:
-            node.hovering = False
-            if with_pins:
-                for pin in node.pins:
-                    pin.hovering = False
-
-    @staticmethod
     def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
         for node in nodes:
             if node.hovering:
                 node.selected = not node.selected
-                break
+                return
 
     @staticmethod
     def _update_nodes_for_moving(nodes: Sequence[Node], zoom: float) -> None:
@@ -286,54 +311,69 @@ class GraphCanvas(CanvasController):
             y2 += dy
             node.node_roi = x1, y1, x2, y2
 
+    @staticmethod
+    def _update_nodes_all_unhovering(nodes: Sequence[Node]) -> None:
+        for node in nodes:
+            node.hovering = False
+            for pin in node.pins:
+                pin.hovering = False
+
+    def _update_pins_single_hovering(self, node: Node) -> None:
+        for pin in node.pins:
+            icon_x = node.node_pos[0] + pin.icon_pos[0]
+            icon_y = node.node_pos[1] + pin.icon_pos[1]
+            icon_w = pin.icon_size[0]
+            icon_h = pin.icon_size[1]
+            icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
+            icon_roi = self.canvas_to_screen_roi(icon_roi)
+            pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
+            if pin.hovering:
+                return
+
+    def _update_nodes_single_hovering(self, nodes: Sequence[Node]) -> None:
+        for node in nodes:
+            roi = self.canvas_to_screen_roi(node.node_roi)
+            node.hovering = imgui.is_mouse_hovering_rect(*roi)
+            if node.hovering:
+                self._update_pins_single_hovering(node)
+                return
+
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
 
-        self._update_nodes_all_unhovering(nodes, with_pins=True)
-
-        for node in self.graph.nodes:
-            roi = self.canvas_to_screen_roi(node.node_roi)
-            node.hovering = imgui.is_mouse_hovering_rect(*roi)
-            if not node.hovering:
-                continue
-            for pin in node.pins:
-                icon_x = node.node_pos[0] + pin.icon_pos[0]
-                icon_y = node.node_pos[1] + pin.icon_pos[1]
-                icon_w = pin.icon_size[0]
-                icon_h = pin.icon_size[1]
-                icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
-                icon_roi = self.canvas_to_screen_roi(icon_roi)
-                pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
-            break
+        self._update_nodes_all_unhovering(nodes)
+        self._update_nodes_single_hovering(nodes)
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
 
-        if not self.ctrl_down and self.left_dragging:
-            if self._dragging_mode == DraggingMode.none and self._left_dragging.changed:
-                hovering_node = self._find_hovering_single_node(nodes)
-                if hovering_node is not None:
-                    hovering_pin = self._find_hovering_single_pin(hovering_node.pins)
-                    if hovering_pin is not None:
-                        self._dragging_mode = DraggingMode.pin_connecting
-                        self._arc_begin_node = hovering_node
-                        self._arc_begin_pin = hovering_pin
-                    else:
-                        if not hovering_node.selected:
-                            self._update_nodes_all_unselect(nodes)
-                            hovering_node.selected = True
-                        self._dragging_mode = DraggingMode.node_moving
+        if self.beginning_left_dragging and self.is_none_dragging_mode:
+            hovering_node = self._find_hovering_single_node(nodes)
+            if hovering_node is not None:
+                hovering_pin = self._find_hovering_single_pin(hovering_node.pins)
+                if hovering_pin is not None:
+                    self._dragging_mode = DraggingMode.pin_connecting
+                    self._connecting_node = hovering_node
+                    self._connecting_pin = hovering_pin
+                else:
+                    if not hovering_node.selected:
+                        self._update_nodes_all_unselect(nodes)
+                        hovering_node.selected = True
+                    self._dragging_mode = DraggingMode.node_moving
 
+        if self.left_dragging:
             match self._dragging_mode:
                 case DraggingMode.node_moving:
                     self._update_nodes_for_moving(nodes, self.zoom)
                     return
                 case DraggingMode.pin_connecting:
-                    pass
+                    return
 
         if self._dragging_mode != DraggingMode.none:
             self._dragging_mode = DraggingMode.none
+            self._connecting_node = None
+            self._connecting_pin = None
 
         if self._left_dragging.prev:
             # When the node drag (movement) is finished, the mouse up event is
@@ -592,8 +632,8 @@ class GraphCanvas(CanvasController):
         if self._dragging_mode != DraggingMode.pin_connecting:
             return
 
-        node = self._arc_begin_node
-        pin = self._arc_begin_pin
+        node = self._connecting_node
+        pin = self._connecting_pin
         assert node is not None
         assert pin is not None
 
