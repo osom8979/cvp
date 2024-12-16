@@ -5,7 +5,7 @@ from typing import Callable, Generic, Optional, TypeVar
 _T = TypeVar("_T")
 
 
-class StateWatcher(Generic[_T]):
+class Delta(Generic[_T]):
     def __init__(
         self,
         value: _T,
@@ -15,6 +15,14 @@ class StateWatcher(Generic[_T]):
         self.prev = prev
         self.value = value
         self._on_change = on_change
+
+    @classmethod
+    def from_single_value(
+        cls,
+        value: _T,
+        on_change: Optional[Callable[[_T, _T], None]] = None,
+    ):
+        return cls(value, value, on_change)
 
     @property
     def changed(self) -> bool:

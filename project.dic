@@ -58,6 +58,7 @@ dockerignore
 doreturn
 dostr
 doublebuf
+dragger
 eventable
 extendleft
 fastdecode

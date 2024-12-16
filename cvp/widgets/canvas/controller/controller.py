@@ -13,16 +13,16 @@ from cvp.imgui.flags.mouse import MouseButton
 from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
-from cvp.patterns.state_watcher import StateWatcher
+from cvp.patterns.delta import Delta
 from cvp.types.shapes import ROI, Point
 from cvp.widgets.canvas.controller.result import ControllerResult
 
 
 class CanvasController:
     def __init__(self):
-        self._pan_x = StateWatcher(0.0, 0.0)
-        self._pan_y = StateWatcher(0.0, 0.0)
-        self._zoom = StateWatcher(1.0, 1.0)
+        self._pan_x = Delta.from_single_value(0.0)
+        self._pan_y = Delta.from_single_value(0.0)
+        self._zoom = Delta.from_single_value(1.0)
 
         self._draw_list = DrawList()
         self._mouse_pos = 0.0, 0.0
@@ -59,20 +59,20 @@ class CanvasController:
         self._control_flags = int(ALL_BUTTON_FLAGS)
         self._mouse_dragging_threshold = -1.0
 
-        self._activating = StateWatcher(False, False)
-        self._hovering = StateWatcher(False, False)
+        self._activating = Delta.from_single_value(False)
+        self._hovering = Delta.from_single_value(False)
 
-        self._left_dragging = StateWatcher(False, False)
-        self._middle_dragging = StateWatcher(False, False)
-        self._right_dragging = StateWatcher(False, False)
+        self._left_dragging = Delta.from_single_value(False)
+        self._middle_dragging = Delta.from_single_value(False)
+        self._right_dragging = Delta.from_single_value(False)
 
-        self._left_down = StateWatcher(False, False)
-        self._middle_down = StateWatcher(False, False)
-        self._right_down = StateWatcher(False, False)
+        self._left_down = Delta.from_single_value(False)
+        self._middle_down = Delta.from_single_value(False)
+        self._right_down = Delta.from_single_value(False)
 
-        self._shift_down = StateWatcher(False, False)
-        self._ctrl_down = StateWatcher(False, False)
-        self._alt_down = StateWatcher(False, False)
+        self._shift_down = Delta.from_single_value(False)
+        self._ctrl_down = Delta.from_single_value(False)
+        self._alt_down = Delta.from_single_value(False)
 
     @property
     def frame_padding(self) -> Tuple[int, int]:

@@ -2,10 +2,10 @@
 
 from unittest import TestCase, main
 
-from cvp.patterns.state_watcher import StateWatcher
+from cvp.patterns.delta import Delta
 
 
-class StateWatcherTestCase(TestCase):
+class DeltaTestCase(TestCase):
     def setUp(self):
         self._current = 0
         self._previous = 0
@@ -15,7 +15,7 @@ class StateWatcherTestCase(TestCase):
         self._previous = prev
 
     def test_default(self):
-        watcher = StateWatcher(0, 0, self._on_change)
+        watcher = Delta(0, 0, self._on_change)
         self.assertFalse(watcher.update(0))
         self.assertEqual(0, self._current)
         self.assertEqual(0, self._previous)
