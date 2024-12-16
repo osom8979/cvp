@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum, auto, unique
-from typing import Final, List
+from typing import Final, List, Optional
 from uuid import uuid4
 
 from cvp.fonts.glyphs.mdi import (
@@ -245,6 +245,12 @@ class Node:
     def hovering(self, value: bool) -> None:
         self._hovering = value
 
+    def find_hovering_pin(self) -> Optional[Pin]:
+        for pin in self.pins:
+            if pin.hovering:
+                return pin
+        return None
+
 
 @dataclass
 class GraphTemplate:
@@ -346,3 +352,9 @@ class Graph:
     axis_x: Axis = field(default_factory=Axis)
     axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)
+
+    def find_hovering_node(self) -> Optional[Node]:
+        for node in self.nodes:
+            if node.hovering:
+                return node
+        return None

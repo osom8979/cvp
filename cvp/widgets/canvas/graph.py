@@ -11,7 +11,7 @@ from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.override import override
-from cvp.widgets.canvas.controller.controller import CanvasController
+from cvp.widgets.canvas.controller import CanvasController
 
 
 @unique
