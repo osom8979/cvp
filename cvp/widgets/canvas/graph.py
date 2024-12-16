@@ -348,7 +348,7 @@ class GraphCanvas(CanvasController):
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
 
-        if self.beginning_left_dragging and self.is_none_dragging_mode:
+        if self.start_left_dragging and self.is_none_dragging_mode:
             hovering_node = self._find_hovering_single_node(nodes)
             if hovering_node is not None:
                 hovering_pin = self._find_hovering_single_pin(hovering_node.pins)
@@ -375,11 +375,11 @@ class GraphCanvas(CanvasController):
             self._connecting_node = None
             self._connecting_pin = None
 
-        if self._left_dragging.prev:
-            # When the node drag (movement) is finished, the mouse up event is
-            # necessarily fired. Therefore, we check the drag state of the previous
-            # frame to prevent the node from being selected.
-            return
+        # if self._left_dragging.prev:
+        #     # When the node drag (movement) is finished, the mouse up event is
+        #     # necessarily fired. Therefore, we check the drag state of the previous
+        #     # frame to prevent the node from being selected.
+        #     return
 
         if self.changed_left_up:
             if self.ctrl_down:

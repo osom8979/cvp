@@ -9,8 +9,9 @@ from cvp.imgui.drag_float2 import drag_float2
 from cvp.imgui.draw_list.get_draw_list import get_window_draw_list
 from cvp.imgui.draw_list.types import DrawList
 from cvp.imgui.flags.button import ALL_BUTTON_FLAGS
-from cvp.imgui.flags.mouse import MouseButton
+from cvp.imgui.flags.mouse import MouseButtonIndex
 from cvp.imgui.input_float2 import input_float2
+from cvp.imgui.mouse_button import MouseButton
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
 from cvp.patterns.delta import Delta
@@ -62,17 +63,13 @@ class CanvasController:
         self._activating = Delta.from_single_value(False)
         self._hovering = Delta.from_single_value(False)
 
-        self._left_dragging = Delta.from_single_value(False)
-        self._middle_dragging = Delta.from_single_value(False)
-        self._right_dragging = Delta.from_single_value(False)
-
-        self._left_down = Delta.from_single_value(False)
-        self._middle_down = Delta.from_single_value(False)
-        self._right_down = Delta.from_single_value(False)
-
         self._shift_down = Delta.from_single_value(False)
         self._ctrl_down = Delta.from_single_value(False)
         self._alt_down = Delta.from_single_value(False)
+
+        self._left_button = MouseButton()
+        self._middle_button = MouseButton()
+        self._right_button = MouseButton()
 
     @property
     def frame_padding(self) -> Tuple[int, int]:
@@ -169,39 +166,27 @@ class CanvasController:
 
     @property
     def left_dragging(self):
-        return self._left_dragging.value
+        return self._left_button.is_dragging
 
     @property
     def middle_dragging(self):
-        return self._middle_dragging.value
+        return self._middle_button.is_dragging
 
     @property
     def right_dragging(self):
-        return self._right_dragging.value
-
-    @property
-    def beginning_left_dragging(self):
-        return self._left_dragging.changed and self._left_dragging.value
-
-    @property
-    def beginning_middle_dragging(self):
-        return self._middle_dragging.changed and self._middle_dragging.value
-
-    @property
-    def beginning_right_dragging(self):
-        return self._right_dragging.changed and self._right_dragging.value
+        return self._right_button.is_dragging
 
     @property
     def left_down(self):
-        return self._left_down.value
+        return self._left_button.is_down
 
     @property
     def middle_down(self):
-        return self._middle_down.value
+        return self._middle_button.is_down
 
     @property
     def right_down(self):
-        return self._right_down.value
+        return self._right_button.is_down
 
     @property
     def shift_down(self):
@@ -216,28 +201,12 @@ class CanvasController:
         return self._alt_down.value
 
     @property
-    def changed_left_down(self) -> bool:
-        return self._left_down.changed and self._left_down.value
-
-    @property
-    def changed_middle_down(self) -> bool:
-        return self._middle_down.changed and self._middle_down.value
-
-    @property
-    def changed_right_down(self) -> bool:
-        return self._right_down.changed and self._right_down.value
-
-    @property
     def changed_left_up(self) -> bool:
-        return self._left_down.changed and not self._left_down.value
+        return self._left_button.changed_up
 
     @property
-    def changed_middle_up(self) -> bool:
-        return self._middle_down.changed and not self._middle_down.value
-
-    @property
-    def changed_right_up(self) -> bool:
-        return self._right_down.changed and not self._right_down.value
+    def start_left_dragging(self):
+        return self._left_button.start_dragging
 
     def as_unformatted_text(self):
         return (
@@ -358,8 +327,8 @@ class CanvasController:
     def mouse_to_canvas_coords(self) -> Point:
         return self.screen_to_canvas_coords(self._mouse_pos)
 
-    def is_mouse_dragging(self, button: Union[int, MouseButton]) -> bool:
-        if isinstance(button, MouseButton):
+    def is_mouse_dragging(self, button: Union[int, MouseButtonIndex]) -> bool:
+        if isinstance(button, MouseButtonIndex):
             button = int(button)
         assert isinstance(button, int)
         assert self._mouse_dragging_threshold != 0.0
@@ -418,18 +387,17 @@ class CanvasController:
         # 1) it will advance the layout cursor and
         # 2) allows us to use `is_item_hovered()`/`is_item_active()`
         imgui.invisible_button(self._control_identifier, cw, ch, self._control_flags)
-
         self._activating.update(imgui.is_item_active())
         self._hovering.update(imgui.is_item_hovered())
 
-        self._left_dragging.update(self.is_mouse_dragging(imgui.MOUSE_BUTTON_LEFT))
-        self._middle_dragging.update(self.is_mouse_dragging(imgui.MOUSE_BUTTON_MIDDLE))
-        self._right_dragging.update(self.is_mouse_dragging(imgui.MOUSE_BUTTON_RIGHT))
-
         io = imgui.get_io()
-        self._left_down.update(bool(io.mouse_down[imgui.MOUSE_BUTTON_LEFT]))
-        self._middle_down.update(bool(io.mouse_down[imgui.MOUSE_BUTTON_MIDDLE]))
-        self._right_down.update(bool(io.mouse_down[imgui.MOUSE_BUTTON_RIGHT]))
+        left_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_LEFT])
+        middle_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_MIDDLE])
+        right_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_RIGHT])
+
+        self._left_button.update(left_down, self._mouse_pos)
+        self._middle_button.update(middle_down, self._mouse_pos)
+        self._right_button.update(right_down, self._mouse_pos)
 
         self._shift_down.update(io.key_shift)
         self._ctrl_down.update(io.key_ctrl)

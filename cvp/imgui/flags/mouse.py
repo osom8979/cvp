@@ -7,12 +7,12 @@ import imgui
 
 
 @unique
-class MouseButton(IntEnum):
+class MouseButtonIndex(IntEnum):
     LEFT = imgui.MOUSE_BUTTON_LEFT
     MIDDLE = imgui.MOUSE_BUTTON_MIDDLE
     RIGHT = imgui.MOUSE_BUTTON_RIGHT
 
 
-MOUSE_LEFT: Final[MouseButton] = MouseButton.LEFT
-MOUSE_MIDDLE: Final[MouseButton] = MouseButton.MIDDLE
-MOUSE_RIGHT: Final[MouseButton] = MouseButton.RIGHT
+MOUSE_LEFT: Final[MouseButtonIndex] = MouseButtonIndex.LEFT
+MOUSE_MIDDLE: Final[MouseButtonIndex] = MouseButtonIndex.MIDDLE
+MOUSE_RIGHT: Final[MouseButtonIndex] = MouseButtonIndex.RIGHT
