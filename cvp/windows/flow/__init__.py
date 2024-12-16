@@ -30,7 +30,7 @@ from cvp.variables import (
     MIN_WINDOW_WIDTH,
 )
 from cvp.widgets.aui import AuiWindow
-from cvp.widgets.canvas.graph import GraphCanvas
+from cvp.widgets.canvas.graph import CanvasGraph
 from cvp.widgets.splitter import Splitter
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
@@ -44,7 +44,7 @@ CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_R
 
 
 class FlowWindow(AuiWindow[FlowAuiConfig]):
-    _canvases: Dict[str, GraphCanvas]
+    _canvases: Dict[str, CanvasGraph]
     _prev_cursor: Optional[str]
 
     def __init__(self, context: Context, fonts: FontMapper):
@@ -130,18 +130,18 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         return self.context.fm.current_graph
 
     @property
-    def current_canvas(self) -> Optional[GraphCanvas]:
+    def current_canvas(self) -> Optional[CanvasGraph]:
         graph = self.current_graph
         if graph is None:
             return None
 
         canvas = self._canvases.get(graph.uuid)
         if canvas is None:
-            canvas = GraphCanvas(graph, self._fonts)
+            canvas = CanvasGraph(graph, self._fonts)
             self._canvases[graph.uuid] = canvas
 
         assert canvas is not None
-        assert isinstance(canvas, GraphCanvas)
+        assert isinstance(canvas, CanvasGraph)
         return canvas
 
     def on_new_graph_popup(self, name: str) -> None:

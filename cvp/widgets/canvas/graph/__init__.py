@@ -21,7 +21,7 @@ class DraggingMode(Enum):
     pin_connecting = auto()
 
 
-class GraphCanvas(CanvasController):
+class CanvasGraph(CanvasController):
     _graph_ref: ReferenceType[Graph]
     _fonts_ref: ReferenceType[FontMapper]
 
