@@ -11,24 +11,18 @@ from cvp.imgui.draw_list.types import DrawList
 from cvp.imgui.flags.button import ALL_BUTTON_FLAGS
 from cvp.imgui.flags.mouse import MouseButtonIndex
 from cvp.imgui.input_float2 import input_float2
-from cvp.imgui.mouse_button import MouseButton
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
-from cvp.patterns.delta import Delta
 from cvp.types.shapes import ROI, Point
+from cvp.widgets.canvas.controller.props import ControllerProps
 from cvp.widgets.canvas.controller.result import ControllerResult
 
 
-class CanvasController:
+class CanvasController(ControllerProps):
     def __init__(self):
-        self._pan_x = Delta.from_single_value(0.0)
-        self._pan_y = Delta.from_single_value(0.0)
-        self._zoom = Delta.from_single_value(1.0)
+        super().__init__()
 
         self._draw_list = DrawList()
-        self._mouse_pos = 0.0, 0.0
-        self._canvas_pos = 0.0, 0.0
-        self._canvas_size = 0.0, 0.0
 
         self._pan_label = "Pan"
         self._pan_speed = 0.1
@@ -60,17 +54,6 @@ class CanvasController:
         self._control_flags = int(ALL_BUTTON_FLAGS)
         self._mouse_dragging_threshold = -1.0
 
-        self._activating = Delta.from_single_value(False)
-        self._hovering = Delta.from_single_value(False)
-
-        self._shift_down = Delta.from_single_value(False)
-        self._ctrl_down = Delta.from_single_value(False)
-        self._alt_down = Delta.from_single_value(False)
-
-        self._left_button = MouseButton()
-        self._middle_button = MouseButton()
-        self._right_button = MouseButton()
-
     @property
     def frame_padding(self) -> Tuple[int, int]:
         return imgui.get_style().frame_padding
@@ -87,149 +70,8 @@ class CanvasController:
     def item_inner_spacing(self) -> Tuple[int, int]:
         return imgui.get_style().item_inner_spacing
 
-    @property
-    def mx(self):
-        return self._mouse_pos[0]
-
-    @property
-    def my(self):
-        return self._mouse_pos[1]
-
-    @property
-    def cx(self):
-        return self._canvas_pos[0]
-
-    @property
-    def cy(self):
-        return self._canvas_pos[1]
-
-    @property
-    def cw(self):
-        return self._canvas_size[0]
-
-    @property
-    def ch(self):
-        return self._canvas_size[1]
-
-    @property
-    def p1(self):
-        return self.cx, self.cy
-
-    @property
-    def p2(self):
-        return self.cx + self.cw, self.cy + self.ch
-
-    @property
-    def canvas_roi(self):
-        return self.cx, self.cy, self.cx + self.cw, self.cy + self.ch
-
-    @property
-    def pan_x(self):
-        return self._pan_x.value
-
-    @pan_x.setter
-    def pan_x(self, value: float) -> None:
-        self._pan_x.value = value
-
-    @property
-    def pan_y(self):
-        return self._pan_y.value
-
-    @pan_y.setter
-    def pan_y(self, value: float) -> None:
-        self._pan_y.value = value
-
-    @property
-    def zoom(self):
-        return self._zoom.value
-
-    @zoom.setter
-    def zoom(self, value: float) -> None:
-        self._zoom.value = value
-
-    @property
-    def pan(self) -> Point:
-        return self._pan_x.value, self._pan_y.value
-
-    @pan.setter
-    def pan(self, value: Point) -> None:
-        self._pan_x.value = value[0]
-        self._pan_y.value = value[1]
-
-    @property
-    def activating(self):
-        return self._activating.value
-
-    @property
-    def hovering(self):
-        return self._hovering.value
-
-    @property
-    def left_dragging(self):
-        return self._left_button.is_dragging
-
-    @property
-    def middle_dragging(self):
-        return self._middle_button.is_dragging
-
-    @property
-    def right_dragging(self):
-        return self._right_button.is_dragging
-
-    @property
-    def left_down(self):
-        return self._left_button.is_down
-
-    @property
-    def middle_down(self):
-        return self._middle_button.is_down
-
-    @property
-    def right_down(self):
-        return self._right_button.is_down
-
-    @property
-    def shift_down(self):
-        return self._shift_down.value
-
-    @property
-    def ctrl_down(self):
-        return self._ctrl_down.value
-
-    @property
-    def alt_down(self):
-        return self._alt_down.value
-
-    @property
-    def changed_left_up(self) -> bool:
-        return self._left_button.changed_up
-
-    @property
-    def start_left_dragging(self):
-        return self._left_button.start_dragging
-
-    def as_unformatted_text(self):
-        return (
-            f"Pen: {self.pan_x:.02f}, {self.pan_y:.02f}\n"
-            f"Zoom: {self.zoom:.02f}\n"
-            f"Mouse pos: {self.mx:.02f}, {self.my:.02f}\n"
-            f"Canvas pos: {self.cx:.02f}, {self.cy:.02f}\n"
-            f"Canvas size: {self.cw:.02f}, {self.ch:.02f}\n"
-            f"Activating: {self.activating}\n"
-            f"Hovering: {self.hovering}\n"
-            f"Left dragging: {self.left_dragging}\n"
-            f"Middle dragging: {self.middle_dragging}\n"
-            f"Right dragging: {self.right_dragging}\n"
-            f"Left down: {self.left_down}\n"
-            f"Middle down: {self.middle_down}\n"
-            f"Right down: {self.right_down}\n"
-            f"Shift down: {self.shift_down}\n"
-            f"Ctrl down: {self.ctrl_down}\n"
-            f"Alt down: {self.alt_down}\n"
-        )
-
     def drag_pan(self, dryrun=False):
-        result = drag_float2(
+        retval = drag_float2(
             self._pan_label,
             self.pan_x,
             self.pan_y,
@@ -239,13 +81,13 @@ class CanvasController:
             self._pan_fmt,
             self._pan_flags,
         )
-        if not dryrun and result:
-            self.pan_x.value = result.value0
-            self.pan_y.value = result.value1
-        return result
+        if not dryrun and retval:
+            self.pan_x.value = retval.value0
+            self.pan_y.value = retval.value1
+        return retval
 
     def slider_zoom(self, dryrun=False):
-        result = slider_float(
+        retval = slider_float(
             self._zoom_label,
             self.zoom,
             self._zoom_min,
@@ -253,9 +95,9 @@ class CanvasController:
             self._zoom_fmt,
             self._zoom_flags,
         )
-        if not dryrun and result:
-            self.zoom = result.value
-        return result
+        if not dryrun and retval:
+            self.zoom = retval.value
+        return retval
 
     def input_local_pos(self):
         return input_float2(
@@ -340,16 +182,16 @@ class CanvasController:
         if self.zoom <= 0:
             raise ValueError("The 'zoom' value must be greater than 0")
 
-        result = list()
+        retval = list()
         x = fmod(self.pan_x * self.zoom, step * self.zoom)
         while x < self.cw:
             x1 = self.cx + x
             y1 = self.cy
             x2 = self.cx + x
             y2 = self.cy + self.ch
-            result.append((x1, y1, x2, y2))
+            retval.append((x1, y1, x2, y2))
             x += step * self.zoom
-        return result
+        return retval
 
     def horizontal_grid_lines(self, step: float):
         if step <= 0:
@@ -357,16 +199,16 @@ class CanvasController:
         if self.zoom <= 0:
             raise ValueError("The 'zoom' value must be greater than 0")
 
-        result = list()
+        retval = list()
         y = fmod(self.pan_y * self.zoom, step * self.zoom)
         while y < self.ch:
             x1 = self.cx
             y1 = self.cy + y
             x2 = self.cx + self.cw
             y2 = self.cy + y
-            result.append((x1, y1, x2, y2))
+            retval.append((x1, y1, x2, y2))
             y += step * self.zoom
-        return result
+        return retval
 
     def update_state(self) -> ControllerResult:
         mx, my = imgui.get_mouse_pos()

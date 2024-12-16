@@ -19,9 +19,21 @@ class MouseButton:
 
     def __init__(self) -> None:
         self._down = Delta.from_single_value(False)
-        self._dragging = Delta.from_single_value(False)
+        self._drag = Delta.from_single_value(False)
         self._state = ButtonState.normal
         self._pivot = None
+
+    @property
+    def down(self):
+        return self._down
+
+    @property
+    def drag(self):
+        return self._drag
+
+    @property
+    def state(self):
+        return self._state
 
     @property
     def pivot(self):
@@ -44,16 +56,16 @@ class MouseButton:
         return self._down.changed and not self._down.value
 
     @property
-    def is_dragging(self) -> bool:
-        return self._dragging.value
+    def is_drag(self) -> bool:
+        return self._drag.value
 
     @property
-    def start_dragging(self) -> bool:
-        return self._dragging.changed and self._dragging.value
+    def start_drag(self) -> bool:
+        return self._drag.changed and self._drag.value
 
     @property
-    def end_dragging(self) -> bool:
-        return self._dragging.changed and not self._dragging.value
+    def end_drag(self) -> bool:
+        return self._drag.changed and not self._drag.value
 
     def update(self, down: bool, mouse_point: Point) -> None:
         if self._down.update(down):
@@ -67,7 +79,7 @@ class MouseButton:
         if not self._down.value:
             assert self._state == ButtonState.normal
             assert self._pivot is None
-            self._dragging.update(False)
+            self._drag.update(False)
             return
 
         assert self._state != ButtonState.normal
@@ -76,4 +88,4 @@ class MouseButton:
         if self._state == ButtonState.ready and self._pivot != mouse_point:
             self._state = ButtonState.dragging
 
-        self._dragging.update(self._state == ButtonState.dragging)
+        self._drag.update(self._state == ButtonState.dragging)

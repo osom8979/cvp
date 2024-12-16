@@ -69,7 +69,7 @@ class CanvasGraph(CanvasController):
         return self._dragging_mode == DraggingMode.pin_connecting
 
     @override
-    def as_unformatted_text(self):
+    def as_unformatted_text(self) -> str:
         node_name = self._connecting_node.name if self._connecting_node else "None"
         pin_name = self._connecting_pin.name if self._connecting_pin else "None"
         return super().as_unformatted_text() + (
