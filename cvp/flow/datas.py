@@ -136,6 +136,8 @@ class Pin:
     def hovering(self, value: bool) -> None:
         self._hovering = value
 
+    # arcs: List[Arc] = field(default_factory=list)
+
 
 @dataclass
 class ArcTemplate:

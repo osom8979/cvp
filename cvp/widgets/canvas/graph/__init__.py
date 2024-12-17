@@ -22,8 +22,8 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
-    _connecting_node: Optional[Node]
-    _connecting_pin: Optional[Pin]
+    _connect_node: Optional[Node]
+    _connect_pin: Optional[Pin]
 
     _select_begin: Optional[Point]
     _select_end: Optional[Point]
@@ -36,8 +36,8 @@ class CanvasGraph(CanvasController):
         self._fonts = None
 
         self._mode = ControlMode.normal
-        self._connecting_node = None
-        self._connecting_pin = None
+        self._connect_node = None
+        self._connect_pin = None
         self._select_begin = None
         self._select_end = None
 
@@ -73,12 +73,14 @@ class CanvasGraph(CanvasController):
 
     @override
     def as_unformatted_text(self) -> str:
-        node_name = self._connecting_node.name if self._connecting_node else "None"
-        pin_name = self._connecting_pin.name if self._connecting_pin else "None"
+        node_name = self._connect_node.name if self._connect_node else "None"
+        pin_name = self._connect_pin.name if self._connect_pin else "None"
         return super().as_unformatted_text() + (
-            f"Dragging mode: {self._mode.name}\n"
-            f"Arc begin node: {node_name}\n"
-            f"Arc begin pin: {pin_name}\n"
+            f"Mode: {self._mode.name}\n"
+            f"Connect node: {node_name}\n"
+            f"Connect pin: {pin_name}\n"
+            f"Select begin: {self._select_begin}\n"
+            f"Select end: {self._select_end}\n"
         )
 
     @property
@@ -395,12 +397,12 @@ class CanvasGraph(CanvasController):
                 else:
                     self._update_nodes_all_unselect(nodes)
 
-        if self.start_left_dragging:
+        if self.activating and self.start_left_dragging:
             if hovering_node := self._find_hovering_single_node(nodes):
                 if hovering_pin := self._find_hovering_single_pin(hovering_node.pins):
                     self._mode = ControlMode.pin_connecting
-                    self._connecting_node = hovering_node
-                    self._connecting_pin = hovering_pin
+                    self._connect_node = hovering_node
+                    self._connect_pin = hovering_pin
                 elif hovering_node.selected:
                     self._mode = ControlMode.node_moving
                 else:
@@ -424,13 +426,13 @@ class CanvasGraph(CanvasController):
     def _update_nodes_state_for_pin_connecting(self) -> None:
         assert not self.is_pan_mode
         assert self.is_pin_connecting_mode
-        assert self._connecting_node is not None
-        assert self._connecting_pin is not None
+        assert self._connect_node is not None
+        assert self._connect_pin is not None
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
-            self._connecting_node = None
-            self._connecting_pin = None
+            self._connect_node = None
+            self._connect_pin = None
 
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
@@ -701,8 +703,8 @@ class CanvasGraph(CanvasController):
         if not self.is_pin_connecting_mode:
             return
 
-        node = self._connecting_node
-        pin = self._connecting_pin
+        node = self._connect_node
+        pin = self._connect_pin
         assert node is not None
         assert pin is not None
 

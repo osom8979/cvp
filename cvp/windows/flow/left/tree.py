@@ -4,21 +4,33 @@ import imgui
 
 from cvp.context.context import Context
 from cvp.flow.datas import Graph
+from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.text_centered import text_centered
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
 
 class TreeTab(TabItem[Graph]):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, fonts: FontMapper):
         super().__init__(context, "Tree")
+        self._fonts = fonts
 
     @override
     def on_item(self, item: Graph) -> None:
         if imgui.tree_node(item.name, imgui.TREE_NODE_DEFAULT_OPEN):
             for node in item.nodes:
-                if imgui.tree_node(node.name, imgui.TREE_NODE_DEFAULT_OPEN):
-                    for pin in node.pins:
+                node_label = f"{node.name}##{node.uuid}"
+                if imgui.tree_node(node_label):
+                    for pin in node.flow_pins:
+                        with self._fonts.normal_icon:
+                            imgui.text(item.style.flow_pin_n_icon)
+                        imgui.same_line()
+                        imgui.text(pin.name)
+
+                    for pin in node.data_pins:
+                        with self._fonts.normal_icon:
+                            imgui.text(item.style.data_pin_n_icon)
+                        imgui.same_line()
                         imgui.text(pin.name)
                     imgui.tree_pop()
             imgui.tree_pop()

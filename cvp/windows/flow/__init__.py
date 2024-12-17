@@ -78,7 +78,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._fonts = fonts
         self._canvases = dict()
         self._catalogs = Catalogs(context)
-        self._left_tabs = FlowLeftTabs(context)
+        self._left_tabs = FlowLeftTabs(context, fonts)
         self._right_tabs = FlowRightTabs(context)
         self._bottom_tabs = FlowBottomTabs(context)
 
