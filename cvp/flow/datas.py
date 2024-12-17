@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum, auto, unique
-from typing import Final, List, Optional
+from typing import Final, List, NamedTuple, Optional, Tuple
 from uuid import uuid4
 
 from cvp.fonts.glyphs.mdi import (
@@ -11,7 +11,8 @@ from cvp.fonts.glyphs.mdi import (
     MDI_CIRCLE,
     MDI_CIRCLE_OUTLINE,
 )
-from cvp.palette.basic import BLACK, GREEN, RED, WHITE, YELLOW
+from cvp.palette.basic import BLACK, BLUE, RED, WHITE
+from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI, Point, Size
 
@@ -102,7 +103,13 @@ class Pin:
     name_pos: Point = EMPTY_POINT
     name_size: Size = EMPTY_SIZE
 
+    arcs: List[str] = field(default_factory=list)
+
     _hovering: bool = False
+
+    @property
+    def connected(self) -> bool:
+        return bool(self.arcs)
 
     @property
     def icon_roi(self) -> ROI:
@@ -135,22 +142,6 @@ class Pin:
     @hovering.setter
     def hovering(self, value: bool) -> None:
         self._hovering = value
-
-
-@dataclass
-class ArcTemplate:
-    start_node: str = EMPTY_TEXT
-    start_pin: str = EMPTY_TEXT
-    end_node: str = EMPTY_TEXT
-    end_pin: str = EMPTY_TEXT
-
-
-@dataclass
-class Arc:
-    start_node: str = EMPTY_TEXT
-    start_pin: str = EMPTY_TEXT
-    end_node: str = EMPTY_TEXT
-    end_pin: str = EMPTY_TEXT
 
 
 @dataclass
@@ -252,6 +243,48 @@ class Node:
         return None
 
 
+class NodePin(NamedTuple):
+    node: Node
+    pin: Pin
+
+    def __str__(self):
+        return f"{self.node.name}.{self.pin.name}"
+
+
+@dataclass
+class ArcTemplate:
+    start_node: str = EMPTY_TEXT
+    start_pin: str = EMPTY_TEXT
+    end_node: str = EMPTY_TEXT
+    end_pin: str = EMPTY_TEXT
+
+
+@dataclass
+class Arc:
+    uuid: str = field(default_factory=lambda: str(uuid4()))
+    name: str = EMPTY_TEXT
+    docs: str = EMPTY_TEXT
+
+    _start: Optional[NodePin] = None
+    _end: Optional[NodePin] = None
+
+    @property
+    def start(self):
+        return self._start
+
+    @start.setter
+    def start(self, value: Optional[NodePin]) -> None:
+        self._start = value
+
+    @property
+    def end(self):
+        return self._end
+
+    @end.setter
+    def end(self, value: Optional[NodePin]) -> None:
+        self._end = value
+
+
 @dataclass
 class GraphTemplate:
     name: str = EMPTY_TEXT
@@ -302,7 +335,7 @@ class Stroke:
 
     @classmethod
     def default_hovering(cls):
-        return cls.from_rgb(YELLOW, thickness=1.5)
+        return cls.from_rgb(ORANGE, thickness=1.5)
 
     @classmethod
     def default_normal(cls):
@@ -316,13 +349,13 @@ class Style:
     normal_node: Stroke = field(default_factory=lambda: Stroke.default_normal())
 
     normal_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
-    hovering_color: RGBA = field(default_factory=lambda: (*YELLOW, 0.8))
+    hovering_color: RGBA = field(default_factory=lambda: (*ORANGE, 0.9))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
 
     pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
     pin_connection_thickness: float = 2.0
 
-    selection_box_color: RGBA = field(default_factory=lambda: (*GREEN, 0.3))
+    selection_box_color: RGBA = field(default_factory=lambda: (*BLUE, 0.3))
     selection_box_thickness: float = 1.0
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
@@ -375,3 +408,63 @@ class Graph:
                 continue
             x, y = node.node_pos
             node.node_pos = x + dx, y + dy
+
+    @staticmethod
+    def connectable_pins(left: NodePin, right: NodePin) -> bool:
+        if left.node == right.node:
+            return False
+        if left.pin.stream == right.pin.stream:
+            return False
+        if left.pin.action != left.pin.action:
+            return False
+        if left.pin.dtype != right.pin.dtype:
+            return False
+        return True
+
+    @staticmethod
+    def reorder_pins(left: NodePin, right: NodePin) -> Tuple[NodePin, NodePin]:
+        if left.pin.stream == Stream.input:
+            assert right.pin.stream == Stream.output
+            return left, right
+        else:
+            assert left.pin.stream == Stream.output
+            assert right.pin.stream == Stream.input
+            return right, left
+
+    def _connect_pins(self, in_node_pin: NodePin, out_node_pin: NodePin) -> None:
+        in_pin = in_node_pin.pin
+        out_pin = out_node_pin.pin
+        assert in_pin.stream == Stream.input
+        assert out_pin.stream == Stream.output
+        if not in_pin.arcs and not out_pin.arcs:
+            arc = Arc()
+            arc.start = in_node_pin
+            arc.end = in_node_pin
+            self.arcs.append(arc)
+            out_pin.arcs.append(arc.uuid)
+            in_pin.arcs.append(arc.uuid)
+
+    def connect_pins(self, left: NodePin, right: NodePin) -> None:
+        if not self.connectable_pins(left, right):
+            return
+        in_node_pin, out_node_pin = self.reorder_pins(left, right)
+        in_pin = in_node_pin.pin
+        out_pin = out_node_pin.pin
+        assert in_pin.stream == Stream.input
+        assert out_pin.stream == Stream.output
+
+        if not in_pin.arcs and not out_pin.arcs:
+            arc = Arc()
+            arc.start = in_node_pin
+            arc.end = in_node_pin
+            self.arcs.append(arc)
+            out_pin.arcs.append(arc.uuid)
+            in_pin.arcs.append(arc.uuid)
+        elif in_pin.arcs and not out_pin.arcs:
+            pass
+        elif not in_pin.arcs and out_pin.arcs:
+            pass
+        elif in_pin.arcs and out_pin.arcs:
+            pass
+        else:
+            assert False, "Inaccessible section"

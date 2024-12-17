@@ -5,12 +5,12 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Arc, FontSize, Graph, Node, Pin, Stroke, Style
+from cvp.flow.datas import Arc, FontSize, Graph, Node, NodePin, Pin, Stroke, Style
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.override import override
-from cvp.types.shapes import Point
+from cvp.types.shapes import ROI
 from cvp.widgets.canvas.controller import CanvasController
 from cvp.widgets.canvas.graph.mode import ControlMode
 
@@ -22,11 +22,8 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
-    _connect_node: Optional[Node]
-    _connect_pin: Optional[Pin]
-
-    _select_begin: Optional[Point]
-    _select_end: Optional[Point]
+    _connect: Optional[NodePin]
+    _select: Optional[ROI]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
@@ -36,10 +33,8 @@ class CanvasGraph(CanvasController):
         self._fonts = None
 
         self._mode = ControlMode.normal
-        self._connect_node = None
-        self._connect_pin = None
-        self._select_begin = None
-        self._select_end = None
+        self._connect = None
+        self._select = None
 
         self._pan_x.update(graph.canvas.pan_x, no_emit=True)
         self._pan_y.update(graph.canvas.pan_y, no_emit=True)
@@ -73,14 +68,10 @@ class CanvasGraph(CanvasController):
 
     @override
     def as_unformatted_text(self) -> str:
-        node_name = self._connect_node.name if self._connect_node else "None"
-        pin_name = self._connect_pin.name if self._connect_pin else "None"
         return super().as_unformatted_text() + (
             f"Mode: {self._mode.name}\n"
-            f"Connect node: {node_name}\n"
-            f"Connect pin: {pin_name}\n"
-            f"Select begin: {self._select_begin}\n"
-            f"Select end: {self._select_end}\n"
+            f"Connect: {self._connect}\n"
+            f"Select: {self._select}\n"
         )
 
     @property
@@ -183,8 +174,8 @@ class CanvasGraph(CanvasController):
         self.draw_axis_y()
 
         with font_global_scale(self.zoom):
-            self.draw_nodes()
             self.draw_arcs()
+            self.draw_nodes()
 
         self.draw_pin_connection()
         self.draw_selection_box()
@@ -394,8 +385,7 @@ class CanvasGraph(CanvasController):
             if hovering_node := self._find_hovering_single_node(nodes):
                 if hovering_pin := self._find_hovering_single_pin(hovering_node.pins):
                     self._mode = ControlMode.pin_connecting
-                    self._connect_node = hovering_node
-                    self._connect_pin = hovering_pin
+                    self._connect = NodePin(hovering_node, hovering_pin)
                 elif hovering_node.selected:
                     self._mode = ControlMode.node_moving
                 else:
@@ -404,8 +394,7 @@ class CanvasGraph(CanvasController):
                     hovering_node.selected = True
             else:
                 self._mode = ControlMode.selection_box
-                self._select_begin = self._mouse_pos
-                self._select_end = self._mouse_pos
+                self._select = self.mx, self.my, self.mx, self.my
 
     def _update_nodes_state_for_node_moving(self) -> None:
         assert not self.is_pan_mode
@@ -422,26 +411,32 @@ class CanvasGraph(CanvasController):
     def _update_nodes_state_for_pin_connecting(self) -> None:
         assert not self.is_pan_mode
         assert self.is_pin_connecting_mode
-        assert self._connect_node is not None
-        assert self._connect_pin is not None
+        assert self._connect is not None
 
         if self.changed_left_up:
-            self._mode = ControlMode.normal
-            self._connect_node = None
-            self._connect_pin = None
+            try:
+                node = self.graph.find_hovering_node()
+                if node is None or node == self._connect.node:
+                    return
+                pin = node.find_hovering_pin()
+                if pin is None or pin == self._connect.pin:
+                    return
+                self.graph.connect_pins(self._connect, NodePin(node, pin))
+            finally:
+                self._mode = ControlMode.normal
+                self._connect = None
 
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
         assert self.is_selection_box_mode
-        assert self._select_begin is not None
-        assert self._select_end is not None
+        assert self._select is not None
 
-        self._select_end = self.mx, self.my
-        x1 = self._select_begin[0]
-        y1 = self._select_begin[1]
-        x2 = self._select_end[0]
-        y2 = self._select_end[1]
-        x1, y1, x2, y2 = self.screen_to_canvas_roi((x1, y1, x2, y2))
+        x1 = self._select[0]
+        y1 = self._select[1]
+        x2 = self.mx
+        y2 = self.my
+        self._select = x1, y1, x2, y2
+        x1, y1, x2, y2 = self.screen_to_canvas_roi(self._select)
         left = min(x1, x2)
         right = max(x1, x2)
         top = min(y1, y2)
@@ -455,8 +450,7 @@ class CanvasGraph(CanvasController):
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
-            self._select_begin = None
-            self._select_end = None
+            self._select = None
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -609,6 +603,7 @@ class CanvasGraph(CanvasController):
         fill_color = imgui.get_color_u32_rgba(*node.color)
         stroke_color = imgui.get_color_u32_rgba(*stroke.color)
         label_color = imgui.get_color_u32_rgba(*style.normal_color)
+        hovering_color = imgui.get_color_u32_rgba(*style.hovering_color)
         layout_color = imgui.get_color_u32_rgba(*style.layout_color)
 
         thickness = stroke.thickness
@@ -658,8 +653,9 @@ class CanvasGraph(CanvasController):
             for pin in node.flow_pins:
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
-                pin_icon = flow_pin_y_icon if pin.hovering else flow_pin_n_icon
-                self._draw_list.add_text(x1, y1, label_color, pin_icon)
+                pin_icon = flow_pin_y_icon if pin.connected else flow_pin_n_icon
+                pin_color = hovering_color if pin.hovering else label_color
+                self._draw_list.add_text(x1, y1, pin_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
@@ -671,8 +667,9 @@ class CanvasGraph(CanvasController):
             for pin in node.data_pins:
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
-                pin_icon = data_pin_y_icon if pin.hovering else data_pin_n_icon
-                self._draw_list.add_text(x1, y1, label_color, pin_icon)
+                pin_icon = data_pin_y_icon if pin.connected else data_pin_n_icon
+                pin_color = hovering_color if pin.hovering else label_color
+                self._draw_list.add_text(x1, y1, pin_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
@@ -699,8 +696,9 @@ class CanvasGraph(CanvasController):
         if not self.is_pin_connecting_mode:
             return
 
-        node = self._connect_node
-        pin = self._connect_pin
+        assert self._connect is not None
+        node = self._connect.node
+        pin = self._connect.pin
         assert node is not None
         assert pin is not None
 
@@ -720,14 +718,8 @@ class CanvasGraph(CanvasController):
         if not self.is_selection_box_mode:
             return
 
-        assert self._select_begin is not None
-        assert self._select_end is not None
-
-        x1 = self._select_begin[0]
-        y1 = self._select_begin[1]
-        x2 = self._select_end[0]
-        y2 = self._select_end[1]
-
+        assert self._select is not None
+        x1, y1, x2, y2 = self._select
         color = imgui.get_color_u32_rgba(*self.graph.style.selection_box_color)
         thickness = self.graph.style.selection_box_thickness
         self._draw_list.add_rect_filled(x1, y1, x2, y2, color)
