@@ -333,13 +333,6 @@ class CanvasGraph(CanvasController):
             y2 += dy
             node.node_roi = x1, y1, x2, y2
 
-    @staticmethod
-    def _update_nodes_all_unhovering(nodes: Sequence[Node]) -> None:
-        for node in nodes:
-            node.hovering = False
-            for pin in node.pins:
-                pin.hovering = False
-
     def _update_pins_single_hovering(self, node: Node) -> None:
         for pin in node.pins:
             icon_x = node.node_pos[0] + pin.icon_pos[0]
@@ -363,7 +356,7 @@ class CanvasGraph(CanvasController):
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
 
-        self._update_nodes_all_unhovering(nodes)
+        self.graph.update_nodes_all_unhovering()
         self._update_nodes_single_hovering(nodes)
 
         if self.is_pan_mode:
@@ -421,7 +414,10 @@ class CanvasGraph(CanvasController):
         if self.changed_left_up:
             self._mode = ControlMode.normal
         else:
-            self._update_nodes_for_moving(self.graph.nodes, self.zoom)
+            io = imgui.get_io()
+            dx = io.mouse_delta.x / self.zoom
+            dy = io.mouse_delta.y / self.zoom
+            self.graph.move_selected_nodes((dx, dy))
 
     def _update_nodes_state_for_pin_connecting(self) -> None:
         assert not self.is_pan_mode

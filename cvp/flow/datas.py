@@ -136,8 +136,6 @@ class Pin:
     def hovering(self, value: bool) -> None:
         self._hovering = value
 
-    # arcs: List[Arc] = field(default_factory=list)
-
 
 @dataclass
 class ArcTemplate:
@@ -358,8 +356,22 @@ class Graph:
     axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)
 
+    def update_nodes_all_unhovering(self) -> None:
+        for node in self.nodes:
+            node.hovering = False
+            for pin in node.pins:
+                pin.hovering = False
+
     def find_hovering_node(self) -> Optional[Node]:
         for node in self.nodes:
             if node.hovering:
                 return node
         return None
+
+    def move_selected_nodes(self, delta: Size) -> None:
+        dx, dy = delta
+        for node in self.nodes:
+            if not node.selected:
+                continue
+            x, y = node.node_pos
+            node.node_pos = x + dx, y + dy
