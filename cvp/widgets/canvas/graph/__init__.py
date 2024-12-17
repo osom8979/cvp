@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from enum import Enum, auto, unique
 from typing import Optional, Sequence
 from weakref import ReferenceType, ref
 
@@ -11,14 +10,9 @@ from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.override import override
+from cvp.types.shapes import Point
 from cvp.widgets.canvas.controller import CanvasController
-
-
-@unique
-class DraggingMode(Enum):
-    none = auto()
-    node_moving = auto()
-    pin_connecting = auto()
+from cvp.widgets.canvas.graph.mode import ControlMode
 
 
 class CanvasGraph(CanvasController):
@@ -31,6 +25,9 @@ class CanvasGraph(CanvasController):
     _connecting_node: Optional[Node]
     _connecting_pin: Optional[Pin]
 
+    _select_begin: Optional[Point]
+    _select_end: Optional[Point]
+
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
         self._graph_ref = ref(graph)
@@ -38,9 +35,11 @@ class CanvasGraph(CanvasController):
         self._graph = None
         self._fonts = None
 
-        self._dragging_mode = DraggingMode.none
+        self._mode = ControlMode.normal
         self._connecting_node = None
         self._connecting_pin = None
+        self._select_begin = None
+        self._select_end = None
 
         self._pan_x.update(graph.canvas.pan_x, no_emit=True)
         self._pan_y.update(graph.canvas.pan_y, no_emit=True)
@@ -57,23 +56,27 @@ class CanvasGraph(CanvasController):
         return self.alt_down
 
     @property
-    def is_none_dragging_mode(self) -> bool:
-        return self._dragging_mode == DraggingMode.none
+    def is_normal_mode(self) -> bool:
+        return self._mode == ControlMode.normal
 
     @property
     def is_node_moving_mode(self) -> bool:
-        return self._dragging_mode == DraggingMode.node_moving
+        return self._mode == ControlMode.node_moving
 
     @property
     def is_pin_connecting_mode(self) -> bool:
-        return self._dragging_mode == DraggingMode.pin_connecting
+        return self._mode == ControlMode.pin_connecting
+
+    @property
+    def is_selection_box_mode(self) -> bool:
+        return self._mode == ControlMode.selection_box
 
     @override
     def as_unformatted_text(self) -> str:
         node_name = self._connecting_node.name if self._connecting_node else "None"
         pin_name = self._connecting_pin.name if self._connecting_pin else "None"
         return super().as_unformatted_text() + (
-            f"Dragging mode: {self._dragging_mode.name}\n"
+            f"Dragging mode: {self._mode.name}\n"
             f"Arc begin node: {node_name}\n"
             f"Arc begin pin: {pin_name}\n"
         )
@@ -133,15 +136,17 @@ class CanvasGraph(CanvasController):
         self.close()
 
     def reset_controllers(self):
+        assert self._graph is not None
+        assert self._fonts is not None
+
         self.pan_x = 0.0
         self.pan_y = 0.0
         self.zoom = 1.0
 
-        if self._graph is not None:
-            canvas = self._graph.canvas
-            canvas.pan_x = 0.0
-            canvas.pan_y = 0.0
-            canvas.zoom = 1.0
+        canvas = self.graph.canvas
+        canvas.pan_x = 0.0
+        canvas.pan_y = 0.0
+        canvas.zoom = 1.0
 
     def do_process_controllers(self, debugging=False) -> None:
         assert self._graph is not None
@@ -180,6 +185,7 @@ class CanvasGraph(CanvasController):
             self.draw_arcs()
 
         self.draw_pin_connection()
+        self.draw_selection_box()
 
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
@@ -278,6 +284,20 @@ class CanvasGraph(CanvasController):
         return None
 
     @staticmethod
+    def _find_selected_single_node(nodes: Sequence[Node]) -> Optional[Node]:
+        for node in nodes:
+            if node.selected:
+                return node
+        return None
+
+    @staticmethod
+    def _find_hovering_selected_single_node(nodes: Sequence[Node]) -> Optional[Node]:
+        for node in nodes:
+            if node.hovering and node.selected:
+                return node
+        return None
+
+    @staticmethod
     def _update_nodes_single_select(nodes: Sequence[Node], selected_node: Node) -> None:
         for node in nodes:
             node.selected = selected_node == node
@@ -348,38 +368,23 @@ class CanvasGraph(CanvasController):
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
 
-        if self.start_left_dragging and self.is_none_dragging_mode:
-            hovering_node = self._find_hovering_single_node(nodes)
-            if hovering_node is not None:
-                hovering_pin = self._find_hovering_single_pin(hovering_node.pins)
-                if hovering_pin is not None:
-                    self._dragging_mode = DraggingMode.pin_connecting
-                    self._connecting_node = hovering_node
-                    self._connecting_pin = hovering_pin
-                else:
-                    if not hovering_node.selected:
-                        self._update_nodes_all_unselect(nodes)
-                        hovering_node.selected = True
-                    self._dragging_mode = DraggingMode.node_moving
+        match self._mode:
+            case ControlMode.normal:
+                self._update_nodes_state_for_normal()
+            case ControlMode.node_moving:
+                self._update_nodes_state_for_node_moving()
+            case ControlMode.pin_connecting:
+                self._update_nodes_state_for_pin_connecting()
+            case ControlMode.selection_box:
+                self._update_nodes_state_for_selection_box()
+            case _:
+                assert False, "Inaccessible section"
 
-        if self.left_dragging:
-            match self._dragging_mode:
-                case DraggingMode.node_moving:
-                    self._update_nodes_for_moving(nodes, self.zoom)
-                    return
-                case DraggingMode.pin_connecting:
-                    return
+    def _update_nodes_state_for_normal(self) -> None:
+        assert not self.is_pan_mode
+        assert self.is_normal_mode
 
-        if self._dragging_mode != DraggingMode.none:
-            self._dragging_mode = DraggingMode.none
-            self._connecting_node = None
-            self._connecting_pin = None
-
-        # if self._left_dragging.prev:
-        #     # When the node drag (movement) is finished, the mouse up event is
-        #     # necessarily fired. Therefore, we check the drag state of the previous
-        #     # frame to prevent the node from being selected.
-        #     return
+        nodes = self.graph.nodes
 
         if self.changed_left_up:
             if self.ctrl_down:
@@ -389,7 +394,71 @@ class CanvasGraph(CanvasController):
                     self._update_nodes_single_select(nodes, selected_node)
                 else:
                     self._update_nodes_all_unselect(nodes)
-            return
+
+        if self.start_left_dragging:
+            if hovering_node := self._find_hovering_single_node(nodes):
+                if hovering_pin := self._find_hovering_single_pin(hovering_node.pins):
+                    self._mode = ControlMode.pin_connecting
+                    self._connecting_node = hovering_node
+                    self._connecting_pin = hovering_pin
+                elif hovering_node.selected:
+                    self._mode = ControlMode.node_moving
+                else:
+                    self._mode = ControlMode.node_moving
+                    self._update_nodes_all_unselect(nodes)
+                    hovering_node.selected = True
+            else:
+                self._mode = ControlMode.selection_box
+                self._select_begin = self._mouse_pos
+                self._select_end = self._mouse_pos
+
+    def _update_nodes_state_for_node_moving(self) -> None:
+        assert not self.is_pan_mode
+        assert self.is_node_moving_mode
+
+        if self.changed_left_up:
+            self._mode = ControlMode.normal
+        else:
+            self._update_nodes_for_moving(self.graph.nodes, self.zoom)
+
+    def _update_nodes_state_for_pin_connecting(self) -> None:
+        assert not self.is_pan_mode
+        assert self.is_pin_connecting_mode
+        assert self._connecting_node is not None
+        assert self._connecting_pin is not None
+
+        if self.changed_left_up:
+            self._mode = ControlMode.normal
+            self._connecting_node = None
+            self._connecting_pin = None
+
+    def _update_nodes_state_for_selection_box(self) -> None:
+        assert not self.is_pan_mode
+        assert self.is_selection_box_mode
+        assert self._select_begin is not None
+        assert self._select_end is not None
+
+        self._select_end = self.mx, self.my
+        x1 = self._select_begin[0]
+        y1 = self._select_begin[1]
+        x2 = self._select_end[0]
+        y2 = self._select_end[1]
+        x1, y1, x2, y2 = self.screen_to_canvas_roi((x1, y1, x2, y2))
+        left = min(x1, x2)
+        right = max(x1, x2)
+        top = min(y1, y2)
+        bottom = max(y1, y2)
+
+        for node in self.graph.nodes:
+            nx1, ny1, nx2, ny2 = node.node_roi
+            x_in = left <= nx1 <= right or left <= nx2 <= right
+            y_in = top <= ny1 <= bottom or top <= ny2 <= bottom
+            node.selected = x_in and y_in
+
+        if self.changed_left_up:
+            self._mode = ControlMode.normal
+            self._select_begin = None
+            self._select_end = None
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -629,7 +698,7 @@ class CanvasGraph(CanvasController):
         pass
 
     def draw_pin_connection(self) -> None:
-        if self._dragging_mode != DraggingMode.pin_connecting:
+        if not self.is_pin_connecting_mode:
             return
 
         node = self._connecting_node
@@ -648,3 +717,20 @@ class CanvasGraph(CanvasController):
         color = imgui.get_color_u32_rgba(*self.graph.style.pin_connection_color)
         thickness = self.graph.style.pin_connection_thickness
         self._draw_list.add_line(x1, y1, mx, my, color, thickness)
+
+    def draw_selection_box(self) -> None:
+        if not self.is_selection_box_mode:
+            return
+
+        assert self._select_begin is not None
+        assert self._select_end is not None
+
+        x1 = self._select_begin[0]
+        y1 = self._select_begin[1]
+        x2 = self._select_end[0]
+        y2 = self._select_end[1]
+
+        color = imgui.get_color_u32_rgba(*self.graph.style.selection_box_color)
+        thickness = self.graph.style.selection_box_thickness
+        self._draw_list.add_rect_filled(x1, y1, x2, y2, color)
+        self._draw_list.add_rect(x1, y1, x2, y2, color, 0.0, 0, thickness)

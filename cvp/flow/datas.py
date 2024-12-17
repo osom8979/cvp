@@ -11,7 +11,7 @@ from cvp.fonts.glyphs.mdi import (
     MDI_CIRCLE,
     MDI_CIRCLE_OUTLINE,
 )
-from cvp.palette.basic import BLACK, RED, WHITE, YELLOW
+from cvp.palette.basic import BLACK, GREEN, RED, WHITE, YELLOW
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI, Point, Size
 
@@ -321,6 +321,9 @@ class Style:
 
     pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
     pin_connection_thickness: float = 2.0
+
+    selection_box_color: RGBA = field(default_factory=lambda: (*GREEN, 0.3))
+    selection_box_thickness: float = 1.0
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
 

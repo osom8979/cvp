@@ -140,12 +140,52 @@ class ControllerProps:
         return self._alt_down.value
 
     @property
+    def changed_left_down(self) -> bool:
+        return self._left_button.changed_down
+
+    @property
+    def changed_middle_down(self) -> bool:
+        return self._middle_button.changed_down
+
+    @property
+    def changed_right_down(self) -> bool:
+        return self._right_button.changed_down
+
+    @property
     def changed_left_up(self) -> bool:
         return self._left_button.changed_up
 
     @property
+    def changed_middle_up(self) -> bool:
+        return self._middle_button.changed_up
+
+    @property
+    def changed_right_up(self) -> bool:
+        return self._right_button.changed_up
+
+    @property
     def start_left_dragging(self) -> bool:
         return self._left_button.start_drag
+
+    @property
+    def start_middle_dragging(self) -> bool:
+        return self._middle_button.start_drag
+
+    @property
+    def start_right_dragging(self) -> bool:
+        return self._right_button.start_drag
+
+    @property
+    def end_left_dragging(self) -> bool:
+        return self._left_button.end_drag
+
+    @property
+    def end_middle_dragging(self) -> bool:
+        return self._middle_button.end_drag
+
+    @property
+    def end_right_dragging(self) -> bool:
+        return self._right_button.end_drag
 
     def as_unformatted_text(self) -> str:
         return (
