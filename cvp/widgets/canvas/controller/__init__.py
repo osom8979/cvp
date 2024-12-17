@@ -247,29 +247,43 @@ class CanvasController(ControllerProps):
         self._ctrl_down.update(io.key_ctrl)
         self._alt_down.update(io.key_alt)
 
-        if self.activating:
-            if self.middle_dragging:
-                self.pan_x += io.mouse_delta.x / self.zoom
-                self.pan_y += io.mouse_delta.y / self.zoom
-            elif self.alt_down and self.left_dragging:
-                self.pan_x += io.mouse_delta.x / self.zoom
-                self.pan_y += io.mouse_delta.y / self.zoom
+        zoom = self.zoom
+        pan_x = self.pan_x
+        pan_y = self.pan_y
+        try:
+            if self.activating:
+                if self.middle_dragging:
+                    pan_x += io.mouse_delta.x / zoom
+                    pan_y += io.mouse_delta.y / zoom
+                elif self.alt_down and self.left_dragging:
+                    pan_x += io.mouse_delta.x / zoom
+                    pan_y += io.mouse_delta.y / zoom
 
-        if self.hovering and io.mouse_wheel != 0:
-            if io.mouse_wheel > 0:
-                self.zoom += self._zoom_step
-            elif io.mouse_wheel < 0:
-                self.zoom -= self._zoom_step
+            if self.hovering and io.mouse_wheel != 0:
+                if io.mouse_wheel > 0:
+                    zoom += self._zoom_step
+                elif io.mouse_wheel < 0:
+                    zoom -= self._zoom_step
 
-        if self.zoom > self._zoom_max:
-            self.zoom = self._zoom_max
-        elif self.zoom < self._zoom_min:
-            self.zoom = self._zoom_min
+            if zoom > self._zoom_max:
+                zoom = self._zoom_max
+            elif zoom < self._zoom_min:
+                zoom = self._zoom_min
+
+            if zoom != self.zoom:
+                # Apply zoom centered on the mouse position.
+                dx1 = (mx - cx) / self.zoom
+                dy1 = (my - cy) / self.zoom
+                dx2 = (mx - cx) / zoom
+                dy2 = (my - cy) / zoom
+                pan_x += dx2 - dx1
+                pan_y += dy2 - dy1
+        finally:
+            self.zoom = zoom
+            self.pan_x = pan_x
+            self.pan_y = pan_y
 
         if self._hovering.value:
-            mx, my = imgui.get_mouse_pos()
-            assert isinstance(mx, float)
-            assert isinstance(my, float)
             self._local_pos_x = mx - cx
             self._local_pos_y = my - cy
 

@@ -68,7 +68,7 @@ class ControllerProps:
 
     @pan_x.setter
     def pan_x(self, value: float) -> None:
-        self._pan_x.value = value
+        self._pan_x.update(value)
 
     @property
     def pan_y(self):
@@ -76,7 +76,7 @@ class ControllerProps:
 
     @pan_y.setter
     def pan_y(self, value: float) -> None:
-        self._pan_y.value = value
+        self._pan_y.update(value)
 
     @property
     def zoom(self):
@@ -84,7 +84,7 @@ class ControllerProps:
 
     @zoom.setter
     def zoom(self, value: float) -> None:
-        self._zoom.value = value
+        self._zoom.update(value)
 
     @property
     def pan(self) -> Point:
@@ -92,8 +92,8 @@ class ControllerProps:
 
     @pan.setter
     def pan(self, value: Point) -> None:
-        self._pan_x.value = value[0]
-        self._pan_y.value = value[1]
+        self._pan_x.update(value[0])
+        self._pan_y.update(value[1])
 
     @property
     def activating(self):
