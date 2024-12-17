@@ -11,7 +11,7 @@ from cvp.fonts.glyphs.mdi import (
     MDI_CIRCLE,
     MDI_CIRCLE_OUTLINE,
 )
-from cvp.palette.basic import BLACK, BLUE, RED, WHITE
+from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGB, RGBA
 from cvp.types.shapes import ROI, Point, Size
@@ -242,6 +242,18 @@ class Node:
                 return pin
         return None
 
+    def find_start_pin(self, arc_uuid: str) -> Optional[Pin]:
+        for pin in self.output_pins:
+            if arc_uuid in pin.arcs:
+                return pin
+        return None
+
+    def find_end_pin(self, arc_uuid: str) -> Optional[Pin]:
+        for pin in self.input_pins:
+            if arc_uuid in pin.arcs:
+                return pin
+        return None
+
 
 class NodePin(NamedTuple):
     node: Node
@@ -358,6 +370,9 @@ class Style:
     selection_box_color: RGBA = field(default_factory=lambda: (*BLUE, 0.3))
     selection_box_thickness: float = 1.0
 
+    arc_color: RGBA = field(default_factory=lambda: (*SILVER, 0.8))
+    arc_thickness: float = 2.0
+
     item_spacing: Size = DEFAULT_ITEM_SPACING
 
     emblem_size: FontSize = FontSize.large
@@ -456,7 +471,7 @@ class Graph:
         if not in_pin.arcs and not out_pin.arcs:
             arc = Arc()
             arc.start = in_node_pin
-            arc.end = in_node_pin
+            arc.end = out_node_pin
             self.arcs.append(arc)
             out_pin.arcs.append(arc.uuid)
             in_pin.arcs.append(arc.uuid)

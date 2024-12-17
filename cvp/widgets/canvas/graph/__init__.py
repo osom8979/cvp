@@ -687,10 +687,43 @@ class CanvasGraph(CanvasController):
 
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
+
+            if arc.start is None:
+                for node in self.graph.nodes:
+                    if pin := node.find_start_pin(arc.uuid):
+                        arc.start = NodePin(node, pin)
+                        break
+
+            if arc.end is None:
+                for node in self.graph.nodes:
+                    if pin := node.find_end_pin(arc.uuid):
+                        arc.end = NodePin(node, pin)
+                        break
+
+            assert arc.start is not None
+            assert arc.end is not None
             self.draw_arc(arc)
 
     def draw_arc(self, arc: Arc) -> None:
-        pass
+        assert arc.start is not None
+        snx, sny = arc.start.node.node_pos
+        six, siy = arc.start.pin.icon_pos
+        siw, sih = arc.start.pin.icon_size
+        sx = snx + six + siw / 2
+        sy = sny + siy + sih / 2
+        x1, y1 = self.canvas_to_screen_coords((sx, sy))
+
+        assert arc.end is not None
+        enx, eny = arc.end.node.node_pos
+        eix, eiy = arc.end.pin.icon_pos
+        eiw, eih = arc.end.pin.icon_size
+        ex = enx + eix + eiw / 2
+        ey = eny + eiy + eih / 2
+        x2, y2 = self.canvas_to_screen_coords((ex, ey))
+
+        color = imgui.get_color_u32_rgba(*self.graph.style.arc_color)
+        thickness = self.graph.style.arc_thickness
+        self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
 
     def draw_pin_connection(self) -> None:
         if not self.is_pin_connecting_mode:
