@@ -13,16 +13,7 @@ from cvp.imgui.cursor import cursor_pos_y
 from cvp.imgui.push_style_var import style_item_spacing, style_window_padding
 from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
-from cvp.variables import (
-    AUI_PADDING_HEIGHT,
-    AUI_PADDING_WIDTH,
-    MAX_SIDEBAR_HEIGHT,
-    MAX_SIDEBAR_WIDTH,
-    MIN_SIDEBAR_HEIGHT,
-    MIN_SIDEBAR_WIDTH,
-    MIN_WINDOW_HEIGHT,
-    MIN_WINDOW_WIDTH,
-)
+from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.splitter import Splitter
 
 AuiSectionT = TypeVar("AuiSectionT", bound=AuiWindowConfig)
@@ -57,12 +48,6 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         min_width=MIN_WINDOW_WIDTH,
         min_height=MIN_WINDOW_HEIGHT,
         modifiable_title=False,
-        min_sidebar_width=MIN_SIDEBAR_WIDTH,
-        max_sidebar_width=MAX_SIDEBAR_WIDTH,
-        min_sidebar_height=MIN_SIDEBAR_HEIGHT,
-        max_sidebar_height=MAX_SIDEBAR_HEIGHT,
-        padding_width=AUI_PADDING_WIDTH,
-        padding_height=AUI_PADDING_HEIGHT,
     ):
         super().__init__(
             context=context,
@@ -74,9 +59,6 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
             min_height=min_height,
             modifiable_title=modifiable_title,
         )
-
-        self._padding_width = padding_width
-        self._padding_height = padding_height
 
         self._split_left = AuiLeftProxy(window_config)
         self._split_right = AuiRightProxy(window_config)
@@ -91,21 +73,21 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
         self._left_splitter = Splitter.from_vertical(
             "## VSplitterLeft",
             value_proxy=self._split_left,
-            min_value=min_sidebar_width,
-            max_value=max_sidebar_width,
+            min_value=window_config.min_sidebar_left,
+            max_value=window_config.max_sidebar_right,
         )
         self._right_splitter = Splitter.from_vertical(
             "## VSplitterRight",
             value_proxy=self._split_right,
-            min_value=min_sidebar_width,
-            max_value=max_sidebar_width,
+            min_value=window_config.min_sidebar_right,
+            max_value=window_config.max_sidebar_right,
             negative_delta=True,
         )
         self._bottom_splitter = Splitter.from_horizontal(
             "## HSplitterBottom",
             value_proxy=self._split_bottom,
-            min_value=min_sidebar_height,
-            max_value=max_sidebar_height,
+            min_value=window_config.min_sidebar_bottom,
+            max_value=window_config.max_sidebar_bottom,
             negative_delta=True,
         )
 
@@ -141,15 +123,15 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
 
     @property
     def padding_width(self) -> float:
-        return self._padding_width
+        return self.window_config.padding_width
 
     @property
     def padding_height(self) -> float:
-        return self._padding_height
+        return self.window_config.padding_height
 
     @property
     def padding(self) -> Tuple[float, float]:
-        return self._padding_width, self._padding_height
+        return self.padding_width, self.padding_height
 
     @override
     def begin(self) -> Tuple[bool, bool]:
@@ -158,8 +140,8 @@ class AuiWindow(WindowBase[AuiSectionT], AuiInterface):
 
     @override
     def on_process(self) -> None:
-        pw = self._padding_width
-        ph = self._padding_height
+        pw = self.padding_width
+        ph = self.padding_height
         top = imgui.get_cursor_pos_y()
 
         imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + pw)

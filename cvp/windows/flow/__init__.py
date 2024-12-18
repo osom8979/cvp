@@ -19,16 +19,7 @@ from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
 from cvp.types.override import override
-from cvp.variables import (
-    AUI_PADDING_HEIGHT,
-    AUI_PADDING_WIDTH,
-    MAX_SIDEBAR_HEIGHT,
-    MAX_SIDEBAR_WIDTH,
-    MIN_SIDEBAR_HEIGHT,
-    MIN_SIDEBAR_WIDTH,
-    MIN_WINDOW_HEIGHT,
-    MIN_WINDOW_WIDTH,
-)
+from cvp.variables import MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH
 from cvp.widgets.aui import AuiWindow
 from cvp.widgets.canvas.graph import CanvasGraph
 from cvp.widgets.splitter import Splitter
@@ -48,31 +39,15 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     _prev_cursor: Optional[str]
 
     def __init__(self, context: Context, fonts: FontMapper):
-        min_width = MIN_WINDOW_WIDTH
-        min_height = MIN_WINDOW_HEIGHT
-        modifiable_title = False
-        min_sidebar_width = MIN_SIDEBAR_WIDTH
-        max_sidebar_width = MAX_SIDEBAR_WIDTH
-        min_sidebar_height = MIN_SIDEBAR_HEIGHT
-        max_sidebar_height = MAX_SIDEBAR_HEIGHT
-        padding_width = AUI_PADDING_WIDTH
-        padding_height = AUI_PADDING_HEIGHT
-
         super().__init__(
             context=context,
             window_config=context.config.flow_aui,
             title="Flow",
             closable=True,
             flags=imgui.WINDOW_MENU_BAR,
-            min_width=min_width,
-            min_height=min_height,
-            modifiable_title=modifiable_title,
-            min_sidebar_width=min_sidebar_width,
-            max_sidebar_width=max_sidebar_width,
-            min_sidebar_height=min_sidebar_height,
-            max_sidebar_height=max_sidebar_height,
-            padding_width=padding_width,
-            padding_height=padding_height,
+            min_width=MIN_WINDOW_WIDTH,
+            min_height=MIN_WINDOW_HEIGHT,
+            modifiable_title=False,
         )
 
         self._fonts = fonts
@@ -88,9 +63,9 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
         self._split_tree = SplitTreeProxy(context.config.flow_aui)
         self._tree_splitter = Splitter.from_horizontal(
-            "## HSplitterTree",
+            "##HSplitterTree",
             value_proxy=self._split_tree,
-            min_value=min_sidebar_height,
+            min_value=context.config.flow_aui.min_split_tree,
             negative_delta=True,
         )
 
