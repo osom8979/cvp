@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum, auto, unique
-from typing import Final, List, NamedTuple, Optional, Sequence, Set, Tuple, Union
+from typing import Final, List, NamedTuple, Optional, Sequence, Set, Union
 from uuid import uuid4
 
 from cvp.fonts.glyphs.mdi import (
@@ -242,13 +242,13 @@ class Node:
                 return pin
         return None
 
-    def find_start_pin(self, arc_uuid: str) -> Optional[Pin]:
+    def find_output_pin(self, arc_uuid: str) -> Optional[Pin]:
         for pin in self.output_pins:
             if arc_uuid in pin.arcs:
                 return pin
         return None
 
-    def find_end_pin(self, arc_uuid: str) -> Optional[Pin]:
+    def find_input_pin(self, arc_uuid: str) -> Optional[Pin]:
         for pin in self.input_pins:
             if arc_uuid in pin.arcs:
                 return pin
@@ -263,12 +263,17 @@ class NodePin(NamedTuple):
         return f"{self.node.name}.{self.pin.name}"
 
 
+class ConnectPair(NamedTuple):
+    output: NodePin
+    input: NodePin
+
+
 @dataclass
 class ArcTemplate:
-    start_node: str = EMPTY_TEXT
-    start_pin: str = EMPTY_TEXT
-    end_node: str = EMPTY_TEXT
-    end_pin: str = EMPTY_TEXT
+    output_node: str = EMPTY_TEXT
+    output_pin: str = EMPTY_TEXT
+    input_node: str = EMPTY_TEXT
+    input_pin: str = EMPTY_TEXT
 
 
 @dataclass
@@ -277,24 +282,24 @@ class Arc:
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT
 
-    _start: Optional[NodePin] = None
-    _end: Optional[NodePin] = None
+    _output: Optional[NodePin] = None
+    _input: Optional[NodePin] = None
 
     @property
-    def start(self):
-        return self._start
+    def output(self):
+        return self._output
 
-    @start.setter
-    def start(self, value: Optional[NodePin]) -> None:
-        self._start = value
+    @output.setter
+    def output(self, value: Optional[NodePin]) -> None:
+        self._output = value
 
     @property
-    def end(self):
-        return self._end
+    def input(self):
+        return self._input
 
-    @end.setter
-    def end(self, value: Optional[NodePin]) -> None:
-        self._end = value
+    @input.setter
+    def input(self, value: Optional[NodePin]) -> None:
+        self._input = value
 
 
 @dataclass
@@ -445,29 +450,7 @@ class Graph:
             node.node_pos = x + dx, y + dy
 
     @staticmethod
-    def reorder_pins(left: NodePin, right: NodePin) -> Tuple[NodePin, NodePin]:
-        if left.pin.stream == Stream.input:
-            assert right.pin.stream == Stream.output
-            return right, left
-        else:
-            assert left.pin.stream == Stream.output
-            assert right.pin.stream == Stream.input
-            return left, right
-
-    def _connect_pins(self, in_node_pin: NodePin, out_node_pin: NodePin) -> None:
-        in_pin = in_node_pin.pin
-        out_pin = out_node_pin.pin
-        assert in_pin.stream == Stream.input
-        assert out_pin.stream == Stream.output
-        if not in_pin.arcs and not out_pin.arcs:
-            arc = Arc()
-            arc.start = in_node_pin
-            arc.end = in_node_pin
-            self.arcs.append(arc)
-            out_pin.arcs.append(arc.uuid)
-            in_pin.arcs.append(arc.uuid)
-
-    def connect_pins(self, left: NodePin, right: NodePin) -> None:
+    def reorder_connectable_pins(left: NodePin, right: NodePin) -> ConnectPair:
         if left.node == right.node:
             raise ValueError("Identical nodes cannot be connected")
         if left.pin.stream == right.pin.stream:
@@ -477,9 +460,18 @@ class Graph:
         if left.pin.dtype != right.pin.dtype:
             raise ValueError("The dtype of the pins must match")
 
-        out_node_pin, in_node_pin = self.reorder_pins(left, right)
-        out_pin = out_node_pin.pin
-        in_pin = in_node_pin.pin
+        if left.pin.stream == Stream.input:
+            assert right.pin.stream == Stream.output
+            out_conn = right
+            in_conn = left
+        else:
+            assert left.pin.stream == Stream.output
+            assert right.pin.stream == Stream.input
+            out_conn = left
+            in_conn = right
+
+        out_pin = out_conn.pin
+        in_pin = in_conn.pin
         assert out_pin.stream == Stream.output
         assert in_pin.stream == Stream.input
         assert out_pin.action == in_pin.action
@@ -490,10 +482,17 @@ class Graph:
         if action == Action.data and in_pin.arcs:
             raise ValueError("There cannot be multiple input data pins")
 
+        return ConnectPair(out_conn, in_conn)
+
+    def connect_pins(self, left: NodePin, right: NodePin) -> Arc:
+        out_conn, in_conn = self.reorder_connectable_pins(left, right)
+
         arc = Arc()
-        arc.start = out_node_pin
-        arc.end = in_node_pin
+        arc.output = out_conn
+        arc.input = in_conn
 
         self.arcs.append(arc)
-        out_pin.arcs.append(arc.uuid)
-        in_pin.arcs.append(arc.uuid)
+        out_conn.pin.arcs.append(arc.uuid)
+        in_conn.pin.arcs.append(arc.uuid)
+
+        return arc

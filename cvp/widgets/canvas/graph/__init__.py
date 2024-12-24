@@ -5,17 +5,7 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import (
-    Arc,
-    FontSize,
-    Graph,
-    Node,
-    NodePin,
-    Pin,
-    Stream,
-    Stroke,
-    Style,
-)
+from cvp.flow.datas import Arc, FontSize, Graph, Node, NodePin, Pin, Stroke, Style
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
@@ -399,16 +389,16 @@ class CanvasGraph(CanvasController):
                     # if hovering_pin.arcs:
                     #     for arc in self.graph.pop_arcs(hovering_pin.arcs):
                     #         self.update_arc_cache(arc)
-                    #         assert arc.start is not None
-                    #         assert arc.end is not None
+                    #         assert arc.output is not None
+                    #         assert arc.input is not None
                     #         if hovering_pin.stream == Stream.input:
-                    #             self._connects.append(arc.end)
+                    #             self._connects.append(arc.input)
                     #         elif hovering_pin.stream == Stream.output:
-                    #             self._connects.append(arc.start)
+                    #             self._connects.append(arc.output)
                     #         else:
                     #             assert False, "Inaccessible section"
-                    #         arc.start.pin.arcs.clear()
-                    #         arc.end.pin.arcs.clear()
+                    #         arc.output.pin.arcs.clear()
+                    #         arc.input.pin.arcs.clear()
                     # else:
                     self._connects.append(NodePin(hovering_node, hovering_pin))
                 elif hovering_node.selected:
@@ -722,38 +712,38 @@ class CanvasGraph(CanvasController):
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
     def update_arc_cache(self, arc: Arc) -> None:
-        if arc.start is None:
+        if arc.output is None:
             for node in self.graph.nodes:
-                if pin := node.find_start_pin(arc.uuid):
-                    arc.start = NodePin(node, pin)
+                if pin := node.find_output_pin(arc.uuid):
+                    arc.output = NodePin(node, pin)
                     break
 
-        if arc.end is None:
+        if arc.input is None:
             for node in self.graph.nodes:
-                if pin := node.find_end_pin(arc.uuid):
-                    arc.end = NodePin(node, pin)
+                if pin := node.find_input_pin(arc.uuid):
+                    arc.input = NodePin(node, pin)
                     break
 
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
             self.update_arc_cache(arc)
-            assert arc.start is not None
-            assert arc.end is not None
+            assert arc.output is not None
+            assert arc.input is not None
             self.draw_arc(arc)
 
     def draw_arc(self, arc: Arc) -> None:
-        assert arc.start is not None
-        snx, sny = arc.start.node.node_pos
-        six, siy = arc.start.pin.icon_pos
-        siw, sih = arc.start.pin.icon_size
+        assert arc.output is not None
+        snx, sny = arc.output.node.node_pos
+        six, siy = arc.output.pin.icon_pos
+        siw, sih = arc.output.pin.icon_size
         sx = snx + six + siw / 2
         sy = sny + siy + sih / 2
         x1, y1 = self.canvas_to_screen_coords((sx, sy))
 
-        assert arc.end is not None
-        enx, eny = arc.end.node.node_pos
-        eix, eiy = arc.end.pin.icon_pos
-        eiw, eih = arc.end.pin.icon_size
+        assert arc.input is not None
+        enx, eny = arc.input.node.node_pos
+        eix, eiy = arc.input.pin.icon_pos
+        eiw, eih = arc.input.pin.icon_size
         ex = enx + eix + eiw / 2
         ey = eny + eiy + eih / 2
         x2, y2 = self.canvas_to_screen_coords((ex, ey))
