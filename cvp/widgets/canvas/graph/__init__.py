@@ -9,6 +9,7 @@ from cvp.flow.datas import Arc, FontSize, Graph, Node, NodePin, Pin, Stroke, Sty
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
+from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.types.shapes import ROI
 from cvp.widgets.canvas.controller import CanvasController
@@ -256,73 +257,12 @@ class CanvasGraph(CanvasController):
     #         img_color,
     #     )
 
-    # def is_selected_node(self, node: Node) -> bool:
-    #     if not self.left_clicked:
-    #         return False
-    #     roi = self.canvas_to_screen_roi(node.roi)
-    #     return imgui.is_mouse_hovering_rect(*roi)
-
-    @staticmethod
-    def _find_hovering_single_pin(pins: Sequence[Pin]) -> Optional[Pin]:
-        for pin in pins:
-            if pin.hovering:
-                return pin
-        return None
-
-    @staticmethod
-    def _find_hovering_single_node(nodes: Sequence[Node]) -> Optional[Node]:
-        for node in nodes:
-            if node.hovering:
-                return node
-        return None
-
-    @staticmethod
-    def _find_selected_single_node(nodes: Sequence[Node]) -> Optional[Node]:
-        for node in nodes:
-            if node.selected:
-                return node
-        return None
-
-    @staticmethod
-    def _find_hovering_selected_single_node(nodes: Sequence[Node]) -> Optional[Node]:
-        for node in nodes:
-            if node.hovering and node.selected:
-                return node
-        return None
-
-    @staticmethod
-    def _update_nodes_single_select(nodes: Sequence[Node], selected_node: Node) -> None:
-        for node in nodes:
-            node.selected = selected_node == node
-
-    @staticmethod
-    def _update_nodes_all_unselect(nodes: Sequence[Node]) -> None:
-        for node in nodes:
-            node.selected = False
-
     @staticmethod
     def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
         for node in nodes:
             if node.hovering:
                 node.selected = not node.selected
                 return
-
-    @staticmethod
-    def _update_nodes_for_moving(nodes: Sequence[Node], zoom: float) -> None:
-        io = imgui.get_io()
-        dx = io.mouse_delta.x / zoom
-        dy = io.mouse_delta.y / zoom
-
-        for node in nodes:
-            if not node.selected:
-                continue
-
-            x1, y1, x2, y2 = node.node_roi
-            x1 += dx
-            y1 += dy
-            x2 += dx
-            y2 += dy
-            node.node_roi = x1, y1, x2, y2
 
     def _update_pins_single_hovering(self, node: Node) -> None:
         for pin in node.pins:
@@ -347,7 +287,7 @@ class CanvasGraph(CanvasController):
     def update_nodes_state(self) -> None:
         nodes = self.graph.nodes
 
-        self.graph.update_nodes_all_unhovering()
+        self.graph.clear_state()
         self._update_nodes_single_hovering(nodes)
 
         if self.is_pan_mode:
@@ -370,42 +310,27 @@ class CanvasGraph(CanvasController):
         assert not self.is_pan_mode
         assert self.is_normal_mode
 
-        nodes = self.graph.nodes
-
         if self.changed_left_up:
             if self.ctrl_down:
-                self._update_nodes_for_multiple_select(nodes)
+                self.graph.flip_selected_on_hovering_nodes()
             else:
-                if selected_node := self._find_hovering_single_node(nodes):
-                    self._update_nodes_single_select(nodes, selected_node)
+                if self.graph.find_hovering_node() is not None:
+                    self.graph.select_on_hovering_nodes()
                 else:
-                    self._update_nodes_all_unselect(nodes)
+                    self.graph.unselect_all_nodes()
 
         if self.activating and self.start_left_dragging:
-            if hovering_node := self._find_hovering_single_node(nodes):
-                if hovering_pin := self._find_hovering_single_pin(hovering_node.pins):
+            if hovering_node := self.graph.find_hovering_node():
+                if hovering_np := self.graph.find_hovering_pin(hovering_node):
+                    assert hovering_node == hovering_np.node
                     self._mode = ControlMode.pin_connecting
                     self._connects.clear()
-                    # if hovering_pin.arcs:
-                    #     for arc in self.graph.pop_arcs(hovering_pin.arcs):
-                    #         self.update_arc_cache(arc)
-                    #         assert arc.output is not None
-                    #         assert arc.input is not None
-                    #         if hovering_pin.stream == Stream.input:
-                    #             self._connects.append(arc.input)
-                    #         elif hovering_pin.stream == Stream.output:
-                    #             self._connects.append(arc.output)
-                    #         else:
-                    #             assert False, "Inaccessible section"
-                    #         arc.output.pin.arcs.clear()
-                    #         arc.input.pin.arcs.clear()
-                    # else:
-                    self._connects.append(NodePin(hovering_node, hovering_pin))
+                    self._connects.append(hovering_np)
                 elif hovering_node.selected:
                     self._mode = ControlMode.node_moving
                 else:
                     self._mode = ControlMode.node_moving
-                    self._update_nodes_all_unselect(nodes)
+                    self.graph.unselect_all_nodes()
                     hovering_node.selected = True
             else:
                 self._mode = ControlMode.selection_box
@@ -421,36 +346,32 @@ class CanvasGraph(CanvasController):
             io = imgui.get_io()
             dx = io.mouse_delta.x / self.zoom
             dy = io.mouse_delta.y / self.zoom
-            self.graph.move_selected_nodes((dx, dy))
+            self.graph.move_on_selected_nodes((dx, dy))
 
     def _update_nodes_state_for_pin_connecting(self) -> None:
         assert not self.is_pan_mode
         assert self.is_pin_connecting_mode
-        assert self._connects
+        assert 1 <= len(self._connects)
+
+        connect_pairs = list()
+
+        if hovering_np := self.graph.find_hovering_pin():
+            for conn in self._connects:
+                try:
+                    pair = self.graph.reorder_connectable_pins(conn, hovering_np)
+                    connect_pairs.append(pair)
+                except ValueError:
+                    connect_pairs.clear()
+                    break
+            hovering_np.pin.connectable = bool(connect_pairs)
 
         if self.changed_left_up:
-            try:
-                node = self.graph.find_hovering_node()
-                if node is None:
-                    return
+            if connect_pairs:
+                for out_conn, in_conn in connect_pairs:
+                    self.graph.connect_pins(out_conn, in_conn, no_reorder=True)
 
-                for conn in self._connects:
-                    if node == conn.node:
-                        return
-
-                pin = node.find_hovering_pin()
-                if pin is None:
-                    return
-
-                assert pin not in (np.pin for np in self._connects)
-                for np in self._connects:
-                    try:
-                        self.graph.connect_pins(np, NodePin(node, pin))
-                    except ValueError:
-                        continue
-            finally:
-                self._mode = ControlMode.normal
-                self._connects.clear()
+            self._mode = ControlMode.normal
+            self._connects.clear()
 
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
@@ -477,6 +398,16 @@ class CanvasGraph(CanvasController):
         if self.changed_left_up:
             self._mode = ControlMode.normal
             self._select = None
+
+    def get_pin_color(self, pin: Pin, style: Style) -> RGBA:
+        if self.is_pin_connecting_mode:
+            if pin.hovering and pin.connectable:
+                return style.connect_color
+        else:
+            if pin.hovering:
+                return style.hovering_color
+
+        return style.normal_color
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -629,7 +560,6 @@ class CanvasGraph(CanvasController):
         fill_color = imgui.get_color_u32_rgba(*node.color)
         stroke_color = imgui.get_color_u32_rgba(*stroke.color)
         label_color = imgui.get_color_u32_rgba(*style.normal_color)
-        hovering_color = imgui.get_color_u32_rgba(*style.hovering_color)
         layout_color = imgui.get_color_u32_rgba(*style.layout_color)
 
         thickness = stroke.thickness
@@ -680,7 +610,8 @@ class CanvasGraph(CanvasController):
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
                 pin_icon = flow_pin_y_icon if pin.connected else flow_pin_n_icon
-                pin_color = hovering_color if pin.hovering else label_color
+                pin_rgba = self.get_pin_color(pin, graph.style)
+                pin_color = imgui.get_color_u32_rgba(*pin_rgba)
                 self._draw_list.add_text(x1, y1, pin_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
@@ -694,7 +625,8 @@ class CanvasGraph(CanvasController):
                 x1 = nx + pin.icon_pos[0] * zoom
                 y1 = ny + pin.icon_pos[1] * zoom
                 pin_icon = data_pin_y_icon if pin.connected else data_pin_n_icon
-                pin_color = hovering_color if pin.hovering else label_color
+                pin_rgba = self.get_pin_color(pin, graph.style)
+                pin_color = imgui.get_color_u32_rgba(*pin_rgba)
                 self._draw_list.add_text(x1, y1, pin_color, pin_icon)
                 if graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
@@ -771,6 +703,7 @@ class CanvasGraph(CanvasController):
     def draw_pin_connects(self) -> None:
         if not self.is_pin_connecting_mode:
             return
+
         for connect in self._connects:
             self.draw_pin_connect(connect)
 

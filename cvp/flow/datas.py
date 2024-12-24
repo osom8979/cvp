@@ -106,6 +106,7 @@ class Pin:
     arcs: List[str] = field(default_factory=list)
 
     _hovering: bool = False
+    _connectable: bool = False
 
     @property
     def connected(self) -> bool:
@@ -142,6 +143,14 @@ class Pin:
     @hovering.setter
     def hovering(self, value: bool) -> None:
         self._hovering = value
+
+    @property
+    def connectable(self):
+        return self._connectable
+
+    @connectable.setter
+    def connectable(self, value: bool) -> None:
+        self._connectable = value
 
 
 @dataclass
@@ -367,6 +376,7 @@ class Style:
 
     normal_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_color: RGBA = field(default_factory=lambda: (*ORANGE, 0.9))
+    connect_color: RGBA = field(default_factory=lambda: (*RED, 0.9))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
 
     pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
@@ -409,17 +419,34 @@ class Graph:
     axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)
 
-    def update_nodes_all_unhovering(self) -> None:
+    def clear_state(self) -> None:
         for node in self.nodes:
             node.hovering = False
+            # Do not change the `node.selected` property.
             for pin in node.pins:
                 pin.hovering = False
+                pin.connectable = False
 
     def find_hovering_node(self) -> Optional[Node]:
         for node in self.nodes:
             if node.hovering:
                 return node
         return None
+
+    def find_hovering_pin(self, node: Optional[Node] = None) -> Optional[NodePin]:
+        if node is None:
+            node = self.find_hovering_node()
+            if node is None:
+                return None
+
+        if not node.hovering:
+            raise ValueError("Only hovering nodes are allowed")
+
+        pin = node.find_hovering_pin()
+        if pin is None:
+            return None
+
+        return NodePin(node, pin)
 
     def find_arc(self, uuid: str) -> Optional[Arc]:
         for arc in self.arcs:
@@ -441,7 +468,24 @@ class Graph:
         self.arcs.extend(remain_arcs)
         return pop_arcs
 
-    def move_selected_nodes(self, delta: Size) -> None:
+    def select_all_nodes(self) -> None:
+        for node in self.nodes:
+            node.selected = True
+
+    def unselect_all_nodes(self) -> None:
+        for node in self.nodes:
+            node.selected = False
+
+    def select_on_hovering_nodes(self) -> None:
+        for node in self.nodes:
+            node.selected = node.hovering
+
+    def flip_selected_on_hovering_nodes(self) -> None:
+        for node in self.nodes:
+            if node.hovering:
+                node.selected = not node.selected
+
+    def move_on_selected_nodes(self, delta: Size) -> None:
         dx, dy = delta
         for node in self.nodes:
             if not node.selected:
@@ -484,8 +528,24 @@ class Graph:
 
         return ConnectPair(out_conn, in_conn)
 
-    def connect_pins(self, left: NodePin, right: NodePin) -> Arc:
-        out_conn, in_conn = self.reorder_connectable_pins(left, right)
+    @staticmethod
+    def is_connectable_pins(left: NodePin, right: NodePin) -> bool:
+        try:
+            Graph.reorder_connectable_pins(left, right)
+        except ValueError:
+            return False
+        else:
+            return True
+
+    def connect_pins(
+        self,
+        out_conn: NodePin,
+        in_conn: NodePin,
+        *,
+        no_reorder=False,
+    ) -> Arc:
+        if not no_reorder:
+            out_conn, in_conn = self.reorder_connectable_pins(out_conn, in_conn)
 
         arc = Arc()
         arc.output = out_conn
