@@ -2,7 +2,7 @@
 
 from typing import Final, NamedTuple, Optional, Union
 
-from cvp.flow.datas import Prefix
+from cvp.flow.datas.prefix import Prefix
 
 PATH_SEPARATOR: Final[str] = "."
 PATH_ENCODING: Final[str] = "utf-8"

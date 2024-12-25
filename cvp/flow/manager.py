@@ -8,7 +8,8 @@ from type_serialize import deserialize, serialize
 from yaml import dump, full_load
 
 from cvp.flow.catalog import FlowCatalog
-from cvp.flow.datas import Action, Graph, Node, Pin, Stream
+from cvp.flow.datas import Action, Node, Pin, Stream
+from cvp.flow.datas.graph import Graph
 from cvp.flow.path import FlowPath
 from cvp.resources.home import HomeDir
 from cvp.strings.is_uuid import is_uuid4

@@ -5,7 +5,8 @@ from typing import Final, List
 import imgui
 
 from cvp.context.context import Context
-from cvp.flow.datas import Arc, Axis, Graph, Grid, Node, Stroke, Style
+from cvp.flow.datas import Arc, Axis, Grid, Node, Stroke, Style
+from cvp.flow.datas.graph import Graph
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
 from cvp.imgui.input_float import input_float
@@ -124,20 +125,21 @@ class PropsTab(TabItem[Graph]):
 
         node.name = input_text_value("Name", node.name)
         node.docs = input_text_value("Docs", node.docs)
+        node.emblem = input_text_value("Emblem", node.emblem)
 
-        # emblem: str = EMPTY_TEXT
-        # color: RGBA = WHITE_RGBA
-        #
+        if color_result := color_edit4("Color", *node.color):
+            node.color = color_result.color
+
         # emblem_pos: Point = EMPTY_POINT
         # emblem_size: Size = EMPTY_SIZE
         # name_pos: Point = EMPTY_POINT
         # name_size: Size = EMPTY_SIZE
         # node_pos: Point = EMPTY_POINT
         # node_size: Size = EMPTY_SIZE
-        #
+
         # flow_inputs: List[Pin] = field(default_factory=list)
         # flow_outputs: List[Pin] = field(default_factory=list)
-        #
+
         # data_inputs: List[Pin] = field(default_factory=list)
         # data_outputs: List[Pin] = field(default_factory=list)
 

@@ -5,7 +5,8 @@ from weakref import ReferenceType, ref
 
 import imgui
 
-from cvp.flow.datas import Arc, FontSize, Graph, Node, NodePin, Pin, Stroke, Style
+from cvp.flow.datas import Arc, FontSize, Node, NodePin, Pin, Stroke, Style
+from cvp.flow.datas.graph import Graph
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
