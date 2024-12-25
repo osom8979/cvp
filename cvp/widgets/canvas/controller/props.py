@@ -13,6 +13,7 @@ class ControllerProps:
 
         self._activating = Delta.from_single_value(False)
         self._hovering = Delta.from_single_value(False)
+        self._focusing = Delta.from_single_value(False)
 
         self._shift_down = Delta.from_single_value(False)
         self._ctrl_down = Delta.from_single_value(False)
@@ -102,6 +103,10 @@ class ControllerProps:
     @property
     def hovering(self):
         return self._hovering.value
+
+    @property
+    def focusing(self):
+        return self._focusing.value
 
     @property
     def left_dragging(self):
@@ -196,6 +201,7 @@ class ControllerProps:
             f"Canvas size: {self.cw:.02f}, {self.ch:.02f}\n"
             f"Activating: {self.activating}\n"
             f"Hovering: {self.hovering}\n"
+            f"Focusing: {self.focusing}\n"
             f"Left dragging: {self.left_dragging}\n"
             f"Middle dragging: {self.middle_dragging}\n"
             f"Right dragging: {self.right_dragging}\n"

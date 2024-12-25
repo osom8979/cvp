@@ -58,8 +58,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._bottom_tabs = FlowBottomTabs(context)
 
         self._prev_cursor = None
-        self._graph_path = str()
-        self._node_path = str()
 
         self._split_tree = SplitTreeProxy(context.config.flow_aui)
         self._tree_splitter = Splitter.from_horizontal(
@@ -235,11 +233,11 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             with canvas:
                 canvas.do_process_controllers(debugging=self.context.debug)
         imgui.spacing()
-        self._right_tabs.do_process(self._node_path)
+        self._right_tabs.do_process(self.current_graph)
 
     @override
     def on_process_bottom(self):
-        self._bottom_tabs.do_process(self._graph_path)
+        self._bottom_tabs.do_process(self.current_graph)
 
     @override
     def on_process_main(self) -> None:

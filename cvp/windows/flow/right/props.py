@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
+from typing import Final, List
 
 import imgui
 
 from cvp.context.context import Context
-from cvp.flow.datas import Axis, Grid, Stroke, Style
+from cvp.flow.datas import Arc, Axis, Graph, Grid, Node, Stroke, Style
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
 from cvp.imgui.input_float import input_float
@@ -18,23 +18,29 @@ INPUT_BUFFER: Final[int] = 256
 ENTER_RETURN: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 
 
-class PropsTab(TabItem[str]):
+class PropsTab(TabItem[Graph]):
     def __init__(self, context: Context):
         super().__init__(context, "Props")
 
     @override
-    def on_item(self, item: str) -> None:
-        if self.context.fm.opened:
-            if item:
-                self.on_item_cursor(item)
+    def on_item(self, item: Graph) -> None:
+        nodes = item.find_selected_nodes()
+        arcs = item.find_selected_arcs()
+        count = len(nodes) + len(arcs)
+        assert 0 <= count
+        if count == 0:
+            self.on_graph_cursor(item)
+        elif count == 1:
+            if nodes:
+                assert 1 == len(nodes)
+                assert 0 == len(arcs)
+                self.on_node_cursor(nodes[0])
             else:
-                self.on_graph_cursor()
+                assert 0 == len(nodes)
+                assert 1 == len(arcs)
+                self.on_arc_cursor(arcs[0])
         else:
-            self.on_none()
-
-    @override
-    def on_none(self) -> None:
-        pass
+            self.on_multiple_cursor(nodes, arcs)
 
     @staticmethod
     def tree_grid(label: str, grid: Grid) -> None:
@@ -90,10 +96,7 @@ class PropsTab(TabItem[str]):
             finally:
                 imgui.tree_pop()
 
-    def on_graph_cursor(self) -> None:
-        graph = self.context.fm.current_graph
-        assert graph is not None
-
+    def on_graph_cursor(self, graph: Graph) -> None:
         input_text_disabled("Type", "Graph")
         input_text_disabled("UUID", graph.uuid)
 
@@ -115,9 +118,38 @@ class PropsTab(TabItem[str]):
         if show_layout := checkbox("Show layout", graph.style.show_layout):
             graph.style.show_layout = show_layout.state
 
-    def on_item_cursor(self, item: str) -> None:
-        graph = self.context.fm.current_graph
-        assert graph is not None
+    def on_node_cursor(self, node: Node) -> None:
+        input_text_disabled("Type", type(node).__name__)
+        input_text_disabled("UUID", node.uuid)
 
-        input_text_disabled("Type", "Node")
-        input_text_disabled("Key", item)
+        node.name = input_text_value("Name", node.name)
+        node.docs = input_text_value("Docs", node.docs)
+
+        # emblem: str = EMPTY_TEXT
+        # color: RGBA = WHITE_RGBA
+        #
+        # emblem_pos: Point = EMPTY_POINT
+        # emblem_size: Size = EMPTY_SIZE
+        # name_pos: Point = EMPTY_POINT
+        # name_size: Size = EMPTY_SIZE
+        # node_pos: Point = EMPTY_POINT
+        # node_size: Size = EMPTY_SIZE
+        #
+        # flow_inputs: List[Pin] = field(default_factory=list)
+        # flow_outputs: List[Pin] = field(default_factory=list)
+        #
+        # data_inputs: List[Pin] = field(default_factory=list)
+        # data_outputs: List[Pin] = field(default_factory=list)
+
+    def on_arc_cursor(self, arc: Arc) -> None:
+        input_text_disabled("Type", type(arc).__name__)
+        input_text_disabled("UUID", arc.uuid)
+
+        arc.name = input_text_value("Name", arc.name)
+        arc.docs = input_text_value("Docs", arc.docs)
+
+        # arc.output
+        # arc.input
+
+    def on_multiple_cursor(self, nodes: List[Node], arcs: List[Arc]) -> None:
+        input_text_disabled("Type", "Multiple")

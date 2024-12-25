@@ -42,7 +42,7 @@ class CanvasGraph(CanvasController):
         self._zoom.update(graph.canvas.zoom, no_emit=True)
 
     @property
-    def is_select_mode(self) -> bool:
+    def is_multi_select_mode(self) -> bool:
         # Pressing the CTRL button switches to 'Multi-node selection mode'
         return self.ctrl_down
 
@@ -311,7 +311,7 @@ class CanvasGraph(CanvasController):
         assert self.is_normal_mode
 
         if self.changed_left_up:
-            if self.ctrl_down:
+            if self.is_multi_select_mode:
                 self.graph.flip_selected_on_hovering_nodes()
             else:
                 if self.graph.find_hovering_node() is not None:
@@ -330,7 +330,8 @@ class CanvasGraph(CanvasController):
                     self._mode = ControlMode.node_moving
                 else:
                     self._mode = ControlMode.node_moving
-                    self.graph.unselect_all_nodes()
+                    if not self.is_multi_select_mode:
+                        self.graph.unselect_all_nodes()
                     hovering_node.selected = True
             else:
                 self._mode = ControlMode.selection_box

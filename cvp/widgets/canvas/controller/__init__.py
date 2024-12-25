@@ -233,19 +233,22 @@ class CanvasController(ControllerProps):
         imgui.invisible_button(self._control_identifier, cw, ch, self._control_flags)
         self._activating.update(imgui.is_item_active())
         self._hovering.update(imgui.is_item_hovered())
+        self._focusing.update(imgui.is_item_focused())
 
         io = imgui.get_io()
-        left_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_LEFT])
-        middle_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_MIDDLE])
-        right_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_RIGHT])
 
-        self._left_button.update(left_down, self._mouse_pos)
-        self._middle_button.update(middle_down, self._mouse_pos)
-        self._right_button.update(right_down, self._mouse_pos)
+        if self._focusing.value:
+            left_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_LEFT])
+            middle_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_MIDDLE])
+            right_down = bool(io.mouse_down[imgui.MOUSE_BUTTON_RIGHT])
 
-        self._shift_down.update(io.key_shift)
-        self._ctrl_down.update(io.key_ctrl)
-        self._alt_down.update(io.key_alt)
+            self._left_button.update(left_down, self._mouse_pos)
+            self._middle_button.update(middle_down, self._mouse_pos)
+            self._right_button.update(right_down, self._mouse_pos)
+
+            self._shift_down.update(io.key_shift)
+            self._ctrl_down.update(io.key_ctrl)
+            self._alt_down.update(io.key_alt)
 
         zoom = self.zoom
         pan_x = self.pan_x

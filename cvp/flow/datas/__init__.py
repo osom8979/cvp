@@ -294,6 +294,9 @@ class Arc:
     _output: Optional[NodePin] = None
     _input: Optional[NodePin] = None
 
+    _selected: bool = False
+    _hovering: bool = False
+
     @property
     def output(self):
         return self._output
@@ -309,6 +312,22 @@ class Arc:
     @input.setter
     def input(self, value: Optional[NodePin]) -> None:
         self._input = value
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value: bool) -> None:
+        self._selected = value
+
+    @property
+    def hovering(self):
+        return self._hovering
+
+    @hovering.setter
+    def hovering(self, value: bool) -> None:
+        self._hovering = value
 
 
 @dataclass
@@ -467,6 +486,20 @@ class Graph:
         self.arcs.clear()
         self.arcs.extend(remain_arcs)
         return pop_arcs
+
+    def find_selected_arcs(self) -> List[Arc]:
+        result = list()
+        for arc in self.arcs:
+            if arc.selected:
+                result.append(arc)
+        return result
+
+    def find_selected_nodes(self) -> List[Node]:
+        result = list()
+        for node in self.nodes:
+            if node.selected:
+                result.append(node)
+        return result
 
     def select_all_nodes(self) -> None:
         for node in self.nodes:

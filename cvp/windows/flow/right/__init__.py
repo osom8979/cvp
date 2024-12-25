@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from cvp.context.context import Context
+from cvp.flow.datas import Graph
 from cvp.widgets.tab import TabBar
 from cvp.windows.flow.right.props import PropsTab
 
 
-class FlowRightTabs(TabBar[str]):
+class FlowRightTabs(TabBar[Graph]):
     def __init__(self, context: Context):
         super().__init__(
             context=context,
