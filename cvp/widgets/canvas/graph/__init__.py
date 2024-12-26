@@ -171,6 +171,7 @@ class CanvasGraph(CanvasController):
 
         self.update_nodes_state()
         self.graph.update_arcs_io()
+        self.graph.update_arcs_polyline()
 
     def draw_graph(self) -> None:
         assert self._graph is not None
@@ -656,25 +657,28 @@ class CanvasGraph(CanvasController):
             self.draw_arc(arc)
 
     def draw_arc(self, arc: Arc) -> None:
-        assert arc.output is not None
-        snx, sny = arc.output.node.node_pos
-        six, siy = arc.output.pin.icon_pos
-        siw, sih = arc.output.pin.icon_size
-        sx = snx + six + siw / 2
-        sy = sny + siy + sih / 2
-        x1, y1 = self.canvas_to_screen_coords((sx, sy))
-
-        assert arc.input is not None
-        enx, eny = arc.input.node.node_pos
-        eix, eiy = arc.input.pin.icon_pos
-        eiw, eih = arc.input.pin.icon_size
-        ex = enx + eix + eiw / 2
-        ey = eny + eiy + eih / 2
-        x2, y2 = self.canvas_to_screen_coords((ex, ey))
+        # assert arc.output is not None
+        # snx, sny = arc.output.node.node_pos
+        # six, siy = arc.output.pin.icon_pos
+        # siw, sih = arc.output.pin.icon_size
+        # sx = snx + six + siw / 2
+        # sy = sny + siy + sih / 2
+        # x1, y1 = self.canvas_to_screen_coords((sx, sy))
+        #
+        # assert arc.input is not None
+        # enx, eny = arc.input.node.node_pos
+        # eix, eiy = arc.input.pin.icon_pos
+        # eiw, eih = arc.input.pin.icon_size
+        # ex = enx + eix + eiw / 2
+        # ey = eny + eiy + eih / 2
+        # x2, y2 = self.canvas_to_screen_coords((ex, ey))
 
         color = imgui.get_color_u32_rgba(*self.graph.style.arc_color)
         thickness = self.graph.style.arc_thickness
-        self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
+        # self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
+
+        polyline = [self.canvas_to_screen_coords(p) for p in arc.polyline]
+        self._draw_list.add_polyline(polyline, color, 0, thickness)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node

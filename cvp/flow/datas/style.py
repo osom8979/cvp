@@ -15,6 +15,7 @@ from cvp.palette.basic import BLACK, BLUE, RED, SILVER
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Size
+from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
 
 
 @dataclass
@@ -36,6 +37,9 @@ class Style:
 
     arc_color: RGBA = field(default_factory=lambda: (*SILVER, 0.8))
     arc_thickness: float = 2.0
+
+    bezier_curve_tess_tol: float = DEFAULT_CURVE_TESSELLATION_TOL
+    bezier_curve_interpolate_delta: float = 12.0
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
 

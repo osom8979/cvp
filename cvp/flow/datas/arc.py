@@ -60,6 +60,14 @@ class Arc:
         self._hovering = value
 
     @property
+    def polyline(self):
+        return self._polyline
+
+    @polyline.setter
+    def polyline(self, value: List[Point]) -> None:
+        self._polyline = value
+
+    @property
     def polyline_roi(self) -> Optional[ROI]:
         if not self._polyline:
             return None

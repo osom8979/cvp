@@ -12,10 +12,13 @@ from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
 from cvp.flow.datas.grid import Grid
+from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
+from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
+from cvp.maths.bezier.casteljau.quadratic import bezier_quadratic_casteljau_points
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Size
 
@@ -121,34 +124,47 @@ class Graph:
 
     def move_on_selected_nodes(self, delta: Size) -> None:
         dx, dy = delta
+        if dx == 0 and dy == 0:
+            return
+
         for node in self.nodes:
             if not node.selected:
                 continue
             x, y = node.node_pos
             node.node_pos = x + dx, y + dy
+            for pin in node.pins:
+                for arc_uuid in pin.arcs:
+                    if arc := self.find_arc(arc_uuid):
+                        self.update_arc_polyline(arc, force=True)
 
-    def update_arcs_io(self) -> None:
+    def update_arcs_io(self, *, force=False) -> None:
         for arc in self.arcs:
-            self.update_arc_io(arc)
+            self.update_arc_io(arc, force=force)
 
-    def update_arc_io(self, arc: Arc) -> None:
-        if arc.output is None:
-            self.update_arc_output(arc)
-        if arc.input is None:
-            self.update_arc_input(arc)
+    def update_arc_io(self, arc: Arc, *, force=False) -> None:
+        self.update_arc_output(arc, force=force)
+        self.update_arc_input(arc, force=force)
 
-    def update_arc_output(self, arc: Arc) -> None:
+    def update_arc_output(self, arc: Arc, *, force=False) -> None:
+        if not force and arc.output is not None:
+            return
+
         for node in self.nodes:
             if pin := node.find_output_pin(arc.uuid):
                 arc.output = NodePin(node, pin)
                 return
+
         raise IndexError("Could not find the output pin of the arc")
 
-    def update_arc_input(self, arc: Arc) -> None:
+    def update_arc_input(self, arc: Arc, *, force=False) -> None:
+        if not force and arc.input is not None:
+            return
+
         for node in self.nodes:
             if pin := node.find_input_pin(arc.uuid):
                 arc.input = NodePin(node, pin)
                 return
+
         raise IndexError("Could not find the input pin of the arc")
 
     @staticmethod
@@ -195,6 +211,61 @@ class Graph:
         else:
             return True
 
+    def update_arcs_polyline(self, *, force=False) -> None:
+        for arc in self.arcs:
+            self.update_arc_polyline(arc, force=force)
+
+    def update_arc_polyline(self, arc: Arc, *, force=False) -> None:
+        if not force and arc.polyline:
+            return
+
+        if arc.output is None:
+            self.update_arc_output(arc)
+
+        if arc.input is None:
+            self.update_arc_input(arc)
+
+        output_np = arc.output
+        input_np = arc.input
+        assert output_np is not None
+        assert input_np is not None
+
+        snx, sny = output_np.node.node_pos
+        six, siy = output_np.pin.icon_pos
+        siw, sih = output_np.pin.icon_size
+        sx = snx + six + siw / 2
+        sy = sny + siy + sih / 2
+
+        enx, eny = input_np.node.node_pos
+        eix, eiy = input_np.pin.icon_pos
+        eiw, eih = input_np.pin.icon_size
+        ex = enx + eix + eiw / 2
+        ey = eny + eiy + eih / 2
+
+        tess_tol = self.style.bezier_curve_tess_tol
+        delta = self.style.bezier_curve_interpolate_delta
+
+        match arc.line_type:
+            case LineType.linear:
+                p1 = sx, sy
+                p2 = ex, ey
+                arc.polyline = [p1, p2]
+            case LineType.bezier_quadratic:
+                mx = sx + (ex - sx) / 2
+                my = sy + (ey - sy) / 2
+                p1 = sx, sy
+                p2 = mx, my
+                p3 = ex, ey
+                arc.polyline = bezier_quadratic_casteljau_points(p1, p2, p3, tess_tol)
+            case LineType.bezier_cubic:
+                p1 = sx, sy
+                p2 = sx + delta, sy
+                p3 = ex - delta, ey
+                p4 = ex, ey
+                arc.polyline = bezier_cubic_casteljau_points(p1, p2, p3, p4, tess_tol)
+            case _:
+                assert False, "Inaccessible section"
+
     def connect_pins(
         self,
         out_conn: NodePin,
@@ -208,6 +279,7 @@ class Graph:
         arc = Arc()
         arc.output = out_conn
         arc.input = in_conn
+        self.update_arc_polyline(arc)
 
         self.arcs.append(arc)
         out_conn.pin.arcs.append(arc.uuid)
