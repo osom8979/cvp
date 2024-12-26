@@ -44,6 +44,9 @@ class Graph:
                 pin.hovering = False
                 pin.connectable = False
 
+        for arc in self.arcs:
+            arc.hovering = False
+
     def find_hovering_node(self) -> Optional[Node]:
         for node in self.nodes:
             if node.hovering:
@@ -123,6 +126,30 @@ class Graph:
                 continue
             x, y = node.node_pos
             node.node_pos = x + dx, y + dy
+
+    def update_arcs_io(self) -> None:
+        for arc in self.arcs:
+            self.update_arc_io(arc)
+
+    def update_arc_io(self, arc: Arc) -> None:
+        if arc.output is None:
+            self.update_arc_output(arc)
+        if arc.input is None:
+            self.update_arc_input(arc)
+
+    def update_arc_output(self, arc: Arc) -> None:
+        for node in self.nodes:
+            if pin := node.find_output_pin(arc.uuid):
+                arc.output = NodePin(node, pin)
+                return
+        raise IndexError("Could not find the output pin of the arc")
+
+    def update_arc_input(self, arc: Arc) -> None:
+        for node in self.nodes:
+            if pin := node.find_input_pin(arc.uuid):
+                arc.input = NodePin(node, pin)
+                return
+        raise IndexError("Could not find the input pin of the arc")
 
     @staticmethod
     def reorder_connectable_pins(left: NodePin, right: NodePin) -> ConnectPair:

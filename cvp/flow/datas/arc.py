@@ -7,7 +7,7 @@ from uuid import uuid4
 from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
-from cvp.types.shapes import Point
+from cvp.types.shapes import ROI, Point
 
 
 @dataclass
@@ -24,6 +24,8 @@ class Arc:
 
     _selected: bool = False
     _hovering: bool = False
+
+    _polyline: List[Point] = field(default_factory=list)
 
     @property
     def output(self):
@@ -56,3 +58,12 @@ class Arc:
     @hovering.setter
     def hovering(self, value: bool) -> None:
         self._hovering = value
+
+    @property
+    def polyline_roi(self) -> Optional[ROI]:
+        if not self._polyline:
+            return None
+
+        xs = [p[0] for p in self._polyline]
+        ys = [p[1] for p in self._polyline]
+        return min(xs), min(ys), max(xs), max(ys)

@@ -31,7 +31,7 @@ class CanvasGraph(CanvasController):
     _fonts: Optional[FontMapper]
 
     _connects: List[NodePin]
-    _select: Optional[ROI]
+    _roi: Optional[ROI]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
@@ -42,7 +42,7 @@ class CanvasGraph(CanvasController):
 
         self._mode = ControlMode.normal
         self._connects = list()
-        self._select = None
+        self._roi = None
 
         self._pan_x.update(graph.canvas.pan_x, no_emit=True)
         self._pan_y.update(graph.canvas.pan_y, no_emit=True)
@@ -79,7 +79,7 @@ class CanvasGraph(CanvasController):
         return super().as_unformatted_text() + (
             f"Mode: {self._mode.name}\n"
             f"Connects: {self._connects}\n"
-            f"Select: {self._select}\n"
+            f"Select: {self._roi}\n"
         )
 
     @property
@@ -170,7 +170,7 @@ class CanvasGraph(CanvasController):
             canvas.zoom = result.zoom
 
         self.update_nodes_state()
-        self.update_arcs_state()
+        self.graph.update_arcs_io()
 
     def draw_graph(self) -> None:
         assert self._graph is not None
@@ -284,8 +284,8 @@ class CanvasGraph(CanvasController):
             if pin.hovering:
                 return
 
-    def _update_nodes_single_hovering(self, nodes: Sequence[Node]) -> None:
-        for node in nodes:
+    def _update_nodes_single_hovering(self) -> None:
+        for node in self.graph.nodes:
             roi = self.canvas_to_screen_roi(node.node_roi)
             node.hovering = imgui.is_mouse_hovering_rect(*roi)
             if node.hovering:
@@ -293,10 +293,8 @@ class CanvasGraph(CanvasController):
                 return
 
     def update_nodes_state(self) -> None:
-        nodes = self.graph.nodes
-
         self.graph.clear_state()
-        self._update_nodes_single_hovering(nodes)
+        self._update_nodes_single_hovering()
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
@@ -330,20 +328,19 @@ class CanvasGraph(CanvasController):
         if self.activating and self.start_left_dragging:
             if hovering_node := self.graph.find_hovering_node():
                 if hovering_np := self.graph.find_hovering_pin(hovering_node):
-                    assert hovering_node == hovering_np.node
+                    assert hovering_np.node == hovering_node
                     self._mode = ControlMode.pin_connecting
                     self._connects.clear()
                     self._connects.append(hovering_np)
-                elif hovering_node.selected:
-                    self._mode = ControlMode.node_moving
                 else:
                     self._mode = ControlMode.node_moving
-                    if not self.is_multi_select_mode:
-                        self.graph.unselect_all_nodes()
-                    hovering_node.selected = True
+                    if not hovering_node.selected:
+                        if not self.is_multi_select_mode:
+                            self.graph.unselect_all_nodes()
+                        hovering_node.selected = True
             else:
                 self._mode = ControlMode.selection_box
-                self._select = self.mx, self.my, self.mx, self.my
+                self._roi = self.mx, self.my, self.mx, self.my
 
     def _update_nodes_state_for_node_moving(self) -> None:
         assert not self.is_pan_mode
@@ -385,14 +382,14 @@ class CanvasGraph(CanvasController):
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
         assert self.is_selection_box_mode
-        assert self._select is not None
+        assert self._roi is not None
 
-        x1 = self._select[0]
-        y1 = self._select[1]
+        x1 = self._roi[0]
+        y1 = self._roi[1]
         x2 = self.mx
         y2 = self.my
-        self._select = x1, y1, x2, y2
-        x1, y1, x2, y2 = self.screen_to_canvas_roi(self._select)
+        self._roi = x1, y1, x2, y2
+        x1, y1, x2, y2 = self.screen_to_canvas_roi(self._roi)
         left = min(x1, x2)
         right = max(x1, x2)
         top = min(y1, y2)
@@ -406,7 +403,7 @@ class CanvasGraph(CanvasController):
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
-            self._select = None
+            self._roi = None
 
     def get_pin_color(self, pin: Pin, style: Style) -> RGBA:
         if self.is_pin_connecting_mode:
@@ -652,23 +649,6 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-    def update_arcs_state(self) -> None:
-        for arc in self.graph.arcs:
-            self.update_arc_state(arc)
-
-    def update_arc_state(self, arc: Arc) -> None:
-        if arc.output is None:
-            for node in self.graph.nodes:
-                if pin := node.find_output_pin(arc.uuid):
-                    arc.output = NodePin(node, pin)
-                    break
-
-        if arc.input is None:
-            for node in self.graph.nodes:
-                if pin := node.find_input_pin(arc.uuid):
-                    arc.input = NodePin(node, pin)
-                    break
-
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
             assert arc.output is not None
@@ -723,8 +703,8 @@ class CanvasGraph(CanvasController):
         if not self.is_selection_box_mode:
             return
 
-        assert self._select is not None
-        x1, y1, x2, y2 = self._select
+        assert self._roi is not None
+        x1, y1, x2, y2 = self._roi
         color = imgui.get_color_u32_rgba(*self.graph.style.selection_box_color)
         thickness = self.graph.style.selection_box_thickness
         self._draw_list.add_rect_filled(x1, y1, x2, y2, color)
