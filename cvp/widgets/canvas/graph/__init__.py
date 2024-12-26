@@ -170,6 +170,7 @@ class CanvasGraph(CanvasController):
             canvas.zoom = result.zoom
 
         self.update_nodes_state()
+        self.update_arcs_state()
 
     def draw_graph(self) -> None:
         assert self._graph is not None
@@ -651,7 +652,11 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-    def update_arc_cache(self, arc: Arc) -> None:
+    def update_arcs_state(self) -> None:
+        for arc in self.graph.arcs:
+            self.update_arc_state(arc)
+
+    def update_arc_state(self, arc: Arc) -> None:
         if arc.output is None:
             for node in self.graph.nodes:
                 if pin := node.find_output_pin(arc.uuid):
@@ -666,7 +671,6 @@ class CanvasGraph(CanvasController):
 
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
-            self.update_arc_cache(arc)
             assert arc.output is not None
             assert arc.input is not None
             self.draw_arc(arc)

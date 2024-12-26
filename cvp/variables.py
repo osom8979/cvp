@@ -71,3 +71,10 @@ WSD_TIMEOUT: Final[float] = 30.0
 WSD_NAME_DEFAULT: Final[str] = "New Device"
 
 ZEEP_ELEMENT_SEPARATOR: Final[str] = "."
+
+DEFAULT_CURVE_TESSELLATION_TOL: Final[float] = 1.25
+"""
+Tessellation tolerance when using BezierCurve without a specific number of segments.
+Decrease for highly tessellated curves (higher quality, more polygons),
+Increase to reduce quality.
+"""
