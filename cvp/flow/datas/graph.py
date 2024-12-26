@@ -83,9 +83,9 @@ class Graph:
 
         return NodePin(node, pin)
 
-    def find_arc(self, uuid: str) -> Optional[Arc]:
+    def find_arc(self, arc_uuid: str) -> Optional[Arc]:
         for arc in self.arcs:
-            if arc.uuid == uuid:
+            if arc.uuid == arc_uuid:
                 return arc
         return None
 

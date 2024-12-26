@@ -21,7 +21,7 @@ from cvp.imgui.draw_list.types import DrawList
 from cvp.imgui.text_centered import text_centered
 from cvp.renderer.window.base import WindowBase
 from cvp.types.override import override
-from cvp.types.shapes import ROI
+from cvp.types.shapes import Rect
 
 SINGLE_LINE_CLEAR_SCORE: Final[int] = 100
 DOUBLE_LINE_CLEAR_SCORE: Final[int] = 300
@@ -298,7 +298,7 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
         if imgui.is_key_pressed(kmap[imgui.KEY_SPACE]):
             self.hard_drop()
 
-    def draw_bord(self, draw_list: DrawList, canvas_roi: ROI) -> None:
+    def draw_bord(self, draw_list: DrawList, canvas_roi: Rect) -> None:
         fixed_block_color = self.fixed_block_color
         outline_color = self.outline_color
         cx = canvas_roi[0] + self.window_padding[0]
@@ -317,7 +317,7 @@ class TetrixWindow(WindowBase[TetrixWindowConfig]):
 
                 draw_list.add_rect(x1, y1, x2, y2, outline_color)
 
-    def draw_current_block(self, draw_list: DrawList, canvas_roi: ROI) -> None:
+    def draw_current_block(self, draw_list: DrawList, canvas_roi: Rect) -> None:
         if self._game_over:
             return
 

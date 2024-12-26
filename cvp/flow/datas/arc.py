@@ -7,7 +7,7 @@ from uuid import uuid4
 from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
-from cvp.types.shapes import ROI, Point
+from cvp.types.shapes import Point, Rect
 
 
 @dataclass
@@ -68,7 +68,7 @@ class Arc:
         self._polyline = value
 
     @property
-    def polyline_roi(self) -> Optional[ROI]:
+    def polyline_roi(self) -> Optional[Rect]:
         if not self._polyline:
             return None
 

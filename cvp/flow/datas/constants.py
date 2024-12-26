@@ -9,12 +9,12 @@ from cvp.fonts.glyphs.mdi import (
     MDI_CIRCLE_OUTLINE,
 )
 from cvp.types.colors import RGBA
-from cvp.types.shapes import ROI, Point, Size
+from cvp.types.shapes import Point, Rect, Size
 
 EMPTY_TEXT: Final[str] = str()
 EMPTY_POINT: Final[Point] = 0.0, 0.0
 EMPTY_SIZE: Final[Size] = 0.0, 0.0
-EMPTY_ROI: Final[ROI] = 0.0, 0.0, 0.0, 0.0
+EMPTY_ROI: Final[Rect] = 0.0, 0.0, 0.0, 0.0
 WHITE_RGBA: Final[RGBA] = 1.0, 1.0, 1.0, 1.0
 
 DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2

@@ -2,7 +2,7 @@
 
 import imgui
 
-from cvp.types.shapes import ROI
+from cvp.types.shapes import Rect
 
 
 def measure_window_roi(
@@ -20,7 +20,7 @@ def measure_window_roi(
     margin_y=0.0,
     padding_x=0.0,
     padding_y=0.0,
-) -> ROI:
+) -> Rect:
     canvas_pos_x = viewport_pos_x + margin_x
     canvas_pos_y = viewport_pos_y + margin_y
     canvas_size_x = viewport_size_width - margin_x * 2
@@ -48,7 +48,7 @@ def get_window_roi(
     margin_y=0.0,
     padding_x=0.0,
     padding_y=0.0,
-) -> ROI:
+) -> Rect:
     viewport = imgui.get_main_viewport()
     work_pos = viewport.work_pos  # Use work area to avoid menu-bar/task-bar, if any
     work_size = viewport.work_size

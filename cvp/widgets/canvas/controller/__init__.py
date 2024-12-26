@@ -13,7 +13,7 @@ from cvp.imgui.flags.mouse import MouseButtonIndex
 from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.imgui.slider_float import slider_float
-from cvp.types.shapes import ROI, Point
+from cvp.types.shapes import Point, Rect
 from cvp.widgets.canvas.controller.props import ControllerProps
 from cvp.widgets.canvas.controller.result import ControllerResult
 
@@ -153,7 +153,7 @@ class CanvasController(ControllerProps):
     def local_origin_to_screen_coords(self) -> Point:
         return self.canvas_to_screen_coords((0.0, 0.0))
 
-    def canvas_to_screen_roi(self, roi: ROI) -> ROI:
+    def canvas_to_screen_roi(self, roi: Rect) -> Rect:
         p1 = self.canvas_to_screen_coords((roi[0], roi[1]))
         p2 = self.canvas_to_screen_coords((roi[2], roi[3]))
         return p1[0], p1[1], p2[0], p2[1]
@@ -163,7 +163,7 @@ class CanvasController(ControllerProps):
         y = (point[1] - self.cy) / self.zoom - self.pan_y
         return x, y
 
-    def screen_to_canvas_roi(self, roi: ROI) -> ROI:
+    def screen_to_canvas_roi(self, roi: Rect) -> Rect:
         p1 = self.screen_to_canvas_coords((roi[0], roi[1]))
         p2 = self.screen_to_canvas_coords((roi[2], roi[3]))
         return p1[0], p1[1], p2[0], p2[1]

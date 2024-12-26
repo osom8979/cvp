@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # https://en.wikipedia.org/wiki/Jaccard_index
 
-from cvp.types.shapes import ROI
+from cvp.types.shapes import Rect
 
 
-def calculate_iou(roi1: ROI, roi2: ROI) -> float:
+def calculate_iou(roi1: Rect, roi2: Rect) -> float:
     """
     Intersection over Union
     """

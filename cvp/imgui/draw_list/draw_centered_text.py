@@ -3,7 +3,7 @@
 import imgui
 
 from cvp.imgui.draw_list.types import DrawList
-from cvp.types.shapes import ROI
+from cvp.types.shapes import Rect
 
 
 def draw_centered_text(
@@ -14,7 +14,7 @@ def draw_centered_text(
     y2: float,
     color: int,
     text: str,
-) -> ROI:
+) -> Rect:
     w = x2 - x1
     h = y2 - y1
     tw, th = imgui.calc_text_size(text)

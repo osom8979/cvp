@@ -17,4 +17,4 @@ _X2: TypeAlias = float  # Right
 _Y1: TypeAlias = float  # Top
 _Y2: TypeAlias = float  # Bottom
 
-ROI: TypeAlias = Tuple[_X1, _Y1, _X2, _Y2]
+Rect: TypeAlias = Tuple[_X1, _Y1, _X2, _Y2]

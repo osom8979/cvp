@@ -7,7 +7,7 @@ from uuid import uuid4
 from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT, WHITE_RGBA
 from cvp.flow.datas.pin import Pin
 from cvp.types.colors import RGBA
-from cvp.types.shapes import ROI, Point, Size
+from cvp.types.shapes import Point, Rect, Size
 
 
 @dataclass
@@ -37,13 +37,13 @@ class Node:
     _hovering: bool = False
 
     @property
-    def node_roi(self) -> ROI:
+    def node_roi(self) -> Rect:
         x, y = self.node_pos
         w, h = self.node_size
         return x, y, x + w, y + h
 
     @node_roi.setter
-    def node_roi(self, value: ROI) -> None:
+    def node_roi(self, value: Rect) -> None:
         x1, y1, x2, y2 = value
         self.node_pos = x1, y1
         self.node_size = x2 - x1, y2 - y1

@@ -18,7 +18,7 @@ from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.colors import RGBA
 from cvp.types.override import override
-from cvp.types.shapes import ROI
+from cvp.types.shapes import Rect
 from cvp.widgets.canvas.controller import CanvasController
 from cvp.widgets.canvas.graph.mode import ControlMode
 
@@ -31,7 +31,7 @@ class CanvasGraph(CanvasController):
     _fonts: Optional[FontMapper]
 
     _connects: List[NodePin]
-    _roi: Optional[ROI]
+    _roi: Optional[Rect]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
