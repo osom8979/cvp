@@ -20,7 +20,7 @@ from cvp.flow.datas.style import Style
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
 from cvp.maths.bezier.casteljau.quadratic import bezier_quadratic_casteljau_points
 from cvp.types.colors import RGBA
-from cvp.types.shapes import Size
+from cvp.types.shapes import Point, Size
 
 
 @dataclass
@@ -49,6 +49,18 @@ class Graph:
 
         for arc in self.arcs:
             arc.hovering = False
+
+    def find_hovering_node_with_mouse(self, mouse: Point) -> Optional[Node]:
+        mx, my = mouse
+        for node in self.nodes:
+            x1, y1, x2, y2 = node.node_roi
+            left = min(x1, x2)
+            right = max(x1, x2)
+            top = min(y1, y2)
+            bottom = max(y1, y2)
+            if left <= mx <= right and top <= my <= bottom:
+                return node
+        return None
 
     def find_hovering_node(self) -> Optional[Node]:
         for node in self.nodes:

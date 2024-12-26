@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Optional, Sequence
+from typing import List, Optional
 from weakref import ReferenceType, ref
 
 import imgui
@@ -266,13 +266,6 @@ class CanvasGraph(CanvasController):
     #         img_color,
     #     )
 
-    @staticmethod
-    def _update_nodes_for_multiple_select(nodes: Sequence[Node]) -> None:
-        for node in nodes:
-            if node.hovering:
-                node.selected = not node.selected
-                return
-
     def _update_pins_single_hovering(self, node: Node) -> None:
         for pin in node.pins:
             icon_x = node.node_pos[0] + pin.icon_pos[0]
@@ -296,6 +289,7 @@ class CanvasGraph(CanvasController):
     def update_nodes_state(self) -> None:
         self.graph.clear_state()
         self._update_nodes_single_hovering()
+        # self.graph.update_hovering_state(self.mouse_to_canvas_coords())
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.

@@ -92,6 +92,25 @@ class Node:
     def hovering(self, value: bool) -> None:
         self._hovering = value
 
+    def find_hovering_pin_with_mouse(self, mouse: Point) -> Optional[Pin]:
+        mx, my = mouse
+        for pin in self.pins:
+            icon_x1 = self.node_pos[0] + pin.icon_pos[0]
+            icon_y1 = self.node_pos[1] + pin.icon_pos[1]
+            icon_w = pin.icon_size[0]
+            icon_h = pin.icon_size[1]
+            icon_x2 = icon_x1 + icon_w
+            icon_y2 = icon_y1 + icon_h
+
+            left = min(icon_x1, icon_x2)
+            right = max(icon_x1, icon_x2)
+            top = min(icon_y1, icon_y2)
+            bottom = max(icon_y1, icon_y2)
+
+            if left <= mx <= right and top <= my <= bottom:
+                return pin
+        return None
+
     def find_hovering_pin(self) -> Optional[Pin]:
         for pin in self.pins:
             if pin.hovering:
