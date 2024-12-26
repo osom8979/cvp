@@ -5,30 +5,19 @@ from typing import List, Optional, Sequence, Set, Union
 from uuid import uuid4
 
 from cvp.flow.datas.action import Action
-from cvp.flow.datas.arc import Arc, ArcTemplate
+from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.canvas import Canvas
 from cvp.flow.datas.connect_pair import ConnectPair
-from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT, WHITE_RGBA
+from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
 from cvp.flow.datas.grid import Grid
-from cvp.flow.datas.node import Node, NodeTemplate
+from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Size
-
-
-@dataclass
-class GraphTemplate:
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
-    icon: str = EMPTY_TEXT
-    color: RGBA = WHITE_RGBA
-    nodes: List[NodeTemplate] = field(default_factory=list)
-    arcs: List[ArcTemplate] = field(default_factory=list)
-    dtypes: List[DataType] = field(default_factory=list)
 
 
 @dataclass

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from cvp.flow.datas import DEFAULT_AXIS_COLOR
+from cvp.flow.datas.constants import DEFAULT_AXIS_COLOR
 from cvp.types.colors import RGBA
 
 

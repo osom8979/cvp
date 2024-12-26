@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from cvp.flow.datas import EMPTY_TEXT, WHITE_RGBA
+from cvp.flow.datas.constants import EMPTY_TEXT, WHITE_RGBA
 from cvp.types.colors import RGBA
 
 

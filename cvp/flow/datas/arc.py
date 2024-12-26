@@ -4,15 +4,8 @@ from dataclasses import dataclass, field
 from typing import Optional
 from uuid import uuid4
 
-from cvp.flow.datas import EMPTY_TEXT, NodePin
-
-
-@dataclass
-class ArcTemplate:
-    output_node: str = EMPTY_TEXT
-    output_pin: str = EMPTY_TEXT
-    input_node: str = EMPTY_TEXT
-    input_pin: str = EMPTY_TEXT
+from cvp.flow.datas.constants import EMPTY_TEXT
+from cvp.flow.datas.node_pin import NodePin
 
 
 @dataclass

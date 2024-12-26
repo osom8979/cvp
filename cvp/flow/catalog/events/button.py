@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from cvp.flow.datas import Action, NodeTemplate, PinTemplate, Stream
+from cvp.flow.datas.action import Action
+from cvp.flow.datas.stream import Stream
+from cvp.flow.datas.templates.node import NodeTemplate
+from cvp.flow.datas.templates.pin import PinTemplate
 from cvp.fonts.glyphs.mdi import MOVIE_OPEN_PLAY
 
 

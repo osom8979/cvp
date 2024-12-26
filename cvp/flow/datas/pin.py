@@ -10,16 +10,6 @@ from cvp.types.shapes import ROI, Point, Size
 
 
 @dataclass
-class PinTemplate:
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
-    dtype: str = EMPTY_TEXT
-    action: Action = Action.data
-    stream: Stream = Stream.input
-    required: bool = False
-
-
-@dataclass
 class Pin:
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT

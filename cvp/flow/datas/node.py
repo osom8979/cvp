@@ -5,19 +5,9 @@ from typing import List, Optional
 from uuid import uuid4
 
 from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT, WHITE_RGBA
-from cvp.flow.datas.pin import Pin, PinTemplate
+from cvp.flow.datas.pin import Pin
 from cvp.types.colors import RGBA
 from cvp.types.shapes import ROI, Point, Size
-
-
-@dataclass
-class NodeTemplate:
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
-    emblem: str = EMPTY_TEXT
-    color: RGBA = WHITE_RGBA
-    pins: List[PinTemplate] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
 
 
 @dataclass

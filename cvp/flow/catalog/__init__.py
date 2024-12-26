@@ -4,7 +4,7 @@ from functools import lru_cache
 from typing import Dict, Union
 
 from cvp.flow.catalog import events
-from cvp.flow.datas import NodeTemplate
+from cvp.flow.datas.templates.node import NodeTemplate
 from cvp.flow.path import FlowPath
 from cvp.inspect.member import is_dunder, is_sunder
 
