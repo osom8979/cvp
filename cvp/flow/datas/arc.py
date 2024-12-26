@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from cvp.flow.datas.constants import EMPTY_TEXT
+from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
+from cvp.types.shapes import Point
 
 
 @dataclass
@@ -13,6 +15,9 @@ class Arc:
     uuid: str = field(default_factory=lambda: str(uuid4()))
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT
+
+    line_type: LineType = LineType.linear
+    line_args: List[Point] = field(default_factory=list)
 
     _output: Optional[NodePin] = None
     _input: Optional[NodePin] = None
