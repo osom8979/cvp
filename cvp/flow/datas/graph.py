@@ -142,8 +142,10 @@ class Graph:
         for node in self.nodes:
             if not node.selected:
                 continue
+
             x, y = node.node_pos
             node.node_pos = x + dx, y + dy
+
             for pin in node.pins:
                 for arc_uuid in pin.arcs:
                     if arc := self.find_arc(arc_uuid):
