@@ -117,6 +117,13 @@ class Node:
                 return pin
         return None
 
+    def find_selected_pins(self) -> List[Pin]:
+        result = list()
+        for pin in self.pins:
+            if pin.selected:
+                result.append(pin)
+        return result
+
     def find_output_pin(self, arc_uuid: str) -> Optional[Pin]:
         for pin in self.output_pins:
             if arc_uuid in pin.arcs:

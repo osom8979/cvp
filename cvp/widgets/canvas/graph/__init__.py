@@ -266,30 +266,9 @@ class CanvasGraph(CanvasController):
     #         img_color,
     #     )
 
-    def _update_pins_single_hovering(self, node: Node) -> None:
-        for pin in node.pins:
-            icon_x = node.node_pos[0] + pin.icon_pos[0]
-            icon_y = node.node_pos[1] + pin.icon_pos[1]
-            icon_w = pin.icon_size[0]
-            icon_h = pin.icon_size[1]
-            icon_roi = icon_x, icon_y, icon_x + icon_w, icon_y + icon_h
-            icon_roi = self.canvas_to_screen_roi(icon_roi)
-            pin.hovering = imgui.is_mouse_hovering_rect(*icon_roi)
-            if pin.hovering:
-                return
-
-    def _update_nodes_single_hovering(self) -> None:
-        for node in self.graph.nodes:
-            roi = self.canvas_to_screen_roi(node.node_roi)
-            node.hovering = imgui.is_mouse_hovering_rect(*roi)
-            if node.hovering:
-                self._update_pins_single_hovering(node)
-                return
-
     def update_nodes_state(self) -> None:
         self.graph.clear_state()
-        self._update_nodes_single_hovering()
-        # self.graph.update_hovering_state(self.mouse_to_canvas_coords())
+        self.graph.update_hovering_state(self.mouse_to_canvas_coords())
 
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
@@ -313,25 +292,24 @@ class CanvasGraph(CanvasController):
 
         if self.changed_left_up:
             if self.is_multi_select_mode:
-                self.graph.flip_selected_on_hovering_nodes()
+                self.graph.flip_selected_on_hovering_item()
             else:
-                if self.graph.find_hovering_node() is not None:
-                    self.graph.select_on_hovering_nodes()
-                else:
-                    self.graph.unselect_all_nodes()
+                hovering_item = self.graph.find_hovering_item()
+                self.graph.unselect_all_items()
+                if hovering_item is not None:
+                    hovering_item.selected = True
 
         if self.activating and self.start_left_dragging:
             if hovering_node := self.graph.find_hovering_node():
-                if hovering_np := self.graph.find_hovering_pin(hovering_node):
-                    assert hovering_np.node == hovering_node
+                if hovering_pin := hovering_node.find_hovering_pin():
                     self._mode = ControlMode.pin_connecting
                     self._connects.clear()
-                    self._connects.append(hovering_np)
+                    self._connects.append(NodePin(hovering_node, hovering_pin))
                 else:
                     self._mode = ControlMode.node_moving
                     if not hovering_node.selected:
                         if not self.is_multi_select_mode:
-                            self.graph.unselect_all_nodes()
+                            self.graph.unselect_all_items()
                         hovering_node.selected = True
             else:
                 self._mode = ControlMode.selection_box
@@ -403,12 +381,25 @@ class CanvasGraph(CanvasController):
     def get_pin_color(self, pin: Pin, style: Style) -> RGBA:
         if self.is_pin_connecting_mode:
             if pin.hovering and pin.connectable:
-                return style.connect_color
+                return style.select_color
+            else:
+                return style.normal_color
         else:
-            if pin.hovering:
+            if pin.selected:
+                return style.select_color
+            elif pin.hovering:
                 return style.hovering_color
+            else:
+                return style.normal_color
 
-        return style.normal_color
+    @staticmethod
+    def get_arc_color(arc: Arc, style: Style) -> RGBA:
+        if arc.selected:
+            return style.select_color
+        elif arc.hovering:
+            return style.hovering_color
+        else:
+            return style.arc_color
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -667,7 +658,7 @@ class CanvasGraph(CanvasController):
         # ey = eny + eiy + eih / 2
         # x2, y2 = self.canvas_to_screen_coords((ex, ey))
 
-        color = imgui.get_color_u32_rgba(*self.graph.style.arc_color)
+        color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
         thickness = self.graph.style.arc_thickness
         # self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
 

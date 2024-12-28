@@ -10,6 +10,7 @@ from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.node import Node
+from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.checkbox import checkbox
@@ -31,22 +32,32 @@ class PropsTab(TabItem[Graph]):
     @override
     def on_item(self, item: Graph) -> None:
         nodes = item.find_selected_nodes()
+        pins = item.find_selected_pins()
         arcs = item.find_selected_arcs()
-        count = len(nodes) + len(arcs)
+        count = len(nodes) + len(pins) + len(arcs)
         assert 0 <= count
         if count == 0:
             self.on_graph_cursor(item)
         elif count == 1:
             if nodes:
                 assert 1 == len(nodes)
+                assert 0 == len(pins)
                 assert 0 == len(arcs)
                 self.on_node_cursor(nodes[0])
-            else:
+            elif pins:
                 assert 0 == len(nodes)
+                assert 1 == len(pins)
+                assert 0 == len(arcs)
+                self.on_pin_cursor(pins[0])
+            elif arcs:
+                assert 0 == len(nodes)
+                assert 0 == len(pins)
                 assert 1 == len(arcs)
                 self.on_arc_cursor(arcs[0])
+            else:
+                assert False, "Inaccessible section"
         else:
-            self.on_multiple_cursor(nodes, arcs)
+            self.on_multiple_cursor(nodes, pins, arcs)
 
     @staticmethod
     def tree_grid(label: str, grid: Grid) -> None:
@@ -148,6 +159,10 @@ class PropsTab(TabItem[Graph]):
         # data_inputs: List[Pin] = field(default_factory=list)
         # data_outputs: List[Pin] = field(default_factory=list)
 
+    def on_pin_cursor(self, pin: Pin) -> None:
+        input_text_disabled("Type", type(pin).__name__)
+        input_text_disabled("Name", pin.name)
+
     def on_arc_cursor(self, arc: Arc) -> None:
         input_text_disabled("Type", type(arc).__name__)
         input_text_disabled("UUID", arc.uuid)
@@ -158,5 +173,10 @@ class PropsTab(TabItem[Graph]):
         # arc.output
         # arc.input
 
-    def on_multiple_cursor(self, nodes: List[Node], arcs: List[Arc]) -> None:
+    def on_multiple_cursor(
+        self,
+        nodes: List[Node],
+        pins: List[Pin],
+        arcs: List[Arc],
+    ) -> None:
         input_text_disabled("Type", "Multiple")

@@ -26,7 +26,7 @@ class Style:
 
     normal_color: RGBA = field(default_factory=lambda: (*BLACK, 0.8))
     hovering_color: RGBA = field(default_factory=lambda: (*ORANGE, 0.9))
-    connect_color: RGBA = field(default_factory=lambda: (*RED, 0.9))
+    select_color: RGBA = field(default_factory=lambda: (*RED, 0.9))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
 
     pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))

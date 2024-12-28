@@ -26,6 +26,7 @@ class Pin:
 
     arcs: List[str] = field(default_factory=list)
 
+    _selected: bool = False
     _hovering: bool = False
     _connectable: bool = False
 
@@ -56,6 +57,14 @@ class Pin:
         x1, y1, x2, y2 = value
         self.name_pos = x1, y1
         self.name_size = x2 - x1, y2 - y1
+
+    @property
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value: bool) -> None:
+        self._selected = value
 
     @property
     def hovering(self):

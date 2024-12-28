@@ -4,10 +4,13 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Sequence, Set, Union
 from uuid import uuid4
 
+import shapely
+
 from cvp.flow.datas.action import Action
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.canvas import Canvas
+from cvp.flow.datas.config import Config
 from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
@@ -15,6 +18,7 @@ from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
+from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
@@ -38,6 +42,7 @@ class Graph:
     axis_x: Axis = field(default_factory=Axis)
     axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)
+    config: Config = field(default_factory=Config)
 
     def clear_state(self) -> None:
         for node in self.nodes:
@@ -68,11 +73,10 @@ class Graph:
                 return node
         return None
 
-    def find_hovering_pin(self, node: Optional[Node] = None) -> Optional[NodePin]:
+    def find_hovering_pin(self) -> Optional[NodePin]:
+        node = self.find_hovering_node()
         if node is None:
-            node = self.find_hovering_node()
-            if node is None:
-                return None
+            return None
 
         if not node.hovering:
             raise ValueError("Only hovering nodes are allowed")
@@ -82,6 +86,36 @@ class Graph:
             return None
 
         return NodePin(node, pin)
+
+    def find_hovering_arc_with_mouse(self, mouse: Point) -> Optional[Arc]:
+        mp = shapely.Point(mouse)
+        for arc in self.arcs:
+            distance = shapely.LineString(arc.polyline).distance(mp)
+            if distance <= self.config.arc_hovering_tolerance:
+                return arc
+        return None
+
+    def find_hovering_arc(self) -> Optional[Arc]:
+        for arc in self.arcs:
+            if arc.hovering:
+                return arc
+        return None
+
+    def find_hovering_item(self) -> Optional[Union[Node, Pin, Arc]]:
+        if node := self.find_hovering_node():
+            assert node.hovering
+
+            if pin := node.find_hovering_pin():
+                assert pin.hovering
+                return pin
+
+            return node
+
+        if arc := self.find_hovering_arc():
+            assert arc.hovering
+            return arc
+
+        return None
 
     def find_arc(self, arc_uuid: str) -> Optional[Arc]:
         for arc in self.arcs:
@@ -110,6 +144,12 @@ class Graph:
                 result.append(arc)
         return result
 
+    def find_selected_pins(self) -> List[Pin]:
+        result = list()
+        for node in self.nodes:
+            result.extend(node.find_selected_pins())
+        return result
+
     def find_selected_nodes(self) -> List[Node]:
         result = list()
         for node in self.nodes:
@@ -121,18 +161,34 @@ class Graph:
         for node in self.nodes:
             node.selected = True
 
-    def unselect_all_nodes(self) -> None:
+    def unselect_all_items(self) -> None:
         for node in self.nodes:
             node.selected = False
+            for pin in node.pins:
+                pin.selected = False
+        for arc in self.arcs:
+            arc.selected = False
 
     def select_on_hovering_nodes(self) -> None:
         for node in self.nodes:
             node.selected = node.hovering
 
-    def flip_selected_on_hovering_nodes(self) -> None:
-        for node in self.nodes:
-            if node.hovering:
+    def flip_selected_on_hovering_item(self) -> None:
+        if node := self.find_hovering_node():
+            assert node.hovering
+
+            if pin := node.find_hovering_pin():
+                assert pin.hovering
+                pin.selected = not pin.selected
+                return
+            else:
                 node.selected = not node.selected
+                return
+
+        if arc := self.find_hovering_arc():
+            assert arc.hovering
+            arc.selected = not arc.selected
+            return
 
     def move_on_selected_nodes(self, delta: Size) -> None:
         dx, dy = delta
@@ -300,3 +356,17 @@ class Graph:
         in_conn.pin.arcs.append(arc.uuid)
 
         return arc
+
+    def update_hovering_state(self, mouse: Point) -> None:
+        hovering_node = self.find_hovering_node_with_mouse(mouse)
+        if hovering_node is not None:
+            hovering_node.hovering = True
+            hovering_pin = hovering_node.find_hovering_pin_with_mouse(mouse)
+            if hovering_pin is not None:
+                hovering_pin.hovering = True
+                return
+            return
+
+        hovering_arc = self.find_hovering_arc_with_mouse(mouse)
+        if hovering_arc is not None:
+            hovering_arc.hovering = True
