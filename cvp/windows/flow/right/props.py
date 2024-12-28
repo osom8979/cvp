@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final, List
+from typing import Final
 
 import imgui
 
@@ -11,6 +11,7 @@ from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.pin import Pin
+from cvp.flow.datas.selected_items import SelectedItems
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.checkbox import checkbox
@@ -31,33 +32,30 @@ class PropsTab(TabItem[Graph]):
 
     @override
     def on_item(self, item: Graph) -> None:
-        nodes = item.find_selected_nodes()
-        pins = item.find_selected_pins()
-        arcs = item.find_selected_arcs()
-        count = len(nodes) + len(pins) + len(arcs)
-        assert 0 <= count
-        if count == 0:
+        items = item.find_selected_items()
+        if len(items) == 0:
             self.on_graph_cursor(item)
-        elif count == 1:
-            if nodes:
-                assert 1 == len(nodes)
-                assert 0 == len(pins)
-                assert 0 == len(arcs)
-                self.on_node_cursor(nodes[0])
-            elif pins:
-                assert 0 == len(nodes)
-                assert 1 == len(pins)
-                assert 0 == len(arcs)
-                self.on_pin_cursor(pins[0])
-            elif arcs:
-                assert 0 == len(nodes)
-                assert 0 == len(pins)
-                assert 1 == len(arcs)
-                self.on_arc_cursor(arcs[0])
+        elif len(items) == 1:
+            if items.nodes:
+                assert 1 == len(items.nodes)
+                assert 0 == len(items.pins)
+                assert 0 == len(items.arcs)
+                self.on_node_cursor(items.nodes[0])
+            elif items.pins:
+                assert 0 == len(items.nodes)
+                assert 1 == len(items.pins)
+                assert 0 == len(items.arcs)
+                self.on_pin_cursor(items.pins[0])
+            elif items.arcs:
+                assert 0 == len(items.nodes)
+                assert 0 == len(items.pins)
+                assert 1 == len(items.arcs)
+                self.on_arc_cursor(items.arcs[0])
             else:
                 assert False, "Inaccessible section"
         else:
-            self.on_multiple_cursor(nodes, pins, arcs)
+            assert 2 <= len(items)
+            self.on_multiple_cursor(items)
 
     @staticmethod
     def tree_grid(label: str, grid: Grid) -> None:
@@ -173,10 +171,5 @@ class PropsTab(TabItem[Graph]):
         # arc.output
         # arc.input
 
-    def on_multiple_cursor(
-        self,
-        nodes: List[Node],
-        pins: List[Pin],
-        arcs: List[Arc],
-    ) -> None:
+    def on_multiple_cursor(self, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")

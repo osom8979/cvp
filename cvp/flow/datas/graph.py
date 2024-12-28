@@ -19,6 +19,7 @@ from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
+from cvp.flow.datas.selected_items import SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
@@ -370,3 +371,9 @@ class Graph:
         hovering_arc = self.find_hovering_arc_with_mouse(mouse)
         if hovering_arc is not None:
             hovering_arc.hovering = True
+
+    def find_selected_items(self):
+        nodes = self.find_selected_nodes()
+        pins = self.find_selected_pins()
+        arcs = self.find_selected_arcs()
+        return SelectedItems(nodes, pins, arcs)
