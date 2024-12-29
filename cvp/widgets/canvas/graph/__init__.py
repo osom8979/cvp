@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 from weakref import ReferenceType, ref
 
 import imgui
@@ -30,6 +30,7 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
+    _select_items: Dict[int, Union[Node, Pin, Arc]]
     _connects: List[NodePin]
     _roi: Optional[Rect]
 
@@ -41,6 +42,7 @@ class CanvasGraph(CanvasController):
         self._fonts = None
 
         self._mode = ControlMode.normal
+        self._select_items = dict()
         self._connects = list()
         self._roi = None
 
@@ -79,7 +81,8 @@ class CanvasGraph(CanvasController):
         return super().as_unformatted_text() + (
             f"Mode: {self._mode.name}\n"
             f"Connects: {self._connects}\n"
-            f"Select: {self._roi}\n"
+            f"Select items: {len(self._select_items)}\n"
+            f"ROI: {self._roi}\n"
         )
 
     @property
@@ -135,6 +138,17 @@ class CanvasGraph(CanvasController):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    def add_select_item(self, item: Union[Node, Pin, Arc]) -> None:
+        assert item.selected
+        self._select_items[id(item)] = item
+
+    def remove_select_item(self, item: Union[Node, Pin, Arc]) -> None:
+        assert not item.selected
+        try:
+            self._select_items.pop(id(item))
+        except KeyError:
+            pass
 
     def reset_controllers(self):
         assert self._graph is not None
@@ -273,8 +287,6 @@ class CanvasGraph(CanvasController):
         if imgui.is_key_pressed(imgui.get_key_index(imgui.KEY_DELETE)):
             self.graph.remove_selected_items()
 
-        self.graph.update_hovering_state(self.mouse_to_canvas_coords())
-
         if self.is_pan_mode:
             # Nodes cannot be selected or dragged during 'Canvas Pan Mode'.
             return
@@ -297,12 +309,19 @@ class CanvasGraph(CanvasController):
 
         if self.changed_left_up:
             if self.is_multi_select_mode:
-                self.graph.flip_selected_on_hovering_item()
+                item = self.graph.flip_selected_on_hovering_item()
+                if item is not None:
+                    if item.selected:
+                        self.add_select_item(item)
+                    else:
+                        self.remove_select_item(item)
             else:
                 hovering_item = self.graph.find_hovering_item()
                 self.graph.unselect_all_items()
+                self._select_items.clear()
                 if hovering_item is not None:
                     hovering_item.selected = True
+                    self.add_select_item(hovering_item)
 
         if self.activating and self.start_left_dragging:
             if hovering_node := self.graph.find_hovering_node():
@@ -315,7 +334,9 @@ class CanvasGraph(CanvasController):
                     if not hovering_node.selected:
                         if not self.is_multi_select_mode:
                             self.graph.unselect_all_items()
+                            self._select_items.clear()
                         hovering_node.selected = True
+                        self.add_select_item(hovering_node)
             else:
                 self._mode = ControlMode.selection_box
                 self._roi = self.mx, self.my, self.mx, self.my
@@ -378,6 +399,10 @@ class CanvasGraph(CanvasController):
             x_in = left <= nx1 <= right or left <= nx2 <= right
             y_in = top <= ny1 <= bottom or top <= ny2 <= bottom
             node.selected = x_in and y_in
+            if node.selected:
+                self.add_select_item(node)
+            else:
+                self.remove_select_item(node)
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
@@ -647,26 +672,8 @@ class CanvasGraph(CanvasController):
             self.draw_arc(arc)
 
     def draw_arc(self, arc: Arc) -> None:
-        # assert arc.output is not None
-        # snx, sny = arc.output.node.node_pos
-        # six, siy = arc.output.pin.icon_pos
-        # siw, sih = arc.output.pin.icon_size
-        # sx = snx + six + siw / 2
-        # sy = sny + siy + sih / 2
-        # x1, y1 = self.canvas_to_screen_coords((sx, sy))
-        #
-        # assert arc.input is not None
-        # enx, eny = arc.input.node.node_pos
-        # eix, eiy = arc.input.pin.icon_pos
-        # eiw, eih = arc.input.pin.icon_size
-        # ex = enx + eix + eiw / 2
-        # ey = eny + eiy + eih / 2
-        # x2, y2 = self.canvas_to_screen_coords((ex, ey))
-
         color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
         thickness = self.graph.style.arc_thickness
-        # self._draw_list.add_line(x1, y1, x2, y2, color, thickness)
-
         polyline = [self.canvas_to_screen_coords(p) for p in arc.polyline]
         self._draw_list.add_polyline(polyline, color, 0, thickness)
 

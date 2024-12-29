@@ -174,22 +174,24 @@ class Graph:
         for node in self.nodes:
             node.selected = node.hovering
 
-    def flip_selected_on_hovering_item(self) -> None:
+    def flip_selected_on_hovering_item(self) -> Optional[Union[Node, Pin, Arc]]:
         if node := self.find_hovering_node():
             assert node.hovering
 
             if pin := node.find_hovering_pin():
                 assert pin.hovering
                 pin.selected = not pin.selected
-                return
+                return pin
             else:
                 node.selected = not node.selected
-                return
+                return node
 
         if arc := self.find_hovering_arc():
             assert arc.hovering
             arc.selected = not arc.selected
-            return
+            return arc
+
+        return None
 
     def move_on_selected_nodes(self, delta: Size) -> None:
         dx, dy = delta
@@ -322,17 +324,34 @@ class Graph:
                 p2 = ex, ey
                 arc.polyline = [p1, p2]
             case LineType.bezier_quadratic:
-                mx = sx + (ex - sx) / 2
-                my = sy + (ey - sy) / 2
                 p1 = sx, sy
-                p2 = mx, my
                 p3 = ex, ey
+
+                if arc.line_args:
+                    p2 = arc.line_args[0]
+                else:
+                    mx = sx + (ex - sx) / 2
+                    my = sy + (ey - sy) / 2
+                    p2 = mx, my
+                    arc.line_args.append(p2)
+
                 arc.polyline = bezier_quadratic_casteljau_points(p1, p2, p3, tess_tol)
             case LineType.bezier_cubic:
                 p1 = sx, sy
-                p2 = sx + delta, sy
-                p3 = ex - delta, ey
                 p4 = ex, ey
+
+                if 1 <= len(arc.line_args):
+                    p2 = arc.line_args[0]
+                else:
+                    p2 = sx + delta, sy
+                    arc.line_args.append(p2)
+
+                if 2 <= len(arc.line_args):
+                    p3 = arc.line_args[1]
+                else:
+                    p3 = ex - delta, ey
+                    arc.line_args.append(p2)
+
                 arc.polyline = bezier_cubic_casteljau_points(p1, p2, p3, p4, tess_tol)
             case _:
                 assert False, "Inaccessible section"

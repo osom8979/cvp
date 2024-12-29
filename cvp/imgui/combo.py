@@ -29,5 +29,7 @@ def combo(
     items: Sequence[str],
     height_in_items=-1,
 ):
+    if not isinstance(items, list):
+        items = list(items)
     result = imgui.combo(label, current, items, height_in_items)
     return ComboResult.from_raw(result)

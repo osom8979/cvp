@@ -49,6 +49,22 @@ class Pin:
         )
 
     @property
+    def is_data_action(self):
+        return self.action == Action.data
+
+    @property
+    def is_flow_action(self):
+        return self.action == Action.flow
+
+    @property
+    def is_input_stream(self):
+        return self.stream == Stream.input
+
+    @property
+    def is_output_stream(self):
+        return self.stream == Stream.output
+
+    @property
     def connected(self) -> bool:
         return bool(self.arcs)
 

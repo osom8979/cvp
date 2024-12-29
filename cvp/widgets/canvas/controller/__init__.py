@@ -82,8 +82,8 @@ class CanvasController(ControllerProps):
             self._pan_flags,
         )
         if not dryrun and retval:
-            self.pan_x.value = retval.value0
-            self.pan_y.value = retval.value1
+            self.pan_x = retval.value0
+            self.pan_y = retval.value1
         return retval
 
     def slider_zoom(self, dryrun=False):

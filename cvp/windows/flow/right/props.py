@@ -9,6 +9,12 @@ from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.grid import Grid
+from cvp.flow.datas.line_type import (
+    LINE_TYPE_INDEX2NAME,
+    LINE_TYPE_NAME2INDEX,
+    LINE_TYPE_NAMES,
+    LineType,
+)
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.selected_items import SelectedItems
@@ -16,8 +22,10 @@ from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
+from cvp.imgui.combo import combo
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.input_float import input_float
+from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.input_text_value import input_text_value
 from cvp.imgui.push_style_var import style_disable_input
@@ -195,11 +203,33 @@ class PropsTab(TabItem[Graph]):
         arc.name = input_text_value("Name", arc.name)
         arc.docs = input_text_value("Docs", arc.docs)
 
-        # line_type: LineType = LineType.linear
-        # line_args: List[Point] = field(default_factory=list)
+        line_index = LINE_TYPE_NAME2INDEX[str(arc.line_type)]
+        if line_result := combo("Line Type", line_index, LINE_TYPE_NAMES):
+            line_name = LINE_TYPE_INDEX2NAME[line_result.value]
+            arc.line_type = LineType(line_name)
 
-        # arc.output
-        # arc.input
+        with style_disable_input():
+            for i, line_arg in enumerate(arc.line_args):
+                input_float2(
+                    f"Line Arg {i}",
+                    line_arg[0],
+                    line_arg[1],
+                    flags=imgui.INPUT_TEXT_READ_ONLY,
+                )
+
+        if arc.output:
+            if imgui.tree_node("Output pin"):
+                try:
+                    self.on_pin_item(arc.output.pin)
+                finally:
+                    imgui.tree_pop()
+
+        if arc.input:
+            if imgui.tree_node("Input pin"):
+                try:
+                    self.on_pin_item(arc.input.pin)
+                finally:
+                    imgui.tree_pop()
 
     def on_multiple_items(self, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")
