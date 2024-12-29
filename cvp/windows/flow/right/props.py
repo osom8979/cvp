@@ -16,9 +16,11 @@ from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
+from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.input_float import input_float
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.input_text_value import input_text_value
+from cvp.imgui.push_style_var import style_disable_input
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 
@@ -27,8 +29,9 @@ ENTER_RETURN: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 
 
 class PropsTab(TabItem[Graph]):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, fonts: FontMapper):
         super().__init__(context, "Props")
+        self._fonts = fonts
 
     @override
     def on_item(self, item: Graph) -> None:
@@ -40,22 +43,22 @@ class PropsTab(TabItem[Graph]):
                 assert 1 == len(items.nodes)
                 assert 0 == len(items.pins)
                 assert 0 == len(items.arcs)
-                self.on_node_cursor(items.nodes[0])
+                self.on_node_item(items.nodes[0])
             elif items.pins:
                 assert 0 == len(items.nodes)
                 assert 1 == len(items.pins)
                 assert 0 == len(items.arcs)
-                self.on_pin_cursor(items.pins[0])
+                self.on_pin_item(items.pins[0])
             elif items.arcs:
                 assert 0 == len(items.nodes)
                 assert 0 == len(items.pins)
                 assert 1 == len(items.arcs)
-                self.on_arc_cursor(items.arcs[0])
+                self.on_arc_item(items.arcs[0])
             else:
                 assert False, "Inaccessible section"
         else:
             assert 2 <= len(items)
-            self.on_multiple_cursor(items)
+            self.on_multiple_items(items)
 
     @staticmethod
     def tree_grid(label: str, grid: Grid) -> None:
@@ -133,43 +136,88 @@ class PropsTab(TabItem[Graph]):
         if show_layout := checkbox("Show layout", graph.style.show_layout):
             graph.style.show_layout = show_layout.state
 
-    def on_node_cursor(self, node: Node) -> None:
+    @staticmethod
+    def tree_node_debugging(label: str, node: Node) -> None:
+        if imgui.tree_node(label):
+            try:
+                message = node.as_unformatted_text()
+                imgui.text_unformatted(message.strip())
+            finally:
+                imgui.tree_pop()
+
+    def on_node_item(self, node: Node) -> None:
         input_text_disabled("Type", type(node).__name__)
         input_text_disabled("UUID", node.uuid)
 
         node.name = input_text_value("Name", node.name)
         node.docs = input_text_value("Docs", node.docs)
-        node.emblem = input_text_value("Emblem", node.emblem)
+
+        with self._fonts.normal_icon:
+            input_text_disabled("Emblem", node.emblem)
 
         if color_result := color_edit4("Color", *node.color):
             node.color = color_result.color
 
-        # emblem_pos: Point = EMPTY_POINT
-        # emblem_size: Size = EMPTY_SIZE
-        # name_pos: Point = EMPTY_POINT
-        # name_size: Size = EMPTY_SIZE
-        # node_pos: Point = EMPTY_POINT
-        # node_size: Size = EMPTY_SIZE
+        if self.context.debug:
+            self.tree_node_debugging("Debugging", node)
 
         # flow_inputs: List[Pin] = field(default_factory=list)
         # flow_outputs: List[Pin] = field(default_factory=list)
-
         # data_inputs: List[Pin] = field(default_factory=list)
         # data_outputs: List[Pin] = field(default_factory=list)
 
-    def on_pin_cursor(self, pin: Pin) -> None:
+    @staticmethod
+    def tree_pin_debugging(label: str, pin: Pin) -> None:
+        if imgui.tree_node(label):
+            try:
+                message = pin.as_unformatted_text()
+                imgui.text_unformatted(message.strip())
+            finally:
+                imgui.tree_pop()
+
+    def on_pin_item(self, pin: Pin) -> None:
         input_text_disabled("Type", type(pin).__name__)
         input_text_disabled("Name", pin.name)
+        input_text_disabled("Data Type", pin.dtype)
+        input_text_disabled("Action", str(pin.action))
+        input_text_disabled("Stream", str(pin.stream))
 
-    def on_arc_cursor(self, arc: Arc) -> None:
+        with style_disable_input():
+            checkbox("Required", pin.required)
+
+        if self.context.debug:
+            self.tree_pin_debugging("Debugging", pin)
+
+    def on_arc_item(self, arc: Arc) -> None:
         input_text_disabled("Type", type(arc).__name__)
         input_text_disabled("UUID", arc.uuid)
 
         arc.name = input_text_value("Name", arc.name)
         arc.docs = input_text_value("Docs", arc.docs)
 
+        # line_type: LineType = LineType.linear
+        # line_args: List[Point] = field(default_factory=list)
+
         # arc.output
         # arc.input
 
-    def on_multiple_cursor(self, items: SelectedItems) -> None:
+    def on_multiple_items(self, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")
+
+        if items.nodes:
+            for i, item in enumerate(items.all):
+                typename = type(item).__name__
+                title = f"{typename} ({item.name})" if item.name else typename
+                label = f"{title}###{i}"
+                if imgui.tree_node(label):
+                    try:
+                        if isinstance(item, Node):
+                            self.on_node_item(item)
+                        elif isinstance(item, Pin):
+                            self.on_pin_item(item)
+                        elif isinstance(item, Arc):
+                            self.on_arc_item(item)
+                        else:
+                            assert False, "Inaccessible section"
+                    finally:
+                        imgui.tree_pop()

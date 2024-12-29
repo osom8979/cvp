@@ -54,7 +54,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self._canvases = dict()
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context, fonts)
-        self._right_tabs = FlowRightTabs(context)
+        self._right_tabs = FlowRightTabs(context, fonts)
         self._bottom_tabs = FlowBottomTabs(context)
 
         self._prev_cursor = None
@@ -151,7 +151,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     def on_close_graph(self, uuid: str):
         if self.context.debug:
-            logger.debug(f"{type(self).__name__}.on_close_graph('{uuid}')")
+            logger.debug(f"{type(self).__name__}.('{uuid}')")
 
         graph = self.context.fm.get(uuid)
         if graph is None:

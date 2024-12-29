@@ -36,6 +36,16 @@ class Node:
     _selected: bool = False
     _hovering: bool = False
 
+    def as_unformatted_text(self) -> str:
+        return (
+            f"Emblem pos: {self.emblem_pos[0]:.02f}, {self.emblem_pos[1]:.02f}\n"
+            f"Emblem size: {self.emblem_size[0]:.02f}, {self.emblem_size[1]:.02f}\n"
+            f"Name pos: {self.name_pos[0]:.02f}, {self.name_pos[1]:.02f}\n"
+            f"Name size: {self.name_size[0]:.02f}, {self.name_size[1]:.02f}\n"
+            f"Node pos: {self.node_pos[0]:.02f}, {self.node_pos[1]:.02f}\n"
+            f"Node size: {self.node_size[0]:.02f}, {self.node_size[1]:.02f}\n"
+        )
+
     @property
     def node_roi(self) -> Rect:
         x, y = self.node_pos

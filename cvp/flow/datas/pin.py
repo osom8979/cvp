@@ -30,6 +30,24 @@ class Pin:
     _hovering: bool = False
     _connectable: bool = False
 
+    def as_unformatted_text(self) -> str:
+        return (
+            f"Name: {self.name}\n"
+            f"Docs: {self.docs}\n"
+            f"Data Type: {self.dtype}\n"
+            f"Action: {self.action}\n"
+            f"Stream: {self.stream}\n"
+            f"Required: {self.required}\n"
+            f"Arcs: {len(self.arcs)}\n"
+            f"Icon pos: {self.icon_pos[0]:.02f}, {self.icon_pos[1]:.02f}\n"
+            f"Icon size: {self.icon_size[0]:.02f}, {self.icon_size[1]:.02f}\n"
+            f"Name pos: {self.name_pos[0]:.02f}, {self.name_pos[1]:.02f}\n"
+            f"Name size: {self.name_size[0]:.02f}, {self.name_size[1]:.02f}\n"
+            f"Selected: {self._selected}\n"
+            f"Hovering: {self._hovering}\n"
+            f"Connectable: {self._connectable}\n"
+        )
+
     @property
     def connected(self) -> bool:
         return bool(self.arcs)
