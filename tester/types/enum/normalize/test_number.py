@@ -4,7 +4,7 @@ from enum import IntEnum, unique
 from typing import Final, Optional, Union
 from unittest import TestCase, main
 
-from cvp.types.enum.normalize import (
+from cvp.types.enum.normalize.number import (
     FrozenNameToNumber,
     FrozenNumberToName,
     name2number,

@@ -6,7 +6,6 @@ from typing import Type, Union
 
 FrozenNameToNumber = MappingProxyType[str, int]
 FrozenNumberToName = MappingProxyType[int, str]
-
 IntEnumLike = Union[IntEnum, str, int]
 
 

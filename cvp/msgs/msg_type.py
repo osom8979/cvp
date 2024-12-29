@@ -3,7 +3,7 @@
 from enum import IntEnum, auto, unique
 from typing import Final, Union
 
-from cvp.types.enum.normalize import (
+from cvp.types.enum.normalize.number import (
     FrozenNameToNumber,
     FrozenNumberToName,
     name2number,
