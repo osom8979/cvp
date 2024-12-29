@@ -377,3 +377,29 @@ class Graph:
         pins = self.find_selected_pins()
         arcs = self.find_selected_arcs()
         return SelectedItems(nodes, pins, arcs)
+
+    def remove_arc(self, arc: Arc) -> None:
+        if arc.input:
+            arc.input.pin.arcs.remove(arc.uuid)
+        if arc.output:
+            arc.output.pin.arcs.remove(arc.uuid)
+        self.arcs.remove(arc)
+
+    def remove_selected_arcs(self) -> None:
+        for arc in self.find_selected_arcs():
+            self.remove_arc(arc)
+
+    def remove_node(self, node: Node):
+        for pin in node.pins:
+            for arc_uuid in pin.arcs:
+                if arc := self.find_arc(arc_uuid):
+                    self.remove_arc(arc)
+        self.nodes.remove(node)
+
+    def remove_selected_nodes(self) -> None:
+        for node in self.find_selected_nodes():
+            self.remove_node(node)
+
+    def remove_selected_items(self) -> None:
+        self.remove_selected_arcs()
+        self.remove_selected_nodes()
