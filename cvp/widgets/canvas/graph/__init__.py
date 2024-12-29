@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, List, Optional, Union
+from collections import OrderedDict
+from typing import List, Optional, Union
 from weakref import ReferenceType, ref
 
 import imgui
 
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.graph import Graph
+from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
@@ -30,7 +32,7 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
-    _select_items: Dict[int, Union[Node, Pin, Arc]]
+    _select_items: OrderedDict[int, Union[Node, Pin, Arc]]
     _connects: List[NodePin]
     _roi: Optional[Rect]
 
@@ -42,7 +44,7 @@ class CanvasGraph(CanvasController):
         self._fonts = None
 
         self._mode = ControlMode.normal
-        self._select_items = dict()
+        self._select_items = OrderedDict()
         self._connects = list()
         self._roi = None
 
@@ -676,6 +678,28 @@ class CanvasGraph(CanvasController):
         thickness = self.graph.style.arc_thickness
         polyline = [self.canvas_to_screen_coords(p) for p in arc.polyline]
         self._draw_list.add_polyline(polyline, color, 0, thickness)
+
+        if arc.selected and arc.line_type == LineType.bezier_cubic:
+            arc_anchor_size = self.graph.style.arc_anchor_size
+            arc_anchor_half = arc_anchor_size / 2.0
+
+            assert 2 <= len(arc.polyline)
+            assert 2 <= len(arc.line_args)
+            sx, sy = arc.polyline[0]
+            ex, ey = arc.polyline[-1]
+            ax, ay = self.canvas_to_screen_coords(arc.line_args[0])
+            ax1 = sx + ax - arc_anchor_half
+            ay1 = sy + ay - arc_anchor_half
+            ax2 = sx + ax + arc_anchor_half
+            ay2 = sy + ay + arc_anchor_half
+            self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
+
+            ax, ay = self.canvas_to_screen_coords(arc.line_args[1])
+            ax1 = ex + ax - arc_anchor_half
+            ay1 = ey + ay - arc_anchor_half
+            ax2 = ex + ax + arc_anchor_half
+            ay2 = ey + ay + arc_anchor_half
+            self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node

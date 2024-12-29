@@ -26,6 +26,14 @@ class InputFloat2Result(NamedTuple):
     def __bool__(self):
         return self.changed
 
+    @property
+    def value0(self):
+        return self.value[0]
+
+    @property
+    def value1(self):
+        return self.value[1]
+
 
 def input_float2(
     label: str,

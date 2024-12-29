@@ -10,7 +10,6 @@ from cvp.types.enum.normalize.string import index2string, string2index
 class LineType(StrEnum):
     linear = auto()
     bezier_cubic = auto()
-    bezier_quadratic = auto()
 
 
 LINE_TYPE_INDEX2NAME = index2string(LineType)

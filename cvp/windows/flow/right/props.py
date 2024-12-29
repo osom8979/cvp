@@ -23,9 +23,9 @@ from cvp.flow.datas.style import Style
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
 from cvp.imgui.combo import combo
+from cvp.imgui.drag_float2 import drag_float2
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.input_float import input_float
-from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.imgui.input_text_value import input_text_value
 from cvp.imgui.push_style_var import style_disable_input
@@ -43,30 +43,30 @@ class PropsTab(TabItem[Graph]):
 
     @override
     def on_item(self, item: Graph) -> None:
-        items = item.find_selected_items()
-        if len(items) == 0:
+        selected_items = item.find_selected_items()
+        if len(selected_items) == 0:
             self.on_graph_cursor(item)
-        elif len(items) == 1:
-            if items.nodes:
-                assert 1 == len(items.nodes)
-                assert 0 == len(items.pins)
-                assert 0 == len(items.arcs)
-                self.on_node_item(items.nodes[0])
-            elif items.pins:
-                assert 0 == len(items.nodes)
-                assert 1 == len(items.pins)
-                assert 0 == len(items.arcs)
-                self.on_pin_item(items.pins[0])
-            elif items.arcs:
-                assert 0 == len(items.nodes)
-                assert 0 == len(items.pins)
-                assert 1 == len(items.arcs)
-                self.on_arc_item(items.arcs[0])
+        elif len(selected_items) == 1:
+            if selected_items.nodes:
+                assert 1 == len(selected_items.nodes)
+                assert 0 == len(selected_items.pins)
+                assert 0 == len(selected_items.arcs)
+                self.on_node_item(selected_items.nodes[0])
+            elif selected_items.pins:
+                assert 0 == len(selected_items.nodes)
+                assert 1 == len(selected_items.pins)
+                assert 0 == len(selected_items.arcs)
+                self.on_pin_item(selected_items.pins[0])
+            elif selected_items.arcs:
+                assert 0 == len(selected_items.nodes)
+                assert 0 == len(selected_items.pins)
+                assert 1 == len(selected_items.arcs)
+                self.on_arc_item(item, selected_items.arcs[0])
             else:
                 assert False, "Inaccessible section"
         else:
-            assert 2 <= len(items)
-            self.on_multiple_items(items)
+            assert 2 <= len(selected_items)
+            self.on_multiple_items(item, selected_items)
 
     @staticmethod
     def tree_grid(label: str, grid: Grid) -> None:
@@ -196,7 +196,7 @@ class PropsTab(TabItem[Graph]):
         if self.context.debug:
             self.tree_pin_debugging("Debugging", pin)
 
-    def on_arc_item(self, arc: Arc) -> None:
+    def on_arc_item(self, graph: Graph, arc: Arc) -> None:
         input_text_disabled("Type", type(arc).__name__)
         input_text_disabled("UUID", arc.uuid)
 
@@ -207,15 +207,13 @@ class PropsTab(TabItem[Graph]):
         if line_result := combo("Line Type", line_index, LINE_TYPE_NAMES):
             line_name = LINE_TYPE_INDEX2NAME[line_result.value]
             arc.line_type = LineType(line_name)
+            graph.update_arc_polyline(arc, force=True)
 
-        with style_disable_input():
-            for i, line_arg in enumerate(arc.line_args):
-                input_float2(
-                    f"Line Arg {i}",
-                    line_arg[0],
-                    line_arg[1],
-                    flags=imgui.INPUT_TEXT_READ_ONLY,
-                )
+        for i, anchor in enumerate(arc.line_args):
+            ax, ay = anchor
+            if anchor_result := drag_float2(f"Line Arg {i}", ax, ay):
+                arc.line_args[i] = anchor_result.values
+                graph.update_arc_polyline(arc, force=True)
 
         if arc.output:
             if imgui.tree_node("Output pin"):
@@ -231,7 +229,7 @@ class PropsTab(TabItem[Graph]):
                 finally:
                     imgui.tree_pop()
 
-    def on_multiple_items(self, items: SelectedItems) -> None:
+    def on_multiple_items(self, graph: Graph, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")
 
         if items.nodes:
@@ -246,7 +244,7 @@ class PropsTab(TabItem[Graph]):
                         elif isinstance(item, Pin):
                             self.on_pin_item(item)
                         elif isinstance(item, Arc):
-                            self.on_arc_item(item)
+                            self.on_arc_item(graph, item)
                         else:
                             assert False, "Inaccessible section"
                     finally:

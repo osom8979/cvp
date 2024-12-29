@@ -23,7 +23,6 @@ from cvp.flow.datas.selected_items import SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
-from cvp.maths.bezier.casteljau.quadratic import bezier_quadratic_casteljau_points
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Point, Size
 
@@ -308,51 +307,36 @@ class Graph:
         siw, sih = output_np.pin.icon_size
         sx = snx + six + siw / 2
         sy = sny + siy + sih / 2
+        sp = sx, sy
 
         enx, eny = input_np.node.node_pos
         eix, eiy = input_np.pin.icon_pos
         eiw, eih = input_np.pin.icon_size
         ex = enx + eix + eiw / 2
         ey = eny + eiy + eih / 2
+        ep = ex, ey
 
         tess_tol = self.style.bezier_curve_tess_tol
         delta = self.style.bezier_curve_interpolate_delta
 
         match arc.line_type:
             case LineType.linear:
-                p1 = sx, sy
-                p2 = ex, ey
-                arc.polyline = [p1, p2]
-            case LineType.bezier_quadratic:
-                p1 = sx, sy
-                p3 = ex, ey
-
-                if arc.line_args:
-                    p2 = arc.line_args[0]
-                else:
-                    mx = sx + (ex - sx) / 2
-                    my = sy + (ey - sy) / 2
-                    p2 = mx, my
-                    arc.line_args.append(p2)
-
-                arc.polyline = bezier_quadratic_casteljau_points(p1, p2, p3, tess_tol)
+                arc.polyline = [sp, ep]
             case LineType.bezier_cubic:
-                p1 = sx, sy
-                p4 = ex, ey
+                if len(arc.line_args) <= 0:
+                    arc.line_args.append((delta, 0.0))
+                if len(arc.line_args) <= 1:
+                    arc.line_args.append((-delta, 0.0))
 
-                if 1 <= len(arc.line_args):
-                    p2 = arc.line_args[0]
-                else:
-                    p2 = sx + delta, sy
-                    arc.line_args.append(p2)
+                assert 2 <= len(arc.line_args)
 
-                if 2 <= len(arc.line_args):
-                    p3 = arc.line_args[1]
-                else:
-                    p3 = ex - delta, ey
-                    arc.line_args.append(p2)
+                dx, dy = arc.line_args[0]
+                p2 = sx + dx, sy + dy
 
-                arc.polyline = bezier_cubic_casteljau_points(p1, p2, p3, p4, tess_tol)
+                dx, dy = arc.line_args[1]
+                p3 = ex + dx, ey + dy
+
+                arc.polyline = bezier_cubic_casteljau_points(sp, p2, p3, ep, tess_tol)
             case _:
                 assert False, "Inaccessible section"
 
