@@ -667,11 +667,25 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
+    @property
+    def selected_arc_only(self) -> Optional[Arc]:
+        if 1 != len(self._select_items):
+            return None
+        first_item = next(iter(self._select_items.values()))
+        if isinstance(first_item, Arc):
+            return first_item
+        else:
+            return None
+
     def draw_arcs(self) -> None:
+        selected_arc_only = self.selected_arc_only
+
         for arc in self.graph.arcs:
             assert arc.output is not None
             assert arc.input is not None
             self.draw_arc(arc)
+            if arc.selected and selected_arc_only == arc:
+                self.draw_arc_anchors(arc)
 
     def draw_arc(self, arc: Arc) -> None:
         color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
@@ -679,26 +693,30 @@ class CanvasGraph(CanvasController):
         polyline = [self.canvas_to_screen_coords(p) for p in arc.polyline]
         self._draw_list.add_polyline(polyline, color, 0, thickness)
 
-        if arc.selected and arc.line_type == LineType.bezier_cubic:
-            arc_anchor_size = self.graph.style.arc_anchor_size
-            arc_anchor_half = arc_anchor_size / 2.0
+    def draw_arc_anchors(self, arc: Arc) -> None:
+        assert arc.selected
 
+        if arc.line_type == LineType.bezier_cubic:
             assert 2 <= len(arc.polyline)
             assert 2 <= len(arc.line_args)
+
+            color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
+            anchor_half_size = self.graph.style.arc_anchor_size / 2.0
+
             sx, sy = arc.polyline[0]
             ex, ey = arc.polyline[-1]
             ax, ay = self.canvas_to_screen_coords(arc.line_args[0])
-            ax1 = sx + ax - arc_anchor_half
-            ay1 = sy + ay - arc_anchor_half
-            ax2 = sx + ax + arc_anchor_half
-            ay2 = sy + ay + arc_anchor_half
+            ax1 = sx + ax - anchor_half_size
+            ay1 = sy + ay - anchor_half_size
+            ax2 = sx + ax + anchor_half_size
+            ay2 = sy + ay + anchor_half_size
             self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
 
             ax, ay = self.canvas_to_screen_coords(arc.line_args[1])
-            ax1 = ex + ax - arc_anchor_half
-            ay1 = ey + ay - arc_anchor_half
-            ax2 = ex + ax + arc_anchor_half
-            ay2 = ey + ay + arc_anchor_half
+            ax1 = ex + ax - anchor_half_size
+            ay1 = ey + ay - anchor_half_size
+            ax2 = ex + ax + anchor_half_size
+            ay2 = ey + ay + anchor_half_size
             self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
