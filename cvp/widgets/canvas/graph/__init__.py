@@ -241,32 +241,6 @@ class CanvasGraph(CanvasController):
         y2 = self.cy + self.ch
         self._draw_list.add_line(x1, y1, x2, y2, color, axis_y.thickness)
 
-    # def draw_texture(
-    #     self,
-    #     texture: Texture,
-    #     x: float,
-    #     y: float,
-    #     color: Optional[RGBA] = None,
-    # ) -> None:
-    #     img_id = texture.texture
-    #     img_x = x
-    #     img_y = y
-    #     img_w = texture.width
-    #     img_h = texture.height
-    #     img_roi = img_x, img_y, img_w, img_h
-    #     img_screen_roi = self.canvas_to_screen_roi(img_roi)
-    #     img_screen_p1 = img_screen_roi[0], img_screen_roi[1]
-    #     img_screen_p2 = img_screen_roi[2], img_screen_roi[3]
-    #     img_color = imgui.get_color_u32_rgba(*color) if color is not None else 0
-    #     self.draw_list.add_image(
-    #         img_id,
-    #         img_screen_p1,
-    #         img_screen_p2,
-    #         (0, 0),
-    #         (1, 1),
-    #         img_color,
-    #     )
-
     def update_nodes_state(self) -> None:
         self.graph.clear_state()
         self.graph.update_hovering_state(self.mouse_to_canvas_coords())
@@ -668,22 +642,22 @@ class CanvasGraph(CanvasController):
 
             color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
             anchor_half_size = self.graph.style.arc_anchor_size / 2.0
+            start, end = arc.get_bezier_cubic_anchors()
 
-            sx, sy = arc.polyline[0]
-            ex, ey = arc.polyline[-1]
-            ax, ay = self.canvas_to_screen_coords(arc.line_args[0])
-            ax1 = sx + ax - anchor_half_size
-            ay1 = sy + ay - anchor_half_size
-            ax2 = sx + ax + anchor_half_size
-            ay2 = sy + ay + anchor_half_size
-            self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
+            sx, sy = self.canvas_to_screen_coords(start)
+            ex, ey = self.canvas_to_screen_coords(end)
 
-            ax, ay = self.canvas_to_screen_coords(arc.line_args[1])
-            ax1 = ex + ax - anchor_half_size
-            ay1 = ey + ay - anchor_half_size
-            ax2 = ex + ax + anchor_half_size
-            ay2 = ey + ay + anchor_half_size
-            self._draw_list.add_rect_filled(ax1, ay1, ax2, ay2, color)
+            sx1 = sx - anchor_half_size
+            sy1 = sy - anchor_half_size
+            sx2 = sx + anchor_half_size
+            sy2 = sy + anchor_half_size
+            self._draw_list.add_rect_filled(sx1, sy1, sx2, sy2, color)
+
+            ex1 = ex - anchor_half_size
+            ey1 = ey - anchor_half_size
+            ex2 = ex + anchor_half_size
+            ey2 = ey + anchor_half_size
+            self._draw_list.add_rect_filled(ex1, ey1, ex2, ey2, color)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node

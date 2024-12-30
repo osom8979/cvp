@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence, Set, Union
+from typing import List, Optional, Sequence, Set, Tuple, Union
 from uuid import uuid4
 
 import shapely
@@ -337,7 +337,7 @@ class Graph:
         ep = ex, ey
 
         tess_tol = self.style.bezier_curve_tess_tol
-        delta = self.style.bezier_curve_interpolate_delta
+        delta = abs(ex - sx) / 2
 
         match arc.line_type:
             case LineType.linear:
@@ -359,6 +359,35 @@ class Graph:
                 arc.polyline = bezier_cubic_casteljau_points(sp, p2, p3, ep, tess_tol)
             case _:
                 assert False, "Inaccessible section"
+
+    def find_hovering_bezier_cubic_anchor_with_mouse(
+        self, mouse: Point
+    ) -> Optional[Tuple[Arc, int]]:
+        selected_arc_only = self.selected_arc_only
+        if selected_arc_only is None:
+            return None
+
+        anchor_half_size = self.style.arc_anchor_size / 2.0
+        start, end = selected_arc_only.get_bezier_cubic_anchors()
+        sx, sy = start
+        ex, ey = end
+        mx, my = mouse
+
+        sx1 = sx - anchor_half_size
+        sy1 = sy - anchor_half_size
+        sx2 = sx + anchor_half_size
+        sy2 = sy + anchor_half_size
+        if sx1 <= mx <= sx2 and sy1 <= my <= sy2:
+            return selected_arc_only, 0
+
+        ex1 = ex - anchor_half_size
+        ey1 = ey - anchor_half_size
+        ex2 = ex + anchor_half_size
+        ey2 = ey + anchor_half_size
+        if ex1 <= mx <= ex2 and ey1 <= my <= ey2:
+            return selected_arc_only, 1
+
+        return None
 
     def connect_pins(
         self,
@@ -394,13 +423,6 @@ class Graph:
         hovering_arc = self.find_hovering_arc_with_mouse(mouse)
         if hovering_arc is not None:
             hovering_arc.hovering = True
-
-    def find_selected_items(self):
-        result = SelectedItems()
-        result.extends(self.find_selected_nodes())
-        result.extends(self.find_selected_pins())
-        result.extends(self.find_selected_arcs())
-        return result
 
     def remove_arc(self, arc: Arc) -> None:
         if arc.input:

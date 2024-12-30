@@ -40,7 +40,6 @@ class Style:
     arc_anchor_size: float = 4.0
 
     bezier_curve_tess_tol: float = DEFAULT_CURVE_TESSELLATION_TOL
-    bezier_curve_interpolate_delta: float = 24.0
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
 

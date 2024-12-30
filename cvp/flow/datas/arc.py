@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from cvp.flow.datas.constants import EMPTY_TEXT
@@ -67,11 +67,28 @@ class Arc:
     def polyline(self, value: List[Point]) -> None:
         self._polyline = value
 
-    @property
-    def polyline_roi(self) -> Optional[Rect]:
+    def get_polyline_roi(self) -> Rect:
         if not self._polyline:
-            return None
+            raise ValueError("The 'polyline' attribute is empty")
 
         xs = [p[0] for p in self._polyline]
         ys = [p[1] for p in self._polyline]
         return min(xs), min(ys), max(xs), max(ys)
+
+    def get_bezier_cubic_anchors(self) -> Tuple[Point, Point]:
+        if len(self.polyline) < 2:
+            raise ValueError("At least 2 'polyline' elements are required")
+        if len(self.line_args) < 2:
+            raise ValueError("At least 2 'line_args' elements are required")
+
+        # The first/last index point is located at the connected pin.
+        sx, sy = self.polyline[0]
+        ex, ey = self.polyline[-1]
+
+        sdx, sdy = self.line_args[0]
+        edx, edy = self.line_args[1]
+
+        p1 = sx + sdx, sy + sdy
+        p2 = ex + edx, ey + edy
+
+        return p1, p2
