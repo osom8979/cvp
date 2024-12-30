@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Union
+from typing import List, Optional, Sequence, Set, Union
 from uuid import uuid4
 
 import shapely
@@ -19,14 +19,12 @@ from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
-from cvp.flow.datas.selected_items import SelectedItems
+from cvp.flow.datas.selected_items import SelectableAny, SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Point, Size
-
-SelectableItem = Union[Node, Pin, Arc]
 
 
 @dataclass
@@ -46,7 +44,7 @@ class Graph:
     style: Style = field(default_factory=Style)
     config: Config = field(default_factory=Config)
 
-    _selected_items: Dict[int, SelectableItem] = field(default_factory=dict)
+    _selected_items: SelectedItems = field(default_factory=SelectedItems)
 
     @property
     def selected_items(self):
@@ -54,38 +52,18 @@ class Graph:
 
     @property
     def selected_arc_only(self) -> Optional[Arc]:
-        if 1 != len(self._selected_items):
-            return None
-        first_item = next(iter(self._selected_items.values()))
-        if isinstance(first_item, Arc):
-            return first_item
-        else:
-            return None
+        return self._selected_items.selected_arc_only
 
-    def _add_selected_item(self, item: SelectableItem) -> None:
-        assert item.selected
-        self._selected_items[id(item)] = item
+    def update_selected_item(self, item: SelectableAny) -> None:
+        self._selected_items.apply(item)
 
-    def _remove_selected_item(self, item: SelectableItem) -> None:
-        assert not item.selected
-        try:
-            self._selected_items.pop(id(item))
-        except KeyError:
-            pass
-
-    def update_selected_item(self, item: SelectableItem) -> None:
-        if item.selected:
-            self._add_selected_item(item)
-        else:
-            self._remove_selected_item(item)
-
-    def select_item(self, item: SelectableItem) -> None:
+    def select_item(self, item: SelectableAny) -> None:
         item.selected = True
-        self._add_selected_item(item)
+        self._selected_items.add(item)
 
-    def unselect_item(self, item: SelectableItem) -> None:
+    def unselect_item(self, item: SelectableAny) -> None:
         item.selected = False
-        self._remove_selected_item(item)
+        self._selected_items.remove(item)
 
     def clear_state(self) -> None:
         # Do not change the `node.selected` property.
@@ -219,17 +197,17 @@ class Graph:
             if pin := node.find_hovering_pin():
                 assert pin.hovering
                 pin.selected = not pin.selected
-                self.update_selected_item(pin)
+                self._selected_items.apply(pin)
                 return pin
             else:
                 node.selected = not node.selected
-                self.update_selected_item(node)
+                self._selected_items.apply(node)
                 return node
 
         if arc := self.find_hovering_arc():
             assert arc.hovering
             arc.selected = not arc.selected
-            self.update_selected_item(arc)
+            self._selected_items.apply(arc)
             return arc
 
         return None

@@ -43,25 +43,29 @@ class PropsTab(TabItem[Graph]):
 
     @override
     def on_item(self, item: Graph) -> None:
-        selected_items = item.find_selected_items()
+        selected_items = item.selected_items
+        selected_nodes = selected_items.nodes
+        selected_pins = selected_items.pins
+        selected_arcs = selected_items.arcs
+
         if len(selected_items) == 0:
             self.on_graph_cursor(item)
         elif len(selected_items) == 1:
             if selected_items.nodes:
-                assert 1 == len(selected_items.nodes)
-                assert 0 == len(selected_items.pins)
-                assert 0 == len(selected_items.arcs)
-                self.on_node_item(selected_items.nodes[0])
+                assert 1 == len(selected_nodes)
+                assert 0 == len(selected_pins)
+                assert 0 == len(selected_arcs)
+                self.on_node_item(selected_nodes[0])
             elif selected_items.pins:
-                assert 0 == len(selected_items.nodes)
-                assert 1 == len(selected_items.pins)
-                assert 0 == len(selected_items.arcs)
-                self.on_pin_item(selected_items.pins[0])
+                assert 0 == len(selected_nodes)
+                assert 1 == len(selected_pins)
+                assert 0 == len(selected_arcs)
+                self.on_pin_item(selected_pins[0])
             elif selected_items.arcs:
-                assert 0 == len(selected_items.nodes)
-                assert 0 == len(selected_items.pins)
-                assert 1 == len(selected_items.arcs)
-                self.on_arc_item(item, selected_items.arcs[0])
+                assert 0 == len(selected_nodes)
+                assert 0 == len(selected_pins)
+                assert 1 == len(selected_arcs)
+                self.on_arc_item(item, selected_arcs[0])
             else:
                 assert False, "Inaccessible section"
         else:
@@ -232,10 +236,10 @@ class PropsTab(TabItem[Graph]):
     def on_multiple_items(self, graph: Graph, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")
 
-        for i, item in enumerate(items.values()):
+        for key, item in items.items():
             typename = type(item).__name__
             title = f"{typename} ({item.name})" if item.name else typename
-            label = f"{title}###{i}"
+            label = f"{title}###{key}"
             if imgui.tree_node(label):
                 try:
                     if isinstance(item, Node):
