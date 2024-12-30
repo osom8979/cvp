@@ -16,7 +16,7 @@ class Arc:
     name: str = EMPTY_TEXT
     docs: str = EMPTY_TEXT
 
-    line_type: LineType = LineType.linear
+    line_type: LineType = LineType.bezier_cubic
     line_args: List[Point] = field(default_factory=list)
 
     _output: Optional[NodePin] = None

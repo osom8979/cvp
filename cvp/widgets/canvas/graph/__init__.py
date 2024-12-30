@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
-from typing import List, Optional, Union
+from typing import List, Optional
 from weakref import ReferenceType, ref
 
 import imgui
@@ -32,7 +31,6 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
-    _select_items: OrderedDict[int, Union[Node, Pin, Arc]]
     _connects: List[NodePin]
     _roi: Optional[Rect]
 
@@ -44,7 +42,6 @@ class CanvasGraph(CanvasController):
         self._fonts = None
 
         self._mode = ControlMode.normal
-        self._select_items = OrderedDict()
         self._connects = list()
         self._roi = None
 
@@ -75,15 +72,14 @@ class CanvasGraph(CanvasController):
         return self._mode == ControlMode.pin_connecting
 
     @property
-    def is_selection_box_mode(self) -> bool:
-        return self._mode == ControlMode.selection_box
+    def is_roi_box_mode(self) -> bool:
+        return self._mode == ControlMode.roi_box
 
     @override
     def as_unformatted_text(self) -> str:
         return super().as_unformatted_text() + (
             f"Mode: {self._mode.name}\n"
             f"Connects: {self._connects}\n"
-            f"Select items: {len(self._select_items)}\n"
             f"ROI: {self._roi}\n"
         )
 
@@ -140,17 +136,6 @@ class CanvasGraph(CanvasController):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-
-    def add_select_item(self, item: Union[Node, Pin, Arc]) -> None:
-        assert item.selected
-        self._select_items[id(item)] = item
-
-    def remove_select_item(self, item: Union[Node, Pin, Arc]) -> None:
-        assert not item.selected
-        try:
-            self._select_items.pop(id(item))
-        except KeyError:
-            pass
 
     def reset_controllers(self):
         assert self._graph is not None
@@ -300,7 +285,7 @@ class CanvasGraph(CanvasController):
                 self._update_nodes_state_for_node_moving()
             case ControlMode.pin_connecting:
                 self._update_nodes_state_for_pin_connecting()
-            case ControlMode.selection_box:
+            case ControlMode.roi_box:
                 self._update_nodes_state_for_selection_box()
             case _:
                 assert False, "Inaccessible section"
@@ -311,19 +296,12 @@ class CanvasGraph(CanvasController):
 
         if self.changed_left_up:
             if self.is_multi_select_mode:
-                item = self.graph.flip_selected_on_hovering_item()
-                if item is not None:
-                    if item.selected:
-                        self.add_select_item(item)
-                    else:
-                        self.remove_select_item(item)
+                self.graph.flip_selected_on_hovering_item()
             else:
                 hovering_item = self.graph.find_hovering_item()
                 self.graph.unselect_all_items()
-                self._select_items.clear()
                 if hovering_item is not None:
-                    hovering_item.selected = True
-                    self.add_select_item(hovering_item)
+                    self.graph.select_item(hovering_item)
 
         if self.activating and self.start_left_dragging:
             if hovering_node := self.graph.find_hovering_node():
@@ -336,12 +314,12 @@ class CanvasGraph(CanvasController):
                     if not hovering_node.selected:
                         if not self.is_multi_select_mode:
                             self.graph.unselect_all_items()
-                            self._select_items.clear()
-                        hovering_node.selected = True
-                        self.add_select_item(hovering_node)
+                        self.graph.select_item(hovering_node)
             else:
-                self._mode = ControlMode.selection_box
+                self._mode = ControlMode.roi_box
                 self._roi = self.mx, self.my, self.mx, self.my
+                if not self.is_multi_select_mode:
+                    self.graph.unselect_all_items()
 
     def _update_nodes_state_for_node_moving(self) -> None:
         assert not self.is_pan_mode
@@ -382,7 +360,7 @@ class CanvasGraph(CanvasController):
 
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
-        assert self.is_selection_box_mode
+        assert self.is_roi_box_mode
         assert self._roi is not None
 
         x1 = self._roi[0]
@@ -390,6 +368,7 @@ class CanvasGraph(CanvasController):
         x2 = self.mx
         y2 = self.my
         self._roi = x1, y1, x2, y2
+
         x1, y1, x2, y2 = self.screen_to_canvas_roi(self._roi)
         left = min(x1, x2)
         right = max(x1, x2)
@@ -401,10 +380,7 @@ class CanvasGraph(CanvasController):
             x_in = left <= nx1 <= right or left <= nx2 <= right
             y_in = top <= ny1 <= bottom or top <= ny2 <= bottom
             node.selected = x_in and y_in
-            if node.selected:
-                self.add_select_item(node)
-            else:
-                self.remove_select_item(node)
+            self.graph.update_selected_item(node)
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
@@ -667,18 +643,8 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-    @property
-    def selected_arc_only(self) -> Optional[Arc]:
-        if 1 != len(self._select_items):
-            return None
-        first_item = next(iter(self._select_items.values()))
-        if isinstance(first_item, Arc):
-            return first_item
-        else:
-            return None
-
     def draw_arcs(self) -> None:
-        selected_arc_only = self.selected_arc_only
+        selected_arc_only = self.graph.selected_arc_only
 
         for arc in self.graph.arcs:
             assert arc.output is not None
@@ -727,8 +693,8 @@ class CanvasGraph(CanvasController):
         nx = node_roi[0]
         ny = node_roi[1]
         zoom = self.zoom
-        x1 = nx + pin.icon_pos[0] * zoom + pin.icon_size[0] * zoom / 2
-        y1 = ny + pin.icon_pos[1] * zoom + pin.icon_size[1] * zoom / 2
+        x1 = nx + pin.icon_pos[0] * zoom + pin.icon_size[0] * zoom / 2.0
+        y1 = ny + pin.icon_pos[1] * zoom + pin.icon_size[1] * zoom / 2.0
         mx, my = self._mouse_pos
 
         color = imgui.get_color_u32_rgba(*self.graph.style.pin_connection_color)
@@ -743,7 +709,7 @@ class CanvasGraph(CanvasController):
             self.draw_pin_connect(connect)
 
     def draw_selection_box(self) -> None:
-        if not self.is_selection_box_mode:
+        if not self.is_roi_box_mode:
             return
 
         assert self._roi is not None
