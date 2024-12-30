@@ -232,20 +232,19 @@ class PropsTab(TabItem[Graph]):
     def on_multiple_items(self, graph: Graph, items: SelectedItems) -> None:
         input_text_disabled("Type", "Multiple")
 
-        if items.nodes:
-            for i, item in enumerate(items.all):
-                typename = type(item).__name__
-                title = f"{typename} ({item.name})" if item.name else typename
-                label = f"{title}###{i}"
-                if imgui.tree_node(label):
-                    try:
-                        if isinstance(item, Node):
-                            self.on_node_item(item)
-                        elif isinstance(item, Pin):
-                            self.on_pin_item(item)
-                        elif isinstance(item, Arc):
-                            self.on_arc_item(graph, item)
-                        else:
-                            assert False, "Inaccessible section"
-                    finally:
-                        imgui.tree_pop()
+        for i, item in enumerate(items.values()):
+            typename = type(item).__name__
+            title = f"{typename} ({item.name})" if item.name else typename
+            label = f"{title}###{i}"
+            if imgui.tree_node(label):
+                try:
+                    if isinstance(item, Node):
+                        self.on_node_item(item)
+                    elif isinstance(item, Pin):
+                        self.on_pin_item(item)
+                    elif isinstance(item, Arc):
+                        self.on_arc_item(graph, item)
+                    else:
+                        assert False, "Inaccessible section"
+                finally:
+                    imgui.tree_pop()

@@ -418,10 +418,11 @@ class Graph:
             hovering_arc.hovering = True
 
     def find_selected_items(self):
-        nodes = self.find_selected_nodes()
-        pins = self.find_selected_pins()
-        arcs = self.find_selected_arcs()
-        return SelectedItems(nodes, pins, arcs)
+        result = SelectedItems()
+        result.extends(self.find_selected_nodes())
+        result.extends(self.find_selected_pins())
+        result.extends(self.find_selected_arcs())
+        return result
 
     def remove_arc(self, arc: Arc) -> None:
         if arc.input:
