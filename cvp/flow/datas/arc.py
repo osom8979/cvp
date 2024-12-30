@@ -31,6 +31,26 @@ class Arc:
 
     _polyline: List[Point] = field(default_factory=list)
 
+    @classmethod
+    def from_connect_pair(
+        cls,
+        output_np: NodePin,
+        input_np: NodePin,
+        tess_tol=DEFAULT_CURVE_TESSELLATION_TOL,
+    ):
+        result = cls()
+        result.output = output_np
+        result.input = input_np
+        points = result.calc_linear_polyline()
+        assert 2 == len(points)
+        sx = points[0][0]
+        ex = points[1][0]
+        delta = abs(ex - sx) / 2.0
+        result.start_anchor.point = delta, 0.0
+        result.end_anchor.point = -1 * delta, 0.0
+        result.update_polyline(tess_tol)
+        return result
+
     @property
     def output(self):
         return self._output

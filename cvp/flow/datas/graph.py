@@ -358,11 +358,7 @@ class Graph:
         if not no_reorder:
             out_conn, in_conn = self.reorder_connectable_pins(out_conn, in_conn)
 
-        arc = Arc()
-        arc.output = out_conn
-        arc.input = in_conn
-        self.update_arc_polyline(arc)
-
+        arc = Arc.from_connect_pair(out_conn, in_conn, self.style.bezier_curve_tess_tol)
         self.arcs.append(arc)
         out_conn.pin.arcs.append(arc.uuid)
         in_conn.pin.arcs.append(arc.uuid)
