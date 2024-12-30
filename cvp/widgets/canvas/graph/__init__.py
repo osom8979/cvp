@@ -5,6 +5,7 @@ from weakref import ReferenceType, ref
 
 import imgui
 
+from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.line_type import LineType
@@ -70,6 +71,10 @@ class CanvasGraph(CanvasController):
     @property
     def is_pin_connecting_mode(self) -> bool:
         return self._mode == ControlMode.pin_connecting
+
+    @property
+    def is_anchor_moving_mode(self) -> bool:
+        return self._mode == ControlMode.anchor_moving
 
     @property
     def is_roi_box_mode(self) -> bool:
@@ -259,6 +264,8 @@ class CanvasGraph(CanvasController):
                 self._update_nodes_state_for_node_moving()
             case ControlMode.pin_connecting:
                 self._update_nodes_state_for_pin_connecting()
+            case ControlMode.anchor_moving:
+                self._update_nodes_state_for_anchor_moving()
             case ControlMode.roi_box:
                 self._update_nodes_state_for_selection_box()
             case _:
@@ -290,22 +297,26 @@ class CanvasGraph(CanvasController):
                             self.graph.unselect_all_items()
                         self.graph.select_item(hovering_node)
             else:
-                self._mode = ControlMode.roi_box
-                self._roi = self.mx, self.my, self.mx, self.my
-                if not self.is_multi_select_mode:
-                    self.graph.unselect_all_items()
+                if hovering_anchor := self.graph.find_hovering_anchor():
+                    hovering_anchor.selected = True
+                    self._mode = ControlMode.anchor_moving
+                else:
+                    self._mode = ControlMode.roi_box
+                    self._roi = self.mx, self.my, self.mx, self.my
+                    if not self.is_multi_select_mode:
+                        self.graph.unselect_all_items()
 
     def _update_nodes_state_for_node_moving(self) -> None:
         assert not self.is_pan_mode
         assert self.is_node_moving_mode
 
+        io = imgui.get_io()
+        dx = io.mouse_delta.x / self.zoom
+        dy = io.mouse_delta.y / self.zoom
+        self.graph.move_on_selected_nodes((dx, dy))
+
         if self.changed_left_up:
             self._mode = ControlMode.normal
-        else:
-            io = imgui.get_io()
-            dx = io.mouse_delta.x / self.zoom
-            dy = io.mouse_delta.y / self.zoom
-            self.graph.move_on_selected_nodes((dx, dy))
 
     def _update_nodes_state_for_pin_connecting(self) -> None:
         assert not self.is_pan_mode
@@ -331,6 +342,22 @@ class CanvasGraph(CanvasController):
 
             self._mode = ControlMode.normal
             self._connects.clear()
+
+    def _update_nodes_state_for_anchor_moving(self) -> None:
+        assert not self.is_pan_mode
+        assert self.is_anchor_moving_mode
+
+        io = imgui.get_io()
+        dx = io.mouse_delta.x / self.zoom
+        dy = io.mouse_delta.y / self.zoom
+        self.graph.move_on_selected_anchor((dx, dy))
+
+        if self.changed_left_up:
+            self._mode = ControlMode.normal
+            selected_arc = self.graph.selected_arc_only
+            assert selected_arc is not None
+            selected_arc.start_anchor.selected = False
+            selected_arc.end_anchor.selected = False
 
     def _update_nodes_state_for_selection_box(self) -> None:
         assert not self.is_pan_mode
@@ -382,6 +409,15 @@ class CanvasGraph(CanvasController):
             return style.hovering_color
         else:
             return style.arc_color
+
+    @staticmethod
+    def get_anchor_color(arc: Anchor, style: Style) -> RGBA:
+        if arc.selected:
+            return style.select_color
+        elif arc.hovering:
+            return style.hovering_color
+        else:
+            return style.anchor_color
 
     @staticmethod
     def get_node_stroke(node: Node, style: Style) -> Stroke:
@@ -634,29 +670,21 @@ class CanvasGraph(CanvasController):
         self._draw_list.add_polyline(polyline, color, 0, thickness)
 
     def draw_arc_anchors(self, arc: Arc) -> None:
-        assert arc.selected
+        if arc.line_type != LineType.bezier_cubic:
+            return
 
-        if arc.line_type == LineType.bezier_cubic:
-            assert 2 <= len(arc.polyline)
+        radius = self.graph.style.anchor_radius
+        start, end = arc.get_bezier_cubic_anchors()
 
-            color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
-            anchor_half_size = self.graph.style.arc_anchor_size / 2.0
-            start, end = arc.get_bezier_cubic_anchors()
+        start_rgba = self.get_anchor_color(arc.start_anchor, self.graph.style)
+        start_color = imgui.get_color_u32_rgba(*start_rgba)
+        sx, sy = self.canvas_to_screen_coords(start)
+        self._draw_list.add_circle_filled(sx, sy, radius, start_color)
 
-            sx, sy = self.canvas_to_screen_coords(start)
-            ex, ey = self.canvas_to_screen_coords(end)
-
-            sx1 = sx - anchor_half_size
-            sy1 = sy - anchor_half_size
-            sx2 = sx + anchor_half_size
-            sy2 = sy + anchor_half_size
-            self._draw_list.add_rect_filled(sx1, sy1, sx2, sy2, color)
-
-            ex1 = ex - anchor_half_size
-            ey1 = ey - anchor_half_size
-            ex2 = ex + anchor_half_size
-            ey2 = ey + anchor_half_size
-            self._draw_list.add_rect_filled(ex1, ey1, ex2, ey2, color)
+        end_rgba = self.get_anchor_color(arc.end_anchor, self.graph.style)
+        end_color = imgui.get_color_u32_rgba(*end_rgba)
+        ex, ey = self.canvas_to_screen_coords(end)
+        self._draw_list.add_circle_filled(ex, ey, radius, end_color)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node

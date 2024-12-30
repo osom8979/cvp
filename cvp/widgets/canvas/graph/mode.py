@@ -8,4 +8,5 @@ class ControlMode(Enum):
     normal = auto()
     node_moving = auto()
     pin_connecting = auto()
+    anchor_moving = auto()
     roi_box = auto()

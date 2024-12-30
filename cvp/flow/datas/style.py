@@ -37,7 +37,9 @@ class Style:
 
     arc_color: RGBA = field(default_factory=lambda: (*SILVER, 0.8))
     arc_thickness: float = 2.0
-    arc_anchor_size: float = 4.0
+
+    anchor_color: RGBA = field(default_factory=lambda: (*BLUE, 0.8))
+    anchor_radius: float = 3.0
 
     bezier_curve_tess_tol: float = DEFAULT_CURVE_TESSELLATION_TOL
 

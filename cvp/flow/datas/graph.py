@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence, Set, Tuple, Union
+from math import sqrt
+from typing import List, Optional, Sequence, Set, Union
 from uuid import uuid4
 
 import shapely
 
 from cvp.flow.datas.action import Action
+from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.canvas import Canvas
@@ -73,6 +75,8 @@ class Graph:
 
         for arc in self.arcs:
             arc.hovering = False
+            arc.start_anchor.hovering = False
+            arc.end_anchor.hovering = False
 
     def find_hovering_node_with_mouse(self, mouse: Point) -> Optional[Node]:
         mx, my = mouse
@@ -118,6 +122,34 @@ class Graph:
         for arc in self.arcs:
             if arc.hovering:
                 return arc
+        return None
+
+    def find_hovering_anchor_with_mouse(
+        self,
+        arc: Arc,
+        mouse: Point,
+    ) -> Optional[Anchor]:
+        mx, my = mouse
+        radius = self.style.anchor_radius
+
+        start, end = arc.get_bezier_cubic_anchors()
+        sx, sy = start
+        start_distance = sqrt((mx - sx) ** 2 + (my - sy) ** 2)
+        if start_distance <= radius:
+            return arc.start_anchor
+
+        ex, ey = end
+        end_distance = sqrt((mx - ex) ** 2 + (my - ey) ** 2)
+        if end_distance <= radius:
+            return arc.end_anchor
+        return None
+
+    def find_hovering_anchor(self) -> Optional[Anchor]:
+        if selected_arc := self.selected_arc_only:
+            if selected_arc.start_anchor.hovering:
+                return selected_arc.start_anchor
+            if selected_arc.end_anchor.hovering:
+                return selected_arc.end_anchor
         return None
 
     def find_hovering_item(self) -> Optional[Union[Node, Pin, Arc]]:
@@ -185,6 +217,8 @@ class Graph:
 
         for arc in self.arcs:
             arc.selected = False
+            arc.start_anchor.selected = False
+            arc.end_anchor.selected = False
 
         self._selected_items.clear()
 
@@ -226,6 +260,25 @@ class Graph:
                 for arc_uuid in pin.arcs:
                     if arc := self.find_arc(arc_uuid):
                         self.update_arc_polyline(arc, force=True)
+
+    def move_on_selected_anchor(self, delta: Size) -> None:
+        dx, dy = delta
+        if dx == 0 and dy == 0:
+            return
+
+        selected_arc = self.selected_arc_only
+        if selected_arc is None:
+            return
+
+        if selected_arc.start_anchor.selected:
+            selected_arc.start_anchor.x += dx
+            selected_arc.start_anchor.y += dy
+
+        if selected_arc.end_anchor.selected:
+            selected_arc.end_anchor.x += dx
+            selected_arc.end_anchor.y += dy
+
+        self.update_arc_polyline(selected_arc, force=True)
 
     def update_arcs_io(self, *, force=False) -> None:
         for arc in self.arcs:
@@ -319,35 +372,6 @@ class Graph:
         assert arc.input is not None
         arc.update_polyline(self.style.bezier_curve_tess_tol)
 
-    def find_hovering_bezier_cubic_anchor_with_mouse(
-        self, mouse: Point
-    ) -> Optional[Tuple[Arc, int]]:
-        selected_arc_only = self.selected_arc_only
-        if selected_arc_only is None:
-            return None
-
-        anchor_half_size = self.style.arc_anchor_size / 2.0
-        start, end = selected_arc_only.get_bezier_cubic_anchors()
-        sx, sy = start
-        ex, ey = end
-        mx, my = mouse
-
-        sx1 = sx - anchor_half_size
-        sy1 = sy - anchor_half_size
-        sx2 = sx + anchor_half_size
-        sy2 = sy + anchor_half_size
-        if sx1 <= mx <= sx2 and sy1 <= my <= sy2:
-            return selected_arc_only, 0
-
-        ex1 = ex - anchor_half_size
-        ey1 = ey - anchor_half_size
-        ex2 = ex + anchor_half_size
-        ey2 = ey + anchor_half_size
-        if ex1 <= mx <= ex2 and ey1 <= my <= ey2:
-            return selected_arc_only, 1
-
-        return None
-
     def connect_pins(
         self,
         out_conn: NodePin,
@@ -366,18 +390,18 @@ class Graph:
         return arc
 
     def update_hovering_state(self, mouse: Point) -> None:
-        hovering_node = self.find_hovering_node_with_mouse(mouse)
-        if hovering_node is not None:
+        if hovering_node := self.find_hovering_node_with_mouse(mouse):
             hovering_node.hovering = True
-            hovering_pin = hovering_node.find_hovering_pin_with_mouse(mouse)
-            if hovering_pin is not None:
+            if hovering_pin := hovering_node.find_hovering_pin_with_mouse(mouse):
                 hovering_pin.hovering = True
-                return
             return
 
-        hovering_arc = self.find_hovering_arc_with_mouse(mouse)
-        if hovering_arc is not None:
+        if hovering_arc := self.find_hovering_arc_with_mouse(mouse):
             hovering_arc.hovering = True
+
+        if selected_arc_only := self.selected_arc_only:
+            if anchor := self.find_hovering_anchor_with_mouse(selected_arc_only, mouse):
+                anchor.hovering = True
 
     def remove_arc(self, arc: Arc) -> None:
         if arc.input:

@@ -3,25 +3,37 @@
 [![PyPI](https://img.shields.io/pypi/v/cvp?style=flat-square)](https://pypi.org/project/cvp/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cvp?style=flat-square)
 
-Computer Vision Player
+**Computer Vision Player**
 
 ![Screenshot](./docs/images/screenshot.jpg)
 
 ## Features
 
-* Graph based visual programming
-* ONVIF Client
-* WsDiscovery
+* ONVIF client
+* WS-Discovery client
 * FFmpeg media player
 * Layout management
 * Subprocess management
 * Window management
 * Font browser
-* [Planned] Stitching
-* [Planned] Labeling
-* [Planned] Modeling
-* [Planned] Database
-* [Planned] CEF
+* [Developing] Graph based visual programming
+  * Built-in
+  * OpenCV
+  * NumPy
+  * CuPy
+  * Pandas
+
+## Planned
+
+* Plugin manager
+* MediaMTX client
+* LLM chatting
+* Stitching tool
+* Labeling tool
+* 3D Model rendering
+* Database browser
+* CEF client
+* GIS browser
 
 ## Developing
 
