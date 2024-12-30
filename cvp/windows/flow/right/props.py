@@ -213,11 +213,15 @@ class PropsTab(TabItem[Graph]):
             arc.line_type = LineType(line_name)
             graph.update_arc_polyline(arc, force=True)
 
-        for i, anchor in enumerate(arc.line_args):
-            ax, ay = anchor
-            if anchor_result := drag_float2(f"Line Arg {i}", ax, ay):
-                arc.line_args[i] = anchor_result.values
-                graph.update_arc_polyline(arc, force=True)
+        sax, say = arc.start_anchor.point
+        if anchor_result := drag_float2("Start Anchor", sax, say):
+            arc.start_anchor.point = anchor_result.values
+            graph.update_arc_polyline(arc, force=True)
+
+        eax, eay = arc.end_anchor.point
+        if anchor_result := drag_float2("End Anchor", eax, eay):
+            arc.end_anchor.point = anchor_result.values
+            graph.update_arc_polyline(arc, force=True)
 
         if arc.output:
             if imgui.tree_node("Output pin"):

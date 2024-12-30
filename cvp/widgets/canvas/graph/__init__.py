@@ -638,7 +638,6 @@ class CanvasGraph(CanvasController):
 
         if arc.line_type == LineType.bezier_cubic:
             assert 2 <= len(arc.polyline)
-            assert 2 <= len(arc.line_args)
 
             color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
             anchor_half_size = self.graph.style.arc_anchor_size / 2.0

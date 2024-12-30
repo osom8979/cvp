@@ -15,14 +15,12 @@ from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
 from cvp.flow.datas.grid import Grid
-from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.selected_items import SelectableAny, SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
-from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Point, Size
 
@@ -317,48 +315,9 @@ class Graph:
         if arc.input is None:
             self.update_arc_input(arc)
 
-        output_np = arc.output
-        input_np = arc.input
-        assert output_np is not None
-        assert input_np is not None
-
-        snx, sny = output_np.node.node_pos
-        six, siy = output_np.pin.icon_pos
-        siw, sih = output_np.pin.icon_size
-        sx = snx + six + siw / 2
-        sy = sny + siy + sih / 2
-        sp = sx, sy
-
-        enx, eny = input_np.node.node_pos
-        eix, eiy = input_np.pin.icon_pos
-        eiw, eih = input_np.pin.icon_size
-        ex = enx + eix + eiw / 2
-        ey = eny + eiy + eih / 2
-        ep = ex, ey
-
-        tess_tol = self.style.bezier_curve_tess_tol
-        delta = abs(ex - sx) / 2
-
-        match arc.line_type:
-            case LineType.linear:
-                arc.polyline = [sp, ep]
-            case LineType.bezier_cubic:
-                if len(arc.line_args) <= 0:
-                    arc.line_args.append((delta, 0.0))
-                if len(arc.line_args) <= 1:
-                    arc.line_args.append((-delta, 0.0))
-
-                assert 2 <= len(arc.line_args)
-
-                dx, dy = arc.line_args[0]
-                p2 = sx + dx, sy + dy
-
-                dx, dy = arc.line_args[1]
-                p3 = ex + dx, ey + dy
-
-                arc.polyline = bezier_cubic_casteljau_points(sp, p2, p3, ep, tess_tol)
-            case _:
-                assert False, "Inaccessible section"
+        assert arc.output is not None
+        assert arc.input is not None
+        arc.update_polyline(self.style.bezier_curve_tess_tol)
 
     def find_hovering_bezier_cubic_anchor_with_mouse(
         self, mouse: Point

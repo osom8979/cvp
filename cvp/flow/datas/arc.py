@@ -4,10 +4,13 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 from uuid import uuid4
 
+from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
+from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
 from cvp.types.shapes import Point, Rect
+from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
 
 
 @dataclass
@@ -17,7 +20,8 @@ class Arc:
     docs: str = EMPTY_TEXT
 
     line_type: LineType = LineType.bezier_cubic
-    line_args: List[Point] = field(default_factory=list)
+    start_anchor: Anchor = field(default_factory=Anchor)
+    end_anchor: Anchor = field(default_factory=Anchor)
 
     _output: Optional[NodePin] = None
     _input: Optional[NodePin] = None
@@ -78,17 +82,65 @@ class Arc:
     def get_bezier_cubic_anchors(self) -> Tuple[Point, Point]:
         if len(self.polyline) < 2:
             raise ValueError("At least 2 'polyline' elements are required")
-        if len(self.line_args) < 2:
-            raise ValueError("At least 2 'line_args' elements are required")
 
         # The first/last index point is located at the connected pin.
         sx, sy = self.polyline[0]
         ex, ey = self.polyline[-1]
 
-        sdx, sdy = self.line_args[0]
-        edx, edy = self.line_args[1]
+        sax, say = self.start_anchor.point
+        eax, eay = self.end_anchor.point
 
-        p1 = sx + sdx, sy + sdy
-        p2 = ex + edx, ey + edy
+        p1 = sx + sax, sy + say
+        p2 = ex + eax, ey + eay
 
         return p1, p2
+
+    def update_polyline(self, tess_tol=DEFAULT_CURVE_TESSELLATION_TOL) -> None:
+        points = self.calc_polyline(tess_tol)
+        self._polyline.clear()
+        self._polyline.extend(points)
+
+    def calc_polyline(self, tess_tol=DEFAULT_CURVE_TESSELLATION_TOL) -> List[Point]:
+        match self.line_type:
+            case LineType.linear:
+                return self.calc_linear_polyline()
+            case LineType.bezier_cubic:
+                return self.calc_bezier_cubic_polyline(tess_tol)
+            case _:
+                assert False, "Inaccessible section"
+
+    def calc_linear_polyline(self) -> List[Point]:
+        if self._input is None:
+            raise ValueError("The 'input' attribute is empty")
+        if self._output is None:
+            raise ValueError("The 'output' attribute is empty")
+
+        snx, sny = self._output.node.node_pos
+        six, siy = self._output.pin.icon_pos
+        siw, sih = self._output.pin.icon_size
+        sx = snx + six + siw / 2
+        sy = sny + siy + sih / 2
+        sp = sx, sy
+
+        enx, eny = self._input.node.node_pos
+        eix, eiy = self._input.pin.icon_pos
+        eiw, eih = self._input.pin.icon_size
+        ex = enx + eix + eiw / 2
+        ey = eny + eiy + eih / 2
+        ep = ex, ey
+
+        return [sp, ep]
+
+    def calc_bezier_cubic_polyline(
+        self,
+        tess_tol=DEFAULT_CURVE_TESSELLATION_TOL,
+    ) -> List[Point]:
+        points = self.calc_linear_polyline()
+        assert 2 == len(points)
+        sx, sy = sp = points[0]
+        ex, ey = ep = points[1]
+        sax, say = self.start_anchor.point
+        p2 = sx + sax, sy + say
+        eax, eay = self.end_anchor.point
+        p3 = ex + eax, ey + eay
+        return bezier_cubic_casteljau_points(sp, p2, p3, ep, tess_tol)

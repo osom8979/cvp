@@ -2,16 +2,25 @@
 
 from dataclasses import dataclass
 
-from cvp.flow.datas.constants import EMPTY_POINT
 from cvp.types.shapes import Point
 
 
 @dataclass
 class Anchor:
-    pos: Point = EMPTY_POINT
+    x: float = 0.0
+    y: float = 0.0
 
     _selected: bool = False
     _hovering: bool = False
+
+    @property
+    def point(self):
+        return self.x, self.y
+
+    @point.setter
+    def point(self, value: Point) -> None:
+        self.x = value[0]
+        self.y = value[1]
 
     @property
     def selected(self):
