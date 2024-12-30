@@ -5,6 +5,22 @@
 
 Computer Vision Player
 
+## Features
+
+* Graph based visual programming
+* ONVIF Client
+* WsDiscovery
+* FFmpeg media player
+* Layout management
+* Subprocess management
+* Window management
+* Font browser
+* [Planned] Stitching
+* [Planned] Labeling
+* [Planned] Modeling
+* [Planned] Database
+* [Planned] CEF
+
 ## Developing
 
 ```shell
