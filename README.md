@@ -5,6 +5,8 @@
 
 Computer Vision Player
 
+![Screenshot](./docs/images/screenshot.jpg)
+
 ## Features
 
 * Graph based visual programming
