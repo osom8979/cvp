@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict, Final, Optional
+from typing import Final
 
 import imgui
 
@@ -35,8 +35,6 @@ _CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_
 
 
 class FlowWindow(AuiWindow[FlowAuiConfig]):
-    _canvases: Dict[str, CanvasGraph]
-
     def __init__(self, context: Context, fonts: FontMapper):
         super().__init__(
             context=context,
@@ -50,8 +48,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         )
 
         self._fonts = fonts
-        self._cursor = FlowCursor()
-        self._canvases = dict()
+        self._cursor = FlowCursor(fonts)
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context, fonts, self._cursor)
         self._right_tabs = FlowRightTabs(context, fonts, self._cursor)
@@ -96,21 +93,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def split_tree(self, value: float) -> None:
         self.window_config.split_tree = value
 
-    @property
-    def current_canvas(self) -> Optional[CanvasGraph]:
-        graph = self._cursor.graph
-        if graph is None:
-            return None
-
-        canvas = self._canvases.get(graph.uuid)
-        if canvas is None:
-            canvas = CanvasGraph(graph, self._fonts)
-            self._canvases[graph.uuid] = canvas
-
-        assert canvas is not None
-        assert isinstance(canvas, CanvasGraph)
-        return canvas
-
     def on_new_graph_popup(self, name: str) -> None:
         graph = self.context.fm.create_graph(name, append=True)
         filepath = self.context.home.flows.graph_filepath(graph.uuid)
@@ -128,16 +110,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_process(self) -> None:
         self.on_menu()
         super().on_process()
-
-    def on_close_graph(self, uuid: str):
-        if self.context.debug:
-            logger.debug(f"{type(self).__name__}.('{uuid}')")
-
-        graph = self.context.fm.get(uuid)
-        if graph is None:
-            return
-
-        self.context.save_graph(graph)
 
     def on_open_graph(self, uuid: str):
         if self.context.debug:
@@ -165,35 +137,70 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
                         func()
 
     def on_file_menu(self) -> None:
-        if imgui.menu_item("New graph")[0]:
-            self._new_graph_popup.show()
+        if menu_item("New graph"):
+            self.show_new_graph_popup()
 
-        # if imgui.menu_item("Open graph file")[0]:
+        # if menu_item("Open graph file"):
         #     self._open_graph_popup.show()
         # with imgui.begin_menu("Open recent") as recent_menu:
         #     if recent_menu.opened:
-        #         if imgui.menu_item("graph1.yml")[0]:
+        #         if menu_item("graph1.yml"):
         #             pass
-        #         if imgui.menu_item("graph2.yml")[0]:
+        #         if menu_item("graph2.yml"):
         #             pass
-        # if imgui.menu_item("Save")[0]:
+        # if menu_item("Save"):
         #     pass
-        # if imgui.menu_item("Save As..")[0]:
+        # if menu_item("Save As.."):
         #     pass
 
         imgui.separator()
-
-        # has_cursor = self.context.fm.opened
-        # if imgui.menu_item("Close graph", None, False, enabled=has_cursor)[0]:
-        #     self._cursor.graph = None
+        if menu_item("Close graph", enabled=self._cursor.opened):
+            self.close_graph()
 
         imgui.separator()
-        if imgui.menu_item("Exit")[0]:
+        if menu_item("Exit"):
             self.close()
 
     def on_graph_menu(self) -> None:
-        if imgui.menu_item("Refresh graphs")[0]:
+        if menu_item("Refresh graphs"):
+            self.refresh_graphs()
+
+    def show_new_graph_popup(self) -> None:
+        self._new_graph_popup.show()
+
+    def close_graph(self):
+        graph = self._cursor.graph
+        if graph is None:
+            return
+
+        if self.context.debug:
+            logger.debug(f"Close the flow graph: '{graph.uuid}'")
+
+        try:
+            self.context.save_graph(graph)
+            logger.info(f"The flow graph was successfully saved: '{graph.uuid}'")
+        except BaseException as e:
+            logger.error(f"Failed to save the flow graph: '{graph.uuid}' -> '{e}'")
+        finally:
+            self._cursor.close()
+
+    def refresh_graphs(self) -> None:
+        graph_uuid_stash = str()
+
+        if graph := self._cursor.graph:
+            graph_uuid_stash = graph.uuid
+
+        self.context.fm.clear()
+        self._cursor.clear()
+
+        try:
             self.context.fm.refresh_flow_graphs()
+        except BaseException as e:
+            logger.error(e)
+
+        if graph_uuid_stash:
+            if graph := self.context.fm.get(graph_uuid_stash):
+                self._cursor.open(graph)
 
     @override
     def on_process_sidebar_left(self):
@@ -211,7 +218,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_right(self):
         imgui.text("Canvas controller:")
-        if canvas := self.current_canvas:
+        if canvas := self._cursor.canvas:
             with canvas:
                 canvas.do_process_controllers(debugging=self.context.debug)
         imgui.spacing()
@@ -223,15 +230,15 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process_main(self) -> None:
-        if self._cursor.graph is None:
+        canvas = self._cursor.canvas
+        if canvas is None:
             text_centered("Please select a graph")
             return
 
         self.begin_child_canvas()
         try:
-            if canvas := self.current_canvas:
-                with canvas:
-                    self.on_canvas(canvas)
+            with canvas:
+                self.on_canvas(canvas)
         finally:
             imgui.end_child()
 

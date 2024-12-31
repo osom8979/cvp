@@ -19,7 +19,7 @@ class LogsTab(TabItem[Graph]):
         self._auto_scroll = False
 
     @override
-    def on_item(self, item: Graph) -> None:
+    def on_process(self) -> None:
         with begin_child("## Logging", border=False):
             imgui.text_unformatted("Empty logging")
 

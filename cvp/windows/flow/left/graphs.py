@@ -29,4 +29,4 @@ class GraphsTab(TabItem[Graph]):
 
             if imgui.selectable(label, selected, flags)[0]:
                 if imgui.is_mouse_double_clicked(0):
-                    self._cursor.graph = graph
+                    self._cursor.open(graph)
