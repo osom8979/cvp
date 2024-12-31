@@ -6,8 +6,10 @@ from typing import List
 from cvp.flow.datas.constants import EMPTY_TEXT, WHITE_RGBA
 from cvp.flow.datas.templates.pin import PinTemplate
 from cvp.types.colors import RGBA
+from cvp.types.dataclass.public_eq import public_eq
 
 
+@public_eq
 @dataclass
 class NodeTemplate:
     name: str = EMPTY_TEXT

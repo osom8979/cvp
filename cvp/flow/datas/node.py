@@ -7,9 +7,11 @@ from uuid import uuid4
 from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT, WHITE_RGBA
 from cvp.flow.datas.pin import Pin
 from cvp.types.colors import RGBA
+from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Rect, Size
 
 
+@public_eq
 @dataclass
 class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))

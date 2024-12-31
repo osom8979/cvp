@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from math import sqrt
 from typing import List, Optional, Sequence, Set, Union
 from uuid import uuid4
@@ -24,9 +24,11 @@ from cvp.flow.datas.selected_items import SelectableAny, SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.types.colors import RGBA
+from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Size
 
 
+@public_eq
 @dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
@@ -45,6 +47,16 @@ class Graph:
     config: Config = field(default_factory=Config)
 
     _selected_items: SelectedItems = field(default_factory=SelectedItems)
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Graph):
+            return False
+        for f in fields(self):
+            if f.name.startswith("_"):
+                continue
+            if getattr(self, f.name) != getattr(other, f.name):
+                return False
+        return True
 
     @property
     def selected_items(self):

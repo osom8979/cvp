@@ -14,10 +14,12 @@ from cvp.flow.datas.stroke import Stroke
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
+from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Size
 from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
 
 
+@public_eq
 @dataclass
 class Style:
     selected_node: Stroke = field(default_factory=lambda: Stroke.default_selected())

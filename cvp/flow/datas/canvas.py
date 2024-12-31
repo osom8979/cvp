@@ -2,7 +2,10 @@
 
 from dataclasses import dataclass
 
+from cvp.types.dataclass.public_eq import public_eq
 
+
+@public_eq
 @dataclass
 class Canvas:
     pan_x: float = 0.0

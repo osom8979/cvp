@@ -2,9 +2,11 @@
 
 from dataclasses import dataclass
 
+from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point
 
 
+@public_eq
 @dataclass
 class Anchor:
     x: float = 0.0

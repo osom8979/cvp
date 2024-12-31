@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 
 from cvp.flow.datas.constants import EMPTY_TEXT
+from cvp.types.dataclass.public_eq import public_eq
 
 
+@public_eq
 @dataclass
 class ArcTemplate:
     output_node: str = EMPTY_TEXT

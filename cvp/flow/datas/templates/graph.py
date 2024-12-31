@@ -8,8 +8,10 @@ from cvp.flow.datas.dtype import DataType
 from cvp.flow.datas.templates.arc import ArcTemplate
 from cvp.flow.datas.templates.node import NodeTemplate
 from cvp.types.colors import RGBA
+from cvp.types.dataclass.public_eq import public_eq
 
 
+@public_eq
 @dataclass
 class GraphTemplate:
     name: str = EMPTY_TEXT
