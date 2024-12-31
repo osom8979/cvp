@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from typing import Iterable, List, Optional, TypeGuard, Union
+from typing import Iterable, List, Optional, TypeAlias, TypeGuard, Union
 
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.pin import Pin
 
+SelectableKey: TypeAlias = int
 SelectableAny = Union[Node, Pin, Arc]
+SelectableDict = OrderedDict[SelectableKey, SelectableAny]
 
 
 class SelectedItems:
-    _items: OrderedDict[int, SelectableAny]
+    _items: SelectableDict
 
-    def __init__(self):
-        self._items = OrderedDict()
+    def __init__(self, items: Optional[SelectableDict] = None):
+        self._items = items if items else SelectableDict()
 
-    def __len__(self):
-        return len(self._items)
+    def __len__(self) -> int:
+        return self._items.__len__()
+
+    def __contains__(self, item: Union[SelectableKey, SelectableAny]) -> bool:
+        if not isinstance(item, SelectableKey):
+            item = id(item)
+
+        assert isinstance(item, SelectableKey)
+        return self._items.__contains__(item)
 
     def keys(self):
         return self._items.keys()
@@ -27,6 +36,9 @@ class SelectedItems:
 
     def items(self):
         return self._items.items()
+
+    def copy(self):
+        return self.__class__(self._items.copy())
 
     @staticmethod
     def _is_node(item: SelectableAny) -> TypeGuard[Node]:

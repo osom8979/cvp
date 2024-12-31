@@ -11,6 +11,7 @@ from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
+from cvp.flow.datas.selected_items import SelectedItems
 from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
@@ -35,6 +36,7 @@ class CanvasGraph(CanvasController):
     _mode: ControlMode
     _connects: List[NodePin]
     _roi: Optional[Rect]
+    _selected_stash: Optional[SelectedItems]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
@@ -52,6 +54,7 @@ class CanvasGraph(CanvasController):
         self._mode = ControlMode.normal
         self._connects = list()
         self._roi = None
+        self._selected_stash = None
 
     @property
     def is_multi_select_mode(self) -> bool:
@@ -321,9 +324,10 @@ class CanvasGraph(CanvasController):
                     self._mode = ControlMode.anchor_moving
                 else:
                     self._mode = ControlMode.roi_box
-                    self._roi = self.mx, self.my, self.mx, self.my
                     if not self.is_multi_select_mode:
                         self.graph.unselect_all_items()
+                    self._roi = self.mx, self.my, self.mx, self.my
+                    self._selected_stash = self.graph.selected_items.copy()
 
     def _update_nodes_state_for_node_moving(self) -> None:
         assert not self.is_pan_mode
@@ -355,12 +359,11 @@ class CanvasGraph(CanvasController):
             hovering_np.pin.connectable = bool(connect_pairs)
 
         if self.changed_left_up:
+            self._mode = ControlMode.normal
+            self._connects.clear()
             if connect_pairs:
                 for out_conn, in_conn in connect_pairs:
                     self.graph.connect_pins(out_conn, in_conn, no_reorder=True)
-
-            self._mode = ControlMode.normal
-            self._connects.clear()
 
     def _update_nodes_state_for_anchor_moving(self) -> None:
         assert not self.is_pan_mode
@@ -382,6 +385,7 @@ class CanvasGraph(CanvasController):
         assert not self.is_pan_mode
         assert self.is_roi_box_mode
         assert self._roi is not None
+        assert self._selected_stash is not None
 
         x1 = self._roi[0]
         y1 = self._roi[1]
@@ -399,12 +403,17 @@ class CanvasGraph(CanvasController):
             nx1, ny1, nx2, ny2 = node.node_roi
             x_in = left <= nx1 <= right or left <= nx2 <= right
             y_in = top <= ny1 <= bottom or top <= ny2 <= bottom
-            node.selected = x_in and y_in
-            self.graph.update_selected_item(node)
+            if x_in and y_in:
+                node.selected = node not in self._selected_stash
+            else:
+                node.selected = node in self._selected_stash
 
         if self.changed_left_up:
             self._mode = ControlMode.normal
             self._roi = None
+            self._selected_stash = None
+            for node in self.graph.nodes:
+                self.graph.update_selected_item(node)
 
     # ==================================================================================
     # Color Picker

@@ -57,6 +57,10 @@ class Graph:
     def update_selected_item(self, item: SelectableAny) -> None:
         self._selected_items.apply(item)
 
+    def update_selected_nodes(self) -> None:
+        for node in self.nodes:
+            self._selected_items.apply(node)
+
     def select_item(self, item: SelectableAny) -> None:
         item.selected = True
         self._selected_items.add(item)
