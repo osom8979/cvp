@@ -20,11 +20,10 @@ from cvp.yaml.dumpers import IndentListDumper
 
 
 class FlowManager(OrderedDict[str, Graph]):
-    def __init__(self, home: HomeDir, *, cursor: Optional[str] = None, update=False):
+    def __init__(self, home: HomeDir, *, update=False):
         super().__init__()
         self._catalog = FlowCatalog.from_builtins()
         self._home = home
-        self._cursor = cursor
         if update:
             self.refresh_flow_graphs()
 
@@ -36,56 +35,13 @@ class FlowManager(OrderedDict[str, Graph]):
     def catalog(self):
         return self._catalog
 
-    @property
-    def opened(self):
-        return bool(self._cursor)
-
-    @property
-    def cursor(self):
-        return self._cursor
-
-    @property
-    def current_graph(self) -> Optional[Graph]:
-        if self._cursor is None:
-            return None
-        return self.get(self._cursor, None)
-
-    def open_graph(self, uuid: str) -> None:
-        if uuid not in self:
-            raise KeyError(f"Not exists flow graph: '{uuid}'")
-
-        if self._cursor:
-            raise ValueError("The graph is already opened")
-
-        assert self._cursor is None
-        self._cursor = uuid
-
-    def close_graph(self) -> None:
-        if not self._cursor:
-            raise ValueError("The graph is already closed")
-
-        assert isinstance(self._cursor, str)
-        self._cursor = None
-
-    def open_graph_safely(self, uuid: str) -> None:
-        if self.opened:
-            self.close_graph()
-
-        assert not self.opened
-        self.open_graph(uuid)
-
-    # noinspection PyShadowingBuiltins
     def create_graph(
         self,
         name: str,
         *,
         template: Optional[str] = None,
         append=False,
-        open=False,
     ) -> Graph:
-        if not append and open:
-            raise ValueError("If you don't append a graph, you can't select it")
-
         template = template if template else str()
         assert isinstance(template, str)
         graph = Graph(name=name)
@@ -96,14 +52,9 @@ class FlowManager(OrderedDict[str, Graph]):
             assert graph.uuid not in self
             self[graph.uuid] = graph
 
-        if open:
-            self._cursor = graph.uuid
-
         return graph
 
     def remove_graph(self, uuid: str) -> Graph:
-        if uuid == self._cursor:
-            raise KeyError(f"The selected graph cannot be removed: '{uuid}'")
         if uuid in self:
             raise KeyError(f"Not exists flow graph: '{uuid}'")
         return self.pop(uuid)
@@ -141,11 +92,7 @@ class FlowManager(OrderedDict[str, Graph]):
     def get_node_template(self, path: Union[str, FlowPath]):
         return self._catalog.get_node_template(path)
 
-    def add_node(self, path: Union[str, FlowPath]) -> Node:
-        graph = self.current_graph
-        if graph is None:
-            raise LookupError("A graph must be selected")
-
+    def add_node(self, graph: Graph, path: Union[str, FlowPath]) -> Node:
         node_template = self.get_node_template(path)
         node_name = node_template.name
         node_docs = node_template.docs

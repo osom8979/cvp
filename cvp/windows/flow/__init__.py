@@ -7,7 +7,6 @@ import imgui
 from cvp.config.sections.flow import FlowAuiConfig
 from cvp.config.sections.proxies.flow import SplitTreeProxy
 from cvp.context.context import Context
-from cvp.flow.datas.graph import Graph
 from cvp.imgui.begin_child import begin_child
 from cvp.imgui.drag_types import DRAG_FLOW_NODE_TYPE
 from cvp.imgui.fonts.mapper import FontMapper
@@ -25,18 +24,18 @@ from cvp.widgets.canvas.graph import CanvasGraph
 from cvp.widgets.splitter import Splitter
 from cvp.windows.flow.bottom import FlowBottomTabs
 from cvp.windows.flow.catalogs import Catalogs
+from cvp.windows.flow.cursor import FlowCursor
 from cvp.windows.flow.left import FlowLeftTabs
 from cvp.windows.flow.right import FlowRightTabs
 
 _WINDOW_NO_MOVE: Final[int] = imgui.WINDOW_NO_MOVE
 _WINDOW_NO_SCROLLBAR: Final[int] = imgui.WINDOW_NO_SCROLLBAR
 _WINDOW_NO_RESIZE: Final[int] = imgui.WINDOW_NO_RESIZE
-CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
+_CANVAS_FLAGS: Final[int] = _WINDOW_NO_MOVE | _WINDOW_NO_SCROLLBAR | _WINDOW_NO_RESIZE
 
 
 class FlowWindow(AuiWindow[FlowAuiConfig]):
     _canvases: Dict[str, CanvasGraph]
-    _prev_cursor: Optional[str]
 
     def __init__(self, context: Context, fonts: FontMapper):
         super().__init__(
@@ -51,13 +50,12 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         )
 
         self._fonts = fonts
+        self._cursor = FlowCursor()
         self._canvases = dict()
         self._catalogs = Catalogs(context)
-        self._left_tabs = FlowLeftTabs(context, fonts)
-        self._right_tabs = FlowRightTabs(context, fonts)
-        self._bottom_tabs = FlowBottomTabs(context)
-
-        self._prev_cursor = None
+        self._left_tabs = FlowLeftTabs(context, fonts, self._cursor)
+        self._right_tabs = FlowRightTabs(context, fonts, self._cursor)
+        self._bottom_tabs = FlowBottomTabs(context, fonts, self._cursor)
 
         self._split_tree = SplitTreeProxy(context.config.flow_aui)
         self._tree_splitter = Splitter.from_horizontal(
@@ -99,12 +97,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         self.window_config.split_tree = value
 
     @property
-    def current_graph(self) -> Optional[Graph]:
-        return self.context.fm.current_graph
-
-    @property
     def current_canvas(self) -> Optional[CanvasGraph]:
-        graph = self.current_graph
+        graph = self._cursor.graph
         if graph is None:
             return None
 
@@ -118,7 +112,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         return canvas
 
     def on_new_graph_popup(self, name: str) -> None:
-        graph = self.context.fm.create_graph(name, append=True, open=True)
+        graph = self.context.fm.create_graph(name, append=True)
         filepath = self.context.home.flows.graph_filepath(graph.uuid)
         if filepath.exists():
             raise FileExistsError(f"Graph file already exists: '{str(filepath)}'")
@@ -132,22 +126,8 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
 
     @override
     def on_process(self) -> None:
-        self.do_process_cursor_events()
         self.on_menu()
         super().on_process()
-
-    def do_process_cursor_events(self):
-        if self._prev_cursor == self.context.fm.cursor:
-            return
-
-        try:
-            if self._prev_cursor:
-                self.on_close_graph(self._prev_cursor)
-
-            if self.context.fm.cursor:
-                self.on_open_graph(self.context.fm.cursor)
-        finally:
-            self._prev_cursor = self.context.fm.cursor
 
     def on_close_graph(self, uuid: str):
         if self.context.debug:
@@ -187,6 +167,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_file_menu(self) -> None:
         if imgui.menu_item("New graph")[0]:
             self._new_graph_popup.show()
+
         # if imgui.menu_item("Open graph file")[0]:
         #     self._open_graph_popup.show()
         # with imgui.begin_menu("Open recent") as recent_menu:
@@ -201,13 +182,14 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         #     pass
 
         imgui.separator()
-        has_cursor = self.context.fm.opened
-        if imgui.menu_item("Close graph", None, False, enabled=has_cursor)[0]:
-            self.context.fm.close_graph()
+
+        # has_cursor = self.context.fm.opened
+        # if imgui.menu_item("Close graph", None, False, enabled=has_cursor)[0]:
+        #     self._cursor.graph = None
 
         imgui.separator()
         if imgui.menu_item("Exit")[0]:
-            self.opened = False
+            self.close()
 
     def on_graph_menu(self) -> None:
         if imgui.menu_item("Refresh graphs")[0]:
@@ -216,7 +198,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     @override
     def on_process_sidebar_left(self):
         with begin_child("## ChildLeftTop", 0, -self.split_tree):
-            self._left_tabs.do_process(self.current_graph)
+            self._left_tabs.do_process(self._cursor.graph)
 
         with style_item_spacing(0, -1):
             self._tree_splitter.do_process()
@@ -233,21 +215,23 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             with canvas:
                 canvas.do_process_controllers(debugging=self.context.debug)
         imgui.spacing()
-        self._right_tabs.do_process(self.current_graph)
+        self._right_tabs.do_process(self._cursor.graph)
 
     @override
     def on_process_bottom(self):
-        self._bottom_tabs.do_process(self.current_graph)
+        self._bottom_tabs.do_process(self._cursor.graph)
 
     @override
     def on_process_main(self) -> None:
-        if not self.context.fm.opened:
+        if self._cursor.graph is None:
             text_centered("Please select a graph")
             return
 
         self.begin_child_canvas()
         try:
-            self.on_canvas()
+            if canvas := self.current_canvas:
+                with canvas:
+                    self.on_canvas(canvas)
         finally:
             imgui.end_child()
 
@@ -256,36 +240,28 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         imgui.push_style_var(imgui.STYLE_WINDOW_PADDING, (0, 0))
         imgui.push_style_color(imgui.COLOR_CHILD_BACKGROUND, 0.5, 0.5, 0.5)
         try:
-            return begin_child("##Canvas", border=True, flags=CANVAS_FLAGS)
+            return begin_child("##Canvas", border=True, flags=_CANVAS_FLAGS)
         finally:
             imgui.pop_style_color()
             imgui.pop_style_var()
 
-    def on_canvas(self) -> None:
-        canvas = self.current_canvas
-        if canvas is None:
-            return
+    def on_canvas(self, canvas: CanvasGraph) -> None:
+        assert canvas.opened
+        canvas.do_process_canvas()
 
-        with canvas:
-            canvas.do_process_canvas()
-
-        with imgui.begin_drag_drop_target() as drag_drop_target:
-            if drag_drop_target.hovered:
-                payload = imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE)
-                if payload is not None:
+        with imgui.begin_drag_drop_target() as target:
+            if target.hovered:
+                if payload := imgui.accept_drag_drop_payload(DRAG_FLOW_NODE_TYPE):
                     node_path = str(payload, encoding="utf-8")
-                    node = self.context.fm.add_node(node_path)
-                    with canvas:
-                        canvas.update_node_roi(node)
+                    node = self.context.fm.add_node(canvas.graph, node_path)
+                    canvas.update_node_roi(node)
                     node.node_pos = canvas.mouse_to_canvas_coords()
 
         if imgui.begin_popup_context_window().opened:
             try:
                 if menu_item("Reset"):
-                    with canvas:
-                        canvas.reset_controllers()
+                    canvas.reset_controllers()
             finally:
                 imgui.end_popup()
 
-        with canvas:
-            canvas.draw_graph()
+        canvas.draw_graph()

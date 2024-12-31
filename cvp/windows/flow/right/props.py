@@ -31,15 +31,17 @@ from cvp.imgui.input_text_value import input_text_value
 from cvp.imgui.push_style_var import style_disable_input
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
+from cvp.windows.flow.cursor import FlowCursor
 
 INPUT_BUFFER: Final[int] = 256
 ENTER_RETURN: Final[int] = imgui.INPUT_TEXT_ENTER_RETURNS_TRUE
 
 
 class PropsTab(TabItem[Graph]):
-    def __init__(self, context: Context, fonts: FontMapper):
+    def __init__(self, context: Context, fonts: FontMapper, cursor: FlowCursor):
         super().__init__(context, "Props")
         self._fonts = fonts
+        self._cursor = cursor
 
     @override
     def on_item(self, item: Graph) -> None:

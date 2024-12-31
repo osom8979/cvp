@@ -8,12 +8,14 @@ from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.text_centered import text_centered
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
+from cvp.windows.flow.cursor import FlowCursor
 
 
 class TreeTab(TabItem[Graph]):
-    def __init__(self, context: Context, fonts: FontMapper):
+    def __init__(self, context: Context, fonts: FontMapper, cursor: FlowCursor):
         super().__init__(context, "Tree")
         self._fonts = fonts
+        self._cursor = cursor
 
     @override
     def on_item(self, item: Graph) -> None:

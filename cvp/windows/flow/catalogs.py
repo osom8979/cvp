@@ -29,8 +29,9 @@ class Catalogs(WidgetInterface):
                 with indent(imgui.get_tree_node_to_label_spacing()):
                     for uuid, graph in self._context.fm.items():
                         imgui.selectable(f"{graph.name}##{graph.uuid}")
-                        if not self._context.fm.opened:
-                            continue
+
+                        # if not self._context.fm.opened:
+                        #     continue
 
                         with imgui.begin_drag_drop_source() as drag_drop_src:
                             if drag_drop_src.dragging:
@@ -53,8 +54,8 @@ class Catalogs(WidgetInterface):
                         for node_name, node_template in nodes.items():
                             imgui.selectable(node_name)
 
-                            if not self._context.fm.opened:
-                                continue
+                            # if not self._context.fm.opened:
+                            #     continue
 
                             with imgui.begin_drag_drop_source() as drag_drop_src:
                                 if drag_drop_src.dragging:

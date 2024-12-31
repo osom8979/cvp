@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from typing import Final
-
 import imgui
 
 from cvp.context.context import Context
 from cvp.flow.datas.graph import Graph
+from cvp.imgui.fonts.mapper import FontMapper
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
-
-DOUBLE_CLICK: Final[int] = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK
+from cvp.windows.flow.cursor import FlowCursor
 
 
 class GraphsTab(TabItem[Graph]):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, fonts: FontMapper, cursor: FlowCursor):
         super().__init__(context, "Graphs")
+        self._fonts = fonts
+        self._cursor = cursor
 
     @override
     def on_process(self) -> None:
@@ -25,6 +25,8 @@ class GraphsTab(TabItem[Graph]):
 
             label = f"{graph.name}##{uuid}"
             selected = uuid == current_uuid
-            if imgui.selectable(label, selected, DOUBLE_CLICK)[0]:
+            flags = imgui.SELECTABLE_ALLOW_DOUBLE_CLICK
+
+            if imgui.selectable(label, selected, flags)[0]:
                 if imgui.is_mouse_double_clicked(0):
-                    self.context.fm.open_graph_safely(uuid)
+                    self._cursor.graph = graph

@@ -198,6 +198,12 @@ class WindowBase(
     def opened(self, value: bool) -> None:
         self._window_config.opened = value
 
+    def open(self) -> None:
+        self._window_config.opened = True
+
+    def close(self) -> None:
+        self._window_config.opened = False
+
     def flip_opened(self) -> None:
         self._window_config.opened = not self._window_config.opened
 
