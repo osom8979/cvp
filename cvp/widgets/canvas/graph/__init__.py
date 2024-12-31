@@ -8,13 +8,13 @@ import imgui
 from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.graph import Graph
-from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
+from cvp.imgui.draw_list.draw_dotted_line import draw_dotted_line
 from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
@@ -654,14 +654,14 @@ class CanvasGraph(CanvasController):
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
     def draw_arcs(self) -> None:
-        selected_arc_only = self.graph.selected_arc_only
-
         for arc in self.graph.arcs:
             assert arc.output is not None
             assert arc.input is not None
             self.draw_arc(arc)
-            if arc.selected and selected_arc_only == arc:
-                self.draw_arc_anchors(arc)
+
+        if selected_arc := self.graph.selected_arc_only:
+            if selected_arc.selected and selected_arc.is_bezier_cubic_line_type:
+                self.draw_bezier_cubic_anchors(selected_arc)
 
     def draw_arc(self, arc: Arc) -> None:
         color = imgui.get_color_u32_rgba(*self.get_arc_color(arc, self.graph.style))
@@ -669,22 +669,28 @@ class CanvasGraph(CanvasController):
         polyline = [self.canvas_to_screen_coords(p) for p in arc.polyline]
         self._draw_list.add_polyline(polyline, color, 0, thickness)
 
-    def draw_arc_anchors(self, arc: Arc) -> None:
-        if arc.line_type != LineType.bezier_cubic:
-            return
+    def draw_bezier_cubic_anchors(self, arc: Arc) -> None:
+        assert arc.is_bezier_cubic_line_type
+        assert 2 <= len(arc.polyline)
+
+        # The first/last index point is located at the connected pin.
+        sx, sy = self.canvas_to_screen_coords(arc.polyline[0])
+        ex, ey = self.canvas_to_screen_coords(arc.polyline[-1])
 
         radius = self.graph.style.anchor_radius
         start, end = arc.get_bezier_cubic_anchors()
 
         start_rgba = self.get_anchor_color(arc.start_anchor, self.graph.style)
         start_color = imgui.get_color_u32_rgba(*start_rgba)
-        sx, sy = self.canvas_to_screen_coords(start)
-        self._draw_list.add_circle_filled(sx, sy, radius, start_color)
+        sax, say = self.canvas_to_screen_coords(start)
+        draw_dotted_line(self._draw_list, sx, sy, sax, say, start_color)
+        self._draw_list.add_circle_filled(sax, say, radius, start_color)
 
         end_rgba = self.get_anchor_color(arc.end_anchor, self.graph.style)
         end_color = imgui.get_color_u32_rgba(*end_rgba)
-        ex, ey = self.canvas_to_screen_coords(end)
-        self._draw_list.add_circle_filled(ex, ey, radius, end_color)
+        eax, eay = self.canvas_to_screen_coords(end)
+        draw_dotted_line(self._draw_list, ex, ey, eax, eay, end_color)
+        self._draw_list.add_circle_filled(eax, eay, radius, end_color)
 
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node

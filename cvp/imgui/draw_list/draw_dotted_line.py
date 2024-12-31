@@ -9,7 +9,7 @@ DEFAULT_DOT_LENGTH: Final[float] = 5.0
 DEFAULT_SPACE_LENGTH: Final[float] = 5.0
 
 
-def draw_dotted_lines(
+def draw_dotted_line(
     draw_list: DrawList,
     x1: float,
     y1: float,

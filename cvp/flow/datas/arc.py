@@ -52,6 +52,14 @@ class Arc:
         return result
 
     @property
+    def is_linear_line_type(self) -> bool:
+        return self.line_type == LineType.linear
+
+    @property
+    def is_bezier_cubic_line_type(self) -> bool:
+        return self.line_type == LineType.bezier_cubic
+
+    @property
     def output(self):
         return self._output
 
