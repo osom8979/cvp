@@ -54,6 +54,12 @@ class FlowCursor:
         return self._ref() is not None
 
     def open(self, graph: Graph) -> None:
+        if self._ref is not None:
+            prev_graph = self._ref()
+            if prev_graph is not None:
+                if prev_graph.uuid in self._canvases:
+                    self._canvases.pop(prev_graph.uuid)
+
         self._ref = ref(graph)
         if graph.uuid in self._canvases:
             self._canvases.pop(graph.uuid)

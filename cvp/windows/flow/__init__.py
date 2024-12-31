@@ -13,7 +13,7 @@ from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.menu_item_ex import menu_item
 from cvp.imgui.push_style_var import style_item_spacing
 from cvp.imgui.text_centered import text_centered
-from cvp.logging.logging import logger
+from cvp.logging.logging import flow_logger as logger
 from cvp.popups.confirm import ConfirmPopup
 from cvp.popups.input_text import InputTextPopup
 from cvp.popups.open_file import OpenFilePopup
@@ -99,6 +99,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if filepath.exists():
             raise FileExistsError(f"Graph file already exists: '{str(filepath)}'")
         self.context.fm.write_graph_yaml(filepath, graph)
+        self._cursor.open(graph)
 
     def on_open_file_popup(self, file: str) -> None:
         pass
@@ -110,16 +111,6 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def on_process(self) -> None:
         self.on_menu()
         super().on_process()
-
-    def on_open_graph(self, uuid: str):
-        if self.context.debug:
-            logger.debug(f"{type(self).__name__}.on_open_graph('{uuid}')")
-
-        graph = self.context.fm.get(uuid)
-        if graph is None:
-            return
-
-        # TODO: Initialize canvas properties
 
     def on_menu(self) -> None:
         with imgui.begin_menu_bar() as menu_bar:
@@ -140,25 +131,24 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         if menu_item("New graph"):
             self.show_new_graph_popup()
 
-        # if menu_item("Open graph file"):
+        # imgui.separator()
+        # if menu_item("Import graph"):
         #     self._open_graph_popup.show()
-        # with imgui.begin_menu("Open recent") as recent_menu:
-        #     if recent_menu.opened:
-        #         if menu_item("graph1.yml"):
-        #             pass
-        #         if menu_item("graph2.yml"):
-        #             pass
-        # if menu_item("Save"):
-        #     pass
-        # if menu_item("Save As.."):
-        #     pass
+        # if menu_item("Export graph"):
+        #     self._open_graph_popup.show()
 
         imgui.separator()
-        if menu_item("Close graph", enabled=self._cursor.opened):
-            self.close_graph()
+        has_opened_graph = self._cursor.opened
+        if menu_item("Save graph", enabled=has_opened_graph):
+            self.save_current_graph()
+        if menu_item("Save and close graph", enabled=has_opened_graph):
+            self.save_current_graph()
+            self.close_current_graph()
+        if menu_item("Force close graph", enabled=has_opened_graph):
+            self.close_current_graph()
 
         imgui.separator()
-        if menu_item("Exit"):
+        if menu_item("Exit flow window"):
             self.close()
 
     def on_graph_menu(self) -> None:
@@ -168,21 +158,24 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
     def show_new_graph_popup(self) -> None:
         self._new_graph_popup.show()
 
-    def close_graph(self):
+    def save_current_graph(self) -> None:
         graph = self._cursor.graph
         if graph is None:
             return
-
-        if self.context.debug:
-            logger.debug(f"Close the flow graph: '{graph.uuid}'")
 
         try:
             self.context.save_graph(graph)
             logger.info(f"The flow graph was successfully saved: '{graph.uuid}'")
         except BaseException as e:
             logger.error(f"Failed to save the flow graph: '{graph.uuid}' -> '{e}'")
-        finally:
-            self._cursor.close()
+
+    def close_current_graph(self):
+        graph = self._cursor.graph
+        if graph is None:
+            return
+
+        self._cursor.close()
+        logger.info(f"Close the flow graph: '{graph.uuid}'")
 
     def refresh_graphs(self) -> None:
         graph_uuid_stash = str()

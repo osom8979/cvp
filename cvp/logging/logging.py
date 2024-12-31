@@ -23,6 +23,7 @@ from typing import Final, Optional, Sequence, Union
 from cvp.logging.variables import (
     CVP_DOWNLOAD_LOGGER_NAME,
     CVP_EVENT_LOGGER_NAME,
+    CVP_FLOW_LOGGER_NAME,
     CVP_LOGGER_NAME,
     CVP_MSG_LOGGER_NAME,
     CVP_ONVIF_LOGGER_NAME,
@@ -45,6 +46,7 @@ logger = getLogger(CVP_LOGGER_NAME)
 
 download_logger = getLogger(CVP_DOWNLOAD_LOGGER_NAME)
 event_logger = getLogger(CVP_EVENT_LOGGER_NAME)
+flow_logger = getLogger(CVP_FLOW_LOGGER_NAME)
 msg_logger = getLogger(CVP_MSG_LOGGER_NAME)
 onvif_logger = getLogger(CVP_ONVIF_LOGGER_NAME)
 profile_logger = getLogger(CVP_PROFILE_LOGGER_NAME)
