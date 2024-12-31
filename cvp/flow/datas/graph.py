@@ -134,12 +134,16 @@ class Graph:
 
         start, end = arc.get_bezier_cubic_anchors()
         sx, sy = start
-        start_distance = sqrt((mx - sx) ** 2 + (my - sy) ** 2)
+        sdx = mx - sx
+        sdy = my - sy
+        start_distance = sqrt(sdx**2 + sdy**2)
         if start_distance <= radius:
             return arc.start_anchor
 
         ex, ey = end
-        end_distance = sqrt((mx - ex) ** 2 + (my - ey) ** 2)
+        edx = mx - ex
+        edy = my - ey
+        end_distance = sqrt(edx**2 + edy**2)
         if end_distance <= radius:
             return arc.end_anchor
         return None
