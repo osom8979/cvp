@@ -32,23 +32,26 @@ class CanvasGraph(CanvasController):
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
 
+    _mode: ControlMode
     _connects: List[NodePin]
     _roi: Optional[Rect]
 
     def __init__(self, graph: Graph, fonts: FontMapper):
         super().__init__()
+
+        self._pan_x.update(graph.canvas.pan_x, no_emit=True)
+        self._pan_y.update(graph.canvas.pan_y, no_emit=True)
+        self._zoom.update(graph.canvas.zoom, no_emit=True)
+
         self._graph_ref = ref(graph)
         self._fonts_ref = ref(fonts)
+
         self._graph = None
         self._fonts = None
 
         self._mode = ControlMode.normal
         self._connects = list()
         self._roi = None
-
-        self._pan_x.update(graph.canvas.pan_x, no_emit=True)
-        self._pan_y.update(graph.canvas.pan_y, no_emit=True)
-        self._zoom.update(graph.canvas.zoom, no_emit=True)
 
     @property
     def is_multi_select_mode(self) -> bool:
@@ -87,6 +90,10 @@ class CanvasGraph(CanvasController):
             f"Connects: {self._connects}\n"
             f"ROI: {self._roi}\n"
         )
+
+    # ==================================================================================
+    # Graph/Fonts Context Operations
+    # ==================================================================================
 
     @property
     def graph(self) -> Graph:
@@ -142,6 +149,10 @@ class CanvasGraph(CanvasController):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
+    # ==================================================================================
+    # Public Operations
+    # ==================================================================================
+
     def reset_controllers(self):
         assert self._graph is not None
         assert self._fonts is not None
@@ -179,6 +190,10 @@ class CanvasGraph(CanvasController):
         self.graph.update_arcs_io()
         self.graph.update_arcs_polyline()
 
+    # ==================================================================================
+    # Draw Operations
+    # ==================================================================================
+
     def draw_graph(self) -> None:
         assert self._graph is not None
         assert self._fonts is not None
@@ -194,7 +209,7 @@ class CanvasGraph(CanvasController):
             self.draw_nodes()
 
         self.draw_pin_connects()
-        self.draw_selection_box()
+        self.draw_roi_box()
 
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
@@ -245,6 +260,10 @@ class CanvasGraph(CanvasController):
         x2 = origin_x
         y2 = self.cy + self.ch
         self._draw_list.add_line(x1, y1, x2, y2, color, axis_y.thickness)
+
+    # ==================================================================================
+    # Update state
+    # ==================================================================================
 
     def update_nodes_state(self) -> None:
         self.graph.clear_state()
@@ -387,6 +406,10 @@ class CanvasGraph(CanvasController):
             self._mode = ControlMode.normal
             self._roi = None
 
+    # ==================================================================================
+    # Color Picker
+    # ==================================================================================
+
     def get_pin_color(self, pin: Pin, style: Style) -> RGBA:
         if self.is_pin_connecting_mode:
             if pin.hovering and pin.connectable:
@@ -449,6 +472,10 @@ class CanvasGraph(CanvasController):
             return fonts.large_icon
         else:
             assert False, "Inaccessible section"
+
+    # ==================================================================================
+    # Node Operations
+    # ==================================================================================
 
     def update_nodes_rois(self) -> None:
         for node in self.graph.nodes:
@@ -653,6 +680,10 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
+    # ==================================================================================
+    # Arc Operations
+    # ==================================================================================
+
     def draw_arcs(self) -> None:
         for arc in self.graph.arcs:
             assert arc.output is not None
@@ -692,6 +723,10 @@ class CanvasGraph(CanvasController):
         draw_dotted_line(self._draw_list, ex, ey, eax, eay, end_color)
         self._draw_list.add_circle_filled(eax, eay, radius, end_color)
 
+    # ==================================================================================
+    # Pin Operations
+    # ==================================================================================
+
     def draw_pin_connect(self, connect: NodePin) -> None:
         node = connect.node
         pin = connect.pin
@@ -715,7 +750,11 @@ class CanvasGraph(CanvasController):
         for connect in self._connects:
             self.draw_pin_connect(connect)
 
-    def draw_selection_box(self) -> None:
+    # ==================================================================================
+    # ROI Operations
+    # ==================================================================================
+
+    def draw_roi_box(self) -> None:
         if not self.is_roi_box_mode:
             return
 
