@@ -142,6 +142,7 @@ DEFAULT_LOGGING_CONFIG: Final[Dict[str, Any]] = {
         },
         CVP_DOWNLOAD_LOGGER_NAME: {"level": "DEBUG"},
         CVP_EVENT_LOGGER_NAME: {"level": "INFO"},
+        CVP_FLOW_LOGGER_NAME: {"level": "INFO"},
         CVP_MSG_LOGGER_NAME: {"level": "DEBUG"},
         CVP_ONVIF_LOGGER_NAME: {"level": "INFO"},
         CVP_PROFILE_LOGGER_NAME: {"level": "DEBUG"},
