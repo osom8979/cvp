@@ -20,6 +20,10 @@ class Node:
     emblem: str = EMPTY_TEXT
     color: RGBA = WHITE_RGBA
 
+    head_height: float = 0.0
+    flow_height: float = 0.0
+    data_height: float = 0.0
+
     emblem_pos: Point = EMPTY_POINT
     emblem_size: Size = EMPTY_SIZE
 

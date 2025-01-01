@@ -11,7 +11,7 @@ from cvp.flow.datas.constants import (
 )
 from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
-from cvp.palette.basic import BLACK, BLUE, RED, SILVER
+from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
 from cvp.types.dataclass.public_eq import public_eq
@@ -30,6 +30,8 @@ class Style:
     hovering_color: RGBA = field(default_factory=lambda: (*ORANGE, 0.9))
     select_color: RGBA = field(default_factory=lambda: (*RED, 0.9))
     layout_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
+
+    node_bg_color: RGBA = field(default_factory=lambda: (*WHITE, 0.6))
 
     pin_connection_color: RGBA = field(default_factory=lambda: (*RED, 0.8))
     pin_connection_thickness: float = 2.0

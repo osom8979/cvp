@@ -540,10 +540,14 @@ class CanvasGraph(CanvasController):
         wd = isw + iw + isw + inw + center_padding + onw + isw + iw + isw
         node_w = max((wt, wf, wd))
 
-        header_h = ish + title_h + ish
+        head_h = ish + title_h + ish
         flow_h = ish + (ih + ish) * node.flow_lines
         data_h = ish + (ih + ish) * node.data_lines
-        node_h = header_h + flow_h + data_h
+        node_h = head_h + flow_h + data_h
+
+        node.head_height = head_h
+        node.flow_height = flow_h
+        node.data_height = data_h
 
         node_emblem_x = isw
         node_emblem_y = ish + emblem_y_diff
@@ -560,7 +564,7 @@ class CanvasGraph(CanvasController):
 
         for i, pin in enumerate(node.flow_inputs):
             icon_x = isw
-            icon_y = header_h + ish + (ih + ish) * i
+            icon_y = head_h + ish + (ih + ish) * i
             pin.icon_pos = icon_x, icon_y + pin_icon_y_diff
 
             name_x = icon_x + pin.icon_size[0] + isw
@@ -569,7 +573,7 @@ class CanvasGraph(CanvasController):
 
         for i, pin in enumerate(node.data_inputs):
             icon_x = isw
-            icon_y = header_h + flow_h + ish + (ih + ish) * i
+            icon_y = head_h + flow_h + ish + (ih + ish) * i
             pin.icon_pos = icon_x, icon_y + pin_icon_y_diff
 
             name_x = icon_x + pin.icon_size[0] + isw
@@ -578,7 +582,7 @@ class CanvasGraph(CanvasController):
 
         for i, pin in enumerate(node.flow_outputs):
             icon_x = node_w - isw - iw
-            icon_y = header_h + ish + (ih + ish) * i
+            icon_y = head_h + ish + (ih + ish) * i
             pin.icon_pos = icon_x, icon_y + pin_icon_y_diff
 
             name_x = icon_x - isw - pin.name_size[0]
@@ -587,7 +591,7 @@ class CanvasGraph(CanvasController):
 
         for i, pin in enumerate(node.data_outputs):
             icon_x = node_w - isw - iw
-            icon_y = header_h + flow_h + ish + (ih + ish) * i
+            icon_y = head_h + flow_h + ish + (ih + ish) * i
             pin.icon_pos = icon_x, icon_y + pin_icon_y_diff
 
             name_x = icon_x - isw - pin.name_size[0]
@@ -603,16 +607,20 @@ class CanvasGraph(CanvasController):
         style = self.graph.style
         stroke = self.get_node_stroke(node, style)
 
-        fill_color = imgui.get_color_u32_rgba(*node.color)
+        node_color = imgui.get_color_u32_rgba(*node.color)
         stroke_color = imgui.get_color_u32_rgba(*stroke.color)
         label_color = imgui.get_color_u32_rgba(*style.normal_color)
         layout_color = imgui.get_color_u32_rgba(*style.layout_color)
+        node_bg_color = imgui.get_color_u32_rgba(*style.node_bg_color)
 
         thickness = stroke.thickness
         rounding = stroke.rounding
         flags = stroke.flags
 
-        self._draw_list.add_rect_filled(*node_roi, fill_color, rounding, flags)
+        self._draw_list.add_rect_filled(*node_roi, node_bg_color, rounding, flags)
+        nx1, ny1, nx2, ny2 = node_roi
+        header_roi = nx1, ny1, nx2, ny1 + node.head_height
+        self._draw_list.add_rect_filled(*header_roi, node_color, rounding, flags)
         self._draw_list.add_rect(*node_roi, stroke_color, rounding, flags, thickness)
 
         graph = self.graph
@@ -626,13 +634,11 @@ class CanvasGraph(CanvasController):
         text_font = self.get_text_font(fonts, graph.style.text_size)
         icon_font = self.get_icon_font(fonts, graph.style.icon_size)
 
-        nx = node_roi[0]
-        ny = node_roi[1]
         zoom = self.zoom
 
         with emblem_font:
-            x1 = nx + node.emblem_pos[0] * zoom
-            y1 = ny + node.emblem_pos[1] * zoom
+            x1 = nx1 + node.emblem_pos[0] * zoom
+            y1 = ny1 + node.emblem_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.emblem)
             if graph.style.show_layout:
                 x2 = x1 + node.emblem_size[0] * zoom
@@ -640,8 +646,8 @@ class CanvasGraph(CanvasController):
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with title_font:
-            x1 = nx + node.name_pos[0] * zoom
-            y1 = ny + node.name_pos[1] * zoom
+            x1 = nx1 + node.name_pos[0] * zoom
+            y1 = ny1 + node.name_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.name)
             if graph.style.show_layout:
                 x2 = x1 + node.name_size[0] * zoom
@@ -653,8 +659,8 @@ class CanvasGraph(CanvasController):
             flow_pin_y_icon = graph.style.flow_pin_y_icon
 
             for pin in node.flow_pins:
-                x1 = nx + pin.icon_pos[0] * zoom
-                y1 = ny + pin.icon_pos[1] * zoom
+                x1 = nx1 + pin.icon_pos[0] * zoom
+                y1 = ny1 + pin.icon_pos[1] * zoom
                 pin_icon = flow_pin_y_icon if pin.connected else flow_pin_n_icon
                 pin_rgba = self.get_pin_color(pin, graph.style)
                 pin_color = imgui.get_color_u32_rgba(*pin_rgba)
@@ -668,8 +674,8 @@ class CanvasGraph(CanvasController):
             data_pin_y_icon = graph.style.data_pin_y_icon
 
             for pin in node.data_pins:
-                x1 = nx + pin.icon_pos[0] * zoom
-                y1 = ny + pin.icon_pos[1] * zoom
+                x1 = nx1 + pin.icon_pos[0] * zoom
+                y1 = ny1 + pin.icon_pos[1] * zoom
                 pin_icon = data_pin_y_icon if pin.connected else data_pin_n_icon
                 pin_rgba = self.get_pin_color(pin, graph.style)
                 pin_color = imgui.get_color_u32_rgba(*pin_rgba)
@@ -681,8 +687,8 @@ class CanvasGraph(CanvasController):
 
         with text_font:
             for pin in node.pins:
-                x1 = nx + pin.name_pos[0] * zoom
-                y1 = ny + pin.name_pos[1] * zoom
+                x1 = nx1 + pin.name_pos[0] * zoom
+                y1 = ny1 + pin.name_pos[1] * zoom
                 self._draw_list.add_text(x1, y1, label_color, pin.name)
                 if graph.style.show_layout:
                     x2 = x1 + pin.name_size[0] * zoom
