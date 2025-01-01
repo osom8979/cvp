@@ -118,6 +118,8 @@ def convert_printable_level(level: Union[str, int]) -> str:
     if isinstance(level, str):
         return level
     if isinstance(level, int):
+        if level >= OFF:
+            return "Off"
         if level > CRITICAL:
             return "OverCritical"
         if level == CRITICAL:

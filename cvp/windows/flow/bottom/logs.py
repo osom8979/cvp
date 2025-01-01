@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from collections import deque
-from logging import Handler, LogRecord
-from typing import Callable, Deque, Tuple
+from logging import CRITICAL, DEBUG, ERROR, INFO, NOTSET, WARNING, Handler, LogRecord
+from typing import Callable, Deque, NamedTuple
 from weakref import finalize
 
 import imgui
@@ -10,49 +10,160 @@ import imgui
 from cvp.context.context import Context
 from cvp.flow.datas.graph import Graph
 from cvp.imgui.begin_child import begin_child
+from cvp.imgui.checkbox import checkbox
+from cvp.imgui.combo import combo
 from cvp.imgui.fonts.mapper import FontMapper
+from cvp.logging.logging import (
+    SEVERITY_NAME_CRITICAL,
+    SEVERITY_NAME_DEBUG,
+    SEVERITY_NAME_ERROR,
+    SEVERITY_NAME_INFO,
+    SEVERITY_NAME_NOTSET,
+    SEVERITY_NAME_OFF,
+    SEVERITY_NAME_WARNING,
+    convert_level_number,
+)
 from cvp.logging.logging import flow_logger as logger
+from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.widgets.tab import TabItem
 from cvp.windows.flow.cursor import FlowCursor
 
+LEVEL_NAMES = [
+    SEVERITY_NAME_CRITICAL,
+    SEVERITY_NAME_ERROR,
+    SEVERITY_NAME_WARNING,
+    SEVERITY_NAME_INFO,
+    SEVERITY_NAME_DEBUG,
+    SEVERITY_NAME_NOTSET,
+    SEVERITY_NAME_OFF,
+]
 
-class LoggingHandler(Handler):
-    def __init__(self, callback: Callable[[str, str], None]):
+
+class _LoggingHandler(Handler):
+    def __init__(self, callback: Callable[[LogRecord, str], None]):
         super().__init__()
         self._callback = callback
 
     @override
     def emit(self, record: LogRecord):
-        self._callback(record.levelname, self.format(record))
+        self._callback(record, self.format(record))
 
 
-def unregister_handler(handler: LoggingHandler) -> None:
+class _LineRecord(NamedTuple):
+    level: int
+    levelname: str
+    message: str
+
+
+def _unregister_handler(handler: _LoggingHandler) -> None:
     logger.removeHandler(handler)
 
 
 class LogsTab(TabItem[Graph]):
-    _lines: Deque[Tuple[str, str]]
+    _lines: Deque[_LineRecord]
 
     def __init__(self, context: Context, fonts: FontMapper, cursor: FlowCursor):
         super().__init__(context, "Logs")
         self._fonts = fonts
         self._cursor = cursor
-        self._auto_scroll = False
-        self._lines = deque(maxlen=100)
-        self._handler = LoggingHandler(self.on_logging)
-        logger.addHandler(self._handler)
-        self._finalizer = finalize(self, unregister_handler, self._handler)
 
-    def on_logging(self, level: str, message: str) -> None:
-        self._lines.append((level, message))
+        assert 1 <= self.context.config.flow_aui.logs_lines
+        self._lines = deque(maxlen=self.context.config.flow_aui.logs_lines)
+        self._handler = _LoggingHandler(self.on_logging)
+        logger.addHandler(self._handler)
+        self._finalizer = finalize(self, _unregister_handler, self._handler)
+
+    @property
+    def filter(self) -> str:
+        return self.context.config.flow_aui.logs_filter
+
+    @filter.setter
+    def filter(self, value: str) -> None:
+        self.context.config.flow_aui.logs_filter = value
+
+    @property
+    def autoscroll(self) -> bool:
+        return self.context.config.flow_aui.logs_autoscroll
+
+    @autoscroll.setter
+    def autoscroll(self, value: bool) -> None:
+        self.context.config.flow_aui.logs_autoscroll = value
+
+    @property
+    def logs_lines(self) -> int:
+        return self.context.config.flow_aui.logs_lines
+
+    @logs_lines.setter
+    def logs_lines(self, value: int) -> None:
+        self.context.config.flow_aui.logs_lines = value
+
+    @property
+    def logs_level_index(self) -> int:
+        return self.context.config.flow_aui.logs_level_index
+
+    @logs_level_index.setter
+    def logs_level_index(self, value: int) -> None:
+        self.context.config.flow_aui.logs_level_index = value
+
+    def get_level_number(self) -> int:
+        return convert_level_number(LEVEL_NAMES[self.logs_level_index])
+
+    def get_level_color(self, level: int) -> RGBA:
+        logging_config = self.context.config.flow_aui
+        if ERROR < level <= CRITICAL:
+            return logging_config.logs_critical_color
+        elif WARNING < level <= ERROR:
+            return logging_config.logs_error_color
+        elif INFO < level <= WARNING:
+            return logging_config.logs_warning_color
+        elif DEBUG < level <= INFO:
+            return logging_config.logs_info_color
+        elif NOTSET < level <= DEBUG:
+            return logging_config.logs_debug_color
+        else:
+            return imgui.get_style().colors[imgui.COLOR_TEXT]
+
+    def on_logging(self, record: LogRecord, message: str) -> None:
+        self._lines.append(_LineRecord(record.levelno, record.levelname, message))
+
+    def update_lines_maxlen(self, maxlen: int) -> None:
+        new_lines = type(self._lines)(maxlen=maxlen)
+        new_lines.extend(self._lines)
+        self._lines = new_lines
 
     @override
     def on_process(self) -> None:
-        with begin_child("## Logging", border=False):
+        if self._lines.maxlen != self.logs_lines:
+            self.update_lines_maxlen(self.logs_lines)
 
-            for level, message in self._lines:
-                imgui.text(f"[{level}] {message}")
+        self.autoscroll = checkbox("Autoscroll", self.autoscroll)[1]
 
-            if self._auto_scroll:
+        imgui.same_line()
+        max_width = imgui.calc_text_size(SEVERITY_NAME_CRITICAL)[0]
+        padding = imgui.get_style().item_spacing[0] * 2
+        dropdown_width = 20.0
+        imgui.set_next_item_width(max_width + dropdown_width + padding)
+        if level_result := combo("##Levels", self.logs_level_index, LEVEL_NAMES):
+            self.logs_level_index = level_result.value
+
+        imgui.same_line()
+        imgui.set_next_item_width(-1)
+        self.filter = imgui.input_text_with_hint("##Filter", "Filter", self.filter)[1]
+
+        imgui.separator()
+
+        with begin_child("##Logging", border=False):
+            filter_level = self.get_level_number()
+
+            for line in self._lines:
+                if line.level < filter_level:
+                    continue
+                if line.message.find(self.filter) == -1:
+                    continue
+
+                color = self.get_level_color(line.level)
+                imgui.text_colored(f"[{line.levelname}] {line.message}", *color)
+
+            if self.autoscroll:
                 imgui.set_scroll_here_y(1.0)
