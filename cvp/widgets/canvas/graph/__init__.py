@@ -5,6 +5,7 @@ from weakref import ReferenceType, ref
 
 import imgui
 
+from cvp.config.sections.flow import FlowAuiConfig
 from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.graph import Graph
@@ -29,16 +30,18 @@ from cvp.widgets.canvas.graph.mode import ControlMode
 class CanvasGraph(CanvasController):
     _graph_ref: ReferenceType[Graph]
     _fonts_ref: ReferenceType[FontMapper]
+    _config_ref: ReferenceType[FlowAuiConfig]
 
     _graph: Optional[Graph]
     _fonts: Optional[FontMapper]
+    _config: Optional[FlowAuiConfig]
 
     _mode: ControlMode
     _connects: List[NodePin]
     _roi: Optional[Rect]
     _selected_stash: Optional[SelectedItems]
 
-    def __init__(self, graph: Graph, fonts: FontMapper):
+    def __init__(self, graph: Graph, fonts: FontMapper, config: FlowAuiConfig):
         super().__init__()
 
         self._pan_x.update(graph.canvas.pan_x, no_emit=True)
@@ -47,9 +50,11 @@ class CanvasGraph(CanvasController):
 
         self._graph_ref = ref(graph)
         self._fonts_ref = ref(fonts)
+        self._config_ref = ref(config)
 
         self._graph = None
         self._fonts = None
+        self._config = None
 
         self._mode = ControlMode.normal
         self._connects = list()
@@ -111,39 +116,67 @@ class CanvasGraph(CanvasController):
         return self._fonts
 
     @property
+    def config(self) -> FlowAuiConfig:
+        if self._config is None:
+            raise ReferenceError("The fonts instance has expired")
+        return self._config
+
+    @property
     def opened(self) -> bool:
-        return self._graph is not None and self._fonts is not None
+        if self._graph is not None:
+            assert self._fonts is not None
+            assert self._config is not None
+            return True
+        else:
+            assert self._fonts is None
+            assert self._config is None
+            return False
+
+    def _clear_refs(self) -> None:
+        self._graph = None
+        self._fonts = None
+        self._config = None
 
     def open(self) -> None:
         if self._graph is not None:
             raise ValueError("Graph already open")
         if self._fonts is not None:
             raise ValueError("Fonts already open")
+        if self._config is not None:
+            raise ValueError("Config already open")
 
         assert self._graph is None
         assert self._fonts is None
+        assert self._config is None
         self._graph = self._graph_ref()
         self._fonts = self._fonts_ref()
+        self._config = self._config_ref()
 
         if self._graph is None:
-            self._fonts = None
+            self._clear_refs()
             raise ReferenceError("The graph instance has expired")
 
         if self._fonts is None:
-            self._graph = None
+            self._clear_refs()
             raise ReferenceError("The fonts instance has expired")
+
+        if self._config is None:
+            self._clear_refs()
+            raise ReferenceError("The config instance has expired")
 
         assert self._graph is not None
         assert self._fonts is not None
+        assert self._config is not None
 
     def close(self) -> None:
         if self._graph is None:
             raise ValueError("Graph instance has expired")
         if self._fonts is None:
             raise ValueError("Fonts instance has expired")
+        if self._config is None:
+            raise ValueError("Config instance has expired")
 
-        self._graph = None
-        self._fonts = None
+        self._clear_refs()
 
     def __enter__(self):
         self.open()
@@ -159,6 +192,7 @@ class CanvasGraph(CanvasController):
     def reset_controllers(self):
         assert self._graph is not None
         assert self._fonts is not None
+        assert self._config is not None
 
         self.pan_x = 0.0
         self.pan_y = 0.0
@@ -172,6 +206,7 @@ class CanvasGraph(CanvasController):
     def do_process_controllers(self, debugging=False) -> None:
         assert self._graph is not None
         assert self._fonts is not None
+        assert self._config is not None
 
         if result := self.render_controllers(debugging=debugging):
             canvas = self.graph.canvas
@@ -182,6 +217,7 @@ class CanvasGraph(CanvasController):
     def do_process_canvas(self) -> None:
         assert self._graph is not None
         assert self._fonts is not None
+        assert self._config is not None
 
         if result := self.update_state():
             canvas = self.graph.canvas
@@ -197,10 +233,7 @@ class CanvasGraph(CanvasController):
     # Draw Operations
     # ==================================================================================
 
-    def draw_graph(self) -> None:
-        assert self._graph is not None
-        assert self._fonts is not None
-
+    def draw(self) -> None:
         with window_font_scale(self.zoom):
             self.fill()
             self.draw_grid_x()

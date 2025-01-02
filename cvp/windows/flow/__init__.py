@@ -48,7 +48,7 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
         )
 
         self._fonts = fonts
-        self._cursor = FlowCursor(fonts)
+        self._cursor = FlowCursor(fonts, context.config.flow_aui)
         self._catalogs = Catalogs(context)
         self._left_tabs = FlowLeftTabs(context, fonts, self._cursor)
         self._right_tabs = FlowRightTabs(context, fonts, self._cursor)
@@ -264,4 +264,4 @@ class FlowWindow(AuiWindow[FlowAuiConfig]):
             finally:
                 imgui.end_popup()
 
-        canvas.draw_graph()
+        canvas.draw()

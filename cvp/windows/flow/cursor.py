@@ -3,6 +3,7 @@
 from typing import Dict, Optional
 from weakref import ReferenceType, ref
 
+from cvp.config.sections.flow import FlowAuiConfig
 from cvp.flow.datas.graph import Graph
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.widgets.canvas.graph import CanvasGraph
@@ -12,13 +13,14 @@ class FlowCursor:
     _canvases: Dict[str, CanvasGraph]
     _ref: Optional[ReferenceType[Graph]]
 
-    def __init__(self, fonts: FontMapper):
+    def __init__(self, fonts: FontMapper, config: FlowAuiConfig):
         self._fonts = fonts
+        self._config = config
         self._canvases = dict()
         self._ref = None
 
     def _create_canvas(self, graph: Graph) -> CanvasGraph:
-        canvas = CanvasGraph(graph, self._fonts)
+        canvas = CanvasGraph(graph, self._fonts, self._config)
         self._canvases[graph.uuid] = canvas
         return canvas
 
@@ -37,9 +39,7 @@ class FlowCursor:
         if canvas := self._canvases.get(graph.uuid):
             return canvas
 
-        canvas = CanvasGraph(graph, self._fonts)
-        self._canvases[graph.uuid] = canvas
-        return canvas
+        return self._create_canvas(graph)
 
     @property
     def graph(self) -> Optional[Graph]:
