@@ -73,13 +73,18 @@ class Graph:
         for node in self.nodes:
             self._selected_items.apply(node)
 
-    def select_item(self, item: SelectableAny) -> None:
-        item.selected = True
-        self._selected_items.add(item)
+    def select_item(self, item: SelectableAny, *, selected=True) -> None:
+        item.selected = selected
+        if selected:
+            self._selected_items.add(item)
+        else:
+            self._selected_items.remove(item)
 
     def unselect_item(self, item: SelectableAny) -> None:
-        item.selected = False
-        self._selected_items.remove(item)
+        self.select_item(item, selected=False)
+
+    def flip_select_item(self, item: SelectableAny) -> None:
+        self.select_item(item, selected=not item.selected)
 
     def clear_state(self) -> None:
         # Do not change the `node.selected` property.

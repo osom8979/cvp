@@ -16,9 +16,9 @@ from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.draw_list.draw_dotted_line import draw_dotted_line
-from cvp.imgui.font_global_scale import font_global_scale
 from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
+from cvp.imgui.set_window_font_scale import window_font_scale
 from cvp.types.colors import RGBA
 from cvp.types.override import override
 from cvp.types.shapes import Rect
@@ -201,18 +201,18 @@ class CanvasGraph(CanvasController):
         assert self._graph is not None
         assert self._fonts is not None
 
-        self.fill()
-        self.draw_grid_x()
-        self.draw_grid_y()
-        self.draw_axis_x()
-        self.draw_axis_y()
+        with window_font_scale(self.zoom):
+            self.fill()
+            self.draw_grid_x()
+            self.draw_grid_y()
+            self.draw_axis_x()
+            self.draw_axis_y()
 
-        with font_global_scale(self.zoom):
             self.draw_arcs()
             self.draw_nodes()
 
-        self.draw_pin_connects()
-        self.draw_roi_box()
+            self.draw_pin_connects()
+            self.draw_roi_box()
 
     def fill(self) -> None:
         color = imgui.get_color_u32_rgba(*self.graph.color)
@@ -617,9 +617,11 @@ class CanvasGraph(CanvasController):
         rounding = stroke.rounding
         flags = stroke.flags
 
-        self._draw_list.add_rect_filled(*node_roi, node_bg_color, rounding, flags)
         nx1, ny1, nx2, ny2 = node_roi
-        header_roi = nx1, ny1, nx2, ny1 + node.head_height
+        zoom = self.zoom
+        header_roi = nx1, ny1, nx2, ny1 + node.head_height * zoom
+
+        self._draw_list.add_rect_filled(*node_roi, node_bg_color, rounding, flags)
         self._draw_list.add_rect_filled(*header_roi, node_color, rounding, flags)
         self._draw_list.add_rect(*node_roi, stroke_color, rounding, flags, thickness)
 
@@ -633,8 +635,6 @@ class CanvasGraph(CanvasController):
         title_font = self.get_text_font(fonts, graph.style.title_size)
         text_font = self.get_text_font(fonts, graph.style.text_size)
         icon_font = self.get_icon_font(fonts, graph.style.icon_size)
-
-        zoom = self.zoom
 
         with emblem_font:
             x1 = nx1 + node.emblem_pos[0] * zoom
