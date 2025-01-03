@@ -9,12 +9,10 @@ from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
-from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Rect
 from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
 
 
-@public_eq
 @dataclass
 class Arc:
     uuid: str = field(default_factory=lambda: str(uuid4()))

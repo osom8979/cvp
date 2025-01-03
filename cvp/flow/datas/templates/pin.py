@@ -5,10 +5,8 @@ from dataclasses import dataclass
 from cvp.flow.datas.action import Action
 from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.stream import Stream
-from cvp.types.dataclass.public_eq import public_eq
 
 
-@public_eq
 @dataclass
 class PinTemplate:
     name: str = EMPTY_TEXT

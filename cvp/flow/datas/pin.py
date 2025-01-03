@@ -6,11 +6,9 @@ from typing import List
 from cvp.flow.datas.action import Action
 from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT
 from cvp.flow.datas.stream import Stream
-from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Rect, Size
 
 
-@public_eq
 @dataclass
 class Pin:
     name: str = EMPTY_TEXT

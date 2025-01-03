@@ -22,11 +22,9 @@ from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
 from cvp.flow.datas.view import View
 from cvp.types.colors import RGBA
-from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Size
 
 
-@public_eq
 @dataclass
 class Graph:
     uuid: str = field(default_factory=lambda: str(uuid4()))
@@ -36,7 +34,6 @@ class Graph:
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)
-
     view: View = field(default_factory=View)
     style: Style = field(default_factory=Style)
     config: Config = field(default_factory=Config)
