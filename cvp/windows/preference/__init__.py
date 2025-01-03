@@ -15,6 +15,7 @@ from cvp.windows.preference.appearance import AppearancePreference
 from cvp.windows.preference.concurrency import ConcurrencyPreference
 from cvp.windows.preference.developer import DeveloperPreference
 from cvp.windows.preference.ffmpeg import FFmpegPreference
+from cvp.windows.preference.flow import FlowPreference
 from cvp.windows.preference.keyring import KeyringPreference
 from cvp.windows.preference.logging import LoggingPreference
 from cvp.windows.preference.overlay import OverlayPreference
@@ -34,6 +35,7 @@ class PreferenceManager(Manager[PreferenceManagerConfig, PreferenceWidget]):
 
         menus = [
             AppearancePreference(context),
+            FlowPreference(context),
             FFmpegPreference(context),
             OverlayPreference(context),
             WsdlPreference(context),
