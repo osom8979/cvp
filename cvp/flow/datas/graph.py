@@ -11,7 +11,6 @@ from cvp.flow.datas.action import Action
 from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
-from cvp.flow.datas.canvas import Canvas
 from cvp.flow.datas.config import Config
 from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
@@ -23,6 +22,7 @@ from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.selected_items import SelectableAny, SelectedItems
 from cvp.flow.datas.stream import Stream
 from cvp.flow.datas.style import Style
+from cvp.flow.datas.view import View
 from cvp.types.colors import RGBA
 from cvp.types.dataclass.public_eq import public_eq
 from cvp.types.shapes import Point, Size
@@ -38,7 +38,7 @@ class Graph:
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)
-    canvas: Canvas = field(default_factory=Canvas)
+    view: View = field(default_factory=View)
     grid_x: Grid = field(default_factory=Grid)
     grid_y: Grid = field(default_factory=Grid)
     axis_x: Axis = field(default_factory=Axis)

@@ -44,9 +44,9 @@ class CanvasGraph(CanvasController):
     def __init__(self, graph: Graph, fonts: FontMapper, config: FlowAuiConfig):
         super().__init__()
 
-        self._pan_x.update(graph.canvas.pan_x, no_emit=True)
-        self._pan_y.update(graph.canvas.pan_y, no_emit=True)
-        self._zoom.update(graph.canvas.zoom, no_emit=True)
+        self._pan_x.update(graph.view.pan_x, no_emit=True)
+        self._pan_y.update(graph.view.pan_y, no_emit=True)
+        self._zoom.update(graph.view.zoom, no_emit=True)
 
         self._graph_ref = ref(graph)
         self._fonts_ref = ref(fonts)
@@ -198,7 +198,7 @@ class CanvasGraph(CanvasController):
         self.pan_y = 0.0
         self.zoom = 1.0
 
-        canvas = self.graph.canvas
+        canvas = self.graph.view
         canvas.pan_x = 0.0
         canvas.pan_y = 0.0
         canvas.zoom = 1.0
@@ -209,7 +209,7 @@ class CanvasGraph(CanvasController):
         assert self._config is not None
 
         if result := self.render_controllers(debugging=debugging):
-            canvas = self.graph.canvas
+            canvas = self.graph.view
             canvas.pan_x = result.pan_x
             canvas.pan_y = result.pan_y
             canvas.zoom = result.zoom
@@ -220,7 +220,7 @@ class CanvasGraph(CanvasController):
         assert self._config is not None
 
         if result := self.update_state():
-            canvas = self.graph.canvas
+            canvas = self.graph.view
             canvas.pan_x = result.pan_x
             canvas.pan_y = result.pan_y
             canvas.zoom = result.zoom
