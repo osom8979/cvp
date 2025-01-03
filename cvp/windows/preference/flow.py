@@ -2,6 +2,7 @@
 
 import imgui
 
+from cvp.config.sections.flow.arcs import Arcs
 from cvp.config.sections.flow.axis import Axis
 from cvp.config.sections.flow.grid import Grid
 from cvp.config.sections.flow.logs import Logs
@@ -33,9 +34,9 @@ class FlowPreference(PreferenceWidget):
             try:
                 if visible := checkbox("Visible", grid.visible):
                     grid.visible = visible.state
-                if step := input_float("Step", grid.step):
+                if step := input_float("Step", grid.step, step=1.0):
                     grid.step = step.value
-                if thickness := input_float("Thickness", grid.thickness):
+                if thickness := input_float("Thickness", grid.thickness, step=1.0):
                     grid.thickness = thickness.value
                 if color := color_edit4("Color", *grid.color):
                     grid.color = color.color
@@ -48,7 +49,7 @@ class FlowPreference(PreferenceWidget):
             try:
                 if visible := checkbox("Visible", axis.visible):
                     axis.visible = visible
-                if thickness := input_float("Thickness", axis.thickness):
+                if thickness := input_float("Thickness", axis.thickness, step=1.0):
                     axis.thickness = thickness.value
                 if color := color_edit4("Color", *axis.color):
                     axis.color = color.color
@@ -61,9 +62,9 @@ class FlowPreference(PreferenceWidget):
             try:
                 if color := color_edit4("Color", *stroke.color):
                     stroke.color = color.color
-                if thickness := input_float("Thickness", stroke.thickness):
+                if thickness := input_float("Thickness", stroke.thickness, step=1.0):
                     stroke.thickness = thickness.value
-                if rounding := input_float("Rounding", stroke.rounding):
+                if rounding := input_float("Rounding", stroke.rounding, step=1.0):
                     stroke.rounding = rounding.value
             finally:
                 imgui.tree_pop()
@@ -99,6 +100,19 @@ class FlowPreference(PreferenceWidget):
         finally:
             imgui.tree_pop()
 
+    @staticmethod
+    def tree_arcs(label: str, arcs: Arcs) -> None:
+        if imgui.tree_node(label):
+            try:
+                if hovering_tolerance := input_float(
+                    "Hovering tolerance",
+                    arcs.hovering_tolerance,
+                    step=1.0,
+                ):
+                    arcs.hovering_tolerance = hovering_tolerance.value
+            finally:
+                imgui.tree_pop()
+
     @override
     def on_process(self) -> None:
         self.tree_logs("Logs", self._config.logs)
@@ -106,3 +120,4 @@ class FlowPreference(PreferenceWidget):
         self.tree_grid("Grid Y", self._config.grid_x)
         self.tree_axis("Axis X", self._config.axis_x)
         self.tree_axis("Axis Y", self._config.axis_y)
+        self.tree_arcs("Arcs", self._config.arcs)

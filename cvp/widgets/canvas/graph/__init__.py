@@ -305,7 +305,7 @@ class CanvasGraph(CanvasController):
         self.graph.clear_state()
         self.graph.update_hovering_state(
             self.mouse_to_canvas_coords(),
-            self.config.arc_hovering_tolerance,
+            self.config.arcs.hovering_tolerance,
         )
 
         if imgui.is_key_pressed(imgui.get_key_index(imgui.KEY_DELETE)):
