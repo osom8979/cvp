@@ -4,9 +4,9 @@ from typing import Final
 
 import imgui
 
+from cvp.config.sections.flow.axis import Axis
 from cvp.context.context import Context
 from cvp.flow.datas.arc import Arc
-from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.graph import Graph
 from cvp.flow.datas.line_type import (
     LINE_TYPE_INDEX2NAME,
@@ -122,8 +122,6 @@ class PropsTab(TabItem[Graph]):
         if color_result := color_edit4("Color", *graph.color):
             graph.color = color_result.color
 
-        self.tree_axis("Axis X", graph.axis_x)
-        self.tree_axis("Axis Y", graph.axis_y)
         self.tree_stroke("Selected node", graph.style.selected_node)
         self.tree_stroke("Hovering node", graph.style.hovering_node)
         self.tree_stroke("Normal node", graph.style.normal_node)

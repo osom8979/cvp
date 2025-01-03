@@ -270,7 +270,7 @@ class CanvasGraph(CanvasController):
             self._draw_list.add_line(*line, color, grid_y.thickness)
 
     def draw_axis_x(self) -> None:
-        axis_x = self.graph.axis_x
+        axis_x = self.config.axis_x
         if not axis_x.visible:
             return
 
@@ -284,7 +284,7 @@ class CanvasGraph(CanvasController):
         self._draw_list.add_line(x1, y1, x2, y2, color, axis_x.thickness)
 
     def draw_axis_y(self) -> None:
-        axis_y = self.graph.axis_y
+        axis_y = self.config.axis_y
         if not axis_y.visible:
             return
 

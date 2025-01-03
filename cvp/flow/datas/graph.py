@@ -10,7 +10,6 @@ import shapely
 from cvp.flow.datas.action import Action
 from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
-from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.config import Config
 from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
@@ -39,8 +38,6 @@ class Graph:
     dtypes: List[DataType] = field(default_factory=list)
 
     view: View = field(default_factory=View)
-    axis_x: Axis = field(default_factory=Axis)
-    axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)
     config: Config = field(default_factory=Config)
 

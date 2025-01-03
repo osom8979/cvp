@@ -2,10 +2,10 @@
 
 import imgui
 
+from cvp.config.sections.flow.axis import Axis
 from cvp.config.sections.flow.grid import Grid
 from cvp.config.sections.flow.logs import Logs
 from cvp.context.context import Context
-from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.stroke import Stroke
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
@@ -104,3 +104,5 @@ class FlowPreference(PreferenceWidget):
         self.tree_logs("Logs", self._config.logs)
         self.tree_grid("Grid X", self._config.grid_x)
         self.tree_grid("Grid Y", self._config.grid_x)
+        self.tree_axis("Axis X", self._config.axis_x)
+        self.tree_axis("Axis Y", self._config.axis_y)
