@@ -7,6 +7,7 @@ from typing import Final, Optional, Union
 
 import imgui
 
+from cvp.fonts.scale import FontScale
 from cvp.imgui.fonts.builder import FontBuilder
 from cvp.imgui.fonts.defaults import add_mdi_font, add_mixed_font
 from cvp.imgui.fonts.font import Font
@@ -191,3 +192,23 @@ class FontMapper(OrderedDict[str, Font]):
     @font_global_scale.setter
     def font_global_scale(self, scale: float) -> None:
         self.set_font_global_scale(scale)
+
+    def get_scaled_text(self, scale: FontScale) -> Font:
+        if scale == FontScale.normal:
+            return self.normal_text
+        elif scale == FontScale.medium:
+            return self.medium_text
+        elif scale == FontScale.large:
+            return self.large_text
+        else:
+            assert False, "Inaccessible section"
+
+    def get_scaled_icon(self, scale: FontScale) -> Font:
+        if scale == FontScale.normal:
+            return self.normal_icon
+        elif scale == FontScale.medium:
+            return self.medium_icon
+        elif scale == FontScale.large:
+            return self.large_icon
+        else:
+            assert False, "Inaccessible section"

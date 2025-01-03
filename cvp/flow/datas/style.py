@@ -9,8 +9,8 @@ from cvp.flow.datas.constants import (
     FLOW_PIN_N_ICON,
     FLOW_PIN_Y_ICON,
 )
-from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
+from cvp.fonts.scale import FontScale
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
@@ -47,10 +47,10 @@ class Style:
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
 
-    emblem_size: FontSize = FontSize.large
-    title_size: FontSize = FontSize.medium
-    text_size: FontSize = FontSize.normal
-    icon_size: FontSize = FontSize.normal
+    icon_scale: FontScale = FontScale.large
+    title_scale: FontScale = FontScale.medium
+    text_scale: FontScale = FontScale.normal
+    pin_scale: FontScale = FontScale.normal
 
     flow_pin_n_icon: str = FLOW_PIN_N_ICON
     flow_pin_y_icon: str = FLOW_PIN_Y_ICON

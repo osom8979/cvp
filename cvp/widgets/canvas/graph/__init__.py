@@ -13,11 +13,9 @@ from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
 from cvp.flow.datas.selected_items import SelectedItems
-from cvp.flow.datas.size import FontSize
 from cvp.flow.datas.stroke import Stroke
 from cvp.flow.datas.style import Style
 from cvp.imgui.draw_list.draw_dotted_line import draw_dotted_line
-from cvp.imgui.fonts.font import Font
 from cvp.imgui.fonts.mapper import FontMapper
 from cvp.imgui.set_window_font_scale import window_font_scale
 from cvp.types.colors import RGBA
@@ -184,6 +182,32 @@ class CanvasGraph(CanvasController):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+    # ==================================================================================
+    # Properties
+    # ==================================================================================
+
+    @property
+    def icon_font(self):
+        return self.fonts.get_scaled_icon(self.graph.style.icon_scale)
+
+    @property
+    def pin_font(self):
+        assert self._graph is not None
+        assert self._fonts is not None
+        return self.fonts.get_scaled_icon(self.graph.style.pin_scale)
+
+    @property
+    def title_font(self):
+        assert self._graph is not None
+        assert self._fonts is not None
+        return self.fonts.get_scaled_text(self.graph.style.title_scale)
+
+    @property
+    def text_font(self):
+        assert self._graph is not None
+        assert self._fonts is not None
+        return self.fonts.get_scaled_text(self.graph.style.text_scale)
 
     # ==================================================================================
     # Public Operations
@@ -496,28 +520,6 @@ class CanvasGraph(CanvasController):
         else:
             return style.normal_node
 
-    @staticmethod
-    def get_text_font(fonts: FontMapper, size: FontSize) -> Font:
-        if size == FontSize.normal:
-            return fonts.normal_text
-        elif size == FontSize.medium:
-            return fonts.medium_text
-        elif size == FontSize.large:
-            return fonts.large_text
-        else:
-            assert False, "Inaccessible section"
-
-    @staticmethod
-    def get_icon_font(fonts: FontMapper, size: FontSize) -> Font:
-        if size == FontSize.normal:
-            return fonts.normal_icon
-        elif size == FontSize.medium:
-            return fonts.medium_icon
-        elif size == FontSize.large:
-            return fonts.large_icon
-        else:
-            assert False, "Inaccessible section"
-
     # ==================================================================================
     # Node Operations
     # ==================================================================================
@@ -527,22 +529,17 @@ class CanvasGraph(CanvasController):
             self.update_node_roi(node)
 
     def update_node_roi(self, node: Node) -> None:
-        emblem_font = self.get_icon_font(self.fonts, self.graph.style.emblem_size)
-        title_font = self.get_text_font(self.fonts, self.graph.style.title_size)
-        text_font = self.get_text_font(self.fonts, self.graph.style.text_size)
-        icon_font = self.get_icon_font(self.fonts, self.graph.style.icon_size)
-
-        with emblem_font:
+        with self.icon_font:
             node_emblem_w, node_emblem_h = imgui.calc_text_size(node.emblem)
 
-        with title_font:
+        with self.title_font:
             node_name_w, node_name_h = imgui.calc_text_size(node.name)
 
         title_h = max(node_emblem_h, node_name_h)
         emblem_y_diff = title_h / 2 - node_emblem_h / 2
         title_y_diff = title_h / 2 - node_name_h / 2
 
-        with icon_font:
+        with self.pin_font:
             flow_n_w, flow_n_h = imgui.calc_text_size(self.graph.style.flow_pin_n_icon)
             flow_y_w, flow_y_h = imgui.calc_text_size(self.graph.style.flow_pin_y_icon)
             data_n_w, data_n_h = imgui.calc_text_size(self.graph.style.data_pin_n_icon)
@@ -551,7 +548,7 @@ class CanvasGraph(CanvasController):
         iw = max(flow_y_w, flow_n_w, data_y_w, data_n_w)
         ih = max(flow_y_h, flow_n_h, data_y_h, data_n_h)
 
-        with text_font:
+        with self.text_font:
             for pin in node.pins:
                 pin.icon_size = iw, ih
                 pin.name_size = imgui.calc_text_size(pin.name)
@@ -661,72 +658,61 @@ class CanvasGraph(CanvasController):
         self._draw_list.add_rect_filled(*header_roi, node_color, rounding, flags)
         self._draw_list.add_rect(*node_roi, stroke_color, rounding, flags, thickness)
 
-        graph = self.graph
-        fonts = self.fonts
-
-        assert isinstance(graph, Graph)
-        assert isinstance(fonts, FontMapper)
-
-        emblem_font = self.get_icon_font(fonts, graph.style.emblem_size)
-        title_font = self.get_text_font(fonts, graph.style.title_size)
-        text_font = self.get_text_font(fonts, graph.style.text_size)
-        icon_font = self.get_icon_font(fonts, graph.style.icon_size)
-
-        with emblem_font:
+        with self.icon_font:
             x1 = nx1 + node.emblem_pos[0] * zoom
             y1 = ny1 + node.emblem_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.emblem)
-            if graph.style.show_layout:
+            if self.graph.style.show_layout:
                 x2 = x1 + node.emblem_size[0] * zoom
                 y2 = y1 + node.emblem_size[1] * zoom
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-        with title_font:
+        with self.title_font:
             x1 = nx1 + node.name_pos[0] * zoom
             y1 = ny1 + node.name_pos[1] * zoom
             self._draw_list.add_text(x1, y1, label_color, node.name)
-            if graph.style.show_layout:
+            if self.graph.style.show_layout:
                 x2 = x1 + node.name_size[0] * zoom
                 y2 = y1 + node.name_size[1] * zoom
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-        with icon_font:
-            flow_pin_n_icon = graph.style.flow_pin_n_icon
-            flow_pin_y_icon = graph.style.flow_pin_y_icon
+        with self.pin_font:
+            flow_pin_n_icon = self.graph.style.flow_pin_n_icon
+            flow_pin_y_icon = self.graph.style.flow_pin_y_icon
 
             for pin in node.flow_pins:
                 x1 = nx1 + pin.icon_pos[0] * zoom
                 y1 = ny1 + pin.icon_pos[1] * zoom
                 pin_icon = flow_pin_y_icon if pin.connected else flow_pin_n_icon
-                pin_rgba = self.get_pin_color(pin, graph.style)
+                pin_rgba = self.get_pin_color(pin, self.graph.style)
                 pin_color = imgui.get_color_u32_rgba(*pin_rgba)
                 self._draw_list.add_text(x1, y1, pin_color, pin_icon)
-                if graph.style.show_layout:
+                if self.graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-            data_pin_n_icon = graph.style.data_pin_n_icon
-            data_pin_y_icon = graph.style.data_pin_y_icon
+            data_pin_n_icon = self.graph.style.data_pin_n_icon
+            data_pin_y_icon = self.graph.style.data_pin_y_icon
 
             for pin in node.data_pins:
                 x1 = nx1 + pin.icon_pos[0] * zoom
                 y1 = ny1 + pin.icon_pos[1] * zoom
                 pin_icon = data_pin_y_icon if pin.connected else data_pin_n_icon
-                pin_rgba = self.get_pin_color(pin, graph.style)
+                pin_rgba = self.get_pin_color(pin, self.graph.style)
                 pin_color = imgui.get_color_u32_rgba(*pin_rgba)
                 self._draw_list.add_text(x1, y1, pin_color, pin_icon)
-                if graph.style.show_layout:
+                if self.graph.style.show_layout:
                     x2 = x1 + pin.icon_size[0] * zoom
                     y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-        with text_font:
+        with self.text_font:
             for pin in node.pins:
                 x1 = nx1 + pin.name_pos[0] * zoom
                 y1 = ny1 + pin.name_pos[1] * zoom
                 self._draw_list.add_text(x1, y1, label_color, pin.name)
-                if graph.style.show_layout:
+                if self.graph.style.show_layout:
                     x2 = x1 + pin.name_size[0] * zoom
                     y2 = y1 + pin.name_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
