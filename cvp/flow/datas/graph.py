@@ -38,6 +38,7 @@ class Graph:
     nodes: List[Node] = field(default_factory=list)
     arcs: List[Arc] = field(default_factory=list)
     dtypes: List[DataType] = field(default_factory=list)
+
     view: View = field(default_factory=View)
     grid_x: Grid = field(default_factory=Grid)
     grid_y: Grid = field(default_factory=Grid)
