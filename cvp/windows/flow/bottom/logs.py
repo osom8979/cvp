@@ -61,81 +61,81 @@ def _unregister_handler(handler: _LoggingHandler) -> None:
 
 
 class LogsTab(TabItem[Graph]):
-    _lines: Deque[_LineRecord]
+    _records: Deque[_LineRecord]
 
     def __init__(self, context: Context, fonts: FontMapper, cursor: FlowCursor):
         super().__init__(context, "Logs")
         self._fonts = fonts
         self._cursor = cursor
 
-        assert 1 <= self.context.config.flow_aui.logs_lines
-        self._lines = deque(maxlen=self.context.config.flow_aui.logs_lines)
+        assert 1 <= self.context.config.flow_aui.logs.lines
+        self._records = deque(maxlen=self.context.config.flow_aui.logs.lines)
         self._handler = _LoggingHandler(self.on_logging)
         logger.addHandler(self._handler)
         self._finalizer = finalize(self, _unregister_handler, self._handler)
 
     @property
     def filter(self) -> str:
-        return self.context.config.flow_aui.logs_filter
+        return self.context.config.flow_aui.logs.filter
 
     @filter.setter
     def filter(self, value: str) -> None:
-        self.context.config.flow_aui.logs_filter = value
+        self.context.config.flow_aui.logs.filter = value
 
     @property
     def autoscroll(self) -> bool:
-        return self.context.config.flow_aui.logs_autoscroll
+        return self.context.config.flow_aui.logs.autoscroll
 
     @autoscroll.setter
     def autoscroll(self, value: bool) -> None:
-        self.context.config.flow_aui.logs_autoscroll = value
+        self.context.config.flow_aui.logs.autoscroll = value
 
     @property
-    def logs_lines(self) -> int:
-        return self.context.config.flow_aui.logs_lines
+    def lines(self) -> int:
+        return self.context.config.flow_aui.logs.lines
 
-    @logs_lines.setter
-    def logs_lines(self, value: int) -> None:
-        self.context.config.flow_aui.logs_lines = value
+    @lines.setter
+    def lines(self, value: int) -> None:
+        self.context.config.flow_aui.logs.lines = value
 
     @property
-    def logs_level_index(self) -> int:
-        return self.context.config.flow_aui.logs_level_index
+    def level_index(self) -> int:
+        return self.context.config.flow_aui.logs.level_index
 
-    @logs_level_index.setter
-    def logs_level_index(self, value: int) -> None:
-        self.context.config.flow_aui.logs_level_index = value
+    @level_index.setter
+    def level_index(self, value: int) -> None:
+        self.context.config.flow_aui.logs.level_index = value
 
     def get_level_number(self) -> int:
-        return convert_level_number(LEVEL_NAMES[self.logs_level_index])
+        return convert_level_number(LEVEL_NAMES[self.level_index])
 
     def get_level_color(self, level: int) -> RGBA:
-        logging_config = self.context.config.flow_aui
+        logging_config = self.context.config.flow_aui.logs
         if ERROR < level <= CRITICAL:
-            return logging_config.logs_critical_color
+            return logging_config.critical_color
         elif WARNING < level <= ERROR:
-            return logging_config.logs_error_color
+            return logging_config.error_color
         elif INFO < level <= WARNING:
-            return logging_config.logs_warning_color
+            return logging_config.warning_color
         elif DEBUG < level <= INFO:
-            return logging_config.logs_info_color
+            return logging_config.info_color
         elif NOTSET < level <= DEBUG:
-            return logging_config.logs_debug_color
+            return logging_config.debug_color
         else:
             return imgui.get_style().colors[imgui.COLOR_TEXT]
 
     def on_logging(self, record: LogRecord, message: str) -> None:
-        self._lines.append(_LineRecord(record.levelno, record.levelname, message))
+        self._records.append(_LineRecord(record.levelno, record.levelname, message))
 
-    def update_lines_maxlen(self, maxlen: int) -> None:
-        new_lines = type(self._lines)(maxlen=maxlen)
-        new_lines.extend(self._lines)
-        self._lines = new_lines
+    def update_records_maxlen(self, maxlen: int) -> None:
+        new_lines = type(self._records)(maxlen=maxlen)
+        new_lines.extend(self._records)
+        self._records = new_lines
 
     @override
     def on_process(self) -> None:
-        if self._lines.maxlen != self.logs_lines:
-            self.update_lines_maxlen(self.logs_lines)
+        if self._records.maxlen != self.lines:
+            self.update_records_maxlen(self.lines)
 
         self.autoscroll = checkbox("Autoscroll", self.autoscroll)[1]
 
@@ -144,8 +144,8 @@ class LogsTab(TabItem[Graph]):
         padding = imgui.get_style().item_spacing[0] * 2
         dropdown_width = 20.0
         imgui.set_next_item_width(max_width + dropdown_width + padding)
-        if level_result := combo("##Levels", self.logs_level_index, LEVEL_NAMES):
-            self.logs_level_index = level_result.value
+        if level_result := combo("##Levels", self.level_index, LEVEL_NAMES):
+            self.level_index = level_result.value
 
         imgui.same_line()
         imgui.set_next_item_width(-1)
@@ -156,7 +156,7 @@ class LogsTab(TabItem[Graph]):
         with begin_child("##Logging", border=False):
             filter_level = self.get_level_number()
 
-            for line in self._lines:
+            for line in self._records:
                 if line.level < filter_level:
                     continue
                 if line.message.find(self.filter) == -1:
