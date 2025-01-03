@@ -13,8 +13,11 @@ from cvp.variables import MIN_SIDEBAR_HEIGHT
 class FlowAuiConfig(AuiWindowConfig):
     split_tree: float = MIN_SIDEBAR_HEIGHT
     min_split_tree: float = MIN_SIDEBAR_HEIGHT
+
     logs: Logs = field(default_factory=Logs)
     grid_x: Grid = field(default_factory=Grid)
     grid_y: Grid = field(default_factory=Grid)
     axis_x: Axis = field(default_factory=Axis)
     axis_y: Axis = field(default_factory=Axis)
+
+    arc_hovering_tolerance: float = 4.0

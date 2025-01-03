@@ -10,7 +10,6 @@ import shapely
 from cvp.flow.datas.action import Action
 from cvp.flow.datas.anchor import Anchor
 from cvp.flow.datas.arc import Arc
-from cvp.flow.datas.config import Config
 from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
@@ -36,7 +35,6 @@ class Graph:
     dtypes: List[DataType] = field(default_factory=list)
     view: View = field(default_factory=View)
     style: Style = field(default_factory=Style)
-    config: Config = field(default_factory=Config)
 
     _selected_items: SelectedItems = field(default_factory=SelectedItems)
 
@@ -123,11 +121,15 @@ class Graph:
 
         return NodePin(node, pin)
 
-    def find_hovering_arc_with_mouse(self, mouse: Point) -> Optional[Arc]:
+    def find_hovering_arc_with_mouse(
+        self,
+        mouse: Point,
+        distance_tolerance: float,
+    ) -> Optional[Arc]:
         mp = shapely.Point(mouse)
         for arc in self.arcs:
             distance = shapely.LineString(arc.polyline).distance(mp)
-            if distance <= self.config.arc_hovering_tolerance:
+            if distance <= distance_tolerance:
                 return arc
         return None
 
@@ -406,14 +408,19 @@ class Graph:
 
         return arc
 
-    def update_hovering_state(self, mouse: Point) -> None:
+    def update_hovering_state(
+        self,
+        mouse: Point,
+        arc_hovering_tolerance: float,
+    ) -> None:
         if hovering_node := self.find_hovering_node_with_mouse(mouse):
             hovering_node.hovering = True
             if hovering_pin := hovering_node.find_hovering_pin_with_mouse(mouse):
                 hovering_pin.hovering = True
             return
 
-        if hovering_arc := self.find_hovering_arc_with_mouse(mouse):
+        hovering_arc = self.find_hovering_arc_with_mouse(mouse, arc_hovering_tolerance)
+        if hovering_arc is not None:
             hovering_arc.hovering = True
 
         if selected_arc_only := self.selected_arc_only:
