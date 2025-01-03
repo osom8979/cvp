@@ -8,7 +8,6 @@ from cvp.context.context import Context
 from cvp.flow.datas.arc import Arc
 from cvp.flow.datas.axis import Axis
 from cvp.flow.datas.graph import Graph
-from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.line_type import (
     LINE_TYPE_INDEX2NAME,
     LINE_TYPE_NAME2INDEX,
@@ -75,21 +74,6 @@ class PropsTab(TabItem[Graph]):
             self.on_multiple_items(item, selected_items)
 
     @staticmethod
-    def tree_grid(label: str, grid: Grid) -> None:
-        if imgui.tree_node(label):
-            try:
-                if visible := checkbox("Visible", grid.visible):
-                    grid.visible = visible.state
-                if step := input_float("Step", grid.step):
-                    grid.step = step.value
-                if thickness := input_float("Thickness", grid.thickness):
-                    grid.thickness = thickness.value
-                if color := color_edit4("Color", *grid.color):
-                    grid.color = color.color
-            finally:
-                imgui.tree_pop()
-
-    @staticmethod
     def tree_axis(label: str, axis: Axis) -> None:
         if imgui.tree_node(label):
             try:
@@ -138,8 +122,6 @@ class PropsTab(TabItem[Graph]):
         if color_result := color_edit4("Color", *graph.color):
             graph.color = color_result.color
 
-        self.tree_grid("Grid X", graph.grid_x)
-        self.tree_grid("Grid Y", graph.grid_y)
         self.tree_axis("Axis X", graph.axis_x)
         self.tree_axis("Axis Y", graph.axis_y)
         self.tree_stroke("Selected node", graph.style.selected_node)

@@ -252,7 +252,7 @@ class CanvasGraph(CanvasController):
         self._draw_list.add_rect_filled(*self.canvas_roi, color)
 
     def draw_grid_x(self) -> None:
-        grid_x = self.graph.grid_x
+        grid_x = self.config.grid_x
         if not grid_x.visible:
             return
 
@@ -261,7 +261,7 @@ class CanvasGraph(CanvasController):
             self._draw_list.add_line(*line, color, grid_x.thickness)
 
     def draw_grid_y(self) -> None:
-        grid_y = self.graph.grid_y
+        grid_y = self.config.grid_y
         if not grid_y.visible:
             return
 

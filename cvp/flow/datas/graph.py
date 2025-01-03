@@ -15,7 +15,6 @@ from cvp.flow.datas.config import Config
 from cvp.flow.datas.connect_pair import ConnectPair
 from cvp.flow.datas.constants import DEFAULT_GRAPH_COLOR, EMPTY_TEXT
 from cvp.flow.datas.dtype import DataType
-from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.node import Node
 from cvp.flow.datas.node_pin import NodePin
 from cvp.flow.datas.pin import Pin
@@ -40,8 +39,6 @@ class Graph:
     dtypes: List[DataType] = field(default_factory=list)
 
     view: View = field(default_factory=View)
-    grid_x: Grid = field(default_factory=Grid)
-    grid_y: Grid = field(default_factory=Grid)
     axis_x: Axis = field(default_factory=Axis)
     axis_y: Axis = field(default_factory=Axis)
     style: Style = field(default_factory=Style)

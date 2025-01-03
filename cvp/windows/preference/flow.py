@@ -2,10 +2,10 @@
 
 import imgui
 
+from cvp.config.sections.flow.grid import Grid
 from cvp.config.sections.flow.logs import Logs
 from cvp.context.context import Context
 from cvp.flow.datas.axis import Axis
-from cvp.flow.datas.grid import Grid
 from cvp.flow.datas.stroke import Stroke
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
@@ -77,13 +77,13 @@ class FlowPreference(PreferenceWidget):
             if check := checkbox("Autoscroll", logs.autoscroll):
                 logs.autoscroll = check.state
 
-            if level := combo("Log Level", logs.level_index, logs.level_names):
+            if level := combo("Level", logs.level_index, logs.level_names):
                 logs.level_index = level.value
 
             if filter_text := input_text("Filter", logs.filter):
                 logs.filter = filter_text.value
 
-            if lines := input_int("lines", logs.lines):
+            if lines := input_int("Lines", logs.lines):
                 logs.lines = lines.value
 
             if color := color_edit4("Critical", *logs.critical_color):
@@ -102,3 +102,5 @@ class FlowPreference(PreferenceWidget):
     @override
     def on_process(self) -> None:
         self.tree_logs("Logs", self._config.logs)
+        self.tree_grid("Grid X", self._config.grid_x)
+        self.tree_grid("Grid Y", self._config.grid_x)
