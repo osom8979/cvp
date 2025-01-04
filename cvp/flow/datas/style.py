@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 
 from cvp.flow.datas.stroke import Stroke
-from cvp.fonts.scale import FontScale
+from cvp.fonts.size import FontSize
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
@@ -37,7 +37,7 @@ class Style:
 
     bezier_curve_tess_tol: float = BEZIER_CURVE_TESSELLATION_TOL
 
-    icon_scale: FontScale = FontScale.large
-    title_scale: FontScale = FontScale.medium
-    text_scale: FontScale = FontScale.normal
-    pin_scale: FontScale = FontScale.normal
+    icon_scale: FontSize = FontSize.large
+    title_scale: FontSize = FontSize.medium
+    text_scale: FontSize = FontSize.normal
+    pin_scale: FontSize = FontSize.normal

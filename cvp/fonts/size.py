@@ -4,7 +4,7 @@ from enum import StrEnum, auto, unique
 
 
 @unique
-class FontScale(StrEnum):
+class FontSize(StrEnum):
     normal = auto()
     medium = auto()
     large = auto()
