@@ -6,14 +6,18 @@ from cvp.config.sections.flow.arcs import Arcs
 from cvp.config.sections.flow.axis import Axis
 from cvp.config.sections.flow.grid import Grid
 from cvp.config.sections.flow.logs import Logs
+from cvp.config.sections.flow.nodes import Nodes
+from cvp.config.sections.flow.pins import Pins
 from cvp.context.context import Context
 from cvp.flow.datas.stroke import Stroke
 from cvp.imgui.checkbox import checkbox
 from cvp.imgui.color_edit4 import color_edit4
 from cvp.imgui.combo import combo
 from cvp.imgui.input_float import input_float
+from cvp.imgui.input_float2 import input_float2
 from cvp.imgui.input_int import input_int
 from cvp.imgui.input_text import input_text
+from cvp.imgui.input_text_disabled import input_text_disabled
 from cvp.types.override import override
 from cvp.windows.preference._base import PreferenceWidget
 
@@ -101,6 +105,17 @@ class FlowPreference(PreferenceWidget):
             imgui.tree_pop()
 
     @staticmethod
+    def tree_nodes(label: str, nodes: Nodes) -> None:
+        if imgui.tree_node(label):
+            try:
+                if show_layout := checkbox("Show layout", nodes.show_layout):
+                    nodes.show_layout = show_layout.state
+                if item_spacing := input_float2("Item spacing", *nodes.item_spacing):
+                    nodes.item_spacing = item_spacing.value
+            finally:
+                imgui.tree_pop()
+
+    @staticmethod
     def tree_arcs(label: str, arcs: Arcs) -> None:
         if imgui.tree_node(label):
             try:
@@ -113,6 +128,17 @@ class FlowPreference(PreferenceWidget):
             finally:
                 imgui.tree_pop()
 
+    @staticmethod
+    def tree_pins(label: str, pins: Pins) -> None:
+        if imgui.tree_node(label):
+            try:
+                input_text_disabled("Flow unconnected", pins.flow_n_icon)
+                input_text_disabled("Flow connected", pins.flow_y_icon)
+                input_text_disabled("Data unconnected", pins.data_n_icon)
+                input_text_disabled("Data connected", pins.data_y_icon)
+            finally:
+                imgui.tree_pop()
+
     @override
     def on_process(self) -> None:
         self.tree_logs("Logs", self._config.logs)
@@ -120,4 +146,6 @@ class FlowPreference(PreferenceWidget):
         self.tree_grid("Grid Y", self._config.grid_x)
         self.tree_axis("Axis X", self._config.axis_x)
         self.tree_axis("Axis Y", self._config.axis_y)
+        self.tree_nodes("Nodes", self._config.nodes)
         self.tree_arcs("Arcs", self._config.arcs)
+        self.tree_pins("Pins", self._config.pins)

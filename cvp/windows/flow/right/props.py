@@ -127,9 +127,6 @@ class PropsTab(TabItem[Graph]):
         self.tree_stroke("Normal node", graph.style.normal_node)
         self.tree_style_colors("Colors", graph.style)
 
-        if show_layout := checkbox("Show layout", graph.style.show_layout):
-            graph.style.show_layout = show_layout.state
-
     @staticmethod
     def tree_node_debugging(label: str, node: Node) -> None:
         if imgui.tree_node(label):

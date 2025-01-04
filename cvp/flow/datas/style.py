@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
-from typing import Final
 
 from cvp.flow.datas.stroke import Stroke
 from cvp.fonts.scale import FontScale
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
-from cvp.types.shapes import Size
 from cvp.variables import BEZIER_CURVE_TESSELLATION_TOL
-
-DEFAULT_ITEM_SPACING: Final[Size] = 2.0, 2.0
 
 
 @dataclass
@@ -41,11 +37,7 @@ class Style:
 
     bezier_curve_tess_tol: float = BEZIER_CURVE_TESSELLATION_TOL
 
-    item_spacing: Size = DEFAULT_ITEM_SPACING
-
     icon_scale: FontScale = FontScale.large
     title_scale: FontScale = FontScale.medium
     text_scale: FontScale = FontScale.normal
     pin_scale: FontScale = FontScale.normal
-
-    show_layout: bool = False

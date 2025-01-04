@@ -3,6 +3,7 @@
 from typing import Final
 
 from cvp.types.colors import RGBA
+from cvp.types.shapes import Size
 
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
 CVP_YML_FILENAME: Final[str] = "cvp.yml"
@@ -82,6 +83,9 @@ Tessellation tolerance when using BezierCurve without a specific number of segme
 Decrease for highly tessellated curves (higher quality, more polygons),
 Increase to reduce quality.
 """
+
+FLOW_NODES_SHOW_LAYOUT: Final[bool] = False
+FLOW_NODES_ITEM_SPACING: Final[Size] = 2.0, 2.0
 
 FLOW_AXIS_VISIBLE: Final[bool] = True
 FLOW_AXIS_THICKNESS: Final[float] = 1.0
