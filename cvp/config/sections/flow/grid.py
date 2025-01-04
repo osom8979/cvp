@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass
+from typing import Final
 
-from cvp.flow.datas.constants import DEFAULT_GRID_COLOR
 from cvp.types.colors import RGBA
+
+DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
 
 
 @dataclass

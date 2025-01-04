@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from cvp.flow.datas.anchor import Anchor
-from cvp.flow.datas.constants import EMPTY_TEXT
 from cvp.flow.datas.line_type import LineType
 from cvp.flow.datas.node_pin import NodePin
 from cvp.maths.bezier.casteljau.cubic import bezier_cubic_casteljau_points
@@ -16,8 +15,8 @@ from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
 @dataclass
 class Arc:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
+    name: str = str()
+    docs: str = str()
 
     line_type: LineType = LineType.bezier_cubic
     start_anchor: Anchor = field(default_factory=Anchor)

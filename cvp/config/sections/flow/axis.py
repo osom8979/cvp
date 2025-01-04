@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass
+from typing import Final
 
-from cvp.flow.datas.constants import DEFAULT_AXIS_COLOR
 from cvp.types.colors import RGBA
+
+DEFAULT_AXIS_COLOR: Final[RGBA] = 1.0, 0.0, 0.0, 0.6
 
 
 @dataclass

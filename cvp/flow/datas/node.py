@@ -4,18 +4,17 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 from uuid import uuid4
 
-from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT, WHITE_RGBA
 from cvp.flow.datas.pin import Pin
-from cvp.types.colors import RGBA
-from cvp.types.shapes import Point, Rect, Size
+from cvp.types.colors import RGBA, WHITE_RGBA
+from cvp.types.shapes import EMPTY_POINT, EMPTY_SIZE, Point, Rect, Size
 
 
 @dataclass
 class Node:
     uuid: str = field(default_factory=lambda: str(uuid4()))
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
-    emblem: str = EMPTY_TEXT
+    name: str = str()
+    docs: str = str()
+    emblem: str = str()
     color: RGBA = WHITE_RGBA
 
     head_height: float = 0.0

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass, field
+from typing import Final
 
-from cvp.flow.datas.constants import DEFAULT_ITEM_SPACING
 from cvp.flow.datas.stroke import Stroke
 from cvp.fonts.scale import FontScale
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
@@ -10,6 +10,8 @@ from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Size
 from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
+
+DEFAULT_ITEM_SPACING: Final[Size] = 2.0, 2.0
 
 
 @dataclass

@@ -4,16 +4,15 @@ from dataclasses import dataclass, field
 from typing import List
 
 from cvp.flow.datas.action import Action
-from cvp.flow.datas.constants import EMPTY_POINT, EMPTY_SIZE, EMPTY_TEXT
 from cvp.flow.datas.stream import Stream
-from cvp.types.shapes import Point, Rect, Size
+from cvp.types.shapes import EMPTY_POINT, EMPTY_SIZE, Point, Rect, Size
 
 
 @dataclass
 class Pin:
-    name: str = EMPTY_TEXT
-    docs: str = EMPTY_TEXT
-    dtype: str = EMPTY_TEXT
+    name: str = str()
+    docs: str = str()
+    dtype: str = str()
     action: Action = Action.data
     stream: Stream = Stream.input
     required: bool = False
