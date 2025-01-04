@@ -42,10 +42,10 @@ class TreeTab(TabItem[Graph]):
                 imgui.tree_pop()
 
     def on_node(self, graph: Graph, node: Node) -> None:
-        flow_pin_n_icon = graph.style.flow_pin_n_icon
-        flow_pin_y_icon = graph.style.flow_pin_y_icon
-        data_pin_n_icon = graph.style.data_pin_n_icon
-        data_pin_y_icon = graph.style.data_pin_y_icon
+        flow_pin_n_icon = self.context.config.flow_aui.pins.flow_n_icon
+        flow_pin_y_icon = self.context.config.flow_aui.pins.flow_y_icon
+        data_pin_n_icon = self.context.config.flow_aui.pins.data_n_icon
+        data_pin_y_icon = self.context.config.flow_aui.pins.data_y_icon
         key_ctrl = imgui.get_io().key_ctrl
 
         flags = NODE_FLAGS

@@ -540,10 +540,10 @@ class CanvasGraph(CanvasController):
         title_y_diff = title_h / 2 - node_name_h / 2
 
         with self.pin_font:
-            flow_n_w, flow_n_h = imgui.calc_text_size(self.graph.style.flow_pin_n_icon)
-            flow_y_w, flow_y_h = imgui.calc_text_size(self.graph.style.flow_pin_y_icon)
-            data_n_w, data_n_h = imgui.calc_text_size(self.graph.style.data_pin_n_icon)
-            data_y_w, data_y_h = imgui.calc_text_size(self.graph.style.data_pin_y_icon)
+            flow_n_w, flow_n_h = imgui.calc_text_size(self.config.pins.flow_n_icon)
+            flow_y_w, flow_y_h = imgui.calc_text_size(self.config.pins.flow_y_icon)
+            data_n_w, data_n_h = imgui.calc_text_size(self.config.pins.data_n_icon)
+            data_y_w, data_y_h = imgui.calc_text_size(self.config.pins.data_y_icon)
 
         iw = max(flow_y_w, flow_n_w, data_y_w, data_n_w)
         ih = max(flow_y_h, flow_n_h, data_y_h, data_n_h)
@@ -677,8 +677,8 @@ class CanvasGraph(CanvasController):
                 self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
         with self.pin_font:
-            flow_pin_n_icon = self.graph.style.flow_pin_n_icon
-            flow_pin_y_icon = self.graph.style.flow_pin_y_icon
+            flow_pin_n_icon = self.config.pins.flow_n_icon
+            flow_pin_y_icon = self.config.pins.flow_y_icon
 
             for pin in node.flow_pins:
                 x1 = nx1 + pin.icon_pos[0] * zoom
@@ -692,8 +692,8 @@ class CanvasGraph(CanvasController):
                     y2 = y1 + pin.icon_size[1] * zoom
                     self._draw_list.add_rect(x1, y1, x2, y2, layout_color)
 
-            data_pin_n_icon = self.graph.style.data_pin_n_icon
-            data_pin_y_icon = self.graph.style.data_pin_y_icon
+            data_pin_n_icon = self.config.pins.data_n_icon
+            data_pin_y_icon = self.config.pins.data_y_icon
 
             for pin in node.data_pins:
                 x1 = nx1 + pin.icon_pos[0] * zoom

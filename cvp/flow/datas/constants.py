@@ -2,12 +2,6 @@
 
 from typing import Final
 
-from cvp.fonts.glyphs.mdi import (
-    MDI_ARROW_RIGHT_BOLD,
-    MDI_ARROW_RIGHT_BOLD_OUTLINE,
-    MDI_CIRCLE,
-    MDI_CIRCLE_OUTLINE,
-)
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Point, Rect, Size
 
@@ -21,9 +15,3 @@ DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
 DEFAULT_AXIS_COLOR: Final[RGBA] = 1.0, 0.0, 0.0, 0.6
 DEFAULT_GRAPH_COLOR: Final[RGBA] = 0.5, 0.5, 0.5, 1.0
 DEFAULT_ITEM_SPACING: Final[Size] = 2.0, 2.0
-
-FLOW_PIN_N_ICON: Final[str] = MDI_ARROW_RIGHT_BOLD_OUTLINE
-FLOW_PIN_Y_ICON: Final[str] = MDI_ARROW_RIGHT_BOLD
-
-DATA_PIN_N_ICON: Final[str] = MDI_CIRCLE_OUTLINE
-DATA_PIN_Y_ICON: Final[str] = MDI_CIRCLE

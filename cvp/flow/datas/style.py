@@ -2,13 +2,7 @@
 
 from dataclasses import dataclass, field
 
-from cvp.flow.datas.constants import (
-    DATA_PIN_N_ICON,
-    DATA_PIN_Y_ICON,
-    DEFAULT_ITEM_SPACING,
-    FLOW_PIN_N_ICON,
-    FLOW_PIN_Y_ICON,
-)
+from cvp.flow.datas.constants import DEFAULT_ITEM_SPACING
 from cvp.flow.datas.stroke import Stroke
 from cvp.fonts.scale import FontScale
 from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
@@ -51,10 +45,5 @@ class Style:
     title_scale: FontScale = FontScale.medium
     text_scale: FontScale = FontScale.normal
     pin_scale: FontScale = FontScale.normal
-
-    flow_pin_n_icon: str = FLOW_PIN_N_ICON
-    flow_pin_y_icon: str = FLOW_PIN_Y_ICON
-    data_pin_n_icon: str = DATA_PIN_N_ICON
-    data_pin_y_icon: str = DATA_PIN_Y_ICON
 
     show_layout: bool = False
