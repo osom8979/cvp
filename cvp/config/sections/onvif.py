@@ -8,11 +8,7 @@ from uuid import uuid4
 from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.palette.basic import GREEN, RED, YELLOW
 from cvp.types.colors import RGBA
-from cvp.variables import (
-    DEFAULT_API_SELECT_WIDTH,
-    MAX_API_SELECT_WIDTH,
-    MIN_API_SELECT_WIDTH,
-)
+from cvp.variables import API_SELECT_WIDTH, MAX_API_SELECT_WIDTH, MIN_API_SELECT_WIDTH
 
 
 @unique
@@ -51,7 +47,7 @@ class OnvifConfig:
 class OnvifManagerConfig(ManagerWindowConfig):
     preload: bool = False
 
-    api_select_width: float = DEFAULT_API_SELECT_WIDTH
+    api_select_width: float = API_SELECT_WIDTH
     min_api_select_width: float = MIN_API_SELECT_WIDTH
     max_api_select_width: float = MAX_API_SELECT_WIDTH
 

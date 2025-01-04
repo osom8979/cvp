@@ -9,7 +9,7 @@ from cvp.palette.basic import BLACK, BLUE, RED, SILVER, WHITE
 from cvp.palette.tableau import ORANGE
 from cvp.types.colors import RGBA
 from cvp.types.shapes import Size
-from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
+from cvp.variables import BEZIER_CURVE_TESSELLATION_TOL
 
 DEFAULT_ITEM_SPACING: Final[Size] = 2.0, 2.0
 
@@ -39,7 +39,7 @@ class Style:
     anchor_color: RGBA = field(default_factory=lambda: (*BLUE, 0.8))
     anchor_radius: float = 3.0
 
-    bezier_curve_tess_tol: float = DEFAULT_CURVE_TESSELLATION_TOL
+    bezier_curve_tess_tol: float = BEZIER_CURVE_TESSELLATION_TOL
 
     item_spacing: Size = DEFAULT_ITEM_SPACING
 

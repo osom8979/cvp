@@ -2,20 +2,24 @@
 
 from typing import Final
 
+from cvp.types.colors import RGBA
+
 CVP_HOME_DIRNAME: Final[str] = ".cvp"
 CVP_YML_FILENAME: Final[str] = "cvp.yml"
 GUI_INI_FILENAME: Final[str] = "gui.ini"
 LOGGING_JSON_FILENAME: Final[str] = "logging.json"
 
-DEFAULT_THEME: Final[str] = "dark"
+GUI_THEME: Final[str] = "dark"
 
-DEFAULT_FONT_SCALE: Final[float] = 1.0
-DEFAULT_NORMAL_TEXT_FONT_SIZE: Final[int] = 14
-DEFAULT_MEDIUM_TEXT_FONT_SIZE: Final[int] = 18
-DEFAULT_LARGE_TEXT_FONT_SIZE: Final[int] = 24
-DEFAULT_NORMAL_ICON_FONT_SIZE: Final[int] = 14
-DEFAULT_MEDIUM_ICON_FONT_SIZE: Final[int] = 18
-DEFAULT_LARGE_ICON_FONT_SIZE: Final[int] = 24
+FONT_SCALE: Final[float] = 1.0
+
+NORMAL_TEXT_FONT_SIZE: Final[int] = 14
+MEDIUM_TEXT_FONT_SIZE: Final[int] = 18
+LARGE_TEXT_FONT_SIZE: Final[int] = 24
+
+NORMAL_ICON_FONT_SIZE: Final[int] = 14
+MEDIUM_ICON_FONT_SIZE: Final[int] = 18
+LARGE_ICON_FONT_SIZE: Final[int] = 24
 
 CONFIG_VALUE_SEPARATOR: Final[str] = ","
 CHECKSUM_DELIMITER: Final[str] = ":"
@@ -31,8 +35,8 @@ MAX_PROCESS_WORKERS: Final[int] = 5
 
 THREAD_POOL_PREFIX: Final[str] = "cvp.threadpool"
 
-DEFAULT_LOGGING_STEP: Final[int] = 1000
-DEFAULT_SLOW_CALLBACK_DURATION: Final[float] = 0.05
+LOGGING_STEP: Final[int] = 1000
+SLOW_CALLBACK_DURATION: Final[float] = 0.05
 
 MIN_SIDEBAR_WIDTH: Final[float] = 160.0
 MAX_SIDEBAR_WIDTH: Final[float] = 260.0
@@ -43,7 +47,7 @@ MAX_SIDEBAR_HEIGHT: Final[float] = 260.0
 MIN_WINDOW_WIDTH: Final[int] = 400
 MIN_WINDOW_HEIGHT: Final[int] = 300
 
-DEFAULT_API_SELECT_WIDTH: Final[float] = 180.0
+API_SELECT_WIDTH: Final[float] = 180.0
 MIN_API_SELECT_WIDTH: Final[float] = 100.0
 MAX_API_SELECT_WIDTH: Final[float] = 300.0
 
@@ -72,9 +76,20 @@ WSD_NAME_DEFAULT: Final[str] = "New Device"
 
 ZEEP_ELEMENT_SEPARATOR: Final[str] = "."
 
-DEFAULT_CURVE_TESSELLATION_TOL: Final[float] = 1.25
+BEZIER_CURVE_TESSELLATION_TOL: Final[float] = 1.25
 """
 Tessellation tolerance when using BezierCurve without a specific number of segments.
 Decrease for highly tessellated curves (higher quality, more polygons),
 Increase to reduce quality.
 """
+
+FLOW_AXIS_VISIBLE: Final[bool] = True
+FLOW_AXIS_THICKNESS: Final[float] = 1.0
+FLOW_AXIS_COLOR: Final[RGBA] = 1.0, 0.0, 0.0, 0.6
+
+FLOW_GRID_VISIBLE: Final[bool] = True
+FLOW_GRID_STEP: Final[float] = 50.0
+FLOW_GRID_THICKNESS: Final[float] = 1.0
+FLOW_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
+
+FLOW_ARCS_HOVERING_TOLERANCE: Final[float] = 0.4

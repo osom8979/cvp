@@ -6,7 +6,7 @@ from typing import Optional
 
 from cvp.aio.run import aio_run
 from cvp.logging.logging import worker_logger as logger
-from cvp.variables import DEFAULT_LOGGING_STEP, DEFAULT_SLOW_CALLBACK_DURATION
+from cvp.variables import LOGGING_STEP, SLOW_CALLBACK_DURATION
 
 
 class WorkerApplication:
@@ -14,8 +14,8 @@ class WorkerApplication:
         self,
         *args,
         queue: Optional[Queue] = None,
-        logging_step=DEFAULT_LOGGING_STEP,
-        slow_callback_duration=DEFAULT_SLOW_CALLBACK_DURATION,
+        logging_step=LOGGING_STEP,
+        slow_callback_duration=SLOW_CALLBACK_DURATION,
         use_uvloop=False,
         debug=False,
         verbose=0,

@@ -7,29 +7,29 @@ from cvp.config.sections.bases.manager import ManagerWindowConfig
 from cvp.palette.basic import RED, WHITE
 from cvp.types.colors import RGBA
 from cvp.variables import (
-    DEFAULT_API_SELECT_WIDTH,
-    DEFAULT_FONT_SCALE,
-    DEFAULT_LARGE_ICON_FONT_SIZE,
-    DEFAULT_LARGE_TEXT_FONT_SIZE,
-    DEFAULT_MEDIUM_ICON_FONT_SIZE,
-    DEFAULT_MEDIUM_TEXT_FONT_SIZE,
-    DEFAULT_NORMAL_ICON_FONT_SIZE,
-    DEFAULT_NORMAL_TEXT_FONT_SIZE,
+    API_SELECT_WIDTH,
+    FONT_SCALE,
+    LARGE_ICON_FONT_SIZE,
+    LARGE_TEXT_FONT_SIZE,
     MAX_API_SELECT_WIDTH,
+    MEDIUM_ICON_FONT_SIZE,
+    MEDIUM_TEXT_FONT_SIZE,
     MIN_API_SELECT_WIDTH,
+    NORMAL_ICON_FONT_SIZE,
+    NORMAL_TEXT_FONT_SIZE,
 )
 
 
 @dataclass
 class FontConfig:
     user_font: str = field(default_factory=str)
-    scale: float = DEFAULT_FONT_SCALE
-    normal_text_size: int = DEFAULT_NORMAL_TEXT_FONT_SIZE
-    medium_text_size: int = DEFAULT_MEDIUM_TEXT_FONT_SIZE
-    large_text_size: int = DEFAULT_LARGE_TEXT_FONT_SIZE
-    normal_icon_size: int = DEFAULT_NORMAL_ICON_FONT_SIZE
-    medium_icon_size: int = DEFAULT_MEDIUM_ICON_FONT_SIZE
-    large_icon_size: int = DEFAULT_LARGE_ICON_FONT_SIZE
+    scale: float = FONT_SCALE
+    normal_text_size: int = NORMAL_TEXT_FONT_SIZE
+    medium_text_size: int = MEDIUM_TEXT_FONT_SIZE
+    large_text_size: int = LARGE_TEXT_FONT_SIZE
+    normal_icon_size: int = NORMAL_ICON_FONT_SIZE
+    medium_icon_size: int = MEDIUM_ICON_FONT_SIZE
+    large_icon_size: int = LARGE_ICON_FONT_SIZE
     load_all: bool = False
 
     @property
@@ -59,7 +59,7 @@ class FontConfig:
 
 @dataclass
 class FontManagerConfig(ManagerWindowConfig):
-    range_select_width: float = DEFAULT_API_SELECT_WIDTH
+    range_select_width: float = API_SELECT_WIDTH
     min_range_select_width: float = MIN_API_SELECT_WIDTH
     max_range_select_width: float = MAX_API_SELECT_WIDTH
     selected_block: Tuple[int, int] = field(default_factory=lambda: (0, 0))

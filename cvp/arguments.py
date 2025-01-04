@@ -20,7 +20,7 @@ from cvp.system.environ_keys import (
     CVP_USE_UVLOOP,
     CVP_VERBOSE,
 )
-from cvp.variables import CVP_HOME_DIRNAME, DEFAULT_LOGGING_STEP, LOCAL_DOTENV_FILENAME
+from cvp.variables import CVP_HOME_DIRNAME, LOCAL_DOTENV_FILENAME, LOGGING_STEP
 
 PROG: Final[str] = "cvp"
 DESCRIPTION: Final[str] = "Computer Vision Player"
@@ -114,7 +114,7 @@ def add_worker_parser(subparsers) -> None:
     parser.add_argument(
         "--logging-step",
         type=int,
-        default=get_eval(CVP_LOGGING_STEP, DEFAULT_LOGGING_STEP),
+        default=get_eval(CVP_LOGGING_STEP, LOGGING_STEP),
         help="An iterative step that emits statistics results to a logger",
     )
     parser.add_argument(

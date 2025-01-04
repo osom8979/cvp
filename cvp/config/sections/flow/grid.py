@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from dataclasses import dataclass
-from typing import Final
 
 from cvp.types.colors import RGBA
-
-DEFAULT_GRID_COLOR: Final[RGBA] = 0.8, 0.8, 0.8, 0.2
+from cvp.variables import (
+    FLOW_GRID_COLOR,
+    FLOW_GRID_STEP,
+    FLOW_GRID_THICKNESS,
+    FLOW_GRID_VISIBLE,
+)
 
 
 @dataclass
 class Grid:
-    visible: bool = True
-    step: float = 50.0
-    thickness: float = 1.0
-    color: RGBA = DEFAULT_GRID_COLOR
+    visible: bool = FLOW_GRID_VISIBLE
+    step: float = FLOW_GRID_STEP
+    thickness: float = FLOW_GRID_THICKNESS
+    color: RGBA = FLOW_GRID_COLOR

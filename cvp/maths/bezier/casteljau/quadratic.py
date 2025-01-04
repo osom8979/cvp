@@ -3,7 +3,7 @@
 from typing import List
 
 from cvp.types.shapes import Point
-from cvp.variables import DEFAULT_CURVE_TESSELLATION_TOL
+from cvp.variables import BEZIER_CURVE_TESSELLATION_TOL
 
 
 def _bezier_quadratic_casteljau_points(
@@ -62,7 +62,7 @@ def bezier_quadratic_casteljau_points(
     p1: Point,
     p2: Point,
     p3: Point,
-    tess_tol=DEFAULT_CURVE_TESSELLATION_TOL,
+    tess_tol=BEZIER_CURVE_TESSELLATION_TOL,
 ) -> List[Point]:
     result = [p1]
     _bezier_quadratic_casteljau_points(

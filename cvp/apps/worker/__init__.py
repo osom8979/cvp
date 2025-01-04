@@ -11,7 +11,7 @@ from cvp.logging.logging import (
     set_asyncio_level,
     worker_logger,
 )
-from cvp.variables import DEFAULT_SLOW_CALLBACK_DURATION
+from cvp.variables import SLOW_CALLBACK_DURATION
 
 
 def worker_main(args: Namespace) -> None:
@@ -54,7 +54,7 @@ def worker_main(args: Namespace) -> None:
         *args.opts,
         queue=None,
         logging_step=args.logging_step,
-        slow_callback_duration=DEFAULT_SLOW_CALLBACK_DURATION,
+        slow_callback_duration=SLOW_CALLBACK_DURATION,
         use_uvloop=args.use_uvloop,
         debug=args.debug,
         verbose=args.verbose,

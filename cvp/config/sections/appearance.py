@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-from cvp.variables import DEFAULT_THEME
+from cvp.variables import GUI_THEME
 
 
 @dataclass
 class AppearanceConfig:
-    theme: str = DEFAULT_THEME
+    theme: str = GUI_THEME
